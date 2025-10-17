@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Requisitos do Projeto - Secretaria Online</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: white;
+            padding: 40px;
+            max-width: 21cm;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 28px;
+            color: #1a5490;
+            margin-bottom: 35px;
+            text-align: center;
+            border-bottom: 4px solid #1a5490;
+            padding-bottom: 20px;
+            letter-spacing: -0.5px;
+        }
+        
+        h2 {
+            font-size: 20px;
+            color: #1a5490;
+            margin-top: 35px;
+            margin-bottom: 18px;
+            border-left: 5px solid #1a5490;
+            padding-left: 15px;
+            background: linear-gradient(to right, #f5f8fa 0%, transparent 100%);
+            padding-top: 8px;
+            padding-bottom: 8px;
+        }
+        
+        h3 {
+            font-size: 16px;
+            color: #2c5f8d;
+            margin-top: 25px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            padding-left: 5px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 5px;
+        }
+        
+        h4 {
+            font-size: 14px;
+            color: #2c5f8d;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+            line-height: 1.7;
+        }
+        
+        ol {
+            margin-left: 30px;
+            margin-bottom: 20px;
+            counter-reset: item;
+        }
+        
+        ol > li {
+            margin-bottom: 12px;
+            line-height: 1.7;
+        }
+        
+        ul {
+            margin-left: 25px;
+            margin-bottom: 18px;
+        }
+        
+        ul li {
+            margin-bottom: 10px;
+            line-height: 1.7;
+        }
+        
+        strong {
+            color: #1a5490;
+            font-weight: 600;
+        }
+        
+        .section-intro {
+            background: #f5f8fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 4px solid #1a5490;
+        }
+        
+        .persona-card {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .persona-card h4 {
+            color: #1a5490;
+            font-size: 15px;
+            margin-top: 0;
+            margin-bottom: 10px;
+            border: none;
+            padding: 0;
+        }
+        
+        .module-section {
+            margin-bottom: 30px;
+            padding-left: 10px;
+        }
+        
+        .funcionalidade-item {
+            padding: 8px 0;
+            border-bottom: 1px dotted #ddd;
+        }
+        
+        .funcionalidade-item:last-child {
+            border-bottom: none;
+        }
+        
+        .highlight-box {
+            background: #fff9e6;
+            border-left: 4px solid #ffc107;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .out-of-scope {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .tech-requirements {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 30px 0;
+        }
+        
+        .page-break {
+            page-break-after: always;
+        }
+        
+        @media print {
+            body {
+                padding: 0;
+            }
+            
+            .no-break {
+                page-break-inside: avoid;
+            }
+            
+            button {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Requisitos do Projeto</h1>
+    
+    <h2>1. Nome do Projeto</h2>
+    <div class="section-intro">
+        <p style="font-size: 18px; font-weight: 600; margin: 0; color: #1a5490;">Secretaria Online</p>
+    </div>
+
+    <h2>2. Descrição Geral</h2>
+    <p>O Secretaria Online é um sistema web de gestão acadêmica que visa digitalizar e automatizar os processos administrativos de instituições de ensino. A plataforma oferece funcionalidades completas para cadastro e gerenciamento de professores, alunos, cursos, disciplinas e turmas, além de permitir o controle de matrículas e a gestão documental.</p>
+    
+    <p>O sistema atende três perfis principais de usuários: administradores, professores e alunos. Cada perfil possui acesso a funcionalidades específicas, desde o cadastro inicial de dados até o lançamento de notas, solicitação de documentos e acompanhamento acadêmico. A solução inclui gestão de contratos digitais, armazenamento de documentos obrigatórios e um fluxo completo de solicitações administrativas.</p>
+    
+    <p>Com foco na eficiência e redução de processos burocráticos presenciais, o Secretaria Online centraliza todas as operações acadêmicas em uma única plataforma acessível via web, proporcionando maior agilidade e transparência na comunicação entre alunos, professores e a administração da instituição.</p>
+
+    <h2>3. Funcionalidades Principais</h2>
+
+    <div class="module-section">
+        <h3>Módulo Administrativo</h3>
+        <ol>
+            <li class="funcionalidade-item"><strong>Cadastro de Professores</strong> - Registro completo com dados pessoais (nome, RG, CPF, filiação, endereço, título acadêmico, reservista) e criação de credenciais de acesso (login e senha provisória)</li>
+            
+            <li class="funcionalidade-item"><strong>Cadastro de Alunos</strong> - Registro completo com dados pessoais (nome, RG, CPF, filiação, endereço, título eleitoral, reservista) e criação de credenciais de acesso (login e senha provisória)</li>
+            
+            <li class="funcionalidade-item"><strong>Cadastro de Disciplinas</strong> - Criação e gerenciamento do catálogo de disciplinas oferecidas pela instituição</li>
+            
+            <li class="funcionalidade-item"><strong>Cadastro de Cursos</strong> - Criação de cursos e vinculação das disciplinas que compõem a grade curricular de cada curso</li>
+            
+            <li class="funcionalidade-item"><strong>Cadastro de Matrículas</strong> - Vinculação de alunos aos cursos, gerando matrículas ativas</li>
+            
+            <li class="funcionalidade-item"><strong>Cadastro de Turmas</strong> - Criação de turmas vinculando curso, professor responsável e alunos matriculados</li>
+        </ol>
+    </div>
+
+    <div class="module-section no-break">
+        <h3>Módulo do Aluno</h3>
+        <ol start="7">
+            <li class="funcionalidade-item"><strong>Primeiro Acesso e Contrato</strong> - Apresentação e aceite digital do contrato de matrícula (renovado a cada nova matrícula)</li>
+            
+            <li class="funcionalidade-item"><strong>Gestão de Documentos</strong> - Upload e armazenamento de documentos obrigatórios para a matrícula</li>
+            
+            <li class="funcionalidade-item"><strong>Consulta de Notas</strong> - Visualização do desempenho acadêmico em disciplinas e turmas</li>
+            
+            <li class="funcionalidade-item"><strong>Sistema de Solicitações</strong> - Requisição de atestados de matrícula, históricos escolares, certificados, validação de atividades complementares, transferências e cancelamento de matrícula</li>
+        </ol>
+    </div>
+
+    <div class="module-section no-break">
+        <h3>Módulo do Professor</h3>
+        <ol start="11">
+            <li class="funcionalidade-item"><strong>Primeiro Acesso e Contrato</strong> - Apresentação e aceite digital do contrato de trabalho (renovado semestralmente)</li>
+            
+            <li class="funcionalidade-item"><strong>Gestão de Documentos</strong> - Upload e armazenamento de documentos obrigatórios</li>
+            
+            <li class="funcionalidade-item"><strong>Visualização de Turmas</strong> - Acesso às turmas em que está cadastrado como responsável</li>
+            
+            <li class="funcionalidade-item"><strong>Consulta de Alunos</strong> - Visualização da lista de alunos matriculados em suas turmas</li>
+            
+            <li class="funcionalidade-item"><strong>Lançamento de Notas</strong> - Registro de notas e avaliações dos alunos de suas turmas</li>
+        </ol>
+    </div>
+
+    <div class="page-break"></div>
+
+    <h2>4. Usuários/Personas</h2>
+
+    <div class="persona-card no-break">
+        <h3 style="margin-top: 0;">Administrador</h3>
+        <h4>Perfil:</h4>
+        <p>Funcionário da secretaria acadêmica responsável pela gestão operacional da instituição.</p>
+        
+        <h4>Necessidades:</h4>
+        <ul>
+            <li>Cadastrar e gerenciar dados de professores, alunos, cursos, disciplinas e turmas</li>
+            <li>Controlar matrículas e vínculos acadêmicos</li>
+            <li>Processar solicitações administrativas dos alunos</li>
+            <li>Manter a estrutura acadêmica atualizada</li>
+        </ul>
+    </div>
+
+    <div class="persona-card no-break">
+        <h3 style="margin-top: 0;">Professor</h3>
+        <h4>Perfil:</h4>
+        <p>Docente responsável por lecionar disciplinas e avaliar alunos.</p>
+        
+        <h4>Necessidades:</h4>
+        <ul>
+            <li>Aceitar contrato de trabalho no início de cada semestre</li>
+            <li>Enviar documentação obrigatória</li>
+            <li>Visualizar suas turmas e a lista de alunos</li>
+            <li>Lançar notas e registrar avaliações dos alunos</li>
+            <li>Acompanhar o desempenho das turmas</li>
+        </ul>
+    </div>
+
+    <div class="persona-card no-break">
+        <h3 style="margin-top: 0;">Aluno</h3>
+        <h4>Perfil:</h4>
+        <p>Estudante matriculado em um ou mais cursos da instituição.</p>
+        
+        <h4>Necessidades:</h4>
+        <ul>
+            <li>Aceitar contrato de matrícula ao ingressar ou renovar matrícula</li>
+            <li>Enviar documentação obrigatória para validação da matrícula</li>
+            <li>Consultar suas notas e desempenho acadêmico</li>
+            <li>Solicitar documentos (atestados, históricos, certificados)</li>
+            <li>Registrar atividades complementares</li>
+            <li>Solicitar transferências ou cancelamento de matrícula quando necessário</li>
+        </ul>
+    </div>
+
+    <h2>5. Restrições/Requisitos Técnicos</h2>
+    <div class="tech-requirements">
+        <ul style="margin: 0;">
+            <li><strong>Plataforma:</strong> Web</li>
+            <li><strong>Armazenamento de documentos:</strong> Storage</li>
+        </ul>
+    </div>
+
+    <h2>6. Fora do Escopo</h2>
+    <div class="out-of-scope">
+        <ul style="margin: 0;">
+            <li>Módulo Financeiro</li>
+            <li>Controle de Presenças</li>
+        </ul>
+    </div>
+
+    <script>
+        // Função para gerar PDF
+        window.onload = function() {
+            // Botão de impressão para gerar PDF
+            const printButton = document.createElement('button');
+            printButton.textContent = '🖨️ Gerar PDF';
+            printButton.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                padding: 15px 30px;
+                background: #1a5490;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 16px;
+                font-weight: bold;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                z-index: 1000;
+                transition: all 0.3s ease;
+            `;
+            
+            printButton.onmouseover = function() {
+                this.style.background = '#0d3a6b';
+                this.style.transform = 'scale(1.05)';
+            };
+            
+            printButton.onmouseout = function() {
+                this.style.background = '#1a5490';
+                this.style.transform = 'scale(1)';
+            };
+            
+            printButton.onclick = () => window.print();
+            document.body.appendChild(printButton);
+            
+            // Esconder botão na impressão
+            const style = document.createElement('style');
+            style.textContent = '@media print { button { display: none !important; } }';
+            document.head.appendChild(style);
+        };
+    </script>
+</body>
+</html>

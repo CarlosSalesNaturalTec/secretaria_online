@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proposta Comercial - Secretaria Online</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: white;
+            padding: 40px;
+            max-width: 21cm;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 24px;
+            color: #1a5490;
+            margin-bottom: 30px;
+            text-align: center;
+            border-bottom: 3px solid #1a5490;
+            padding-bottom: 15px;
+        }
+        
+        h2 {
+            font-size: 18px;
+            color: #1a5490;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-left: 4px solid #1a5490;
+            padding-left: 12px;
+        }
+        
+        h3 {
+            font-size: 15px;
+            color: #2c5f8d;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .header-info {
+            background: #f5f8fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #1a5490;
+        }
+        
+        .header-info p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        .header-info strong {
+            color: #1a5490;
+            display: inline-block;
+            min-width: 100px;
+        }
+        
+        p {
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+        
+        ul {
+            margin-left: 25px;
+            margin-bottom: 15px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        thead {
+            background: #1a5490;
+            color: white;
+        }
+        
+        th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+        
+        tbody tr:hover {
+            background: #f9f9f9;
+        }
+        
+        tbody tr:last-child td {
+            border-bottom: 2px solid #1a5490;
+            font-weight: 600;
+        }
+        
+        .valor-destaque {
+            text-align: right;
+            font-weight: 600;
+            color: #1a5490;
+        }
+        
+        .total-row {
+            background: #f5f8fa;
+            font-weight: bold;
+        }
+        
+        hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 30px 0;
+        }
+        
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 2px solid #1a5490;
+        }
+        
+        .footer p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        .assinatura {
+            margin-top: 60px;
+            text-align: center;
+        }
+        
+        .assinatura-linha {
+            display: inline-block;
+            width: 300px;
+            border-bottom: 2px solid #333;
+            margin-top: 40px;
+        }
+        
+        .highlight-box {
+            background: #fff9e6;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        @media print {
+            body {
+                padding: 0;
+            }
+            
+            .no-break {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Proposta Comercial – Desenvolvimento da Plataforma "Secretaria Online"</h1>
+    
+    <div class="header-info">
+        <p><strong>Proponente:</strong> Robô Educa Informática</p>
+        <p><strong>CNPJ:</strong> 51.730.395/0001-19</p>
+        <p><strong>E-mail:</strong> roboeduca.net@gmail.com</p>
+        <p><strong>Telefone:</strong> (71) 3235-2803 / (71) 9.9341-6896</p>
+        <p><strong>Cliente:</strong> Consulcoop - Sr. Diego</p>
+        <p><strong>Data:</strong> 16/10/2025</p>
+    </div>
+
+    <h2>1. Objetivo</h2>
+    <p>Desenvolvimento de uma plataforma web denominada <strong>Secretaria Online</strong>, destinada à digitalização e automação dos processos administrativos e acadêmicos de instituições de ensino.</p>
+    <p>O sistema permitirá o gerenciamento integrado de alunos, professores, cursos, disciplinas, matrículas, contratos e documentos.</p>
+
+    <h2>2. Escopo do Projeto</h2>
+    <p>O projeto contemplará os seguintes módulos e funcionalidades:</p>
+
+    <h3>Módulo Administrativo</h3>
+    <ul>
+        <li>Cadastro e gestão de professores, alunos, disciplinas, cursos, matrículas e turmas;</li>
+        <li>Controle de solicitações administrativas de alunos;</li>
+        <li>Painel administrativo com controle de permissões.</li>
+    </ul>
+
+    <h3>Módulo do Aluno</h3>
+    <ul>
+        <li>Aceite digital de contrato de matrícula;</li>
+        <li>Upload e armazenamento de documentos obrigatórios;</li>
+        <li>Consulta de notas e desempenho acadêmico;</li>
+        <li>Sistema de solicitações (atestados, históricos, certificados, etc.).</li>
+    </ul>
+
+    <h3>Módulo do Professor</h3>
+    <ul>
+        <li>Aceite digital de contrato de trabalho;</li>
+        <li>Upload de documentos obrigatórios;</li>
+        <li>Visualização de turmas e alunos;</li>
+        <li>Lançamento de notas e avaliações.</li>
+    </ul>
+
+    <h3>Infraestrutura</h3>
+    <ul>
+        <li>Aplicação <strong>web responsiva (SPA)</strong> desenvolvida em <strong>React + TypeScript</strong>;</li>
+        <li>Backend em <strong>Node.js + Express + TypeScript</strong>;</li>
+        <li>Banco de dados <strong>PostgreSQL (Cloud SQL)</strong>;</li>
+        <li>Armazenamento de documentos em <strong>Google Cloud Storage (GCS)</strong>;</li>
+        <li>Deploy em <strong>Google Cloud Run</strong>, com CI/CD via <strong>Cloud Build</strong>;</li>
+        <li>Autenticação JWT e controle de acesso baseado em perfis (Admin, Professor, Aluno);</li>
+        <li>Documentação completa de APIs e banco de dados.</li>
+    </ul>
+
+    <h2>3. Entregáveis</h2>
+    <ul>
+        <li>Código-fonte completo (frontend e backend);</li>
+        <li>Banco de dados configurado e documentado;</li>
+        <li>Deploy funcional no ambiente do cliente (GCP);</li>
+        <li>Manual técnico e treinamento remoto básico (até 2h).</li>
+    </ul>
+
+    <h2>4. Prazo Estimado</h2>
+    <table class="no-break">
+        <thead>
+            <tr>
+                <th>Etapa</th>
+                <th>Descrição</th>
+                <th>Prazo</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Planejamento e setup de ambiente</td>
+                <td>1 semana</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Desenvolvimento backend e banco de dados</td>
+                <td>3 semanas</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Desenvolvimento frontend</td>
+                <td>3 semanas</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>Integração, testes e ajustes finais</td>
+                <td>2 semanas</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>Entrega e treinamento</td>
+                <td>1 semana</td>
+            </tr>
+            <tr class="total-row">
+                <td colspan="2"><strong>Total estimado:</strong></td>
+                <td><strong>10 semanas</strong></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>5. Investimento</h2>
+    <table class="no-break">
+        <thead>
+            <tr>
+                <th>Descrição</th>
+                <th style="text-align: right;">Valor (R$)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Desenvolvimento completo da plataforma</td>
+                <td class="valor-destaque">R$ 2.500,00</td>
+            </tr>
+            <tr>
+                <td>Hospedagem e infraestrutura (GCP)</td>
+                <td class="valor-destaque">Por conta do cliente</td>
+            </tr>
+            <tr class="total-row">
+                <td><strong>Total do investimento:</strong></td>
+                <td class="valor-destaque"><strong>R$ 2.500,00</strong></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>6. Condições Comerciais</h2>
+    <ul>
+        <li>Pagamento em <strong>duas parcelas de 50%</strong>:
+            <ul>
+                <li><strong>1ª parcela:</strong> após apresentação do <strong>primeiro protótipo com funcionalidades básicas</strong>;</li>
+                <li><strong>2ª parcela:</strong> na entrega final e homologação.</li>
+            </ul>
+        </li>
+        <li>Novas implementações fora do escopo serão cobradas à parte mediante <strong>análise de viabilidade técnica</strong>.</li>
+        <li>O suporte técnico pós-entrega poderá ser contratado separadamente conforme demanda.</li>
+    </ul>
+
+    <h2>7. Responsabilidades do Cliente</h2>
+    <ul>
+        <li>Disponibilizar acesso à conta GCP (caso o deploy seja feito no ambiente do cliente);</li>
+        <li>Fornecer logotipos e informações institucionais;</li>
+        <li>Indicar responsável técnico para validações durante o desenvolvimento.</li>
+    </ul>
+
+    <h2>8. Validade da Proposta</h2>
+    <p>Esta proposta é válida por <strong>30 (trinta) dias corridos</strong> a contar da data de emissão.</p>
+
+    <hr>
+
+    <div class="footer">
+        <p><strong>Robô Educa Informática</strong></p>
+        <p>CNPJ: 51.730.395/0001-19</p>
+        <p>E-mail: roboeduca.net@gmail.com</p>
+        <p>Tel.: (71) 3235-2803 / (71) 9.9341-6896</p>
+    </div>
+
+    <div class="assinatura">
+        <p><strong>Assinatura:</strong></p>
+        <div class="assinatura-linha"></div>
+    </div>
+
+    <script>
+        // Função para gerar PDF
+        window.onload = function() {
+            // Botão de impressão para gerar PDF
+            const printButton = document.createElement('button');
+            printButton.textContent = '🖨️ Gerar PDF';
+            printButton.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                padding: 15px 30px;
+                background: #1a5490;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 16px;
+                font-weight: bold;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                z-index: 1000;
+            `;
+            printButton.onclick = () => window.print();
+            document.body.appendChild(printButton);
+            
+            // Esconder botão na impressão
+            const style = document.createElement('style');
+            style.textContent = '@media print { button { display: none !important; } }';
+            document.head.appendChild(style);
+        };
+    </script>
+</body>
+</html>
