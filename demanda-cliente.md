@@ -5,7 +5,7 @@ Secretaria Online
 Aplicação destinada a automação dos processos administrativos e acadêmicos de instituições de ensino. O sistema permitirá o gerenciamento integrado de alunos, professores, cursos, disciplinas, matrículas, contratos e documentos.
 
 # Servidor de Produção: 
-Hostgator
+Hostgator com banco de dados MySQL
 
 # Ambiente de desenvolvimento: 
 Windows
