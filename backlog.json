@@ -1,0 +1,1723 @@
+{
+  "projeto": {
+    "nome": "Secretaria Online",
+    "versao": "0.1.0",
+    "descricao": "Sistema de gestão acadêmica para instituição de ensino com ~200 alunos e ~10 professores",
+    "dataGeracao": "2025-10-23"
+  },
+  "grupos": [
+    {
+      "id": "grupo-1",
+      "nome": "Setup e Infraestrutura",
+      "descricao": "Configuração inicial do projeto e estrutura base",
+      "prioridade": "alta",
+      "features": [
+        {
+          "id": "feat-001",
+          "titulo": "Configuração inicial do monorepo",
+          "descricao": "Criar estrutura de pastas raiz com diretórios frontend/, backend/, docs/. Inicializar Git, criar .gitignore e README.md",
+          "estimativa": "30min",
+          "prioridade": "alta",
+          "dependencias": [],
+          "status": "Não Iniciada",
+          "tags": ["setup", "config"],
+          "artefatos": [
+            "README.md",
+            ".gitignore",
+            "estrutura de pastas raiz"
+          ]
+        },
+        {
+          "id": "feat-002",
+          "titulo": "Setup do backend Node.js",
+          "descricao": "Inicializar projeto Node.js no backend/, instalar Express, criar estrutura de pastas (src/config, src/controllers, src/models, etc), configurar package.json com scripts",
+          "estimativa": "1h",
+          "prioridade": "alta",
+          "dependencias": ["feat-001"],
+          "status": "Não Iniciada",
+          "tags": ["setup", "backend"],
+          "artefatos": [
+            "backend/package.json",
+            "backend/src/server.js",
+            "estrutura de pastas backend"
+          ]
+        },
+        {
+          "id": "feat-003",
+          "titulo": "Setup do frontend React com Vite",
+          "descricao": "Inicializar projeto React com Vite no frontend/, configurar TypeScript, instalar dependências base (React Router, Axios, Tailwind CSS), criar estrutura de pastas",
+          "estimativa": "1h",
+          "prioridade": "alta",
+          "dependencias": ["feat-001"],
+          "status": "Não Iniciada",
+          "tags": ["setup", "frontend"],
+          "artefatos": [
+            "frontend/package.json",
+            "frontend/vite.config.ts",
+            "frontend/tsconfig.json",
+            "frontend/tailwind.config.js",
+            "estrutura de pastas frontend"
+          ]
+        },
+        {
+          "id": "feat-004",
+          "titulo": "Configurar variáveis de ambiente",
+          "descricao": "Criar .env.example para backend e frontend com todas as variáveis necessárias (DB, JWT, SMTP, etc). Documentar cada variável",
+          "estimativa": "30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-002", "feat-003"],
+          "status": "Não Iniciada",
+          "tags": ["config", "security"],
+          "artefatos": [
+            "backend/.env.example",
+            "frontend/.env.example"
+          ]
+        },
+        {
+          "id": "feat-005",
+          "titulo": "Configurar ESLint e Prettier",
+          "descricao": "Instalar e configurar ESLint e Prettier para frontend e backend com regras consistentes, criar arquivos de configuração",
+          "estimativa": "45min",
+          "prioridade": "media",
+          "dependencias": ["feat-002", "feat-003"],
+          "status": "Não Iniciada",
+          "tags": ["setup", "code-quality"],
+          "artefatos": [
+            "backend/.eslintrc.json",
+            "frontend/.eslintrc.json",
+            ".prettierrc"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-2",
+      "nome": "Banco de Dados e Modelos",
+      "descricao": "Configuração do MySQL, ORM Sequelize e criação de models",
+      "prioridade": "alta",
+      "features": [
+        {
+          "id": "feat-006",
+          "titulo": "Configurar Sequelize e conexão MySQL",
+          "descricao": "Instalar Sequelize e mysql2, criar config/database.js com configuração de conexão, configurar Sequelize CLI",
+          "estimativa": "1h",
+          "prioridade": "alta",
+          "dependencias": ["feat-002"],
+          "status": "Não Iniciada",
+          "tags": ["database", "orm"],
+          "artefatos": [
+            "backend/src/config/database.js",
+            "backend/.sequelizerc"
+          ]
+        },
+        {
+          "id": "feat-007",
+          "titulo": "Criar migration e model User",
+          "descricao": "Criar tabela users com campos: id, role (enum: admin|teacher|student), name, email, login, password_hash, cpf, rg, timestamps, deleted_at. Criar model User.js",
+          "estimativa": "1h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-006"],
+          "status": "Não Iniciada",
+          "tags": ["database", "model"],
+          "artefatos": [
+            "backend/database/migrations/*-create-users.js",
+            "backend/src/models/User.js"
+          ]
+        },
+        {
+          "id": "feat-008",
+          "titulo": "Criar migrations para Course e Discipline",
+          "descricao": "Criar tabelas courses (id, name, description, duration_semesters) e disciplines (id, name, code, workload_hours). Criar models correspondentes",
+          "estimativa": "1h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-006"],
+          "status": "Não Iniciada",
+          "tags": ["database", "model"],
+          "artefatos": [
+            "backend/database/migrations/*-create-courses.js",
+            "backend/database/migrations/*-create-disciplines.js",
+            "backend/src/models/Course.js",
+            "backend/src/models/Discipline.js"
+          ]
+        },
+        {
+          "id": "feat-009",
+          "titulo": "Criar migration course_disciplines (relação N:N)",
+          "descricao": "Criar tabela course_disciplines para relacionar cursos e disciplinas com campo semester. Configurar associações nos models",
+          "estimativa": "1h",
+          "prioridade": "alta",
+          "dependencias": ["feat-008"],
+          "status": "Não Iniciada",
+          "tags": ["database", "relationship"],
+          "artefatos": [
+            "backend/database/migrations/*-create-course-disciplines.js",
+            "associações nos models Course e Discipline"
+          ]
+        },
+        {
+          "id": "feat-010",
+          "titulo": "Criar migrations para Class e relacionamentos",
+          "descricao": "Criar tabela classes (id, course_id, semester, year). Criar class_teachers (turma-professor-disciplina) e class_students (turma-aluno). Criar models e associações",
+          "estimativa": "2h",
+          "prioridade": "alta",
+          "dependencias": ["feat-008"],
+          "status": "Não Iniciada",
+          "tags": ["database", "model"],
+          "artefatos": [
+            "backend/database/migrations/*-create-classes.js",
+            "backend/database/migrations/*-create-class-teachers.js",
+            "backend/database/migrations/*-create-class-students.js",
+            "backend/src/models/Class.js"
+          ]
+        },
+        {
+          "id": "feat-011",
+          "titulo": "Criar migration e model Enrollment",
+          "descricao": "Criar tabela enrollments (id, student_id, course_id, status enum: pending|active|cancelled, enrollment_date). Criar model com validações",
+          "estimativa": "1h",
+          "prioridade": "alta",
+          "dependencias": ["feat-007", "feat-008"],
+          "status": "Não Iniciada",
+          "tags": ["database", "model"],
+          "artefatos": [
+            "backend/database/migrations/*-create-enrollments.js",
+            "backend/src/models/Enrollment.js"
+          ]
+        },
+        {
+          "id": "feat-012",
+          "titulo": "Criar migrations para Document e DocumentType",
+          "descricao": "Criar tabelas document_types (id, name, description) e documents (id, user_id, document_type_id, file_path, status enum, reviewed_by, reviewed_at, observations)",
+          "estimativa": "1h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-007"],
+          "status": "Não Iniciada",
+          "tags": ["database", "model"],
+          "artefatos": [
+            "backend/database/migrations/*-create-document-types.js",
+            "backend/database/migrations/*-create-documents.js",
+            "backend/src/models/DocumentType.js",
+            "backend/src/models/Document.js"
+          ]
+        },
+        {
+          "id": "feat-013",
+          "titulo": "Criar migrations para Contract e ContractTemplate",
+          "descricao": "Criar tabelas contract_templates (id, name, content) e contracts (id, user_id, template_id, file_path, accepted_at, semester, year)",
+          "estimativa": "1h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-007"],
+          "status": "Não Iniciada",
+          "tags": ["database", "model"],
+          "artefatos": [
+            "backend/database/migrations/*-create-contract-templates.js",
+            "backend/database/migrations/*-create-contracts.js",
+            "backend/src/models/ContractTemplate.js",
+            "backend/src/models/Contract.js"
+          ]
+        },
+        {
+          "id": "feat-014",
+          "titulo": "Criar migrations para Evaluation e Grade",
+          "descricao": "Criar tabelas evaluations (id, class_id, teacher_id, discipline_id, name, date, type enum: grade|concept) e grades (id, evaluation_id, student_id, grade, concept)",
+          "estimativa": "2h",
+          "prioridade": "alta",
+          "dependencias": ["feat-010"],
+          "status": "Não Iniciada",
+          "tags": ["database", "model"],
+          "artefatos": [
+            "backend/database/migrations/*-create-evaluations.js",
+            "backend/database/migrations/*-create-grades.js",
+            "backend/src/models/Evaluation.js",
+            "backend/src/models/Grade.js"
+          ]
+        },
+        {
+          "id": "feat-015",
+          "titulo": "Criar migrations para Request e RequestType",
+          "descricao": "Criar tabelas request_types (id, name, description) e requests (id, student_id, request_type_id, description, status enum, reviewed_by, reviewed_at)",
+          "estimativa": "1h30min",
+          "prioridade": "media",
+          "dependencias": ["feat-007"],
+          "status": "Não Iniciada",
+          "tags": ["database", "model"],
+          "artefatos": [
+            "backend/database/migrations/*-create-request-types.js",
+            "backend/database/migrations/*-create-requests.js",
+            "backend/src/models/RequestType.js",
+            "backend/src/models/Request.js"
+          ]
+        },
+        {
+          "id": "feat-016",
+          "titulo": "Criar seeders de dados iniciais",
+          "descricao": "Criar seeders para: usuário admin, tipos de documentos padrão, tipos de solicitações, curso e disciplinas de exemplo",
+          "estimativa": "1h30min",
+          "prioridade": "media",
+          "dependencias": ["feat-007", "feat-008", "feat-012", "feat-015"],
+          "status": "Não Iniciada",
+          "tags": ["database", "seed"],
+          "artefatos": [
+            "backend/database/seeders/*-admin-user.js",
+            "backend/database/seeders/*-document-types.js",
+            "backend/database/seeders/*-request-types.js",
+            "backend/database/seeders/*-sample-courses.js"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-3",
+      "nome": "Autenticação e Autorização",
+      "descricao": "Implementação de JWT, login, middleware de autenticação e RBAC",
+      "prioridade": "alta",
+      "features": [
+        {
+          "id": "feat-017",
+          "titulo": "Configurar JWT e bcrypt",
+          "descricao": "Instalar jsonwebtoken e bcryptjs, criar config/auth.js com secret e expiration. Criar utilitários para hash de senha e geração de tokens",
+          "estimativa": "1h",
+          "prioridade": "alta",
+          "dependencias": ["feat-002"],
+          "status": "Não Iniciada",
+          "tags": ["auth", "security"],
+          "artefatos": [
+            "backend/src/config/auth.js",
+            "backend/src/utils/generators.js"
+          ]
+        },
+        {
+          "id": "feat-018",
+          "titulo": "Criar AuthService com lógica de autenticação",
+          "descricao": "Implementar AuthService com métodos: login (validar credenciais, gerar JWT), refreshToken, changePassword, validateToken",
+          "estimativa": "2h",
+          "prioridade": "alta",
+          "dependencias": ["feat-017", "feat-007"],
+          "status": "Não Iniciada",
+          "tags": ["auth", "service"],
+          "artefatos": [
+            "backend/src/services/auth.service.js"
+          ]
+        },
+        {
+          "id": "feat-019",
+          "titulo": "Criar AuthController e rotas de autenticação",
+          "descricao": "Implementar AuthController com endpoints: POST /auth/login, POST /auth/logout, POST /auth/refresh-token, POST /auth/change-password. Criar auth.routes.js",
+          "estimativa": "2h",
+          "prioridade": "alta",
+          "dependencias": ["feat-018"],
+          "status": "Não Iniciada",
+          "tags": ["auth", "controller", "api"],
+          "artefatos": [
+            "backend/src/controllers/auth.controller.js",
+            "backend/src/routes/auth.routes.js"
+          ]
+        },
+        {
+          "id": "feat-020",
+          "titulo": "Criar middleware de autenticação JWT",
+          "descricao": "Implementar auth.middleware.js que verifica token JWT no header Authorization, decodifica e injeta user no req.user",
+          "estimativa": "1h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-018"],
+          "status": "Não Iniciada",
+          "tags": ["auth", "middleware"],
+          "artefatos": [
+            "backend/src/middlewares/auth.middleware.js"
+          ]
+        },
+        {
+          "id": "feat-021",
+          "titulo": "Criar middleware RBAC (autorização por role)",
+          "descricao": "Implementar rbac.middleware.js com função authorize(...allowedRoles) que verifica se user.role está nas roles permitidas",
+          "estimativa": "1h",
+          "prioridade": "alta",
+          "dependencias": ["feat-020"],
+          "status": "Não Iniciada",
+          "tags": ["auth", "middleware", "rbac"],
+          "artefatos": [
+            "backend/src/middlewares/rbac.middleware.js"
+          ]
+        },
+        {
+          "id": "feat-022",
+          "titulo": "Implementar rate limiting para login",
+          "descricao": "Instalar express-rate-limit, criar rateLimiter.middleware.js com limite de 5 tentativas de login por IP em 15 minutos",
+          "estimativa": "45min",
+          "prioridade": "media",
+          "dependencias": ["feat-019"],
+          "status": "Não Iniciada",
+          "tags": ["security", "middleware"],
+          "artefatos": [
+            "backend/src/middlewares/rateLimiter.middleware.js"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-4",
+      "nome": "Backend - Middlewares e Utilitários",
+      "descricao": "Middlewares gerais, validação, logging e tratamento de erros",
+      "prioridade": "alta",
+      "features": [
+        {
+          "id": "feat-023",
+          "titulo": "Configurar Helmet.js para headers de segurança",
+          "descricao": "Instalar helmet, configurar em server.js com CSP, HSTS e outras proteções HTTP",
+          "estimativa": "30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-002"],
+          "status": "Não Iniciada",
+          "tags": ["security", "middleware"],
+          "artefatos": [
+            "configuração helmet em server.js"
+          ]
+        },
+        {
+          "id": "feat-024",
+          "titulo": "Configurar CORS",
+          "descricao": "Instalar cors, configurar para permitir requisições do frontend (origin, credentials, methods)",
+          "estimativa": "30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-002"],
+          "status": "Não Iniciada",
+          "tags": ["config", "middleware"],
+          "artefatos": [
+            "configuração cors em server.js"
+          ]
+        },
+        {
+          "id": "feat-025",
+          "titulo": "Criar middleware de validação com express-validator",
+          "descricao": "Instalar express-validator, criar validation.middleware.js com função handleValidationErrors e validadores reutilizáveis (CPF, email, etc)",
+          "estimativa": "1h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-002"],
+          "status": "Não Iniciada",
+          "tags": ["validation", "middleware"],
+          "artefatos": [
+            "backend/src/middlewares/validation.middleware.js",
+            "backend/src/utils/validators.js"
+          ]
+        },
+        {
+          "id": "feat-026",
+          "titulo": "Configurar Winston para logging",
+          "descricao": "Instalar winston, criar utils/logger.js com transports para console e arquivo (error.log, combined.log), configurar níveis e formato JSON",
+          "estimativa": "1h",
+          "prioridade": "alta",
+          "dependencias": ["feat-002"],
+          "status": "Não Iniciada",
+          "tags": ["logging", "utils"],
+          "artefatos": [
+            "backend/src/utils/logger.js",
+            "backend/logs/"
+          ]
+        },
+        {
+          "id": "feat-027",
+          "titulo": "Criar middleware de tratamento de erros",
+          "descricao": "Implementar error.middleware.js com classe AppError e errorHandler que loga erros com Winston e retorna resposta JSON padronizada",
+          "estimativa": "1h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-026"],
+          "status": "Não Iniciada",
+          "tags": ["error-handling", "middleware"],
+          "artefatos": [
+            "backend/src/middlewares/error.middleware.js"
+          ]
+        },
+        {
+          "id": "feat-028",
+          "titulo": "Criar utilitários de formatação e constantes",
+          "descricao": "Implementar utils/formatters.js (formatação de CPF, data, moeda) e utils/constants.js (enums de status, roles, etc)",
+          "estimativa": "1h",
+          "prioridade": "media",
+          "dependencias": ["feat-002"],
+          "status": "Não Iniciada",
+          "tags": ["utils"],
+          "artefatos": [
+            "backend/src/utils/formatters.js",
+            "backend/src/utils/constants.js"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-5",
+      "nome": "Backend - API de Usuários e Estudantes",
+      "descricao": "CRUD de usuários, alunos e professores",
+      "prioridade": "alta",
+      "features": [
+        {
+          "id": "feat-029",
+          "titulo": "Criar UserController e rotas básicas",
+          "descricao": "Implementar UserController com métodos: list, getById, create, update, delete. Criar user.routes.js com validações (somente admin)",
+          "estimativa": "2h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-007", "feat-021", "feat-025"],
+          "status": "Não Iniciada",
+          "tags": ["user", "controller", "api"],
+          "artefatos": [
+            "backend/src/controllers/user.controller.js",
+            "backend/src/routes/user.routes.js"
+          ]
+        },
+        {
+          "id": "feat-030",
+          "titulo": "Criar StudentController e StudentService",
+          "descricao": "Implementar StudentService com lógica de criação de aluno (gerar senha provisória, hash). StudentController com CRUD completo. Criar student.routes.js",
+          "estimativa": "3h",
+          "prioridade": "alta",
+          "dependencias": ["feat-007", "feat-017", "feat-021"],
+          "status": "Não Iniciada",
+          "tags": ["student", "controller", "service", "api"],
+          "artefatos": [
+            "backend/src/services/student.service.js",
+            "backend/src/controllers/student.controller.js",
+            "backend/src/routes/student.routes.js"
+          ]
+        },
+        {
+          "id": "feat-031",
+          "titulo": "Adicionar endpoint de reset de senha para aluno",
+          "descricao": "Implementar POST /students/:id/reset-password (admin only) que gera nova senha provisória e retorna (será enviada por email posteriormente)",
+          "estimativa": "1h",
+          "prioridade": "media",
+          "dependencias": ["feat-030"],
+          "status": "Não Iniciada",
+          "tags": ["student", "auth"],
+          "artefatos": [
+            "método resetPassword em student.controller.js"
+          ]
+        },
+        {
+          "id": "feat-032",
+          "titulo": "Criar TeacherController e rotas",
+          "descricao": "Implementar TeacherController com CRUD (similar a StudentController). Criar teacher.routes.js com validações e autorização admin",
+          "estimativa": "2h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-007", "feat-021"],
+          "status": "Não Iniciada",
+          "tags": ["teacher", "controller", "api"],
+          "artefatos": [
+            "backend/src/controllers/teacher.controller.js",
+            "backend/src/routes/teacher.routes.js"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-6",
+      "nome": "Backend - API de Cursos e Turmas",
+      "descricao": "Gestão de cursos, disciplinas e turmas",
+      "prioridade": "alta",
+      "features": [
+        {
+          "id": "feat-033",
+          "titulo": "Criar CourseController e DisciplineController",
+          "descricao": "Implementar CRUD para cursos e disciplinas. Criar course.routes.js e discipline.routes.js (admin only)",
+          "estimativa": "3h",
+          "prioridade": "alta",
+          "dependencias": ["feat-008", "feat-021"],
+          "status": "Não Iniciada",
+          "tags": ["course", "discipline", "controller", "api"],
+          "artefatos": [
+            "backend/src/controllers/course.controller.js",
+            "backend/src/controllers/discipline.controller.js",
+            "backend/src/routes/course.routes.js",
+            "backend/src/routes/discipline.routes.js"
+          ]
+        },
+        {
+          "id": "feat-034",
+          "titulo": "Adicionar endpoint para vincular disciplinas a curso",
+          "descricao": "Implementar POST /courses/:id/disciplines para adicionar disciplinas ao curso com semestre. DELETE para remover",
+          "estimativa": "1h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-033", "feat-009"],
+          "status": "Não Iniciada",
+          "tags": ["course", "discipline", "relationship"],
+          "artefatos": [
+            "métodos em course.controller.js"
+          ]
+        },
+        {
+          "id": "feat-035",
+          "titulo": "Criar ClassController e rotas",
+          "descricao": "Implementar CRUD de turmas (Class). GET /classes?course_id=x, POST /classes com validação de semestre/ano. Criar class.routes.js",
+          "estimativa": "2h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-010", "feat-021"],
+          "status": "Não Iniciada",
+          "tags": ["class", "controller", "api"],
+          "artefatos": [
+            "backend/src/controllers/class.controller.js",
+            "backend/src/routes/class.routes.js"
+          ]
+        },
+        {
+          "id": "feat-036",
+          "titulo": "Adicionar endpoints para vincular professores e alunos à turma",
+          "descricao": "Implementar POST /classes/:id/teachers (vincular professor + disciplina), POST /classes/:id/students (vincular aluno). DELETE para desvincular",
+          "estimativa": "2h",
+          "prioridade": "alta",
+          "dependencias": ["feat-035"],
+          "status": "Não Iniciada",
+          "tags": ["class", "relationship"],
+          "artefatos": [
+            "métodos em class.controller.js"
+          ]
+        },
+        {
+          "id": "feat-037",
+          "titulo": "Adicionar endpoint para listar alunos e professores de turma",
+          "descricao": "Implementar GET /classes/:id/students e GET /classes/:id/teachers com eager loading (Sequelize include)",
+          "estimativa": "1h30min",
+          "prioridade": "media",
+          "dependencias": ["feat-036"],
+          "status": "Não Iniciada",
+          "tags": ["class", "api"],
+          "artefatos": [
+            "métodos getStudents e getTeachers em class.controller.js"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-7",
+      "nome": "Backend - API de Matrículas",
+      "descricao": "Sistema de matrículas de alunos em cursos",
+      "prioridade": "alta",
+      "features": [
+        {
+          "id": "feat-038",
+          "titulo": "Criar EnrollmentService com regras de negócio",
+          "descricao": "Implementar EnrollmentService com validações: aluno não pode ter matrícula ativa no mesmo curso, documentos obrigatórios aprovados antes de ativar",
+          "estimativa": "2h",
+          "prioridade": "alta",
+          "dependencias": ["feat-011"],
+          "status": "Não Iniciada",
+          "tags": ["enrollment", "service", "business-logic"],
+          "artefatos": [
+            "backend/src/services/enrollment.service.js"
+          ]
+        },
+        {
+          "id": "feat-039",
+          "titulo": "Criar EnrollmentController e rotas",
+          "descricao": "Implementar CRUD de matrículas. POST cria matrícula com status pending. PUT /enrollments/:id/status para alterar status (admin only)",
+          "estimativa": "2h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-038", "feat-021"],
+          "status": "Não Iniciada",
+          "tags": ["enrollment", "controller", "api"],
+          "artefatos": [
+            "backend/src/controllers/enrollment.controller.js",
+            "backend/src/routes/enrollment.routes.js"
+          ]
+        },
+        {
+          "id": "feat-040",
+          "titulo": "Adicionar endpoint para listar matrículas por aluno",
+          "descricao": "Implementar GET /students/:id/enrollments retornando todas as matrículas do aluno com dados do curso",
+          "estimativa": "1h",
+          "prioridade": "media",
+          "dependencias": ["feat-039"],
+          "status": "Não Iniciada",
+          "tags": ["enrollment", "api"],
+          "artefatos": [
+            "método em enrollment.controller.js"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-8",
+      "nome": "Backend - Upload e Gestão de Documentos",
+      "descricao": "Sistema de upload, validação e aprovação de documentos",
+      "prioridade": "alta",
+      "features": [
+        {
+          "id": "feat-041",
+          "titulo": "Configurar Multer para upload de arquivos",
+          "descricao": "Instalar multer, criar config/upload.js com storage (uploads/documents/), limites de tamanho (10MB), filtro de tipos (PDF, JPG, PNG). Criar upload.middleware.js",
+          "estimativa": "1h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-002"],
+          "status": "Não Iniciada",
+          "tags": ["upload", "config", "middleware"],
+          "artefatos": [
+            "backend/src/config/upload.js",
+            "backend/src/middlewares/upload.middleware.js",
+            "backend/uploads/documents/"
+          ]
+        },
+        {
+          "id": "feat-042",
+          "titulo": "Criar DocumentService com validação",
+          "descricao": "Implementar DocumentService com métodos: upload (salvar registro no DB), approve, reject, delete. Validar se documento é obrigatório para o tipo de usuário",
+          "estimativa": "2h",
+          "prioridade": "alta",
+          "dependencias": ["feat-012"],
+          "status": "Não Iniciada",
+          "tags": ["document", "service", "business-logic"],
+          "artefatos": [
+            "backend/src/services/document.service.js"
+          ]
+        },
+        {
+          "id": "feat-043",
+          "titulo": "Criar DocumentController e rotas",
+          "descricao": "Implementar DocumentController: POST /documents (upload - aluno/professor), GET /documents (listar - admin filtro por status), PUT /documents/:id/approve e reject (admin)",
+          "estimativa": "3h",
+          "prioridade": "alta",
+          "dependencias": ["feat-041", "feat-042", "feat-021"],
+          "status": "Não Iniciada",
+          "tags": ["document", "controller", "api"],
+          "artefatos": [
+            "backend/src/controllers/document.controller.js",
+            "backend/src/routes/document.routes.js"
+          ]
+        },
+        {
+          "id": "feat-044",
+          "titulo": "Adicionar endpoint para download de documento",
+          "descricao": "Implementar GET /documents/:id/download que verifica permissões (próprio usuário ou admin) e retorna arquivo com res.download()",
+          "estimativa": "1h30min",
+          "prioridade": "media",
+          "dependencias": ["feat-043"],
+          "status": "Não Iniciada",
+          "tags": ["document", "api"],
+          "artefatos": [
+            "método download em document.controller.js"
+          ]
+        },
+        {
+          "id": "feat-045",
+          "titulo": "Adicionar endpoint para listar documentos por usuário",
+          "descricao": "Implementar GET /users/:id/documents ou GET /my-documents (estudante/professor vê próprios docs)",
+          "estimativa": "1h",
+          "prioridade": "media",
+          "dependencias": ["feat-043"],
+          "status": "Não Iniciada",
+          "tags": ["document", "api"],
+          "artefatos": [
+            "método em document.controller.js"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-9",
+      "nome": "Backend - Contratos e Geração de PDF",
+      "descricao": "Sistema de geração, aceite e gestão de contratos em PDF",
+      "prioridade": "alta",
+      "features": [
+        {
+          "id": "feat-046",
+          "titulo": "Instalar e configurar PDFKit ou Puppeteer",
+          "descricao": "Avaliar limitações do Hostgator, escolher entre PDFKit (leve) ou Puppeteer (flexível). Instalar e criar configuração inicial",
+          "estimativa": "1h",
+          "prioridade": "alta",
+          "dependencias": ["feat-002"],
+          "status": "Não Iniciada",
+          "tags": ["pdf", "config"],
+          "artefatos": [
+            "biblioteca instalada no package.json"
+          ]
+        },
+        {
+          "id": "feat-047",
+          "titulo": "Criar PDFService para geração de contratos",
+          "descricao": "Implementar pdf.service.js com método generateContractPDF(contractData, template) que substitui placeholders e gera PDF em uploads/contracts/",
+          "estimativa": "3h",
+          "prioridade": "alta",
+          "dependencias": ["feat-046"],
+          "status": "Não Iniciada",
+          "tags": ["pdf", "service"],
+          "artefatos": [
+            "backend/src/services/pdf.service.js",
+            "backend/uploads/contracts/"
+          ]
+        },
+        {
+          "id": "feat-048",
+          "titulo": "Criar ContractService com lógica de negócio",
+          "descricao": "Implementar ContractService: generateContract (busca template, gera PDF, salva registro), acceptContract (registra accepted_at)",
+          "estimativa": "2h",
+          "prioridade": "alta",
+          "dependencias": ["feat-013", "feat-047"],
+          "status": "Não Iniciada",
+          "tags": ["contract", "service", "business-logic"],
+          "artefatos": [
+            "backend/src/services/contract.service.js"
+          ]
+        },
+        {
+          "id": "feat-049",
+          "titulo": "Criar ContractController e rotas",
+          "descricao": "Implementar GET /contracts (listar - admin/próprio usuário), POST /contracts (gerar - admin), POST /contracts/:id/accept (aluno aceita), GET /contracts/:id/pdf (download)",
+          "estimativa": "2h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-048", "feat-021"],
+          "status": "Não Iniciada",
+          "tags": ["contract", "controller", "api"],
+          "artefatos": [
+            "backend/src/controllers/contract.controller.js",
+            "backend/src/routes/contract.routes.js"
+          ]
+        },
+        {
+          "id": "feat-050",
+          "titulo": "Criar template HTML de contrato padrão",
+          "descricao": "Criar template HTML com placeholders {{studentName}}, {{courseName}}, etc. Salvar como seeder em contract_templates",
+          "estimativa": "1h30min",
+          "prioridade": "media",
+          "dependencias": ["feat-013"],
+          "status": "Não Iniciada",
+          "tags": ["contract", "template"],
+          "artefatos": [
+            "backend/database/seeders/*-contract-template.js"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-10",
+      "nome": "Backend - Avaliações e Notas",
+      "descricao": "Sistema de cadastro de avaliações e lançamento de notas",
+      "prioridade": "alta",
+      "features": [
+        {
+          "id": "feat-051",
+          "titulo": "Criar EvaluationController e rotas",
+          "descricao": "Implementar CRUD de avaliações. POST /classes/:classId/evaluations (professor cria avaliação), GET /classes/:classId/evaluations (listar)",
+          "estimativa": "2h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-014", "feat-021"],
+          "status": "Não Iniciada",
+          "tags": ["evaluation", "controller", "api"],
+          "artefatos": [
+            "backend/src/controllers/evaluation.controller.js",
+            "backend/src/routes/evaluation.routes.js"
+          ]
+        },
+        {
+          "id": "feat-052",
+          "titulo": "Criar GradeService com validações",
+          "descricao": "Implementar GradeService: lançar nota (validar tipo grade vs concept, valor válido), calcular média, verificar se aluno está na turma",
+          "estimativa": "2h",
+          "prioridade": "alta",
+          "dependencias": ["feat-014"],
+          "status": "Não Iniciada",
+          "tags": ["grade", "service", "business-logic"],
+          "artefatos": [
+            "backend/src/services/grade.service.js"
+          ]
+        },
+        {
+          "id": "feat-053",
+          "titulo": "Criar GradeController e rotas",
+          "descricao": "Implementar POST /grades (professor lança nota), PUT /grades/:id (editar), GET /evaluations/:id/grades (listar notas de avaliação)",
+          "estimativa": "2h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-052", "feat-021"],
+          "status": "Não Iniciada",
+          "tags": ["grade", "controller", "api"],
+          "artefatos": [
+            "backend/src/controllers/grade.controller.js",
+            "backend/src/routes/grade.routes.js"
+          ]
+        },
+        {
+          "id": "feat-054",
+          "titulo": "Adicionar endpoint para aluno ver próprias notas",
+          "descricao": "Implementar GET /my-grades (estudante vê suas notas de todas as disciplinas) com filtro por semestre/disciplina",
+          "estimativa": "1h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-053"],
+          "status": "Não Iniciada",
+          "tags": ["grade", "api", "student"],
+          "artefatos": [
+            "método getMyGrades em grade.controller.js"
+          ]
+        },
+        {
+          "id": "feat-055",
+          "titulo": "Adicionar lançamento em lote de notas",
+          "descricao": "Implementar POST /evaluations/:id/grades/batch recebendo array de {student_id, grade/concept} para lançamento rápido pelo professor",
+          "estimativa": "2h",
+          "prioridade": "media",
+          "dependencias": ["feat-053"],
+          "status": "Não Iniciada",
+          "tags": ["grade", "api", "teacher"],
+          "artefatos": [
+            "método batchCreate em grade.controller.js"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-11",
+      "nome": "Backend - Solicitações",
+      "descricao": "Sistema de solicitações de alunos (declarações, requerimentos)",
+      "prioridade": "media",
+      "features": [
+        {
+          "id": "feat-056",
+          "titulo": "Criar RequestController e rotas",
+          "descricao": "Implementar CRUD de solicitações. POST /requests (aluno cria), GET /requests (admin vê todas, aluno vê próprias), PUT /requests/:id/approve e reject (admin)",
+          "estimativa": "3h",
+          "prioridade": "media",
+          "dependencias": ["feat-015", "feat-021"],
+          "status": "Não Iniciada",
+          "tags": ["request", "controller", "api"],
+          "artefatos": [
+            "backend/src/controllers/request.controller.js",
+            "backend/src/routes/request.routes.js"
+          ]
+        },
+        {
+          "id": "feat-057",
+          "titulo": "Adicionar filtros e paginação para solicitações",
+          "descricao": "Adicionar query params para GET /requests: ?status=pending&page=1&limit=20&student_id=x",
+          "estimativa": "1h30min",
+          "prioridade": "baixa",
+          "dependencias": ["feat-056"],
+          "status": "Não Iniciada",
+          "tags": ["request", "api", "optimization"],
+          "artefatos": [
+            "melhorias em request.controller.js"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-12",
+      "nome": "Backend - Integração de Email",
+      "descricao": "Serviço de envio de emails (senhas provisórias, notificações)",
+      "prioridade": "media",
+      "features": [
+        {
+          "id": "feat-058",
+          "titulo": "Configurar Nodemailer com SMTP",
+          "descricao": "Instalar nodemailer, criar config/email.js com configuração SMTP (host, port, auth) usando variáveis de ambiente",
+          "estimativa": "1h",
+          "prioridade": "media",
+          "dependencias": ["feat-002"],
+          "status": "Não Iniciada",
+          "tags": ["email", "config"],
+          "artefatos": [
+            "backend/src/config/email.js"
+          ]
+        },
+        {
+          "id": "feat-059",
+          "titulo": "Criar EmailService",
+          "descricao": "Implementar email.service.js com métodos: sendPasswordEmail(to, password), sendDocumentApprovedEmail, sendDocumentRejectedEmail",
+          "estimativa": "2h",
+          "prioridade": "media",
+          "dependencias": ["feat-058"],
+          "status": "Não Iniciada",
+          "tags": ["email", "service"],
+          "artefatos": [
+            "backend/src/services/email.service.js"
+          ]
+        },
+        {
+          "id": "feat-060",
+          "titulo": "Integrar envio de email na criação de aluno",
+          "descricao": "Modificar StudentService.create para enviar email com senha provisória após criar aluno",
+          "estimativa": "45min",
+          "prioridade": "media",
+          "dependencias": ["feat-059", "feat-030"],
+          "status": "Não Iniciada",
+          "tags": ["email", "student"],
+          "artefatos": [
+            "integração em student.service.js"
+          ]
+        },
+        {
+          "id": "feat-061",
+          "titulo": "Integrar notificações por email em aprovação/rejeição de documentos",
+          "descricao": "Modificar DocumentService.approve e reject para enviar emails notificando aluno",
+          "estimativa": "1h",
+          "prioridade": "baixa",
+          "dependencias": ["feat-059", "feat-042"],
+          "status": "Não Iniciada",
+          "tags": ["email", "document"],
+          "artefatos": [
+            "integração em document.service.js"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-13",
+      "nome": "Backend - Jobs e Tarefas Agendadas",
+      "descricao": "Cron jobs para limpeza e automação",
+      "prioridade": "baixa",
+      "features": [
+        {
+          "id": "feat-062",
+          "titulo": "Configurar node-cron",
+          "descricao": "Instalar node-cron, criar jobs/index.js para registrar todas as tarefas agendadas",
+          "estimativa": "30min",
+          "prioridade": "baixa",
+          "dependencias": ["feat-002"],
+          "status": "Não Iniciada",
+          "tags": ["cron", "config"],
+          "artefatos": [
+            "backend/src/jobs/index.js"
+          ]
+        },
+        {
+          "id": "feat-063",
+          "titulo": "Criar job de limpeza de arquivos temporários",
+          "descricao": "Implementar cleanupTemp.job.js que roda diariamente e remove arquivos em uploads/temp/ mais antigos que 7 dias",
+          "estimativa": "1h",
+          "prioridade": "baixa",
+          "dependencias": ["feat-062"],
+          "status": "Não Iniciada",
+          "tags": ["cron", "cleanup"],
+          "artefatos": [
+            "backend/src/jobs/cleanupTemp.job.js"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-14",
+      "nome": "Backend - Agregador de Rotas e Server",
+      "descricao": "Configuração final do servidor Express",
+      "prioridade": "alta",
+      "features": [
+        {
+          "id": "feat-064",
+          "titulo": "Criar agregador de rotas routes/index.js",
+          "descricao": "Criar routes/index.js que importa todas as rotas e as monta no Express com prefixo /api/v1",
+          "estimativa": "1h",
+          "prioridade": "alta",
+          "dependencias": ["feat-019", "feat-029", "feat-030", "feat-032", "feat-033", "feat-035", "feat-039", "feat-043", "feat-049", "feat-051", "feat-053", "feat-056"],
+          "status": "Não Iniciada",
+          "tags": ["routes", "config"],
+          "artefatos": [
+            "backend/src/routes/index.js"
+          ]
+        },
+        {
+          "id": "feat-065",
+          "titulo": "Configurar server.js completo",
+          "descricao": "Montar server.js com: middlewares (helmet, cors, json, urlencoded), rotas, error handler, inicialização do servidor na porta do .env",
+          "estimativa": "1h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-064", "feat-023", "feat-024", "feat-027"],
+          "status": "Não Iniciada",
+          "tags": ["server", "config"],
+          "artefatos": [
+            "backend/src/server.js"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-15",
+      "nome": "Frontend - Componentes UI Base",
+      "descricao": "Componentes reutilizáveis (Button, Input, Modal, Table)",
+      "prioridade": "alta",
+      "features": [
+        {
+          "id": "feat-066",
+          "titulo": "Criar componente Button",
+          "descricao": "Implementar components/ui/Button.tsx com variantes (primary, secondary, danger), tamanhos (sm, md, lg), loading state",
+          "estimativa": "1h",
+          "prioridade": "alta",
+          "dependencias": ["feat-003"],
+          "status": "Não Iniciada",
+          "tags": ["ui", "component"],
+          "artefatos": [
+            "frontend/src/components/ui/Button.tsx"
+          ]
+        },
+        {
+          "id": "feat-067",
+          "titulo": "Criar componente Input",
+          "descricao": "Implementar components/ui/Input.tsx com suporte a label, error message, tipos (text, email, password), máscaras (CPF, telefone)",
+          "estimativa": "1h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-003"],
+          "status": "Não Iniciada",
+          "tags": ["ui", "component"],
+          "artefatos": [
+            "frontend/src/components/ui/Input.tsx"
+          ]
+        },
+        {
+          "id": "feat-068",
+          "titulo": "Criar componente Modal",
+          "descricao": "Implementar components/ui/Modal.tsx usando Headless UI Dialog com overlay, close button, variantes de tamanho",
+          "estimativa": "1h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-003"],
+          "status": "Não Iniciada",
+          "tags": ["ui", "component"],
+          "artefatos": [
+            "frontend/src/components/ui/Modal.tsx"
+          ]
+        },
+        {
+          "id": "feat-069",
+          "titulo": "Criar componente Table",
+          "descricao": "Implementar components/ui/Table.tsx reutilizável com suporte a colunas customizáveis, sorting básico, loading state",
+          "estimativa": "2h",
+          "prioridade": "alta",
+          "dependencias": ["feat-003"],
+          "status": "Não Iniciada",
+          "tags": ["ui", "component"],
+          "artefatos": [
+            "frontend/src/components/ui/Table.tsx"
+          ]
+        },
+        {
+          "id": "feat-070",
+          "titulo": "Criar componente FileUpload",
+          "descricao": "Implementar components/ui/FileUpload.tsx com drag-and-drop, preview, validação de tipo e tamanho, progress bar",
+          "estimativa": "2h30min",
+          "prioridade": "media",
+          "dependencias": ["feat-003"],
+          "status": "Não Iniciada",
+          "tags": ["ui", "component", "upload"],
+          "artefatos": [
+            "frontend/src/components/ui/FileUpload.tsx"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-16",
+      "nome": "Frontend - Layout e Navegação",
+      "descricao": "Componentes de layout (Header, Sidebar, Footer) e configuração de rotas",
+      "prioridade": "alta",
+      "features": [
+        {
+          "id": "feat-071",
+          "titulo": "Criar componente Header",
+          "descricao": "Implementar components/layout/Header.tsx com logo, nome do usuário logado, dropdown de perfil (trocar senha, logout)",
+          "estimativa": "2h",
+          "prioridade": "alta",
+          "dependencias": ["feat-003"],
+          "status": "Não Iniciada",
+          "tags": ["layout", "component"],
+          "artefatos": [
+            "frontend/src/components/layout/Header.tsx"
+          ]
+        },
+        {
+          "id": "feat-072",
+          "titulo": "Criar componente Sidebar",
+          "descricao": "Implementar components/layout/Sidebar.tsx com navegação dinâmica baseada no role do usuário (admin, teacher, student)",
+          "estimativa": "2h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-003"],
+          "status": "Não Iniciada",
+          "tags": ["layout", "component"],
+          "artefatos": [
+            "frontend/src/components/layout/Sidebar.tsx"
+          ]
+        },
+        {
+          "id": "feat-073",
+          "titulo": "Criar componente DashboardLayout",
+          "descricao": "Implementar components/layout/DashboardLayout.tsx que compõe Header + Sidebar + children (área de conteúdo)",
+          "estimativa": "1h",
+          "prioridade": "alta",
+          "dependencias": ["feat-071", "feat-072"],
+          "status": "Não Iniciada",
+          "tags": ["layout", "component"],
+          "artefatos": [
+            "frontend/src/components/layout/DashboardLayout.tsx"
+          ]
+        },
+        {
+          "id": "feat-074",
+          "titulo": "Configurar React Router com rotas protegidas",
+          "descricao": "Criar router.tsx com rotas públicas (/login, /first-access) e privadas (dashboards). Implementar PrivateRoute wrapper que verifica autenticação",
+          "estimativa": "2h",
+          "prioridade": "alta",
+          "dependencias": ["feat-003"],
+          "status": "Não Iniciada",
+          "tags": ["routing", "auth"],
+          "artefatos": [
+            "frontend/src/router.tsx",
+            "componente PrivateRoute"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-17",
+      "nome": "Frontend - Autenticação e Contexto",
+      "descricao": "Context API, hooks de autenticação e serviços de API",
+      "prioridade": "alta",
+      "features": [
+        {
+          "id": "feat-075",
+          "titulo": "Configurar Axios e interceptors",
+          "descricao": "Criar services/api.ts com instância Axios configurada (baseURL, timeout), interceptors para adicionar token JWT no header e tratar erros 401",
+          "estimativa": "1h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-003"],
+          "status": "Não Iniciada",
+          "tags": ["api", "config"],
+          "artefatos": [
+            "frontend/src/services/api.ts"
+          ]
+        },
+        {
+          "id": "feat-076",
+          "titulo": "Criar AuthContext e AuthProvider",
+          "descricao": "Implementar contexts/AuthContext.tsx com estado de user, token, loading. Métodos: login, logout, updateUser. Persistência em localStorage",
+          "estimativa": "2h",
+          "prioridade": "alta",
+          "dependencias": ["feat-003"],
+          "status": "Não Iniciada",
+          "tags": ["auth", "context"],
+          "artefatos": [
+            "frontend/src/contexts/AuthContext.tsx"
+          ]
+        },
+        {
+          "id": "feat-077",
+          "titulo": "Criar hook useAuth",
+          "descricao": "Implementar hooks/useAuth.ts que consome AuthContext e expõe user, login, logout, isAuthenticated",
+          "estimativa": "30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-076"],
+          "status": "Não Iniciada",
+          "tags": ["auth", "hook"],
+          "artefatos": [
+            "frontend/src/hooks/useAuth.ts"
+          ]
+        },
+        {
+          "id": "feat-078",
+          "titulo": "Criar auth.service.ts",
+          "descricao": "Implementar services/auth.service.ts com funções: login(credentials), logout(), changePassword(oldPassword, newPassword) que chamam API",
+          "estimativa": "1h",
+          "prioridade": "alta",
+          "dependencias": ["feat-075"],
+          "status": "Não Iniciada",
+          "tags": ["auth", "service"],
+          "artefatos": [
+            "frontend/src/services/auth.service.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-18",
+      "nome": "Frontend - Páginas de Autenticação",
+      "descricao": "Telas de login e primeiro acesso",
+      "prioridade": "alta",
+      "features": [
+        {
+          "id": "feat-079",
+          "titulo": "Criar página de Login",
+          "descricao": "Implementar pages/auth/Login.tsx com formulário (login, senha), validação com Zod, integração com useAuth, redirecionamento pós-login baseado em role",
+          "estimativa": "2h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-077", "feat-078", "feat-067"],
+          "status": "Não Iniciada",
+          "tags": ["auth", "page"],
+          "artefatos": [
+            "frontend/src/pages/auth/Login.tsx"
+          ]
+        },
+        {
+          "id": "feat-080",
+          "titulo": "Criar página de Primeiro Acesso",
+          "descricao": "Implementar pages/auth/FirstAccess.tsx para aluno trocar senha provisória (senha atual, nova senha, confirmar). Validação e redirecionamento após sucesso",
+          "estimativa": "2h",
+          "prioridade": "alta",
+          "dependencias": ["feat-078", "feat-067"],
+          "status": "Não Iniciada",
+          "tags": ["auth", "page"],
+          "artefatos": [
+            "frontend/src/pages/auth/FirstAccess.tsx"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-19",
+      "nome": "Frontend - Dashboard Admin",
+      "descricao": "Dashboard e páginas de gestão para administradores",
+      "prioridade": "alta",
+      "features": [
+        {
+          "id": "feat-081",
+          "titulo": "Criar página Dashboard Admin",
+          "descricao": "Implementar pages/admin/Dashboard.tsx com cards de estatísticas (total alunos, professores, documentos pendentes, matrículas ativas)",
+          "estimativa": "2h",
+          "prioridade": "alta",
+          "dependencias": ["feat-073", "feat-074"],
+          "status": "Não Iniciada",
+          "tags": ["admin", "page", "dashboard"],
+          "artefatos": [
+            "frontend/src/pages/admin/Dashboard.tsx"
+          ]
+        },
+        {
+          "id": "feat-082",
+          "titulo": "Criar student.service.ts",
+          "descricao": "Implementar services/student.service.ts com funções: getAll, getById, create, update, delete, resetPassword",
+          "estimativa": "1h",
+          "prioridade": "alta",
+          "dependencias": ["feat-075"],
+          "status": "Não Iniciada",
+          "tags": ["student", "service"],
+          "artefatos": [
+            "frontend/src/services/student.service.ts"
+          ]
+        },
+        {
+          "id": "feat-083",
+          "titulo": "Criar página Students (listagem e CRUD)",
+          "descricao": "Implementar pages/admin/Students.tsx com tabela de alunos, botões adicionar/editar/remover, modal de formulário, integração com student.service",
+          "estimativa": "3h",
+          "prioridade": "alta",
+          "dependencias": ["feat-082", "feat-069", "feat-068"],
+          "status": "Não Iniciada",
+          "tags": ["admin", "page", "student"],
+          "artefatos": [
+            "frontend/src/pages/admin/Students.tsx",
+            "frontend/src/components/forms/StudentForm.tsx"
+          ]
+        },
+        {
+          "id": "feat-084",
+          "titulo": "Criar teacher.service.ts e página Teachers",
+          "descricao": "Implementar services/teacher.service.ts (similar a student) e pages/admin/Teachers.tsx com CRUD de professores",
+          "estimativa": "3h",
+          "prioridade": "alta",
+          "dependencias": ["feat-075", "feat-069", "feat-068"],
+          "status": "Não Iniciada",
+          "tags": ["admin", "page", "teacher"],
+          "artefatos": [
+            "frontend/src/services/teacher.service.ts",
+            "frontend/src/pages/admin/Teachers.tsx",
+            "frontend/src/components/forms/TeacherForm.tsx"
+          ]
+        },
+        {
+          "id": "feat-085",
+          "titulo": "Criar course.service.ts e página Courses",
+          "descricao": "Implementar services/course.service.ts e pages/admin/Courses.tsx com CRUD de cursos e gestão de disciplinas vinculadas",
+          "estimativa": "3h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-075", "feat-069", "feat-068"],
+          "status": "Não Iniciada",
+          "tags": ["admin", "page", "course"],
+          "artefatos": [
+            "frontend/src/services/course.service.ts",
+            "frontend/src/pages/admin/Courses.tsx",
+            "frontend/src/components/forms/CourseForm.tsx"
+          ]
+        },
+        {
+          "id": "feat-086",
+          "titulo": "Criar class.service.ts e página Classes",
+          "descricao": "Implementar services/class.service.ts e pages/admin/Classes.tsx com CRUD de turmas, vincular professores/alunos",
+          "estimativa": "4h",
+          "prioridade": "alta",
+          "dependencias": ["feat-075", "feat-069", "feat-068"],
+          "status": "Não Iniciada",
+          "tags": ["admin", "page", "class"],
+          "artefatos": [
+            "frontend/src/services/class.service.ts",
+            "frontend/src/pages/admin/Classes.tsx",
+            "frontend/src/components/forms/ClassForm.tsx"
+          ]
+        },
+        {
+          "id": "feat-087",
+          "titulo": "Criar document.service.ts e página Documents Admin",
+          "descricao": "Implementar services/document.service.ts e pages/admin/Documents.tsx com listagem de documentos pendentes/aprovados/rejeitados, botões aprovar/rejeitar",
+          "estimativa": "3h",
+          "prioridade": "alta",
+          "dependencias": ["feat-075", "feat-069"],
+          "status": "Não Iniciada",
+          "tags": ["admin", "page", "document"],
+          "artefatos": [
+            "frontend/src/services/document.service.ts",
+            "frontend/src/pages/admin/Documents.tsx"
+          ]
+        },
+        {
+          "id": "feat-088",
+          "titulo": "Criar request.service.ts e página Requests Admin",
+          "descricao": "Implementar services/request.service.ts e pages/admin/Requests.tsx com listagem de solicitações, filtro por status, aprovar/rejeitar",
+          "estimativa": "3h",
+          "prioridade": "media",
+          "dependencias": ["feat-075", "feat-069"],
+          "status": "Não Iniciada",
+          "tags": ["admin", "page", "request"],
+          "artefatos": [
+            "frontend/src/services/request.service.ts",
+            "frontend/src/pages/admin/Requests.tsx"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-20",
+      "nome": "Frontend - Dashboard Aluno",
+      "descricao": "Dashboard e páginas para estudantes",
+      "prioridade": "alta",
+      "features": [
+        {
+          "id": "feat-089",
+          "titulo": "Criar página Dashboard Aluno",
+          "descricao": "Implementar pages/student/Dashboard.tsx com resumo de notas, documentos pendentes, próximas avaliações",
+          "estimativa": "2h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-073", "feat-074"],
+          "status": "Não Iniciada",
+          "tags": ["student", "page", "dashboard"],
+          "artefatos": [
+            "frontend/src/pages/student/Dashboard.tsx"
+          ]
+        },
+        {
+          "id": "feat-090",
+          "titulo": "Criar grade.service.ts",
+          "descricao": "Implementar services/grade.service.ts com funções: getMyGrades (aluno), getGradesByEvaluation (professor), createGrade, updateGrade",
+          "estimativa": "1h",
+          "prioridade": "alta",
+          "dependencias": ["feat-075"],
+          "status": "Não Iniciada",
+          "tags": ["grade", "service"],
+          "artefatos": [
+            "frontend/src/services/grade.service.ts"
+          ]
+        },
+        {
+          "id": "feat-091",
+          "titulo": "Criar página Grades (aluno)",
+          "descricao": "Implementar pages/student/Grades.tsx mostrando todas as notas do aluno agrupadas por disciplina/semestre",
+          "estimativa": "2h30min",
+          "prioridade": "alta",
+          "dependencias": ["feat-090", "feat-069"],
+          "status": "Não Iniciada",
+          "tags": ["student", "page", "grade"],
+          "artefatos": [
+            "frontend/src/pages/student/Grades.tsx"
+          ]
+        },
+        {
+          "id": "feat-092",
+          "titulo": "Criar página Documents (aluno)",
+          "descricao": "Implementar pages/student/Documents.tsx com upload de documentos, listagem de enviados (status: pendente/aprovado/rejeitado)",
+          "estimativa": "3h",
+          "prioridade": "alta",
+          "dependencias": ["feat-087", "feat-070"],
+          "status": "Não Iniciada",
+          "tags": ["student", "page", "document"],
+          "artefatos": [
+            "frontend/src/pages/student/Documents.tsx"
+          ]
+        },
+        {
+          "id": "feat-093",
+          "titulo": "Criar página Requests (aluno)",
+          "descricao": "Implementar pages/student/Requests.tsx com formulário para criar solicitação, listagem de solicitações enviadas",
+          "estimativa": "2h30min",
+          "prioridade": "media",
+          "dependencias": ["feat-088"],
+          "status": "Não Iniciada",
+          "tags": ["student", "page", "request"],
+          "artefatos": [
+            "frontend/src/pages/student/Requests.tsx"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-21",
+      "nome": "Frontend - Dashboard Professor",
+      "descricao": "Dashboard e páginas para professores",
+      "prioridade": "alta",
+      "features": [
+        {
+          "id": "feat-094",
+          "titulo": "Criar página Dashboard Professor",
+          "descricao": "Implementar pages/teacher/Dashboard.tsx com listagem de turmas do professor, próximas avaliações",
+          "estimativa": "2h",
+          "prioridade": "alta",
+          "dependencias": ["feat-073", "feat-074"],
+          "status": "Não Iniciada",
+          "tags": ["teacher", "page", "dashboard"],
+          "artefatos": [
+            "frontend/src/pages/teacher/Dashboard.tsx"
+          ]
+        },
+        {
+          "id": "feat-095",
+          "titulo": "Criar página Classes (professor)",
+          "descricao": "Implementar pages/teacher/Classes.tsx com listagem de turmas do professor, link para ver alunos e lançar notas",
+          "estimativa": "2h",
+          "prioridade": "alta",
+          "dependencias": ["feat-086"],
+          "status": "Não Iniciada",
+          "tags": ["teacher", "page", "class"],
+          "artefatos": [
+            "frontend/src/pages/teacher/Classes.tsx"
+          ]
+        },
+        {
+          "id": "feat-096",
+          "titulo": "Criar página Students (professor - visualização)",
+          "descricao": "Implementar pages/teacher/Students.tsx mostrando alunos da turma selecionada (read-only)",
+          "estimativa": "1h30min",
+          "prioridade": "media",
+          "dependencias": ["feat-086"],
+          "status": "Não Iniciada",
+          "tags": ["teacher", "page", "student"],
+          "artefatos": [
+            "frontend/src/pages/teacher/Students.tsx"
+          ]
+        },
+        {
+          "id": "feat-097",
+          "titulo": "Criar evaluation.service.ts",
+          "descricao": "Implementar services/evaluation.service.ts com funções: create, getByClass, update, delete",
+          "estimativa": "1h",
+          "prioridade": "alta",
+          "dependencias": ["feat-075"],
+          "status": "Não Iniciada",
+          "tags": ["evaluation", "service"],
+          "artefatos": [
+            "frontend/src/services/evaluation.service.ts"
+          ]
+        },
+        {
+          "id": "feat-098",
+          "titulo": "Criar página Grades (professor - lançamento)",
+          "descricao": "Implementar pages/teacher/Grades.tsx com criação de avaliações, lançamento de notas (individual ou em lote)",
+          "estimativa": "4h",
+          "prioridade": "alta",
+          "dependencias": ["feat-097", "feat-090", "feat-069"],
+          "status": "Não Iniciada",
+          "tags": ["teacher", "page", "grade"],
+          "artefatos": [
+            "frontend/src/pages/teacher/Grades.tsx"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-22",
+      "nome": "Frontend - Utilitários e Types",
+      "descricao": "Funções auxiliares, validadores e tipos TypeScript",
+      "prioridade": "media",
+      "features": [
+        {
+          "id": "feat-099",
+          "titulo": "Criar validators.ts com Zod schemas",
+          "descricao": "Implementar utils/validators.ts com schemas Zod: studentSchema, teacherSchema, loginSchema, cpfValidator, emailValidator",
+          "estimativa": "2h",
+          "prioridade": "alta",
+          "dependencias": ["feat-003"],
+          "status": "Não Iniciada",
+          "tags": ["validation", "utils"],
+          "artefatos": [
+            "frontend/src/utils/validators.ts"
+          ]
+        },
+        {
+          "id": "feat-100",
+          "titulo": "Criar formatters.ts",
+          "descricao": "Implementar utils/formatters.ts com funções: formatCPF, formatPhone, formatDate, formatCurrency",
+          "estimativa": "1h",
+          "prioridade": "media",
+          "dependencias": ["feat-003"],
+          "status": "Não Iniciada",
+          "tags": ["utils"],
+          "artefatos": [
+            "frontend/src/utils/formatters.ts"
+          ]
+        },
+        {
+          "id": "feat-101",
+          "titulo": "Criar types TypeScript",
+          "descricao": "Criar types/*.types.ts com interfaces: IUser, IStudent, ITeacher, ICourse, IClass, IEnrollment, IDocument, IGrade, IRequest",
+          "estimativa": "2h",
+          "prioridade": "alta",
+          "dependencias": ["feat-003"],
+          "status": "Não Iniciada",
+          "tags": ["types", "typescript"],
+          "artefatos": [
+            "frontend/src/types/user.types.ts",
+            "frontend/src/types/student.types.ts",
+            "frontend/src/types/teacher.types.ts",
+            "frontend/src/types/course.types.ts",
+            "outros arquivos de types"
+          ]
+        },
+        {
+          "id": "feat-102",
+          "titulo": "Criar constants.ts",
+          "descricao": "Implementar utils/constants.ts com constantes: USER_ROLES, ENROLLMENT_STATUS, DOCUMENT_STATUS, REQUEST_STATUS, API_ROUTES",
+          "estimativa": "45min",
+          "prioridade": "media",
+          "dependencias": ["feat-003"],
+          "status": "Não Iniciada",
+          "tags": ["utils", "constants"],
+          "artefatos": [
+            "frontend/src/utils/constants.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-23",
+      "nome": "Configuração TanStack Query",
+      "descricao": "Setup do React Query para cache e gerenciamento de estado servidor",
+      "prioridade": "media",
+      "features": [
+        {
+          "id": "feat-103",
+          "titulo": "Configurar TanStack Query (React Query)",
+          "descricao": "Instalar @tanstack/react-query, criar QueryClientProvider em App.tsx, configurar devtools e opções padrão (staleTime, cacheTime)",
+          "estimativa": "1h",
+          "prioridade": "media",
+          "dependencias": ["feat-003"],
+          "status": "Não Iniciada",
+          "tags": ["config", "state-management"],
+          "artefatos": [
+            "configuração em App.tsx"
+          ]
+        },
+        {
+          "id": "feat-104",
+          "titulo": "Criar custom hooks com React Query",
+          "descricao": "Implementar hooks: useStudents, useTeachers, useCourses, useClasses com useQuery e useMutation para operações CRUD",
+          "estimativa": "2h30min",
+          "prioridade": "baixa",
+          "dependencias": ["feat-103", "feat-082", "feat-084", "feat-085", "feat-086"],
+          "status": "Não Iniciada",
+          "tags": ["hooks", "state-management"],
+          "artefatos": [
+            "frontend/src/hooks/useStudents.ts",
+            "frontend/src/hooks/useTeachers.ts",
+            "frontend/src/hooks/useCourses.ts",
+            "frontend/src/hooks/useClasses.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-24",
+      "nome": "Testes e Qualidade",
+      "descricao": "Configuração de testes e validações de qualidade",
+      "prioridade": "baixa",
+      "features": [
+        {
+          "id": "feat-105",
+          "titulo": "Configurar Jest e React Testing Library",
+          "descricao": "Instalar jest, @testing-library/react, configurar para TypeScript, criar setup de testes",
+          "estimativa": "1h30min",
+          "prioridade": "baixa",
+          "dependencias": ["feat-003"],
+          "status": "Não Iniciada",
+          "tags": ["test", "setup"],
+          "artefatos": [
+            "frontend/jest.config.js",
+            "frontend/src/setupTests.ts"
+          ]
+        },
+        {
+          "id": "feat-106",
+          "titulo": "Escrever testes para componentes UI",
+          "descricao": "Criar testes unitários para Button, Input, Modal, Table verificando renderização e interações",
+          "estimativa": "3h",
+          "prioridade": "baixa",
+          "dependencias": ["feat-105", "feat-066", "feat-067", "feat-068", "feat-069"],
+          "status": "Não Iniciada",
+          "tags": ["test", "ui"],
+          "artefatos": [
+            "frontend/src/components/ui/__tests__/"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grupo-25",
+      "nome": "Deploy e Documentação",
+      "descricao": "Configuração de deploy, scripts e documentação final",
+      "prioridade": "media",
+      "features": [
+        {
+          "id": "feat-107",
+          "titulo": "Criar scripts de build e deploy",
+          "descricao": "Criar scripts em package.json: frontend (npm run build), backend (npm run start:prod). Criar deploy.sh para upload via SSH",
+          "estimativa": "2h",
+          "prioridade": "media",
+          "dependencias": ["feat-002", "feat-003"],
+          "status": "Não Iniciada",
+          "tags": ["deploy", "scripts"],
+          "artefatos": [
+            "deploy.sh",
+            "scripts em package.json"
+          ]
+        },
+        {
+          "id": "feat-108",
+          "titulo": "Configurar PM2 para produção",
+          "descricao": "Instalar pm2, criar ecosystem.config.js para gerenciar processo Node.js em produção",
+          "estimativa": "1h",
+          "prioridade": "media",
+          "dependencias": ["feat-002"],
+          "status": "Não Iniciada",
+          "tags": ["deploy", "production"],
+          "artefatos": [
+            "backend/ecosystem.config.js"
+          ]
+        },
+        {
+          "id": "feat-109",
+          "titulo": "Documentar API com Swagger ou arquivo Markdown",
+          "descricao": "Criar docs/api-documentation.md documentando todos os endpoints, payloads, responses e códigos de erro",
+          "estimativa": "3h",
+          "prioridade": "baixa",
+          "dependencias": ["feat-064"],
+          "status": "Não Iniciada",
+          "tags": ["documentation", "api"],
+          "artefatos": [
+            "docs/api-documentation.md"
+          ]
+        },
+        {
+          "id": "feat-110",
+          "titulo": "Criar documentação de setup e instalação",
+          "descricao": "Atualizar README.md com instruções de instalação local, variáveis de ambiente, comandos de build e deploy",
+          "estimativa": "2h",
+          "prioridade": "baixa",
+          "dependencias": ["feat-001"],
+          "status": "Não Iniciada",
+          "tags": ["documentation"],
+          "artefatos": [
+            "README.md atualizado"
+          ]
+        }
+      ]
+    }
+  ],
+  "statusDisponiveis": [
+    "Não Iniciada",
+    "Em Andamento",
+    "Concluída",
+    "Bloqueada"
+  ]
+}
