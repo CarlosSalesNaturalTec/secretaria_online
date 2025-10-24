@@ -1,0 +1,16 @@
+/**
+ * Arquivo: frontend/src/index.css
+ * Descrição: Estilos globais com Tailwind CSS
+ * Feature: feat-003 - Setup do frontend React com Vite
+ * Criado em: 2025-10-24
+ */
+
+@import "tailwindcss";
+
+@layer base {
+  body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+  }
+}
