@@ -19,13 +19,16 @@
           "estimativa": "30min",
           "prioridade": "alta",
           "dependencias": [],
-          "status": "Não Iniciada",
+          "status": "Concluída",
+          "dataInicio": "2025-10-24",
+          "dataConclusao": "2025-10-24",
           "tags": ["setup", "config"],
           "artefatos": [
             "README.md",
             ".gitignore",
             "estrutura de pastas raiz"
-          ]
+          ],
+          "observacoes": "Feature implementada e commitada. Estrutura de pastas criada, .gitignore configurado com ignorações para node_modules, .env, uploads, logs. README.md criado com documentação completa de setup, instalação e execução."
         },
         {
           "id": "feat-002",
@@ -34,13 +37,16 @@
           "estimativa": "1h",
           "prioridade": "alta",
           "dependencias": ["feat-001"],
-          "status": "Não Iniciada",
+          "status": "Concluída",
+          "dataInicio": "2025-10-24",
+          "dataConclusao": "2025-10-24",
           "tags": ["setup", "backend"],
           "artefatos": [
             "backend/package.json",
             "backend/src/server.js",
             "estrutura de pastas backend"
-          ]
+          ],
+          "observacoes": "Feature implementada e commitada. Projeto Node.js inicializado com Express, Sequelize e todas as dependências necessárias. Estrutura de pastas completa criada seguindo o contextDoc.md. Package.json configurado com scripts para dev, start, migrations e seeders. Arquivo server.js criado com configuração básica do Express, middlewares de segurança (Helmet, CORS) e rotas de health check. .sequelizerc configurado para localização correta dos arquivos do Sequelize."
         },
         {
           "id": "feat-003",
