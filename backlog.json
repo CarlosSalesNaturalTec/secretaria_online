@@ -55,15 +55,22 @@
           "estimativa": "1h",
           "prioridade": "alta",
           "dependencias": ["feat-001"],
-          "status": "Não Iniciada",
+          "status": "Concluída",
+          "dataInicio": "2025-10-24",
+          "dataConclusao": "2025-10-24",
           "tags": ["setup", "frontend"],
           "artefatos": [
             "frontend/package.json",
             "frontend/vite.config.ts",
             "frontend/tsconfig.json",
             "frontend/tailwind.config.js",
-            "estrutura de pastas frontend"
-          ]
+            "frontend/postcss.config.js",
+            "frontend/.env.example",
+            "frontend/.eslintrc.json",
+            "frontend/.prettierrc",
+            "estrutura de pastas frontend completa"
+          ],
+          "observacoes": "Feature implementada e aprovada. Projeto React inicializado com Vite e TypeScript. Todas as dependências principais instaladas: React Router DOM, Axios, TanStack Query, Tailwind CSS, React Hook Form, Zod, Headless UI, Lucide React, date-fns. Tailwind CSS configurado com PostCSS e Autoprefixer. Estrutura completa de pastas criada seguindo contextDoc.md (components/ui, components/layout, components/forms, pages/auth, pages/admin, pages/student, pages/teacher, services, hooks, contexts, utils, types). Path aliases configurados com @/ apontando para src/. Arquivos base criados: api.ts (cliente Axios com interceptors), constants.ts, types (api.types.ts, user.types.ts). Configurações ESLint e Prettier adicionadas. Arquivo .env.example criado. README.md do frontend criado com documentação completa."
         },
         {
           "id": "feat-004",
