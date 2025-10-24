@@ -79,12 +79,15 @@
           "estimativa": "30min",
           "prioridade": "alta",
           "dependencias": ["feat-002", "feat-003"],
-          "status": "Não Iniciada",
+          "status": "Concluída",
+          "dataInicio": "2025-10-24",
+          "dataConclusao": "2025-10-24",
           "tags": ["config", "security"],
           "artefatos": [
             "backend/.env.example",
             "frontend/.env.example"
-          ]
+          ],
+          "observacoes": "Feature implementada e aprovada. Criados arquivos .env.example completos e documentados para backend (218 linhas, 60+ variáveis organizadas em 10 seções) e frontend (186 linhas, 30+ variáveis organizadas em 9 seções). README.md atualizado com instruções detalhadas de configuração para Windows/Linux/Mac, seção de troubleshooting e comandos úteis. Backlog atualizado para status Concluída."
         },
         {
           "id": "feat-005",
