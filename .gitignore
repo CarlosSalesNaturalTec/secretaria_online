@@ -41,6 +41,7 @@ desktop.ini
 .settings/
 *.sublime-project
 *.sublime-workspace
+.claude/
 
 # Testing
 coverage/
