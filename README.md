@@ -427,6 +427,129 @@ cd frontend
 npm test
 ```
 
+## 🎨 Qualidade de Código (ESLint e Prettier)
+
+Este projeto utiliza **ESLint** para identificar e corrigir problemas no código, e **Prettier** para garantir formatação consistente.
+
+### Configurações
+
+- **Backend**: `eslint.config.js` (Flat Config - ESLint v9+) com regras para Node.js/JavaScript
+- **Frontend**: `.eslintrc.json` com regras para TypeScript/React
+- **Prettier**: `.prettierrc` na raiz (configurações unificadas)
+- **Ignore**: `.prettierignore` (arquivos excluídos da formatação)
+
+**Nota:** O backend utiliza o formato **Flat Config** do ESLint 9+. Se você encontrar problemas, certifique-se de que está usando ESLint v9 ou superior.
+
+### Comandos Disponíveis
+
+#### Backend
+
+```bash
+cd backend
+
+# Verificar problemas de código (sem corrigir)
+npm run lint
+
+# Corrigir automaticamente problemas de código
+npm run lint:fix
+
+# Verificar formatação (sem modificar arquivos)
+npm run format:check
+
+# Formatar todos os arquivos
+npm run format
+```
+
+#### Frontend
+
+```bash
+cd frontend
+
+# Verificar problemas de código (sem corrigir)
+npm run lint
+
+# Corrigir automaticamente problemas de código
+npm run lint:fix
+
+# Verificar formatação (sem modificar arquivos)
+npm run format:check
+
+# Formatar todos os arquivos
+npm run format
+```
+
+### Integração com VS Code
+
+Para melhor experiência de desenvolvimento, instale as extensões:
+
+- **ESLint** ([dbaeumer.vscode-eslint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint))
+- **Prettier** ([esbenp.prettier-vscode](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode))
+
+Adicione ao seu `.vscode/settings.json`:
+
+```json
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ]
+}
+```
+
+### Regras Principais
+
+**Backend (Node.js):**
+- Single quotes para strings
+- Ponto-e-vírgula obrigatório
+- Indentação de 2 espaços
+- Máximo de 120 caracteres por linha
+- Trailing comma em arrays/objects multilinha
+
+**Frontend (TypeScript/React):**
+- Single quotes para strings (double quotes para JSX)
+- Ponto-e-vírgula obrigatório
+- Indentação de 2 espaços
+- Máximo de 100 caracteres por linha
+- React Hooks validados automaticamente
+- Variáveis não utilizadas iniciadas com `_` são permitidas
+
+### Pre-commit Hook (Opcional)
+
+Para garantir que todo código commitado esteja formatado, você pode configurar o **Husky** com **lint-staged**:
+
+```bash
+# Na raiz do projeto
+npm install --save-dev husky lint-staged
+
+# Configurar husky
+npx husky install
+npx husky add .husky/pre-commit "npx lint-staged"
+```
+
+Adicione ao `package.json` (raiz):
+
+```json
+{
+  "lint-staged": {
+    "backend/**/*.{js,json}": [
+      "cd backend && npm run lint:fix",
+      "cd backend && npm run format"
+    ],
+    "frontend/**/*.{ts,tsx}": [
+      "cd frontend && npm run lint:fix",
+      "cd frontend && npm run format"
+    ]
+  }
+}
+```
+
 ## 📦 Build para Produção
 
 ### Frontend

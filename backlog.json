@@ -96,13 +96,18 @@
           "estimativa": "45min",
           "prioridade": "media",
           "dependencias": ["feat-002", "feat-003"],
-          "status": "Não Iniciada",
+          "status": "Concluída",
+          "dataInicio": "2025-10-25",
+          "dataConclusao": "2025-10-25",
           "tags": ["setup", "code-quality"],
           "artefatos": [
-            "backend/.eslintrc.json",
-            "frontend/.eslintrc.json",
-            ".prettierrc"
-          ]
+            "backend/eslint.config.js",
+            "frontend/eslint.config.js",
+            ".prettierrc",
+            ".prettierignore",
+            "docs/testes/plano-testes-feat-005.md"
+          ],
+          "observacoes": "Feature implementada e aprovada. ESLint v9+ (Flat Config) configurado em backend e frontend com regras customizadas e integração Prettier. Backend: Node.js CommonJS com regras para código limpo (no-var, eqeqeq, prefer-const). Frontend: TypeScript/React com suporte a React Hooks, TypeScript ESLint e Prettier. Arquivo .prettierrc unificado na raiz. Scripts npm adicionados: lint, lint:fix, format, format:check. README.md atualizado com documentação completa. Problemas de lint corrigidos (4 erros Prettier + 1 warning TypeScript). Plano de testes criado com 16 testes documentados. Todos os arquivos formatados e validados."
         }
       ]
     },
