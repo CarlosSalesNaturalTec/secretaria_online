@@ -205,24 +205,77 @@ MAINTENANCE_MODE=false
 
 ### 3. Configure o Banco de Dados
 
-Crie o banco de dados MySQL:
+#### 3.1 Criar o banco de dados MySQL
 
 ```bash
-mysql -u seu_usuario -p
-CREATE DATABASE secretaria_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+# Acesse o MySQL
+mysql -u root -p
+
+# Crie o banco de dados com charset correto
+CREATE DATABASE secretaria_online CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+# (Opcional) Verifique se foi criado
+SHOW DATABASES;
+
+# Saia do MySQL
 EXIT;
 ```
 
-Execute as migrations:
+#### 3.2 Testar conexão com banco de dados
+
+Antes de executar migrations, teste se a conexão está funcionando:
 
 ```bash
-npx sequelize-cli db:migrate
+cd backend
+node src/config/test-connection.js
 ```
 
-Execute os seeders (dados iniciais):
+**Resultado esperado:**
+```
+✓ Database connection has been established successfully.
+✓ SUCESSO: Conexão estabelecida com sucesso!
+```
+
+**Se houver erro:**
+- Verifique se o MySQL está rodando
+- Confirme as credenciais no arquivo `.env`
+- Certifique-se que o banco `secretaria_online` foi criado
+- Verifique se o usuário tem permissões adequadas
+
+#### 3.3 Executar migrations
+
+As migrations criam a estrutura de tabelas no banco de dados:
 
 ```bash
-npx sequelize-cli db:seed:all
+# Execute todas as migrations
+npm run db:migrate
+
+# (Se precisar desfazer) Reverter última migration
+npm run db:migrate:undo
+
+# (Se precisar desfazer) Reverter todas migrations
+npm run db:migrate:undo:all
+```
+
+#### 3.4 Executar seeders (dados iniciais)
+
+Os seeders populam o banco com dados iniciais (usuário admin, tipos de documentos, etc):
+
+```bash
+# Executar todos os seeders
+npm run db:seed
+
+# (Se precisar desfazer) Reverter seeders
+npm run db:seed:undo:all
+```
+
+#### 3.5 Resetar banco de dados (desenvolvimento)
+
+⚠️ **CUIDADO**: Este comando apaga TODOS os dados!
+
+```bash
+# Apaga o banco, recria, executa migrations e seeders
+npm run db:reset
 ```
 
 ### 4. Configure o Frontend
@@ -355,8 +408,37 @@ npm install
 #### Backend: Erro ao conectar no banco de dados
 - Verifique se o MySQL está rodando: `mysql -u root -p`
 - Confirme que o banco `secretaria_online` foi criado
-- Verifique as credenciais no `.env` (DB_USER, DB_PASSWORD)
-- Teste a conexão: `mysql -u root -p secretaria_online`
+- Verifique as credenciais no `.env` (DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME)
+- Teste a conexão: `node src/config/test-connection.js`
+- Teste acesso direto ao MySQL: `mysql -u root -p secretaria_online`
+
+#### Backend: "Missing required database environment variables"
+- Certifique-se que o arquivo `.env` existe na pasta `backend/`
+- Verifique se todas as variáveis DB_* estão definidas:
+  - DB_HOST (ex: localhost)
+  - DB_PORT (ex: 3306)
+  - DB_NAME (ex: secretaria_online)
+  - DB_USER (ex: root)
+  - DB_PASSWORD (sua senha do MySQL)
+- Copie novamente do `.env.example` se necessário
+
+#### Sequelize: "ER_ACCESS_DENIED_ERROR"
+- Senha incorreta ou usuário sem permissões
+- Teste o login manual: `mysql -u seu_usuario -p`
+- Certifique-se que o usuário tem privilégios no banco:
+  ```sql
+  GRANT ALL PRIVILEGES ON secretaria_online.* TO 'seu_usuario'@'localhost';
+  FLUSH PRIVILEGES;
+  ```
+
+#### Sequelize: "ER_BAD_DB_ERROR: Unknown database"
+- O banco de dados não foi criado
+- Execute: `mysql -u root -p -e "CREATE DATABASE secretaria_online CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"`
+
+#### Sequelize: "Too many connections"
+- Reduza DB_POOL_MAX no `.env` (padrão: 25)
+- Verifique conexões ativas: `SHOW PROCESSLIST;` no MySQL
+- Em shared hosting, limite é geralmente 25-50 conexões
 
 #### Backend: "JWT_SECRET is not defined"
 - Certifique-se de que criou o arquivo `.env` a partir do `.env.example`

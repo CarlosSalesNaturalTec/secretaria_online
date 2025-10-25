@@ -124,12 +124,22 @@
           "estimativa": "1h",
           "prioridade": "alta",
           "dependencias": ["feat-002"],
-          "status": "Não Iniciada",
+          "status": "Concluída",
+          "dataInicio": "2025-10-25",
+          "dataConclusao": "2025-10-25",
           "tags": ["database", "orm"],
           "artefatos": [
             "backend/src/config/database.js",
-            "backend/.sequelizerc"
-          ]
+            "backend/src/models/index.js",
+            "backend/src/config/test-connection.js",
+            "backend/database/migrations/",
+            "backend/database/seeders/",
+            "backend/.env.example (atualizado)",
+            "README.md (atualizado)",
+            "docs/testes/plano-testes-feat-006.md",
+            "docs/bugs/fix-feat-006-20251025-1445.md"
+          ],
+          "observacoes": "Feature implementada e aprovada. Configuração completa do Sequelize com validação de variáveis de ambiente, pool de conexões otimizado para shared hosting, suporte a múltiplos ambientes (development, test, production), e métodos auxiliares para teste de conexão. Script de teste criado para validação. README.md atualizado com instruções detalhadas de configuração e troubleshooting. Correção aplicada: removida opção 'collate' inválida de dialectOptions (MySQL2 warning). Teste de conexão executado com sucesso sem warnings."
         },
         {
           "id": "feat-007",
