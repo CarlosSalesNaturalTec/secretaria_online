@@ -19,10 +19,12 @@ const app = express();
 app.use(helmet());
 
 // CORS - Configuração para permitir requisições do frontend
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    credentials: true,
+  })
+);
 
 // Middlewares de parsing
 app.use(express.json());
@@ -33,7 +35,7 @@ app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
     message: 'Secretaria Online API is running',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -44,8 +46,8 @@ app.get('/api/v1', (req, res) => {
     version: '1.0.0',
     endpoints: {
       health: '/health',
-      api: '/api/v1'
-    }
+      api: '/api/v1',
+    },
   });
 });
 
@@ -55,13 +57,13 @@ app.use((req, res) => {
     success: false,
     error: {
       code: 'NOT_FOUND',
-      message: 'Endpoint not found'
-    }
+      message: 'Endpoint not found',
+    },
   });
 });
 
 // Middleware de tratamento de erros global
-app.use((err, req, res, next) => {
+app.use((err, req, res, _next) => {
   console.error('[ERROR]', err);
 
   res.status(err.statusCode || 500).json({
@@ -69,7 +71,7 @@ app.use((err, req, res, next) => {
     error: {
       code: err.code || 'INTERNAL_ERROR',
       message: err.message || 'Internal server error',
-    }
+    },
   });
 });
 

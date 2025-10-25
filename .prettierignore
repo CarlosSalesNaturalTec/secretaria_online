@@ -1,0 +1,62 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+build/
+**/dist/
+**/build/
+frontend/dist/
+backend/uploads/
+
+# Logs
+logs/
+*.log
+**/logs/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Coverage
+coverage/
+**/coverage/
+
+# Database
+*.sql
+database/
+
+# Uploads
+uploads/
+**/uploads/
+
+# Temp files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Minified files
+*.min.js
+*.min.css
+
+# Backups
+*.backup
+*.bak
