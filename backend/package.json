@@ -11,9 +11,19 @@
     "db:seed": "sequelize-cli db:seed:all",
     "db:seed:undo": "sequelize-cli db:seed:undo:all",
     "db:reset": "sequelize-cli db:drop && sequelize-cli db:create && sequelize-cli db:migrate && sequelize-cli db:seed:all",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{js,json,md}\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["secretaria", "gestao-academica", "node", "express", "mysql"],
+  "keywords": [
+    "secretaria",
+    "gestao-academica",
+    "node",
+    "express",
+    "mysql"
+  ],
   "author": "Secretaria Online Team",
   "license": "ISC",
   "type": "commonjs",
@@ -34,7 +44,12 @@
     "winston": "^3.18.3"
   },
   "devDependencies": {
+    "@eslint/js": "^9.38.0",
+    "eslint": "^9.38.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
     "nodemon": "^3.1.10",
+    "prettier": "^3.6.2",
     "sequelize-cli": "^6.6.3"
   }
 }
