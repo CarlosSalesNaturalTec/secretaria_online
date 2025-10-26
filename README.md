@@ -265,6 +265,18 @@ npm run db:migrate:undo:all
   - Suporte a soft delete (paranoid)
   - Validações de CPF e email
 
+- ✅ **create-courses** - Tabela de cursos
+  - Campos: id, name, description, duration_semesters, timestamps, deleted_at
+  - Índices otimizados para name (único)
+  - Suporte a soft delete (paranoid)
+  - Validações de nome e duração
+
+- ✅ **create-disciplines** - Tabela de disciplinas
+  - Campos: id, name, code, workload_hours, timestamps, deleted_at
+  - Índices otimizados para code (único) e name
+  - Suporte a soft delete (paranoid)
+  - Validações de código e carga horária
+
 #### 3.4 Executar seeders (dados iniciais)
 
 Os seeders populam o banco com dados iniciais (usuário admin, tipos de documentos, etc):
