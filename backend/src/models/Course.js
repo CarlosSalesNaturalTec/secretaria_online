@@ -45,14 +45,30 @@ module.exports = (sequelize, DataTypes) => {
      * @param {Object} models - Objeto contendo todos os models
      */
     static associate(models) {
-      // Associação N:N com Discipline através de course_disciplines
-      // Será implementada na feat-009
-      // Course.belongsToMany(models.Discipline, {
-      //   through: 'course_disciplines',
-      //   foreignKey: 'course_id',
-      //   otherKey: 'discipline_id',
-      //   as: 'disciplines'
-      // });
+      /**
+       * Associação N:N com Discipline através de course_disciplines
+       * Um curso possui múltiplas disciplinas, e uma disciplina pode estar em múltiplos cursos
+       * A tabela pivot 'course_disciplines' armazena também o semestre em que a disciplina é oferecida
+       *
+       * @example
+       * // Buscar curso com suas disciplinas
+       * const course = await Course.findByPk(1, {
+       *   include: [{
+       *     model: Discipline,
+       *     as: 'disciplines',
+       *     through: { attributes: ['semester'] } // Inclui o semestre da tabela pivot
+       *   }]
+       * });
+       *
+       * // Adicionar disciplina a um curso em um semestre específico
+       * await course.addDiscipline(disciplineId, { through: { semester: 3 } });
+       */
+      Course.belongsToMany(models.Discipline, {
+        through: 'course_disciplines',
+        foreignKey: 'course_id',
+        otherKey: 'discipline_id',
+        as: 'disciplines'
+      });
 
       // Associação 1:N com Enrollment
       // Será implementada na feat-011

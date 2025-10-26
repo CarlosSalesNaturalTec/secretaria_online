@@ -277,6 +277,13 @@ npm run db:migrate:undo:all
   - Suporte a soft delete (paranoid)
   - Validações de código e carga horária
 
+- ✅ **create-course-disciplines** - Tabela pivot para relação N:N entre courses e disciplines
+  - Campos: id, course_id, discipline_id, semester, timestamps
+  - Relacionamento: Um curso possui múltiplas disciplinas, uma disciplina pode estar em múltiplos cursos
+  - Índice único composto (course_id, discipline_id, semester) - previne duplicação
+  - Foreign keys com onDelete: RESTRICT (previne exclusão de curso/disciplina vinculados)
+  - Permite organizar disciplinas por semestre dentro do curso
+
 #### 3.4 Executar seeders (dados iniciais)
 
 Os seeders populam o banco com dados iniciais (usuário admin, tipos de documentos, etc):
