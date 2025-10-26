@@ -284,6 +284,25 @@ npm run db:migrate:undo:all
   - Foreign keys com onDelete: RESTRICT (previne exclusão de curso/disciplina vinculados)
   - Permite organizar disciplinas por semestre dentro do curso
 
+- ✅ **create-classes** - Tabela de turmas
+  - Campos: id, course_id, semester, year, timestamps, deleted_at
+  - Índices otimizados para course_id, semester/year, e índice único composto
+  - Suporte a soft delete (paranoid)
+  - Validações de semestre (1-12) e ano (2020-2100)
+  - Foreign key com onDelete: RESTRICT (previne exclusão de curso com turmas ativas)
+
+- ✅ **create-class-teachers** - Tabela pivot para relação N:N entre turmas, professores e disciplinas
+  - Campos: id, class_id, teacher_id, discipline_id, timestamps
+  - Relacionamento: Uma turma possui múltiplos professores, cada um lecionando uma ou mais disciplinas
+  - Índice único composto (class_id, teacher_id, discipline_id) - previne duplicação
+  - Foreign keys: class_id (CASCADE on delete), teacher_id/discipline_id (RESTRICT)
+
+- ✅ **create-class-students** - Tabela pivot para relação N:N entre turmas e alunos
+  - Campos: id, class_id, student_id, timestamps
+  - Relacionamento: Uma turma possui múltiplos alunos, um aluno pode estar em múltiplas turmas
+  - Índice único composto (class_id, student_id) - previne duplicação
+  - Foreign keys: class_id (CASCADE on delete), student_id (RESTRICT)
+
 #### 3.4 Executar seeders (dados iniciais)
 
 Os seeders populam o banco com dados iniciais (usuário admin, tipos de documentos, etc):

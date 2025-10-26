@@ -210,14 +210,18 @@
           "estimativa": "2h",
           "prioridade": "alta",
           "dependencias": ["feat-008"],
-          "status": "Não Iniciada",
+          "status": "Concluída",
+          "dataInicio": "2025-10-26",
+          "dataConclusao": "2025-10-26",
           "tags": ["database", "model"],
           "artefatos": [
-            "backend/database/migrations/*-create-classes.js",
-            "backend/database/migrations/*-create-class-teachers.js",
-            "backend/database/migrations/*-create-class-students.js",
-            "backend/src/models/Class.js"
-          ]
+            "backend/database/migrations/20251026215729-create-classes.js",
+            "backend/database/migrations/20251026215825-create-class-teachers.js",
+            "backend/database/migrations/20251026215909-create-class-students.js",
+            "backend/src/models/Class.js",
+            "docs/testes/plano-testes-feat-010.md"
+          ],
+          "observacoes": "Feature implementada e aprovada. Migration create-classes criada com campos id, course_id, semester (1-12), year (2020-2100), timestamps e deleted_at. Índices otimizados: course_id, semester/year, índice único composto (course_id, semester, year) com filtro deleted_at IS NULL, e índice para turmas ativas. Migration create-class-teachers criada para relacionamento N:N entre turmas, professores e disciplinas com índice único composto (class_id, teacher_id, discipline_id). Migration create-class-students criada para relacionamento N:N entre turmas e alunos com índice único composto (class_id, student_id). Model Class.js implementado com validações rigorosas (semester 1-12, year 2020-2100), soft delete, scopes personalizados (active, currentYear, withRelations, recent) e métodos auxiliares (isActive, getPeriodLabel, isCurrentYear, findByCourse, countStudents, countTeachers). Associações configuradas: belongsTo com Course, belongsToMany com User (teachers e students através de tabelas pivot), belongsToMany com Discipline. Hooks implementados para normalização de dados e logs. Ajuste realizado: INTEGER.UNSIGNED para compatibilidade com tabela users. Migrations executadas com sucesso. README.md atualizado. Plano de testes criado."
         },
         {
           "id": "feat-011",
