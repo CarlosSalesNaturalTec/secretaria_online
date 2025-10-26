@@ -148,12 +148,20 @@
           "estimativa": "1h30min",
           "prioridade": "alta",
           "dependencias": ["feat-006"],
-          "status": "Não Iniciada",
+          "status": "Concluída",
+          "dataInicio": "2025-10-25",
+          "dataConclusao": "2025-10-26",
           "tags": ["database", "model"],
           "artefatos": [
-            "backend/database/migrations/*-create-users.js",
-            "backend/src/models/User.js"
-          ]
+            "backend/database/migrations/20251025211732-create-users.js",
+            "backend/src/models/User.js",
+            "docs/testes/plano-testes-feat-007.md",
+            "docs/bugs/fix-feat-007-20251025-2125.md",
+            "docs/bugs/fix-feat-007-20251025-2135.md",
+            "docs/bugs/fix-feat-007-20251025-2145.md",
+            "docs/bugs/fix-feat-007-20251026-1430.md"
+          ],
+          "observacoes": "Feature implementada e aprovada. Migration e Model implementados com todas as validações, índices otimizados e soft delete. Inclui validação de CPF, hash automático de senha com bcrypt, métodos auxiliares (validatePassword, isAdmin, isTeacher, isStudent) e scopes personalizados. BUG CORRIGIDO v2 (2025-10-25): Implementada solução definitiva usando setter customizado no campo virtual 'password' + hook beforeValidate para processar hash ANTES das validações. Plano de testes criado com 16 testes documentados. Reorganização de documentação (docs/ estruturados). Migration executada com sucesso."
         },
         {
           "id": "feat-008",
