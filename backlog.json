@@ -170,14 +170,20 @@
           "estimativa": "1h30min",
           "prioridade": "alta",
           "dependencias": ["feat-006"],
-          "status": "Não Iniciada",
+          "status": "Concluída",
+          "dataInicio": "2025-10-26",
+          "dataConclusao": "2025-10-26",
           "tags": ["database", "model"],
           "artefatos": [
-            "backend/database/migrations/*-create-courses.js",
-            "backend/database/migrations/*-create-disciplines.js",
+            "backend/database/migrations/20251026131903-create-courses.js",
+            "backend/database/migrations/20251026131953-create-disciplines.js",
             "backend/src/models/Course.js",
-            "backend/src/models/Discipline.js"
-          ]
+            "backend/src/models/Discipline.js",
+            "docs/testes/plano-testes-feat-008.md",
+            "docs/bugs/fix-feat-008-20251026-1430.md",
+            "docs/bugs/fix-feat-008-20251026-1448.md"
+          ],
+          "observacoes": "Feature implementada e aprovada. Migrations criadas para tabelas courses e disciplines com campos completos, índices otimizados e soft delete. Models implementados com validações rigorosas (name, code, workload_hours), scopes personalizados (active, recent) e métodos auxiliares. Hooks configurados para normalização de dados (trim, uppercase em code) e logs. Bugs corrigidos: remoção de validador CPF inválido do model Course, implementação correta de validadores customizados. README.md atualizado. Plano de testes criado com 16 testes documentados."
         },
         {
           "id": "feat-009",
