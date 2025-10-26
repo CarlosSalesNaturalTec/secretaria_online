@@ -192,12 +192,16 @@
           "estimativa": "1h",
           "prioridade": "alta",
           "dependencias": ["feat-008"],
-          "status": "Não Iniciada",
+          "status": "Concluída",
+          "dataInicio": "2025-10-26",
+          "dataConclusao": "2025-10-26",
           "tags": ["database", "relationship"],
           "artefatos": [
-            "backend/database/migrations/*-create-course-disciplines.js",
-            "associações nos models Course e Discipline"
-          ]
+            "backend/database/migrations/20251026211804-create-course-disciplines.js",
+            "associações belongsToMany nos models Course e Discipline",
+            "docs/testes/plano-testes-feat-009.md"
+          ],
+          "observacoes": "Feature implementada e aprovada. Migration criada para tabela pivot course_disciplines com índice único composto (course_id, discipline_id, semester), foreign keys com RESTRICT para prevenir exclusão acidental, e índices otimizados. Associações belongsToMany configuradas em ambos os models (Course e Discipline) para relacionamento N:N bidirecional. Migration executada com sucesso. README.md atualizado. Plano de testes criado."
         },
         {
           "id": "feat-010",
