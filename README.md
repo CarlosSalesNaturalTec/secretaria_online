@@ -257,6 +257,14 @@ npm run db:migrate:undo
 npm run db:migrate:undo:all
 ```
 
+**Migrations disponíveis:**
+
+- ✅ **create-users** - Tabela de usuários (admin, teacher, student)
+  - Campos: id, role, name, email, login, password_hash, cpf, rg, timestamps, deleted_at
+  - Índices otimizados para email, login, cpf, role
+  - Suporte a soft delete (paranoid)
+  - Validações de CPF e email
+
 #### 3.4 Executar seeders (dados iniciais)
 
 Os seeders populam o banco com dados iniciais (usuário admin, tipos de documentos, etc):
