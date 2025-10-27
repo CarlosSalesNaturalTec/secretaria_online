@@ -374,11 +374,35 @@ npm run db:migrate:undo:all
   - Índice único composto (evaluation_id, student_id) com filtro deleted_at IS NULL - previne duplicação de nota
   - Índice composto (student_id, deleted_at) - facilita busca de notas ativas de um aluno
   - Suporte a soft delete (paranoid)
-  - Validação CHECK: grade entre 0.00 e 10.00 (MySQL 8.0.16+)
-  - Validação CHECK: apenas grade OU concept pode estar preenchido (não ambos)
-  - Foreign keys: evaluation_id (CASCADE on delete - se avaliação for deletada, notas também são), student_id (RESTRICT)
+  - Validação XOR: grade OU concept deve estar preenchido, nunca ambos
+  - Constraint CHECK: grade deve estar entre 0.00 e 10.00
+  - Foreign keys: evaluation_id (RESTRICT), student_id (RESTRICT)
   - Permite armazenar notas numéricas (0-10) ou conceitos (satisfatório/não satisfatório)
   - Notas podem ser editadas sem restrição de período
+
+- ✅ **create-request-types** - Tabela de tipos de solicitações que alunos podem fazer
+  - Campos: id, name, description, response_deadline_days (prazo em dias úteis), is_active, timestamps, deleted_at
+  - Armazena tipos de solicitações disponíveis: atestado, histórico escolar, certificado, atividades complementares, transferência, cancelamento
+  - Índices otimizados para name, is_active, deleted_at
+  - Índice composto (is_active, deleted_at) - facilita busca de tipos disponíveis
+  - Suporte a soft delete (paranoid)
+  - Campo response_deadline_days define prazo de resposta estimado (padrão: 5 dias úteis)
+  - Campo is_active controla quais tipos de solicitações estão disponíveis para alunos
+  - Validações: nome deve ter entre 3 e 100 caracteres, prazo não pode ser negativo
+
+- ✅ **create-requests** - Tabela de solicitações feitas por alunos
+  - Campos: id, student_id, request_type_id, description, status (ENUM: pending|approved|rejected), reviewed_by, reviewed_at, observations, timestamps, deleted_at
+  - Relacionamento: Uma solicitação pertence a um aluno, a um tipo de solicitação e pode ser revisada por um admin
+  - Índices otimizados para student_id, request_type_id, status, reviewed_by, created_at, deleted_at
+  - Índice composto (student_id, status) - facilita busca de solicitações de um aluno por status
+  - Índice composto (status, created_at) - facilita filtrar por status e ordenar por data
+  - Índice composto (student_id, deleted_at) - facilita busca de solicitações ativas do aluno
+  - Suporte a soft delete (paranoid)
+  - Status padrão: pending (pendente de revisão)
+  - Foreign keys: student_id (RESTRICT), request_type_id (RESTRICT), reviewed_by (SET NULL)
+  - Campos de revisão (reviewed_by, reviewed_at, observations) preenchidos quando admin aprova/rejeita
+  - Description: justificativa fornecida pelo aluno
+  - Observations: feedback do admin sobre a aprovação/rejeição
 
 #### 3.4 Executar seeders (dados iniciais)
 

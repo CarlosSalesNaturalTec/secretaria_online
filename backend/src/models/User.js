@@ -514,6 +514,22 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'RESTRICT',
     });
 
+    // User (aluno) tem muitas Solicitações
+    User.hasMany(models.Request, {
+      foreignKey: 'student_id',
+      as: 'requests',
+      onUpdate: 'CASCADE',
+      onDelete: 'RESTRICT',
+    });
+
+    // User (admin) pode ter revisado muitas Solicitações
+    User.hasMany(models.Request, {
+      foreignKey: 'reviewed_by',
+      as: 'reviewedRequests',
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL',
+    });
+
     // TODO: Adicionar outras associações quando models forem criados
     // User.hasMany(models.Contract, { foreignKey: 'user_id', as: 'contracts' });
   };
