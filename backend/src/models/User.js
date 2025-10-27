@@ -482,8 +482,23 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'RESTRICT',
     });
 
+    // User tem muitos Documentos
+    User.hasMany(models.Document, {
+      foreignKey: 'user_id',
+      as: 'documents',
+      onUpdate: 'CASCADE',
+      onDelete: 'RESTRICT',
+    });
+
+    // User (admin) pode ter revisado muitos Documentos
+    User.hasMany(models.Document, {
+      foreignKey: 'reviewed_by',
+      as: 'reviewedDocuments',
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL',
+    });
+
     // TODO: Adicionar outras associações quando models forem criados
-    // User.hasMany(models.Document, { foreignKey: 'user_id', as: 'documents' });
     // User.hasMany(models.Contract, { foreignKey: 'user_id', as: 'contracts' });
   };
 
