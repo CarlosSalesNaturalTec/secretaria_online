@@ -303,6 +303,16 @@ npm run db:migrate:undo:all
   - Índice único composto (class_id, student_id) - previne duplicação
   - Foreign keys: class_id (CASCADE on delete), student_id (RESTRICT)
 
+- ✅ **create-enrollments** - Tabela de matrículas de alunos em cursos
+  - Campos: id, student_id, course_id, status (ENUM: pending|active|cancelled), enrollment_date, timestamps, deleted_at
+  - Relacionamento: Um aluno pode ter UMA matrícula ativa/pending por vez, um curso pode ter múltiplas matrículas
+  - Índices otimizados para student_id, course_id, status, enrollment_date
+  - Índice único composto (student_id, status) com filtro deleted_at IS NULL - garante apenas 1 matrícula ativa/pending por aluno
+  - Suporte a soft delete (paranoid)
+  - Status padrão: pending (aguardando aprovação de documentos)
+  - Foreign keys: student_id (RESTRICT), course_id (RESTRICT)
+  - Validações: data de matrícula não pode ser futura
+
 #### 3.4 Executar seeders (dados iniciais)
 
 Os seeders populam o banco com dados iniciais (usuário admin, tipos de documentos, etc):

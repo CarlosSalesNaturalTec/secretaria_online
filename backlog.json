@@ -230,12 +230,16 @@
           "estimativa": "1h",
           "prioridade": "alta",
           "dependencias": ["feat-007", "feat-008"],
-          "status": "Não Iniciada",
+          "status": "Concluída",
+          "dataInicio": "2025-10-26",
+          "dataConclusao": "2025-10-27",
           "tags": ["database", "model"],
           "artefatos": [
-            "backend/database/migrations/*-create-enrollments.js",
-            "backend/src/models/Enrollment.js"
-          ]
+            "backend/database/migrations/20251026230800-create-enrollments.js",
+            "backend/src/models/Enrollment.js",
+            "docs/testes/plano-testes-feat-011.md"
+          ],
+          "observacoes": "Feature implementada, aguardando testes manuais. Migration create-enrollments criada com campos id, student_id (INT UNSIGNED - FK para users), course_id (INT - FK para courses), status (ENUM: pending|active|cancelled), enrollment_date (DATEONLY), timestamps e deleted_at. Índices otimizados: student_id, course_id, status, enrollment_date, índice único composto (student_id, status) com filtro para deleted_at NULL e status active/pending - garante apenas 1 matrícula ativa/pending por aluno. Model Enrollment.js implementado com validações rigorosas (student_id, course_id obrigatórios, status ENUM, enrollment_date não pode ser futura), soft delete, scopes personalizados (active, pending, cancelled, recent, withRelations) e métodos auxiliares (isActive, isPending, isCancelled, getStatusLabel, activate, cancel). Métodos estáticos implementados: findByStudent, findByCourse, findActiveByStudent, countActiveByCourse. Associações configuradas: Enrollment belongsTo User (as student) e Course. Associações reversas configuradas: User hasMany Enrollments, Course hasMany Enrollments. Ajuste realizado: student_id como INTEGER.UNSIGNED (compatibilidade com users.id), course_id como INTEGER (compatibilidade com courses.id). Migration executada com sucesso. README.md atualizado com documentação da tabela enrollments."
         },
         {
           "id": "feat-012",

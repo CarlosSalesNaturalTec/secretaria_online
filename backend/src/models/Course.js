@@ -317,5 +317,29 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
+  /**
+   * Associações (relationships)
+   * Serão configuradas após todos os models serem carregados
+   *
+   * @param {Object} models - Objeto contendo todos os models
+   */
+  Course.associate = function (models) {
+    // Course tem muitas Matrículas (Enrollments)
+    Course.hasMany(models.Enrollment, {
+      foreignKey: 'course_id',
+      as: 'enrollments',
+      onUpdate: 'RESTRICT',
+      onDelete: 'RESTRICT',
+    });
+
+    // Course pertence a muitas Disciplinas (através de course_disciplines)
+    Course.belongsToMany(models.Discipline, {
+      through: 'course_disciplines',
+      foreignKey: 'course_id',
+      otherKey: 'discipline_id',
+      as: 'disciplines',
+    });
+  };
+
   return Course;
 };

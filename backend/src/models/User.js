@@ -474,10 +474,16 @@ module.exports = (sequelize, DataTypes) => {
    * @param {Object} models - Objeto contendo todos os models
    */
   User.associate = function (models) {
-    // TODO: Adicionar associações quando outros models forem criados
-    // Exemplos:
+    // User (aluno) tem muitas Matrículas (Enrollments)
+    User.hasMany(models.Enrollment, {
+      foreignKey: 'student_id',
+      as: 'enrollments',
+      onUpdate: 'RESTRICT',
+      onDelete: 'RESTRICT',
+    });
+
+    // TODO: Adicionar outras associações quando models forem criados
     // User.hasMany(models.Document, { foreignKey: 'user_id', as: 'documents' });
-    // User.hasMany(models.Enrollment, { foreignKey: 'student_id', as: 'enrollments' });
     // User.hasMany(models.Contract, { foreignKey: 'user_id', as: 'contracts' });
   };
 
