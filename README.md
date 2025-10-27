@@ -354,6 +354,32 @@ npm run db:migrate:undo:all
   - Validações: semestre (1-12), ano (2020-2100)
   - Armazena caminho do PDF gerado e informações do período
 
+- ✅ **create-evaluations** - Tabela de avaliações (provas, trabalhos, atividades)
+  - Campos: id, class_id, teacher_id, discipline_id, name, date, type (ENUM: grade|concept), timestamps, deleted_at
+  - Relacionamento: Uma avaliação pertence a uma turma, um professor e uma disciplina
+  - Índices otimizados para class_id, teacher_id, discipline_id, date, type, deleted_at
+  - Índice composto (class_id, deleted_at) - facilita busca de avaliações ativas de uma turma
+  - Índice composto (class_id, discipline_id) - facilita busca de avaliações por turma e disciplina
+  - Índice composto (teacher_id, class_id) - facilita busca de avaliações de um professor
+  - Suporte a soft delete (paranoid)
+  - Tipo de avaliação: grade (nota 0-10) ou concept (satisfatório/não satisfatório)
+  - Foreign keys: class_id (RESTRICT), teacher_id (RESTRICT), discipline_id (RESTRICT)
+  - Validações: nome deve ter entre 3 e 100 caracteres, data é obrigatória
+  - Data da avaliação armazenada como DATEONLY (sem horário)
+
+- ✅ **create-grades** - Tabela de notas dos alunos nas avaliações
+  - Campos: id, evaluation_id, student_id, grade (DECIMAL 4,2), concept (ENUM: satisfactory|unsatisfactory), timestamps, deleted_at
+  - Relacionamento: Uma nota pertence a uma avaliação e a um aluno
+  - Índices otimizados para evaluation_id, student_id, deleted_at, created_at
+  - Índice único composto (evaluation_id, student_id) com filtro deleted_at IS NULL - previne duplicação de nota
+  - Índice composto (student_id, deleted_at) - facilita busca de notas ativas de um aluno
+  - Suporte a soft delete (paranoid)
+  - Validação CHECK: grade entre 0.00 e 10.00 (MySQL 8.0.16+)
+  - Validação CHECK: apenas grade OU concept pode estar preenchido (não ambos)
+  - Foreign keys: evaluation_id (CASCADE on delete - se avaliação for deletada, notas também são), student_id (RESTRICT)
+  - Permite armazenar notas numéricas (0-10) ou conceitos (satisfatório/não satisfatório)
+  - Notas podem ser editadas sem restrição de período
+
 #### 3.4 Executar seeders (dados iniciais)
 
 Os seeders populam o banco com dados iniciais (usuário admin, tipos de documentos, etc):

@@ -498,6 +498,22 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'SET NULL',
     });
 
+    // User (professor) tem muitas Avaliações
+    User.hasMany(models.Evaluation, {
+      foreignKey: 'teacher_id',
+      as: 'evaluations',
+      onUpdate: 'CASCADE',
+      onDelete: 'RESTRICT',
+    });
+
+    // User (aluno) tem muitas Notas
+    User.hasMany(models.Grade, {
+      foreignKey: 'student_id',
+      as: 'grades',
+      onUpdate: 'CASCADE',
+      onDelete: 'RESTRICT',
+    });
+
     // TODO: Adicionar outras associações quando models forem criados
     // User.hasMany(models.Contract, { foreignKey: 'user_id', as: 'contracts' });
   };
