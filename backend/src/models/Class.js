@@ -97,6 +97,17 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'discipline_id',
         as: 'disciplines'
       });
+
+      /**
+       * Associação 1:N com Evaluation
+       * Uma turma possui múltiplas avaliações
+       */
+      Class.hasMany(models.Evaluation, {
+        foreignKey: 'class_id',
+        as: 'evaluations',
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT'
+      });
     }
 
     /**

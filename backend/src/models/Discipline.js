@@ -69,11 +69,13 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       // Associação 1:N com Evaluation
-      // Será implementada na feat-014
-      // Discipline.hasMany(models.Evaluation, {
-      //   foreignKey: 'discipline_id',
-      //   as: 'evaluations'
-      // });
+      // Uma disciplina tem muitas Avaliações
+      Discipline.hasMany(models.Evaluation, {
+        foreignKey: 'discipline_id',
+        as: 'evaluations',
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT'
+      });
 
       // Associação N:N com Teacher através de class_teachers
       // Será implementada na feat-010

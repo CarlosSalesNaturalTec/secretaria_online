@@ -288,14 +288,18 @@
           "estimativa": "2h",
           "prioridade": "alta",
           "dependencias": ["feat-010"],
-          "status": "Não Iniciada",
+          "status": "Concluída",
+          "dataInicio": "2025-10-27",
+          "dataConclusao": "2025-10-27",
           "tags": ["database", "model"],
           "artefatos": [
-            "backend/database/migrations/*-create-evaluations.js",
-            "backend/database/migrations/*-create-grades.js",
+            "backend/database/migrations/20251027181314-create-evaluations.js",
+            "backend/database/migrations/20251027181409-create-grades.js",
             "backend/src/models/Evaluation.js",
-            "backend/src/models/Grade.js"
-          ]
+            "backend/src/models/Grade.js",
+            "docs/testes/plano-testes-feat-014.md"
+          ],
+          "observacoes": "Feature implementada, aguardando testes manuais. Migration create-evaluations criada com campos id, class_id (INT - FK para classes), teacher_id (INT UNSIGNED - FK para users), discipline_id (INT - FK para disciplines), name, date (DATEONLY), type (ENUM: grade|concept), timestamps, deleted_at. Índices otimizados: class_id, teacher_id, discipline_id, date, type, deleted_at, índices compostos (class_id, deleted_at), (class_id, discipline_id), (teacher_id, class_id). Migration create-grades criada com campos id, evaluation_id (INT - FK para evaluations), student_id (INT UNSIGNED - FK para users), grade (DECIMAL 4,2), concept (ENUM: satisfactory|unsatisfactory), timestamps, deleted_at. Índices otimizados: evaluation_id, student_id, deleted_at, created_at, índice único composto (evaluation_id, student_id) com filtro deleted_at NULL, índice composto (student_id, deleted_at). Constraints CHECK adicionados: grade entre 0.00 e 10.00, validação XOR (apenas grade OU concept preenchido). Model Evaluation.js implementado com validações rigorosas, soft delete, scopes personalizados (active, byType, upcoming, past, withRelations, recent) e métodos auxiliares (isActive, isGradeType, isConceptType, getTypeLabel, isPast, isFuture, getFormattedDate, findByClass, findByTeacher, findByDiscipline, findUpcomingByClass, countByClass, countByTeacher). Model Grade.js implementado com validações rigorosas (grade 0-10, concept ENUM, validação XOR customizada), soft delete, scopes personalizados (active, withGrades, withConcepts, passing, failing, withRelations, recent) e métodos auxiliares (isActive, isGrade, isConcept, getFormattedValue, isPassing, getStatus, findByEvaluation, findByStudent, findByEvaluationAndStudent, calculateAverageByStudent, countByStudent, countByEvaluation, findPendingByEvaluation). Associações configuradas: Evaluation belongsTo Class/User/Discipline, hasMany Grade; Grade belongsTo Evaluation/User. Associações reversas configuradas: User hasMany Evaluation/Grade, Class hasMany Evaluation, Discipline hasMany Evaluation. Migrations executadas com sucesso. README.md atualizado com documentação das tabelas evaluations e grades."
         },
         {
           "id": "feat-015",
