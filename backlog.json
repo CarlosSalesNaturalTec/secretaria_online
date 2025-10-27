@@ -278,17 +278,22 @@
           "feat-012",
           "feat-015"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-27",
+        "dataConclusao": "2025-10-27",
         "tags": [
           "database",
           "seed"
         ],
         "artefatos": [
-          "backend/database/seeders/*-admin-user.js",
-          "backend/database/seeders/*-document-types.js",
-          "backend/database/seeders/*-request-types.js",
-          "backend/database/seeders/*-sample-courses.js"
-        ]
+          "backend/database/seeders/20251027211219-admin-user.js",
+          "backend/database/seeders/20251027211322-document-types.js",
+          "backend/database/seeders/20251027211442-request-types.js",
+          "backend/database/seeders/20251027211530-sample-courses-and-disciplines.js",
+          "README.md (atualizado)",
+          "docs/testes/plano-testes-feat-016.md"
+        ],
+        "observacoes": "Feature implementada, aguardando testes manuais. Seeders criados: (1) admin-user - usuário admin padrão (login: admin, senha: admin123), (2) document-types - 19 tipos de documentos (9 para alunos, 8 para professores, 1 para ambos), (3) request-types - 10 tipos de solicitações padrão com prazos de resposta configurados, (4) sample-courses-and-disciplines - 3 cursos (ADS, RH, Administração), 28 disciplinas e 40 associações curso-disciplina organizadas por semestre. Todos os seeders são idempotentes (verificam se dados já existem antes de inserir). README.md atualizado com documentação completa dos seeders. Plano de testes criado."
       }
     ]
   }

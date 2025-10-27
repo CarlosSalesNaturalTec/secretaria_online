@@ -406,15 +406,93 @@ npm run db:migrate:undo:all
 
 #### 3.4 Executar seeders (dados iniciais)
 
-Os seeders populam o banco com dados iniciais (usuário admin, tipos de documentos, etc):
+Os seeders populam o banco com dados iniciais necessários para o funcionamento do sistema:
 
 ```bash
 # Executar todos os seeders
 npm run db:seed
 
-# (Se precisar desfazer) Reverter seeders
+# Executar um seeder específico
+npx sequelize-cli db:seed --seed 20251027211219-admin-user.js
+
+# (Se precisar desfazer) Reverter todos seeders
 npm run db:seed:undo:all
+
+# (Se precisar desfazer) Reverter último seeder
+npm run db:seed:undo
 ```
+
+**Seeders disponíveis:**
+
+- ✅ **admin-user** - Cria o usuário administrativo inicial
+  - Login: `admin`
+  - Senha: `admin123` (deve ser alterada no primeiro acesso)
+  - Role: admin
+  - Email: admin@secretariaonline.com
+  - **Nota:** Se já existir um usuário admin no banco, o seeder será ignorado automaticamente
+
+- ✅ **document-types** - Cria tipos de documentos obrigatórios padrão
+  - **Para Alunos (9 tipos):**
+    - RG (Frente e Verso) - obrigatório
+    - CPF - obrigatório
+    - Comprovante de Residência - obrigatório
+    - Foto 3x4 - obrigatório
+    - Certificado de Conclusão do Ensino Médio - obrigatório
+    - Histórico Escolar do Ensino Médio - obrigatório
+    - Certidão de Nascimento ou Casamento - opcional
+    - Título de Eleitor - opcional
+    - Reservista (Masculino) - opcional
+
+  - **Para Professores (8 tipos):**
+    - RG (Frente e Verso) - obrigatório
+    - CPF - obrigatório
+    - Comprovante de Residência - obrigatório
+    - Foto 3x4 - obrigatório
+    - Diploma de Graduação - obrigatório
+    - Título de Pós-Graduação - opcional
+    - Currículo Lattes - opcional
+    - Certificado de Reservista (Masculino) - opcional
+
+  - **Para Ambos (1 tipo):**
+    - Atestado Médico - opcional
+
+  - **Total:** 19 tipos de documentos (documentos duplicados entre alunos/professores são cadastrados separadamente)
+  - **Nota:** Se já existirem tipos de documentos no banco, o seeder será ignorado
+
+- ✅ **request-types** - Cria tipos de solicitações que alunos podem fazer
+  - Pedido de Atestado de Matrícula (prazo: 3 dias úteis)
+  - Histórico Escolar (prazo: 5 dias úteis)
+  - Certificado de Conclusão (prazo: 10 dias úteis)
+  - Validação de Atividades Complementares (prazo: 7 dias úteis)
+  - Transferência de Turma (prazo: 5 dias úteis)
+  - Cancelamento de Matrícula (prazo: 5 dias úteis)
+  - Declaração de Frequência (prazo: 3 dias úteis)
+  - Segunda Via de Diploma (prazo: 15 dias úteis)
+  - Trancamento de Matrícula (prazo: 5 dias úteis)
+  - Reabertura de Matrícula (prazo: 5 dias úteis)
+  - **Total:** 10 tipos de solicitações
+  - **Nota:** Se já existirem tipos de solicitações no banco, o seeder será ignorado
+
+- ✅ **sample-courses-and-disciplines** - Cria cursos e disciplinas de exemplo para testes
+  - **Cursos (3):**
+    1. Análise e Desenvolvimento de Sistemas (6 semestres, 14 disciplinas)
+    2. Gestão de Recursos Humanos (4 semestres, 9 disciplinas)
+    3. Administração (8 semestres, 13 disciplinas)
+
+  - **Disciplinas (28 total):**
+    - Disciplinas comuns (4): Português Instrumental, Matemática Básica, Metodologia Científica, Ética e Cidadania
+    - Disciplinas de ADS (10): Lógica de Programação, Algoritmos, POO, Banco de Dados, Engenharia de Software, etc.
+    - Disciplinas de RH (6): Introdução à Gestão de Pessoas, Recrutamento e Seleção, Treinamento, etc.
+    - Disciplinas de Administração (8): Teoria Geral da Administração, Contabilidade, Marketing, etc.
+
+  - **Associações:** 40 associações curso-disciplina com organização por semestre
+  - **Nota:** Se já existirem cursos no banco, o seeder será ignorado
+
+**⚠️ IMPORTANTE:**
+- Os seeders são **idempotentes**: podem ser executados múltiplas vezes sem duplicar dados
+- Execute os seeders **APÓS** as migrations
+- Para resetar completamente o banco (apaga tudo e recria): `npm run db:reset`
+- O usuário admin é essencial para o primeiro acesso ao sistema
 
 #### 3.5 Resetar banco de dados (desenvolvimento)
 
