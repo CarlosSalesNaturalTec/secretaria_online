@@ -333,6 +333,27 @@ npm run db:migrate:undo:all
   - Validações: tamanho do arquivo não pode ser negativo, nome e caminho são obrigatórios
   - Armazena metadados do arquivo (tamanho, tipo MIME) para controle
 
+- ✅ **create-contract-templates** - Tabela de templates de contratos
+  - Campos: id, name, content (LONGTEXT), is_active, timestamps, deleted_at
+  - Armazena templates HTML com placeholders ({{studentName}}, {{courseName}}, etc.)
+  - Índices otimizados para name, is_active, deleted_at
+  - Índice composto (is_active, deleted_at) - facilita busca de templates disponíveis
+  - Suporte a soft delete (paranoid)
+  - Tipo LONGTEXT permite armazenar HTML completo com estilização
+  - Validações: nome deve ter entre 3 e 100 caracteres, conteúdo deve ter estrutura HTML básica
+
+- ✅ **create-contracts** - Tabela de contratos gerados para alunos e professores
+  - Campos: id, user_id, template_id, file_path, file_name, accepted_at, semester, year, timestamps, deleted_at
+  - Relacionamento: Um usuário possui múltiplos contratos, um contrato usa um template
+  - Índices otimizados para user_id, template_id, accepted_at, semester, year
+  - Índice composto (user_id, semester, year) - facilita busca de contratos por período
+  - Índice composto (user_id, accepted_at) - facilita busca de contratos aceitos/pendentes
+  - Suporte a soft delete (paranoid)
+  - Campo accepted_at NULL indica contrato pendente de aceite
+  - Foreign keys: user_id (RESTRICT), template_id (RESTRICT)
+  - Validações: semestre (1-12), ano (2020-2100)
+  - Armazena caminho do PDF gerado e informações do período
+
 #### 3.4 Executar seeders (dados iniciais)
 
 Os seeders populam o banco com dados iniciais (usuário admin, tipos de documentos, etc):
