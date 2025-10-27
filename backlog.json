@@ -248,14 +248,18 @@
           "estimativa": "1h30min",
           "prioridade": "alta",
           "dependencias": ["feat-007"],
-          "status": "Não Iniciada",
+          "status": "Concluída",
+          "dataInicio": "2025-10-27",
+          "dataConclusao": "2025-10-27",
           "tags": ["database", "model"],
           "artefatos": [
-            "backend/database/migrations/*-create-document-types.js",
-            "backend/database/migrations/*-create-documents.js",
+            "backend/database/migrations/20251027145519-create-document-types.js",
+            "backend/database/migrations/20251027145627-create-documents.js",
             "backend/src/models/DocumentType.js",
-            "backend/src/models/Document.js"
-          ]
+            "backend/src/models/Document.js",
+            "docs/testes/plano-testes-feat-012.md"
+          ],
+          "observacoes": "Feature implementada e aprovada. Migration create-document-types criada com campos id, name, description, user_type (ENUM: student|teacher|both), is_required, timestamps, deleted_at. Índices otimizados: name, user_type, is_required, deleted_at. Migration create-documents criada com campos id, user_id (INT UNSIGNED - FK para users), document_type_id (INT - FK para document_types), file_path, file_name, file_size, mime_type, status (ENUM: pending|approved|rejected), reviewed_by (INT UNSIGNED - FK para users), reviewed_at, observations, timestamps, deleted_at. Índices otimizados: user_id, document_type_id, status, reviewed_by, created_at, deleted_at, índices compostos (user_id, document_type_id) e (status, created_at). Model DocumentType.js implementado com validações (nome 3-100 caracteres, user_type ENUM), soft delete, scopes (active, required, forStudents, forTeachers), métodos de instância (isRequiredForStudents, isRequiredForTeachers, isApplicableFor, getUserTypeLabel) e métodos estáticos (findRequiredForUserType, findActive). Model Document.js implementado com validações rigorosas (user_id, document_type_id, file_path, file_name obrigatórios, file_size não negativo, status ENUM), soft delete, scopes (active, pending, approved, rejected, byStatus, recent, withRelations), métodos de instância (isPending, isApproved, isRejected, getStatusLabel, approve, reject, getFormattedFileSize) e métodos estáticos (findByUser, findByStatus, findPending, findByUserAndType, countPendingByUser, countApprovedByUser). Associações configuradas: DocumentType hasMany Document, Document belongsTo User (dupla associação: user e reviewer), Document belongsTo DocumentType. Associações reversas configuradas em User: hasMany documents e hasMany reviewedDocuments. README.md atualizado com documentação completa das tabelas document_types e documents."
         },
         {
           "id": "feat-013",
