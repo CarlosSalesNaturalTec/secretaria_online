@@ -1,0 +1,115 @@
+{
+  "projeto": {
+    "nome": "Secretaria Online",
+    "versao": "0.1.0",
+    "descricao": "Sistema de gestão acadêmica para instituição de ensino com ~200 alunos e ~10 professores",
+    "dataGeracao": "2025-10-23"
+  },
+  "grupo": {
+    "id": "grupo-10",
+    "nome": "Backend - Avaliações e Notas",
+    "descricao": "Sistema de cadastro de avaliações e lançamento de notas",
+    "prioridade": "alta",
+    "features": [
+      {
+        "id": "feat-051",
+        "titulo": "Criar EvaluationController e rotas",
+        "descricao": "Implementar CRUD de avaliações. POST /classes/:classId/evaluations (professor cria avaliação), GET /classes/:classId/evaluations (listar)",
+        "estimativa": "2h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-014",
+          "feat-021"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "evaluation",
+          "controller",
+          "api"
+        ],
+        "artefatos": [
+          "backend/src/controllers/evaluation.controller.js",
+          "backend/src/routes/evaluation.routes.js"
+        ]
+      },
+      {
+        "id": "feat-052",
+        "titulo": "Criar GradeService com validações",
+        "descricao": "Implementar GradeService: lançar nota (validar tipo grade vs concept, valor válido), calcular média, verificar se aluno está na turma",
+        "estimativa": "2h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-014"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "grade",
+          "service",
+          "business-logic"
+        ],
+        "artefatos": [
+          "backend/src/services/grade.service.js"
+        ]
+      },
+      {
+        "id": "feat-053",
+        "titulo": "Criar GradeController e rotas",
+        "descricao": "Implementar POST /grades (professor lança nota), PUT /grades/:id (editar), GET /evaluations/:id/grades (listar notas de avaliação)",
+        "estimativa": "2h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-052",
+          "feat-021"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "grade",
+          "controller",
+          "api"
+        ],
+        "artefatos": [
+          "backend/src/controllers/grade.controller.js",
+          "backend/src/routes/grade.routes.js"
+        ]
+      },
+      {
+        "id": "feat-054",
+        "titulo": "Adicionar endpoint para aluno ver próprias notas",
+        "descricao": "Implementar GET /my-grades (estudante vê suas notas de todas as disciplinas) com filtro por semestre/disciplina",
+        "estimativa": "1h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-053"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "grade",
+          "api",
+          "student"
+        ],
+        "artefatos": [
+          "método getMyGrades em grade.controller.js"
+        ]
+      },
+      {
+        "id": "feat-055",
+        "titulo": "Adicionar lançamento em lote de notas",
+        "descricao": "Implementar POST /evaluations/:id/grades/batch recebendo array de {student_id, grade/concept} para lançamento rápido pelo professor",
+        "estimativa": "2h",
+        "prioridade": "media",
+        "dependencias": [
+          "feat-053"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "grade",
+          "api",
+          "teacher"
+        ],
+        "artefatos": [
+          "método batchCreate em grade.controller.js"
+        ]
+      }
+    ]
+  }
+}

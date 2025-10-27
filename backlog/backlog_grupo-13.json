@@ -1,0 +1,52 @@
+{
+  "projeto": {
+    "nome": "Secretaria Online",
+    "versao": "0.1.0",
+    "descricao": "Sistema de gestão acadêmica para instituição de ensino com ~200 alunos e ~10 professores",
+    "dataGeracao": "2025-10-23"
+  },
+  "grupo": {
+    "id": "grupo-13",
+    "nome": "Backend - Jobs e Tarefas Agendadas",
+    "descricao": "Cron jobs para limpeza e automação",
+    "prioridade": "baixa",
+    "features": [
+      {
+        "id": "feat-062",
+        "titulo": "Configurar node-cron",
+        "descricao": "Instalar node-cron, criar jobs/index.js para registrar todas as tarefas agendadas",
+        "estimativa": "30min",
+        "prioridade": "baixa",
+        "dependencias": [
+          "feat-002"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "cron",
+          "config"
+        ],
+        "artefatos": [
+          "backend/src/jobs/index.js"
+        ]
+      },
+      {
+        "id": "feat-063",
+        "titulo": "Criar job de limpeza de arquivos temporários",
+        "descricao": "Implementar cleanupTemp.job.js que roda diariamente e remove arquivos em uploads/temp/ mais antigos que 7 dias",
+        "estimativa": "1h",
+        "prioridade": "baixa",
+        "dependencias": [
+          "feat-062"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "cron",
+          "cleanup"
+        ],
+        "artefatos": [
+          "backend/src/jobs/cleanupTemp.job.js"
+        ]
+      }
+    ]
+  }
+}

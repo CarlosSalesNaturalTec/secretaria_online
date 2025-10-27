@@ -1,0 +1,57 @@
+{
+  "projeto": {
+    "nome": "Secretaria Online",
+    "versao": "0.1.0",
+    "descricao": "Sistema de gestão acadêmica para instituição de ensino com ~200 alunos e ~10 professores",
+    "dataGeracao": "2025-10-23"
+  },
+  "grupo": {
+    "id": "grupo-24",
+    "nome": "Testes e Qualidade",
+    "descricao": "Configuração de testes e validações de qualidade",
+    "prioridade": "baixa",
+    "features": [
+      {
+        "id": "feat-105",
+        "titulo": "Configurar Jest e React Testing Library",
+        "descricao": "Instalar jest, @testing-library/react, configurar para TypeScript, criar setup de testes",
+        "estimativa": "1h30min",
+        "prioridade": "baixa",
+        "dependencias": [
+          "feat-003"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "test",
+          "setup"
+        ],
+        "artefatos": [
+          "frontend/jest.config.js",
+          "frontend/src/setupTests.ts"
+        ]
+      },
+      {
+        "id": "feat-106",
+        "titulo": "Escrever testes para componentes UI",
+        "descricao": "Criar testes unitários para Button, Input, Modal, Table verificando renderização e interações",
+        "estimativa": "3h",
+        "prioridade": "baixa",
+        "dependencias": [
+          "feat-105",
+          "feat-066",
+          "feat-067",
+          "feat-068",
+          "feat-069"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "test",
+          "ui"
+        ],
+        "artefatos": [
+          "frontend/src/components/ui/__tests__/"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "projeto": {
+    "nome": "Secretaria Online",
+    "versao": "0.1.0",
+    "descricao": "Sistema de gestão acadêmica para instituição de ensino com ~200 alunos e ~10 professores",
+    "dataGeracao": "2025-10-23"
+  },
+  "grupo": {
+    "id": "grupo-12",
+    "nome": "Backend - Integração de Email",
+    "descricao": "Serviço de envio de emails (senhas provisórias, notificações)",
+    "prioridade": "media",
+    "features": [
+      {
+        "id": "feat-058",
+        "titulo": "Configurar Nodemailer com SMTP",
+        "descricao": "Instalar nodemailer, criar config/email.js com configuração SMTP (host, port, auth) usando variáveis de ambiente",
+        "estimativa": "1h",
+        "prioridade": "media",
+        "dependencias": [
+          "feat-002"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "email",
+          "config"
+        ],
+        "artefatos": [
+          "backend/src/config/email.js"
+        ]
+      },
+      {
+        "id": "feat-059",
+        "titulo": "Criar EmailService",
+        "descricao": "Implementar email.service.js com métodos: sendPasswordEmail(to, password), sendDocumentApprovedEmail, sendDocumentRejectedEmail",
+        "estimativa": "2h",
+        "prioridade": "media",
+        "dependencias": [
+          "feat-058"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "email",
+          "service"
+        ],
+        "artefatos": [
+          "backend/src/services/email.service.js"
+        ]
+      },
+      {
+        "id": "feat-060",
+        "titulo": "Integrar envio de email na criação de aluno",
+        "descricao": "Modificar StudentService.create para enviar email com senha provisória após criar aluno",
+        "estimativa": "45min",
+        "prioridade": "media",
+        "dependencias": [
+          "feat-059",
+          "feat-030"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "email",
+          "student"
+        ],
+        "artefatos": [
+          "integração em student.service.js"
+        ]
+      },
+      {
+        "id": "feat-061",
+        "titulo": "Integrar notificações por email em aprovação/rejeição de documentos",
+        "descricao": "Modificar DocumentService.approve e reject para enviar emails notificando aluno",
+        "estimativa": "1h",
+        "prioridade": "baixa",
+        "dependencias": [
+          "feat-059",
+          "feat-042"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "email",
+          "document"
+        ],
+        "artefatos": [
+          "integração em document.service.js"
+        ]
+      }
+    ]
+  }
+}

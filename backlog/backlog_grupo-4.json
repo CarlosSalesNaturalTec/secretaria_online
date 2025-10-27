@@ -1,0 +1,126 @@
+{
+  "projeto": {
+    "nome": "Secretaria Online",
+    "versao": "0.1.0",
+    "descricao": "Sistema de gestão acadêmica para instituição de ensino com ~200 alunos e ~10 professores",
+    "dataGeracao": "2025-10-23"
+  },
+  "grupo": {
+    "id": "grupo-4",
+    "nome": "Backend - Middlewares e Utilitários",
+    "descricao": "Middlewares gerais, validação, logging e tratamento de erros",
+    "prioridade": "alta",
+    "features": [
+      {
+        "id": "feat-023",
+        "titulo": "Configurar Helmet.js para headers de segurança",
+        "descricao": "Instalar helmet, configurar em server.js com CSP, HSTS e outras proteções HTTP",
+        "estimativa": "30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-002"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "security",
+          "middleware"
+        ],
+        "artefatos": [
+          "configuração helmet em server.js"
+        ]
+      },
+      {
+        "id": "feat-024",
+        "titulo": "Configurar CORS",
+        "descricao": "Instalar cors, configurar para permitir requisições do frontend (origin, credentials, methods)",
+        "estimativa": "30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-002"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "config",
+          "middleware"
+        ],
+        "artefatos": [
+          "configuração cors em server.js"
+        ]
+      },
+      {
+        "id": "feat-025",
+        "titulo": "Criar middleware de validação com express-validator",
+        "descricao": "Instalar express-validator, criar validation.middleware.js com função handleValidationErrors e validadores reutilizáveis (CPF, email, etc)",
+        "estimativa": "1h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-002"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "validation",
+          "middleware"
+        ],
+        "artefatos": [
+          "backend/src/middlewares/validation.middleware.js",
+          "backend/src/utils/validators.js"
+        ]
+      },
+      {
+        "id": "feat-026",
+        "titulo": "Configurar Winston para logging",
+        "descricao": "Instalar winston, criar utils/logger.js com transports para console e arquivo (error.log, combined.log), configurar níveis e formato JSON",
+        "estimativa": "1h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-002"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "logging",
+          "utils"
+        ],
+        "artefatos": [
+          "backend/src/utils/logger.js",
+          "backend/logs/"
+        ]
+      },
+      {
+        "id": "feat-027",
+        "titulo": "Criar middleware de tratamento de erros",
+        "descricao": "Implementar error.middleware.js com classe AppError e errorHandler que loga erros com Winston e retorna resposta JSON padronizada",
+        "estimativa": "1h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-026"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "error-handling",
+          "middleware"
+        ],
+        "artefatos": [
+          "backend/src/middlewares/error.middleware.js"
+        ]
+      },
+      {
+        "id": "feat-028",
+        "titulo": "Criar utilitários de formatação e constantes",
+        "descricao": "Implementar utils/formatters.js (formatação de CPF, data, moeda) e utils/constants.js (enums de status, roles, etc)",
+        "estimativa": "1h",
+        "prioridade": "media",
+        "dependencias": [
+          "feat-002"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "utils"
+        ],
+        "artefatos": [
+          "backend/src/utils/formatters.js",
+          "backend/src/utils/constants.js"
+        ]
+      }
+    ]
+  }
+}

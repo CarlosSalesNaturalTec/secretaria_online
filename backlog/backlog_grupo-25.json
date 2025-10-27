@@ -1,0 +1,89 @@
+{
+  "projeto": {
+    "nome": "Secretaria Online",
+    "versao": "0.1.0",
+    "descricao": "Sistema de gestão acadêmica para instituição de ensino com ~200 alunos e ~10 professores",
+    "dataGeracao": "2025-10-23"
+  },
+  "grupo": {
+    "id": "grupo-25",
+    "nome": "Deploy e Documentação",
+    "descricao": "Configuração de deploy, scripts e documentação final",
+    "prioridade": "media",
+    "features": [
+      {
+        "id": "feat-107",
+        "titulo": "Criar scripts de build e deploy",
+        "descricao": "Criar scripts em package.json: frontend (npm run build), backend (npm run start:prod). Criar deploy.sh para upload via SSH",
+        "estimativa": "2h",
+        "prioridade": "media",
+        "dependencias": [
+          "feat-002",
+          "feat-003"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "deploy",
+          "scripts"
+        ],
+        "artefatos": [
+          "deploy.sh",
+          "scripts em package.json"
+        ]
+      },
+      {
+        "id": "feat-108",
+        "titulo": "Configurar PM2 para produção",
+        "descricao": "Instalar pm2, criar ecosystem.config.js para gerenciar processo Node.js em produção",
+        "estimativa": "1h",
+        "prioridade": "media",
+        "dependencias": [
+          "feat-002"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "deploy",
+          "production"
+        ],
+        "artefatos": [
+          "backend/ecosystem.config.js"
+        ]
+      },
+      {
+        "id": "feat-109",
+        "titulo": "Documentar API com Swagger ou arquivo Markdown",
+        "descricao": "Criar docs/api-documentation.md documentando todos os endpoints, payloads, responses e códigos de erro",
+        "estimativa": "3h",
+        "prioridade": "baixa",
+        "dependencias": [
+          "feat-064"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "documentation",
+          "api"
+        ],
+        "artefatos": [
+          "docs/api-documentation.md"
+        ]
+      },
+      {
+        "id": "feat-110",
+        "titulo": "Criar documentação de setup e instalação",
+        "descricao": "Atualizar README.md com instruções de instalação local, variáveis de ambiente, comandos de build e deploy",
+        "estimativa": "2h",
+        "prioridade": "baixa",
+        "dependencias": [
+          "feat-001"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "documentation"
+        ],
+        "artefatos": [
+          "README.md atualizado"
+        ]
+      }
+    ]
+  }
+}

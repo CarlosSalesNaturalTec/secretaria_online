@@ -1,0 +1,55 @@
+{
+  "projeto": {
+    "nome": "Secretaria Online",
+    "versao": "0.1.0",
+    "descricao": "Sistema de gestão acadêmica para instituição de ensino com ~200 alunos e ~10 professores",
+    "dataGeracao": "2025-10-23"
+  },
+  "grupo": {
+    "id": "grupo-18",
+    "nome": "Frontend - Páginas de Autenticação",
+    "descricao": "Telas de login e primeiro acesso",
+    "prioridade": "alta",
+    "features": [
+      {
+        "id": "feat-079",
+        "titulo": "Criar página de Login",
+        "descricao": "Implementar pages/auth/Login.tsx com formulário (login, senha), validação com Zod, integração com useAuth, redirecionamento pós-login baseado em role",
+        "estimativa": "2h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-077",
+          "feat-078",
+          "feat-067"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "auth",
+          "page"
+        ],
+        "artefatos": [
+          "frontend/src/pages/auth/Login.tsx"
+        ]
+      },
+      {
+        "id": "feat-080",
+        "titulo": "Criar página de Primeiro Acesso",
+        "descricao": "Implementar pages/auth/FirstAccess.tsx para aluno trocar senha provisória (senha atual, nova senha, confirmar). Validação e redirecionamento após sucesso",
+        "estimativa": "2h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-078",
+          "feat-067"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "auth",
+          "page"
+        ],
+        "artefatos": [
+          "frontend/src/pages/auth/FirstAccess.tsx"
+        ]
+      }
+    ]
+  }
+}

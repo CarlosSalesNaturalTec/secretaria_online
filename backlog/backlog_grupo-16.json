@@ -1,0 +1,90 @@
+{
+  "projeto": {
+    "nome": "Secretaria Online",
+    "versao": "0.1.0",
+    "descricao": "Sistema de gestão acadêmica para instituição de ensino com ~200 alunos e ~10 professores",
+    "dataGeracao": "2025-10-23"
+  },
+  "grupo": {
+    "id": "grupo-16",
+    "nome": "Frontend - Layout e Navegação",
+    "descricao": "Componentes de layout (Header, Sidebar, Footer) e configuração de rotas",
+    "prioridade": "alta",
+    "features": [
+      {
+        "id": "feat-071",
+        "titulo": "Criar componente Header",
+        "descricao": "Implementar components/layout/Header.tsx com logo, nome do usuário logado, dropdown de perfil (trocar senha, logout)",
+        "estimativa": "2h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-003"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "layout",
+          "component"
+        ],
+        "artefatos": [
+          "frontend/src/components/layout/Header.tsx"
+        ]
+      },
+      {
+        "id": "feat-072",
+        "titulo": "Criar componente Sidebar",
+        "descricao": "Implementar components/layout/Sidebar.tsx com navegação dinâmica baseada no role do usuário (admin, teacher, student)",
+        "estimativa": "2h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-003"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "layout",
+          "component"
+        ],
+        "artefatos": [
+          "frontend/src/components/layout/Sidebar.tsx"
+        ]
+      },
+      {
+        "id": "feat-073",
+        "titulo": "Criar componente DashboardLayout",
+        "descricao": "Implementar components/layout/DashboardLayout.tsx que compõe Header + Sidebar + children (área de conteúdo)",
+        "estimativa": "1h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-071",
+          "feat-072"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "layout",
+          "component"
+        ],
+        "artefatos": [
+          "frontend/src/components/layout/DashboardLayout.tsx"
+        ]
+      },
+      {
+        "id": "feat-074",
+        "titulo": "Configurar React Router com rotas protegidas",
+        "descricao": "Criar router.tsx com rotas públicas (/login, /first-access) e privadas (dashboards). Implementar PrivateRoute wrapper que verifica autenticação",
+        "estimativa": "2h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-003"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "routing",
+          "auth"
+        ],
+        "artefatos": [
+          "frontend/src/router.tsx",
+          "componente PrivateRoute"
+        ]
+      }
+    ]
+  }
+}
