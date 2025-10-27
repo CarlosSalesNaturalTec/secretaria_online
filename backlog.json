@@ -304,18 +304,21 @@
         {
           "id": "feat-015",
           "titulo": "Criar migrations para Request e RequestType",
-          "descricao": "Criar tabelas request_types (id, name, description) e requests (id, student_id, request_type_id, description, status enum, reviewed_by, reviewed_at)",
+          "descricao": "Criar tabelas request_types (id, name, description, response_deadline_days, is_active) e requests (id, student_id, request_type_id, description, status enum, reviewed_by, reviewed_at, observations)",
           "estimativa": "1h30min",
           "prioridade": "media",
           "dependencias": ["feat-007"],
-          "status": "Não Iniciada",
+          "status": "Em Andamento",
+          "dataInicio": "2025-10-27",
           "tags": ["database", "model"],
           "artefatos": [
-            "backend/database/migrations/*-create-request-types.js",
-            "backend/database/migrations/*-create-requests.js",
+            "backend/database/migrations/20251027192921-create-request-types.js",
+            "backend/database/migrations/20251027192954-create-requests.js",
             "backend/src/models/RequestType.js",
-            "backend/src/models/Request.js"
-          ]
+            "backend/src/models/Request.js",
+            "docs/testes/plano-testes-feat-015.md"
+          ],
+          "observacoes": "Feature implementada, aguardando testes manuais. Migration create-request-types criada com campos id, name, description, response_deadline_days (prazo em dias úteis, padrão 5), is_active, timestamps, deleted_at. Índices otimizados: name, is_active, deleted_at, índice composto (is_active, deleted_at) para tipos disponíveis. Migration create-requests criada com campos id, student_id (INT UNSIGNED - FK para users), request_type_id (INT - FK para request_types), description, status (ENUM: pending|approved|rejected), reviewed_by (INT UNSIGNED - FK para users), reviewed_at, observations, timestamps, deleted_at. Índices otimizados: student_id, request_type_id, status, reviewed_by, created_at, deleted_at, índices compostos (student_id, status), (status, created_at), (student_id, deleted_at). Model RequestType.js implementado com validações (nome 3-100 caracteres, prazo não negativo), soft delete, scopes (active, available, ordered), métodos de instância (isActive, activate, deactivate, getDeadlineLabel, getStatusLabel) e métodos estáticos (findActive, findAvailable, findActiveById, findByName, countActive, countAvailable). Model Request.js implementado com validações rigorosas (student_id, request_type_id obrigatórios, status ENUM), soft delete, scopes (active, pending, approved, rejected, byStatus, withRelations, recent), métodos de instância (isActive, isPending, isApproved, isRejected, getStatusLabel, approve, reject, getFormattedCreatedAt, getFormattedReviewedAt) e métodos estáticos (findByStudent, findByStatus, findPending, findByStudentAndStatus, countPendingByStudent, countByStatus, countPending, findByType, findByReviewer). Associações configuradas: RequestType hasMany Request, Request belongsTo User (student e reviewer) e RequestType. Associações reversas configuradas em User: hasMany Request (requests e reviewedRequests). Migrations executadas com sucesso. README.md atualizado com documentação completa das tabelas request_types e requests."
         },
         {
           "id": "feat-016",
