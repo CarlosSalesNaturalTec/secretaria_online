@@ -268,14 +268,18 @@
           "estimativa": "1h30min",
           "prioridade": "alta",
           "dependencias": ["feat-007"],
-          "status": "Não Iniciada",
+          "status": "Concluída",
+          "dataInicio": "2025-10-27",
+          "dataConclusao": "2025-10-27",
           "tags": ["database", "model"],
           "artefatos": [
-            "backend/database/migrations/*-create-contract-templates.js",
-            "backend/database/migrations/*-create-contracts.js",
+            "backend/database/migrations/20251027174014-create-contract-templates.js",
+            "backend/database/migrations/20251027174643-create-contracts.js",
             "backend/src/models/ContractTemplate.js",
-            "backend/src/models/Contract.js"
-          ]
+            "backend/src/models/Contract.js",
+            "docs/testes/plano-testes-feat-013.md"
+          ],
+          "observacoes": "Feature implementada, aguardando testes manuais. Migration create-contract-templates criada com campos id, name, content (LONGTEXT), is_active, timestamps, deleted_at. Índices otimizados: name, is_active, deleted_at, índice composto (is_active, deleted_at) para templates disponíveis. Migration create-contracts criada com campos id, user_id (INT UNSIGNED - FK para users), template_id (INT - FK para contract_templates), file_path, file_name, accepted_at, semester (1-12), year (2020-2100), timestamps, deleted_at. Índices otimizados: user_id, template_id, accepted_at, semester, year, índices compostos (user_id, semester, year) e (user_id, accepted_at). Model ContractTemplate.js implementado com validações (nome 3-100 caracteres, conteúdo com estrutura HTML básica), soft delete, scopes (active, available, ordered), métodos de instância (isActive, activate, deactivate, replacePlaceholders, getPlaceholders) e métodos estáticos (findActive, findAvailable, findActiveById, findByName). Model Contract.js implementado com validações rigorosas (user_id, template_id, file_path, file_name obrigatórios, semester 1-12, year 2020-2100), soft delete, scopes (active, pending, accepted, withRelations, recent), métodos de instância (isAccepted, isPending, accept, getStatusLabel, getPeriodLabel, isCurrent) e métodos estáticos (findByUser, findPending, findAccepted, findByUserAndPeriod, findPendingByUser, countPendingByUser, countAcceptedByUser). Associações configuradas: ContractTemplate hasMany Contract, Contract belongsTo User e ContractTemplate. Migrations executadas com sucesso no banco de dados. README.md atualizado com documentação completa das tabelas contract_templates e contracts."
         },
         {
           "id": "feat-014",
