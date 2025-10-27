@@ -313,6 +313,26 @@ npm run db:migrate:undo:all
   - Foreign keys: student_id (RESTRICT), course_id (RESTRICT)
   - Validações: data de matrícula não pode ser futura
 
+- ✅ **create-document-types** - Tabela de tipos de documentos obrigatórios
+  - Campos: id, name, description, user_type (ENUM: student|teacher|both), is_required, timestamps, deleted_at
+  - Define quais documentos são obrigatórios para alunos, professores ou ambos
+  - Índices otimizados para name, user_type, is_required, deleted_at
+  - Suporte a soft delete (paranoid)
+  - Exemplos de tipos: RG, CPF, Comprovante de Residência, Histórico Escolar
+  - Validações: nome deve ter entre 3 e 100 caracteres
+
+- ✅ **create-documents** - Tabela de documentos enviados pelos usuários
+  - Campos: id, user_id, document_type_id, file_path, file_name, file_size, mime_type, status (ENUM: pending|approved|rejected), reviewed_by, reviewed_at, observations, timestamps, deleted_at
+  - Relacionamento: Um usuário possui múltiplos documentos, um documento pertence a um tipo de documento
+  - Índices otimizados para user_id, document_type_id, status, reviewed_by, created_at
+  - Índice composto (user_id, document_type_id) - facilita busca de documentos específicos de um usuário
+  - Índice composto (status, created_at) - facilita busca de documentos pendentes ordenados por data
+  - Suporte a soft delete (paranoid)
+  - Status padrão: pending (aguardando revisão)
+  - Foreign keys: user_id (RESTRICT), document_type_id (RESTRICT), reviewed_by (SET NULL)
+  - Validações: tamanho do arquivo não pode ser negativo, nome e caminho são obrigatórios
+  - Armazena metadados do arquivo (tamanho, tipo MIME) para controle
+
 #### 3.4 Executar seeders (dados iniciais)
 
 Os seeders populam o banco com dados iniciais (usuário admin, tipos de documentos, etc):
