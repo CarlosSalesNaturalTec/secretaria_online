@@ -3,6 +3,13 @@
  * Descrição: Middleware de rate limiting para proteção contra ataques de força bruta
  * Feature: feat-022 - Implementar rate limiting para login
  * Criado em: 2025-10-27
+ *
+ * FIX: Corrigido tratamento de endereços IPv6 no keyGenerator
+ *
+ * Problema: ValidationError ERR_ERL_KEY_GEN_IPV6 ao iniciar servidor
+ * Solução: Removido keyGenerator customizado para usar o padrão da biblioteca
+ *          que trata corretamente IPv4 e IPv6
+ * Data: 2025-10-28
  */
 
 const rateLimit = require('express-rate-limit');
@@ -40,12 +47,6 @@ const loginRateLimiter = rateLimit({
   // Headers personalizados na resposta
   standardHeaders: true, // Retorna informações de rate limit nos headers `RateLimit-*`
   legacyHeaders: false, // Desabilita headers `X-RateLimit-*`
-
-  // Função para gerar a chave de identificação (por IP)
-  keyGenerator: (req) => {
-    // Considera proxy reverso (Nginx, etc)
-    return req.ip || req.connection.remoteAddress;
-  },
 
   // Handler customizado quando o limite é excedido
   handler: (req, res) => {
@@ -92,10 +93,6 @@ const generalRateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 
-  keyGenerator: (req) => {
-    return req.ip || req.connection.remoteAddress;
-  },
-
   skip: (req) => {
     return process.env.NODE_ENV === 'test';
   },
@@ -125,10 +122,6 @@ const passwordChangeRateLimiter = rateLimit({
 
   standardHeaders: true,
   legacyHeaders: false,
-
-  keyGenerator: (req) => {
-    return req.ip || req.connection.remoteAddress;
-  },
 
   skip: (req) => {
     return process.env.NODE_ENV === 'test';

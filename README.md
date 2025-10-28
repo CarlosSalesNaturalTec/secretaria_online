@@ -30,6 +30,7 @@ A **Secretaria Online** é uma aplicação web destinada à automação dos proc
 - MySQL 8.0
 - JWT (Autenticação)
 - bcryptjs (Hash de senhas)
+- Helmet.js (Headers de segurança)
 - Nodemailer (Envio de emails)
 - Puppeteer/PDFKit (Geração de PDFs)
 - Winston (Logging)
@@ -887,6 +888,60 @@ Consulte o arquivo [contextDoc.md](./docs/contextDoc.md) para instruções detal
 
 O sistema implementa múltiplas camadas de segurança para proteger dados sensíveis e controlar acesso aos recursos:
 
+#### Helmet.js (Headers de Segurança HTTP)
+
+O sistema utiliza **Helmet.js** para aplicar automaticamente headers de segurança HTTP que protegem contra vulnerabilidades comuns:
+
+**Proteções aplicadas:**
+
+- **Content Security Policy (CSP)**: Define políticas de segurança de conteúdo, restringindo fontes de scripts, estilos e recursos
+  - `default-src 'self'`: Permite recursos apenas do mesmo domínio
+  - `script-src 'self'`: Restringe execução de scripts apenas do domínio
+  - `img-src 'self' data: https:`: Permite imagens do domínio, data URIs e HTTPS
+  - `frame-src 'none'`: Bloqueia uso em iframes (previne clickjacking)
+  - `object-src 'none'`: Bloqueia plugins como Flash
+  - `upgrade-insecure-requests`: Força upgrade de HTTP para HTTPS
+
+- **HTTP Strict Transport Security (HSTS)**: Força navegadores a usarem HTTPS
+  - `max-age: 31536000`: Cache por 1 ano
+  - `includeSubDomains`: Aplica a todos os subdomínios
+  - `preload`: Permite inclusão na lista HSTS pré-carregada dos navegadores
+
+- **X-Frame-Options**: Previne clickjacking bloqueando uso em iframes
+  - Configurado com `deny` (bloqueio total)
+
+- **X-Content-Type-Options**: Previne MIME sniffing
+  - Força navegadores a respeitarem o Content-Type declarado
+
+- **X-XSS-Protection**: Proteção XSS legada para navegadores antigos
+  - Ativa filtro XSS embutido nos navegadores
+
+- **Referrer-Policy**: Controla informações de referrer enviadas em requisições
+  - Configurado com `strict-origin-when-cross-origin`
+
+- **Hide X-Powered-By**: Remove header que identifica Express.js
+  - Dificulta identificação da tecnologia usada
+
+**Configuração:**
+Todos os headers são aplicados automaticamente em **todas as rotas** através do middleware configurado em `backend/src/server.js`:
+
+```javascript
+app.use(helmet({
+  contentSecurityPolicy: { /* ... */ },
+  hsts: { /* ... */ },
+  frameguard: { action: 'deny' },
+  noSniff: true,
+  xssFilter: true,
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  hidePoweredBy: true,
+}));
+```
+
+**⚠️ Importante:**
+- Em produção, certifique-se de que o servidor está usando **HTTPS/TLS** para que HSTS funcione corretamente
+- Se precisar ajustar políticas de CSP (ex: permitir CDNs externos), edite as diretivas em `server.js`
+- Nunca desabilite o Helmet.js em produção
+
 #### JWT (JSON Web Token)
 - **Access Token**: Expira em 15 minutos (configurável via `JWT_ACCESS_EXPIRATION`)
 - **Refresh Token**: Expira em 7 dias (configurável via `JWT_REFRESH_EXPIRATION`)
@@ -1005,7 +1060,7 @@ RATE_LIMIT_LOGIN_WINDOW=15      # Janela em minutos
 
 #### Outras Medidas de Segurança
 - Validação de inputs no frontend e backend
-- Headers de segurança com Helmet.js
+- Headers de segurança com Helmet.js (CSP, HSTS, X-Frame-Options, etc.)
 - CORS configurado adequadamente
 - Logs estruturados para auditoria de operações críticas
 - Soft delete em tabelas sensíveis (preserva histórico)
