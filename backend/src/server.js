@@ -15,8 +15,45 @@ dotenv.config();
 
 const app = express();
 
-// Middlewares de segurança
-app.use(helmet());
+// Middlewares de segurança - Helmet.js com configuração completa
+app.use(
+  helmet({
+    // Content Security Policy - Define políticas de segurança de conteúdo
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"], // unsafe-inline necessário para alguns frameworks CSS
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", "data:", "https:"], // Permite imagens do próprio domínio, data URIs e HTTPS
+        fontSrc: ["'self'", "data:"],
+        connectSrc: ["'self'"], // Restringe conexões AJAX/WebSocket
+        frameSrc: ["'none'"], // Bloqueia iframes
+        objectSrc: ["'none'"], // Bloqueia plugins (Flash, etc)
+        upgradeInsecureRequests: [], // Força upgrade de HTTP para HTTPS
+      },
+    },
+    // HTTP Strict Transport Security - Força uso de HTTPS
+    hsts: {
+      maxAge: 31536000, // 1 ano em segundos
+      includeSubDomains: true, // Aplica a subdomínios
+      preload: true, // Permite inclusão na lista HSTS dos navegadores
+    },
+    // X-Frame-Options - Previne clickjacking
+    frameguard: {
+      action: 'sameorigin', // Permite uso em iframes do mesmo domínio
+    },
+    // X-Content-Type-Options - Previne MIME sniffing
+    noSniff: true,
+    // X-XSS-Protection - Proteção XSS legada (para navegadores antigos)
+    xssFilter: true,
+    // Referrer-Policy - Controla informações de referrer
+    referrerPolicy: {
+      policy: 'no-referrer',
+    },
+    // Remove o header X-Powered-By (esconde que é Express)
+    hidePoweredBy: true,
+  })
+);
 
 // CORS - Configuração para permitir requisições do frontend
 app.use(
