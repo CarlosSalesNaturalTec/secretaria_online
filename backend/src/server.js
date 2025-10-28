@@ -40,6 +40,9 @@ app.get('/health', (req, res) => {
 });
 
 // Rota base da API
+const apiRoutes = require('./routes');
+app.use('/api/v1', apiRoutes);
+
 app.get('/api/v1', (req, res) => {
   res.json({
     message: 'Welcome to Secretaria Online API',

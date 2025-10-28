@@ -9,7 +9,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { User } = require('../models');
-const authConfig = require('../config/auth');
+const { jwtConfig } = require('../config/auth');
 
 class AuthService {
   /**
@@ -20,7 +20,7 @@ class AuthService {
    * @throws {Error} - Se o usuário não for encontrado ou a senha estiver incorreta.
    */
   async login(login, password) {
-    const user = await User.findOne({ where: { login } });
+    const user = await User.scope('withPassword').findOne({ where: { login } });
 
     if (!user) {
       throw new Error('Usuário não encontrado');
@@ -32,8 +32,15 @@ class AuthService {
       throw new Error('Senha inválida');
     }
 
-    const token = jwt.sign({ id: user.id, role: user.role }, authConfig.secret, {
-      expiresIn: authConfig.expiresIn,
+    /**
+     * FIX: [secretOrPrivateKey must have a value]
+     * 
+     * Problema: [A configuração do JWT estava sendo importada incorretamente. `authConfig.secret` era undefined.]
+     * Solução: [Desestruturar `jwtConfig` do `require('../config/auth')` e usar `jwtConfig.secret` e `jwtConfig.accessExpiresIn`.]
+     * Data: [2025-10-27]
+     */
+    const token = jwt.sign({ id: user.id, role: user.role }, jwtConfig.secret, {
+      expiresIn: jwtConfig.accessExpiresIn,
     });
 
     return { user, token };
@@ -47,9 +54,9 @@ class AuthService {
    */
   async refreshToken(token) {
     try {
-      const decoded = jwt.verify(token, authConfig.secret);
-      const newToken = jwt.sign({ id: decoded.id, role: decoded.role }, authConfig.secret, {
-        expiresIn: authConfig.expiresIn,
+      const decoded = jwt.verify(token, jwtConfig.secret);
+      const newToken = jwt.sign({ id: decoded.id, role: decoded.role }, jwtConfig.secret, {
+        expiresIn: jwtConfig.accessExpiresIn,
       });
       return newToken;
     } catch (error) {
@@ -66,7 +73,7 @@ class AuthService {
    * @throws {Error} - Se o usuário não for encontrado ou a senha antiga estiver incorreta.
    */
   async changePassword(userId, oldPassword, newPassword) {
-    const user = await User.findByPk(userId);
+    const user = await User.scope('withPassword').findByPk(userId);
 
     if (!user) {
       throw new Error('Usuário não encontrado');
@@ -90,7 +97,7 @@ class AuthService {
    */
   async validateToken(token) {
     try {
-      const decoded = jwt.verify(token, authConfig.secret);
+      const decoded = jwt.verify(token, jwtConfig.secret);
       return decoded;
     } catch (error) {
       throw new Error('Token inválido');
