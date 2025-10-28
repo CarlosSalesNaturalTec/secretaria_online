@@ -881,12 +881,54 @@ Consulte o arquivo [contextDoc.md](./docs/contextDoc.md) para instruções detal
 
 ## 🔒 Segurança
 
-- Autenticação JWT com tokens de curta duração
-- Senhas hashadas com bcrypt
+### Autenticação e Criptografia
+
+O sistema implementa múltiplas camadas de segurança para proteger dados sensíveis:
+
+#### JWT (JSON Web Token)
+- **Access Token**: Expira em 15 minutos (configurável via `JWT_ACCESS_EXPIRATION`)
+- **Refresh Token**: Expira em 7 dias (configurável via `JWT_REFRESH_EXPIRATION`)
+- **Algoritmo**: HS256 (HMAC SHA-256)
+- **Chave Secreta**: Definida em `JWT_SECRET` (mínimo 32 caracteres recomendado)
+- **Payload**: Contém apenas id, role e email do usuário (sem dados sensíveis)
+
+**Gerar chave JWT segura:**
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+#### Bcrypt (Hash de Senhas)
+- **Salt Rounds**: 10 (balanceamento entre segurança e performance)
+- **Hash irreversível**: Senhas nunca são armazenadas em texto plano
+- **Senhas provisórias**: Geradas automaticamente com 8 caracteres (letras + números)
+- **Primeiro acesso**: Sistema força alteração de senha provisória
+
+**Exemplo de uso:**
+```javascript
+const { hashPassword, comparePassword } = require('./utils/generators');
+
+// Criar novo usuário
+const hashedPassword = await hashPassword('minhasenha123');
+// Salvar hashedPassword no banco
+
+// Validar login
+const isValid = await comparePassword('minhasenha123', hashedPasswordFromDB);
+```
+
+#### Outras Medidas de Segurança
 - Validação de inputs no frontend e backend
-- Rate limiting para prevenir ataques
+- Rate limiting para prevenir ataques de força bruta (5 tentativas em 15 minutos)
 - Headers de segurança com Helmet.js
 - CORS configurado adequadamente
+- Logs estruturados para auditoria de operações críticas
+- Soft delete em tabelas sensíveis (preserva histórico)
+
+**⚠️ IMPORTANTE EM PRODUÇÃO:**
+- Use HTTPS obrigatoriamente (certificado SSL/TLS)
+- Gere `JWT_SECRET` forte e único (nunca use valores de exemplo)
+- Configure `CORS_ORIGIN` com domínio específico (nunca use `*`)
+- Mantenha dependências atualizadas (`npm audit` regularmente)
+- Configure backups automáticos do banco de dados
 
 ## 🤝 Contribuindo
 
