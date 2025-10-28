@@ -774,6 +774,24 @@ npm install
 - [Context Documentation](./docs/contextDoc.md) - Arquitetura e padrões técnicos
 - [Backlog](./docs/backlog.json) - Features e roadmap de desenvolvimento
 
+## 🔌 API Endpoints
+
+### Autenticação
+
+- `POST /api/v1/auth/login` - Login de usuário
+- `POST /api/v1/auth/logout` - Logout de usuário
+- `POST /api/v1/auth/refresh-token` - Renovar access token
+- `POST /api/v1/auth/change-password` - Alterar senha
+
+### Usuários (Admin only)
+
+- `GET /api/v1/users` - Listar usuários com filtros e paginação
+  - Query params: `role` (admin|teacher|student), `search`, `page`, `limit`
+- `GET /api/v1/users/:id` - Buscar usuário por ID
+- `POST /api/v1/users` - Criar novo usuário
+- `PUT /api/v1/users/:id` - Atualizar usuário
+- `DELETE /api/v1/users/:id` - Excluir usuário (soft delete)
+
 ## 🧪 Testes
 
 ```bash
