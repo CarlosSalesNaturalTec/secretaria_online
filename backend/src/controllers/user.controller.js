@@ -69,8 +69,8 @@ class UserController {
         where,
         limit: parseInt(limit),
         offset: parseInt(offset),
-        order: [['createdAt', 'DESC']],
-        attributes: { exclude: ['passwordHash'] }, // Nunca retornar hash de senha
+        order: [['created_at', 'DESC']], // underscored: true no model usa snake_case
+        attributes: { exclude: ['password_hash'] }, // Nunca retornar hash de senha (snake_case)
       });
 
       // Calcular metadados de paginação
@@ -121,7 +121,7 @@ class UserController {
       const { id } = req.params;
 
       const user = await User.findByPk(id, {
-        attributes: { exclude: ['passwordHash'] },
+        attributes: { exclude: ['password_hash'] },
       });
 
       if (!user) {
@@ -248,12 +248,12 @@ class UserController {
         });
       }
 
-      // Criar usuário (passwordHash será gerado automaticamente pelo hook do model)
+      // Criar usuário (password_hash será gerado automaticamente pelo hook do model)
       const user = await User.create({
         name,
         email,
         login,
-        passwordHash: password, // O hook beforeCreate irá hashear
+        password, // Campo virtual - O hook beforeValidate irá hashear e definir password_hash
         role,
         cpf,
         rg,
@@ -264,9 +264,9 @@ class UserController {
         reservist,
       });
 
-      // Remover passwordHash da resposta
+      // Remover password_hash da resposta (já é excluído pelo defaultScope, mas garantir)
       const userResponse = user.toJSON();
-      delete userResponse.passwordHash;
+      delete userResponse.password_hash;
 
       logger.info('[UserController] Usuário criado com sucesso', {
         userId: user.id,
@@ -394,17 +394,17 @@ class UserController {
         ...(reservist && { reservist }),
       };
 
-      // Se senha foi informada, hashear
+      // Se senha foi informada, usar campo virtual (hook irá hashear)
       if (password) {
-        updateData.passwordHash = await bcrypt.hash(password, 10);
+        updateData.password = password; // Campo virtual - hook beforeValidate irá processar
       }
 
       // Atualizar usuário
       await user.update(updateData);
 
-      // Remover passwordHash da resposta
+      // Remover password_hash da resposta (já é excluído pelo defaultScope, mas garantir)
       const userResponse = user.toJSON();
-      delete userResponse.passwordHash;
+      delete userResponse.password_hash;
 
       logger.info('[UserController] Usuário atualizado com sucesso', {
         userId: id,

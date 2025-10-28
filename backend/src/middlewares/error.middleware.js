@@ -73,6 +73,11 @@ class AppError extends Error {
  * Comportamento:
  * - Erros operacionais (isOperational = true): Log como 'warn', retorna mensagem ao cliente
  * - Erros não operacionais (bugs): Log como 'error' com stack trace, retorna mensagem genérica
+ * - Erros do Sequelize: Transformados automaticamente em erros operacionais apropriados
+ *   - SequelizeValidationError: 400 VALIDATION_ERROR
+ *   - SequelizeUniqueConstraintError: 409 DUPLICATE_ENTRY
+ *   - SequelizeForeignKeyConstraintError: 400 INVALID_REFERENCE
+ *   - SequelizeDatabaseError: 500 DATABASE_ERROR
  * - Em desenvolvimento: Inclui stack trace na resposta
  * - Em produção: Oculta detalhes de erros não operacionais
  *
@@ -90,6 +95,39 @@ class AppError extends Error {
 function errorHandler(err, req, res, next) {
   // Desestruturação com valores padrão
   let { statusCode, message, code, details, isOperational } = err;
+
+  // Trata erros específicos do Sequelize
+  if (err.name === 'SequelizeValidationError') {
+    statusCode = 400;
+    code = 'VALIDATION_ERROR';
+    message = 'Erro de validação nos dados enviados';
+    isOperational = true;
+    details = err.errors.map(error => ({
+      field: error.path,
+      message: error.message,
+      value: error.value,
+    }));
+  } else if (err.name === 'SequelizeUniqueConstraintError') {
+    statusCode = 409;
+    code = 'DUPLICATE_ENTRY';
+    message = 'Já existe um registro com estes dados';
+    isOperational = true;
+    details = err.errors.map(error => ({
+      field: error.path,
+      message: error.message,
+      value: error.value,
+    }));
+  } else if (err.name === 'SequelizeForeignKeyConstraintError') {
+    statusCode = 400;
+    code = 'INVALID_REFERENCE';
+    message = 'Referência inválida a outro registro';
+    isOperational = true;
+  } else if (err.name === 'SequelizeDatabaseError') {
+    statusCode = 500;
+    code = 'DATABASE_ERROR';
+    message = 'Erro ao processar operação no banco de dados';
+    isOperational = false;
+  }
 
   // Define valores padrão para erros não tratados
   if (!statusCode) statusCode = 500;
