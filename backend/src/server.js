@@ -124,29 +124,14 @@ app.get('/api/v1', (req, res) => {
   });
 });
 
-// Rota 404 - Não encontrada
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    error: {
-      code: 'NOT_FOUND',
-      message: 'Endpoint not found',
-    },
-  });
-});
+// Middleware de tratamento de erros - deve ser o último middleware
+const { errorHandler, notFoundHandler } = require('./middlewares/error.middleware');
 
-// Middleware de tratamento de erros global
-app.use((err, req, res, _next) => {
-  console.error('[ERROR]', err);
+// Rota 404 - Não encontrada (antes do errorHandler)
+app.use(notFoundHandler);
 
-  res.status(err.statusCode || 500).json({
-    success: false,
-    error: {
-      code: err.code || 'INTERNAL_ERROR',
-      message: err.message || 'Internal server error',
-    },
-  });
-});
+// Middleware de tratamento de erros global (sempre por último)
+app.use(errorHandler);
 
 // Configuração da porta
 const PORT = process.env.PORT || 3000;
