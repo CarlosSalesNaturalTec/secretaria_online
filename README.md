@@ -394,8 +394,6 @@ npm run db:migrate:undo:all
   - Validações: nome deve ter entre 3 e 100 caracteres, prazo não pode ser negativo
 
 - ✅ **create-requests** - Tabela de solicitações feitas por alunos
-- 🟡 **feat-020: Criar middleware de autenticação JWT** - Em desenvolvimento
-
   - Campos: id, student_id, request_type_id, description, status (ENUM: pending|approved|rejected), reviewed_by, reviewed_at, observations, timestamps, deleted_at
   - Relacionamento: Uma solicitação pertence a um aluno, a um tipo de solicitação e pode ser revisada por um admin
   - Índices otimizados para student_id, request_type_id, status, reviewed_by, created_at, deleted_at

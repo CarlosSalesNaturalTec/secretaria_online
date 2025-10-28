@@ -127,14 +127,17 @@
         "dependencias": [
           "feat-002"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-28",
+        "dataConclusao": "2025-10-28",
         "tags": [
           "utils"
         ],
         "artefatos": [
           "backend/src/utils/formatters.js",
           "backend/src/utils/constants.js"
-        ]
+        ],
+        "observacoes": "Feature implementada e aprovada"
       }
     ]
   }
