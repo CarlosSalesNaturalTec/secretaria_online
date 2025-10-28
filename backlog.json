@@ -22,7 +22,10 @@
           "feat-021",
           "feat-025"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-28",
+        "dataConclusao": "2025-10-28",
+        "observacoes": "Feature implementada e aprovada",
         "tags": [
           "user",
           "controller",
