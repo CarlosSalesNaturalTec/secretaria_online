@@ -20,7 +20,8 @@
         "dependencias": [
           "feat-002"
         ],
-        "status": "Não Iniciada",
+        "status": "Em Andamento",
+        "dataInicio": "2025-10-27",
         "tags": [
           "auth",
           "security"
@@ -28,7 +29,8 @@
         "artefatos": [
           "backend/src/config/auth.js",
           "backend/src/utils/generators.js"
-        ]
+        ],
+        "observacoes": "Feature implementada, aguardando testes manuais"
       },
       {
         "id": "feat-018",
