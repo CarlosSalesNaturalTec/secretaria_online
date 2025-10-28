@@ -952,9 +952,59 @@ router.get('/grades', authenticate, authorizeStudent, GradeController.getMyGrade
 - `401 Unauthorized`: Usuário não autenticado
 - `403 Forbidden`: Usuário autenticado mas sem permissão
 
+#### Rate Limiting (Proteção contra Força Bruta)
+O sistema implementa limitação de taxa (rate limiting) para proteger contra ataques de força bruta e uso excessivo de recursos:
+
+**Endpoints protegidos:**
+- **Login** (`POST /api/auth/login`):
+  - Máximo: 5 tentativas por IP
+  - Janela de tempo: 15 minutos
+  - Retorno: HTTP 429 (Too Many Requests) após exceder o limite
+
+- **Mudança de senha** (`POST /api/auth/change-password`):
+  - Máximo: 3 tentativas por IP
+  - Janela de tempo: 60 minutos
+  - Proteção mais rigorosa por ser operação crítica de segurança
+
+**Headers de resposta:**
+Quando o rate limiting está ativo, a API retorna headers informativos:
+```
+RateLimit-Limit: 5
+RateLimit-Remaining: 3
+RateLimit-Reset: 1234567890
+```
+
+**Configuração:**
+```javascript
+// backend/src/middlewares/rateLimiter.middleware.js
+const { loginRateLimiter, passwordChangeRateLimiter } = require('./middlewares/rateLimiter.middleware');
+
+router.post('/login', loginRateLimiter, AuthController.login);
+router.post('/change-password', passwordChangeRateLimiter, AuthController.changePassword);
+```
+
+**Resposta ao exceder limite:**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "RATE_LIMIT_EXCEEDED",
+    "message": "Muitas tentativas de login. Por favor, tente novamente em 15 minutos."
+  },
+  "retryAfter": 900
+}
+```
+
+**Variáveis de ambiente:**
+```env
+RATE_LIMIT_LOGIN_MAX=5          # Máximo de tentativas de login
+RATE_LIMIT_LOGIN_WINDOW=15      # Janela em minutos
+```
+
+**⚠️ Nota:** Em ambiente de teste (`NODE_ENV=test`), o rate limiting é automaticamente desabilitado.
+
 #### Outras Medidas de Segurança
 - Validação de inputs no frontend e backend
-- Rate limiting para prevenir ataques de força bruta (5 tentativas em 15 minutos)
 - Headers de segurança com Helmet.js
 - CORS configurado adequadamente
 - Logs estruturados para auditoria de operações críticas
