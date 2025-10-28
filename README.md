@@ -883,9 +883,9 @@ Consulte o arquivo [contextDoc.md](./docs/contextDoc.md) para instruções detal
 
 ## 🔒 Segurança
 
-### Autenticação e Criptografia
+### Autenticação e Autorização
 
-O sistema implementa múltiplas camadas de segurança para proteger dados sensíveis:
+O sistema implementa múltiplas camadas de segurança para proteger dados sensíveis e controlar acesso aos recursos:
 
 #### JWT (JSON Web Token)
 - **Access Token**: Expira em 15 minutos (configurável via `JWT_ACCESS_EXPIRATION`)
@@ -916,6 +916,41 @@ const hashedPassword = await hashPassword('minhasenha123');
 // Validar login
 const isValid = await comparePassword('minhasenha123', hashedPasswordFromDB);
 ```
+
+#### RBAC (Role-Based Access Control)
+O sistema implementa controle de acesso baseado em roles (perfis de usuário):
+
+- **Roles disponíveis:**
+  - `admin`: Acesso total ao sistema (gestão de usuários, cursos, documentos, solicitações)
+  - `teacher`: Acesso às suas turmas, alunos e lançamento de notas
+  - `student`: Acesso às suas notas, documentos e solicitações
+
+**Middleware de autorização:**
+```javascript
+const { authorize, ROLES } = require('./middlewares/rbac.middleware');
+
+// Apenas administradores
+router.get('/users', authenticate, authorize(ROLES.ADMIN), UserController.list);
+
+// Administradores e professores
+router.get('/classes', authenticate, authorize(ROLES.ADMIN, ROLES.TEACHER), ClassController.list);
+
+// Qualquer usuário autenticado
+router.get('/profile', authenticate, authorize(ROLES.ADMIN, ROLES.TEACHER, ROLES.STUDENT), UserController.getProfile);
+```
+
+**Middlewares pré-configurados:**
+```javascript
+const { authorizeAdmin, authorizeTeacher, authorizeStudent, authorizeAny } = require('./middlewares/rbac.middleware');
+
+// Uso simplificado
+router.get('/users', authenticate, authorizeAdmin, UserController.list);
+router.get('/grades', authenticate, authorizeStudent, GradeController.getMyGrades);
+```
+
+**Respostas HTTP:**
+- `401 Unauthorized`: Usuário não autenticado
+- `403 Forbidden`: Usuário autenticado mas sem permissão
 
 #### Outras Medidas de Segurança
 - Validação de inputs no frontend e backend
