@@ -56,10 +56,43 @@ app.use(
 );
 
 // CORS - Configuração para permitir requisições do frontend
+// Suporta múltiplas origens para ambientes diferentes
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim())
+  : ['http://localhost:5173'];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    // Origem(ns) permitida(s) - pode ser string única ou array
+    origin: (origin, callback) => {
+      // Permite requisições sem origin (ex: Postman, mobile apps, curl)
+      if (!origin) return callback(null, true);
+
+      // Verifica se a origem está na lista de permitidas
+      if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+        callback(null, true);
+      } else {
+        callback(new Error('Origem não permitida pela política de CORS'));
+      }
+    },
+    // Permite envio de credenciais (cookies, authorization headers)
     credentials: true,
+    // Métodos HTTP permitidos
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    // Headers permitidos nas requisições
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Accept',
+      'Origin',
+    ],
+    // Headers expostos nas respostas (acessíveis pelo frontend)
+    exposedHeaders: ['Content-Range', 'X-Content-Range', 'X-Total-Count'],
+    // Tempo de cache da requisição preflight (OPTIONS) em segundos
+    maxAge: 86400, // 24 horas
+    // Inclui status 204 para requisições OPTIONS bem-sucedidas
+    optionsSuccessStatus: 204,
   })
 );
 

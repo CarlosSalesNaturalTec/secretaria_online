@@ -31,6 +31,7 @@ A **Secretaria Online** é uma aplicação web destinada à automação dos proc
 - JWT (Autenticação)
 - bcryptjs (Hash de senhas)
 - Helmet.js (Headers de segurança)
+- CORS (Cross-Origin Resource Sharing)
 - Nodemailer (Envio de emails)
 - Puppeteer/PDFKit (Geração de PDFs)
 - Winston (Logging)
@@ -682,8 +683,57 @@ npm install
 - Verifique no código: `console.log(import.meta.env.VITE_API_BASE_URL)`
 
 #### Frontend: Erro de CORS ao chamar API
-- Verifique se `CORS_ORIGIN` no backend `.env` inclui `http://localhost:5173`
-- Em produção, use o domínio correto: `https://seudominio.com`
+
+**Sintomas:**
+- Erro no console: "Access to fetch at '...' from origin '...' has been blocked by CORS policy"
+- Requisições retornam erro de rede ou status 0
+
+**Soluções:**
+
+1. **Verificar variável CORS_ORIGIN no backend:**
+   ```bash
+   # No arquivo backend/.env, certifique-se que está definida:
+   CORS_ORIGIN=http://localhost:5173
+   ```
+
+2. **Múltiplas origens (desenvolvimento + produção):**
+   ```bash
+   # Separe por vírgula para permitir múltiplos domínios
+   CORS_ORIGIN=http://localhost:5173,https://seudominio.com
+   ```
+
+3. **Verificar configuração do frontend:**
+   - Em `frontend/.env`, confirme que `VITE_API_BASE_URL` aponta para a API correta
+   - Desenvolvimento: `http://localhost:3000/api/v1`
+   - Produção: `https://api.seudominio.com/api/v1`
+
+4. **Reiniciar servidor backend após modificar .env:**
+   ```bash
+   cd backend
+   # Pressione Ctrl+C para parar o servidor
+   npm run dev
+   ```
+
+5. **Testar CORS com curl:**
+   ```bash
+   curl -H "Origin: http://localhost:5173" \
+        -H "Access-Control-Request-Method: GET" \
+        -H "Access-Control-Request-Headers: Content-Type" \
+        -X OPTIONS \
+        http://localhost:3000/api/v1/health --verbose
+   ```
+
+   **Resultado esperado:**
+   - Status: 204 No Content
+   - Headers incluindo:
+     - `Access-Control-Allow-Origin: http://localhost:5173`
+     - `Access-Control-Allow-Credentials: true`
+     - `Access-Control-Allow-Methods: GET,POST,PUT,PATCH,DELETE,OPTIONS`
+
+6. **Configuração específica para produção:**
+   - **NUNCA** use `CORS_ORIGIN=*` em produção (inseguro!)
+   - Use apenas domínios específicos: `CORS_ORIGIN=https://seudominio.com`
+   - Certifique-se de usar HTTPS em produção
 
 #### Erro: "SMTP connection failed"
 - Verifique credenciais SMTP no `.env`
@@ -887,6 +937,76 @@ Consulte o arquivo [contextDoc.md](./docs/contextDoc.md) para instruções detal
 ### Autenticação e Autorização
 
 O sistema implementa múltiplas camadas de segurança para proteger dados sensíveis e controlar acesso aos recursos:
+
+#### CORS (Cross-Origin Resource Sharing)
+
+O sistema implementa **CORS** para controlar quais domínios externos podem fazer requisições à API:
+
+**Configuração aplicada:**
+
+- **Origens permitidas**: Definidas em `CORS_ORIGIN` no `.env`
+  - Desenvolvimento: `http://localhost:5173` (frontend Vite padrão)
+  - Produção: `https://seudominio.com`
+  - Múltiplas origens: `https://dominio1.com,https://dominio2.com` (separadas por vírgula)
+
+- **Credenciais**: Habilitado (`credentials: true`)
+  - Permite envio de cookies e headers de autorização (JWT)
+
+- **Métodos HTTP**: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `OPTIONS`
+  - Todos os métodos REST necessários para CRUD completo
+
+- **Headers permitidos**:
+  - `Content-Type`: Para envio de JSON/form-data
+  - `Authorization`: Para tokens JWT
+  - `X-Requested-With`: Identificador de requisições AJAX
+  - `Accept`, `Origin`: Headers padrão do navegador
+
+- **Headers expostos**:
+  - `Content-Range`, `X-Content-Range`, `X-Total-Count`: Para paginação e listagens
+
+- **Preflight cache**: 24 horas (86400 segundos)
+  - Reduz requisições OPTIONS repetidas do navegador
+
+- **Requisições sem origin**: Automaticamente permitidas
+  - Mobile apps, Postman, curl não enviam header `Origin`
+
+**Como funciona:**
+
+Quando o frontend faz uma requisição para a API:
+1. Navegador envia requisição OPTIONS (preflight) para verificar permissões
+2. Servidor retorna headers CORS informando se a origem é permitida
+3. Se permitido, navegador procede com a requisição real (GET, POST, etc.)
+4. Servidor retorna resposta com headers CORS confirmando permissão
+
+**Configuração no .env:**
+```env
+# Desenvolvimento (frontend local)
+CORS_ORIGIN=http://localhost:5173
+
+# Produção (domínio único)
+CORS_ORIGIN=https://seudominio.com
+
+# Múltiplos ambientes
+CORS_ORIGIN=http://localhost:5173,https://staging.seudominio.com,https://seudominio.com
+```
+
+**⚠️ Importante:**
+- **NUNCA** use `CORS_ORIGIN=*` em produção (permite qualquer domínio fazer requisições)
+- Em produção, liste apenas os domínios confiáveis
+- Requisições sem origin (Postman, mobile) são permitidas automaticamente
+- HTTPS é obrigatório em produção para segurança
+
+**Validação da configuração:**
+```bash
+# Testar preflight (OPTIONS)
+curl -H "Origin: http://localhost:5173" \
+     -H "Access-Control-Request-Method: GET" \
+     -H "Access-Control-Request-Headers: Content-Type" \
+     -X OPTIONS \
+     http://localhost:3000/api/v1/health --verbose
+
+# Resposta esperada: HTTP 204 com headers CORS
+```
 
 #### Helmet.js (Headers de Segurança HTTP)
 
