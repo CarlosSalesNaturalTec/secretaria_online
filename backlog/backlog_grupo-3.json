@@ -20,7 +20,9 @@
         "dependencias": [
           "feat-002"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-27",
+        "dataConclusao": "2025-10-27",
         "tags": [
           "auth",
           "security"
@@ -28,7 +30,8 @@
         "artefatos": [
           "backend/src/config/auth.js",
           "backend/src/utils/generators.js"
-        ]
+        ],
+        "observacoes": "Feature implementada e aprovada"
       },
       {
         "id": "feat-018",
@@ -36,18 +39,17 @@
         "descricao": "Implementar AuthService com métodos: login (validar credenciais, gerar JWT), refreshToken, changePassword, validateToken",
         "estimativa": "2h",
         "prioridade": "alta",
-        "dependencias": [
-          "feat-017",
-          "feat-007"
-        ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-27",
+        "dataConclusao": "2025-10-27",
         "tags": [
           "auth",
           "service"
         ],
         "artefatos": [
           "backend/src/services/auth.service.js"
-        ]
+        ],
+        "observacoes": "Feature implementada e aprovada"
       },
       {
         "id": "feat-019",
