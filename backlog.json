@@ -20,8 +20,9 @@
         "dependencias": [
           "feat-002"
         ],
-        "status": "Em Andamento",
+        "status": "Concluída",
         "dataInicio": "2025-10-27",
+        "dataConclusao": "2025-10-27",
         "tags": [
           "auth",
           "security"
@@ -30,7 +31,7 @@
           "backend/src/config/auth.js",
           "backend/src/utils/generators.js"
         ],
-        "observacoes": "Feature implementada, aguardando testes manuais"
+        "observacoes": "Feature implementada e aprovada"
       },
       {
         "id": "feat-018",
