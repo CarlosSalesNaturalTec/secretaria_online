@@ -6,138 +6,95 @@
     "dataGeracao": "2025-10-23"
   },
   "grupo": {
-    "id": "grupo-4",
-    "nome": "Backend - Middlewares e Utilitários",
-    "descricao": "Middlewares gerais, validação, logging e tratamento de erros",
+    "id": "grupo-5",
+    "nome": "Backend - API de Usuários e Estudantes",
+    "descricao": "CRUD de usuários, alunos e professores",
     "prioridade": "alta",
     "features": [
       {
-        "id": "feat-023",
-        "titulo": "Configurar Helmet.js para headers de segurança",
-        "descricao": "Instalar helmet, configurar em server.js com CSP, HSTS e outras proteções HTTP",
-        "estimativa": "30min",
+        "id": "feat-029",
+        "titulo": "Criar UserController e rotas básicas",
+        "descricao": "Implementar UserController com métodos: list, getById, create, update, delete. Criar user.routes.js com validações (somente admin)",
+        "estimativa": "2h30min",
         "prioridade": "alta",
         "dependencias": [
-          "feat-002"
+          "feat-007",
+          "feat-021",
+          "feat-025"
         ],
-        "status": "Concluída",
-        "dataInicio": "2025-10-28",
-        "dataConclusao": "2025-10-28",
+        "status": "Não Iniciada",
         "tags": [
-          "security",
-          "middleware"
+          "user",
+          "controller",
+          "api"
         ],
         "artefatos": [
-          "configuração helmet em server.js"
-        ],
-        "observacoes": "Feature implementada e aprovada"
+          "backend/src/controllers/user.controller.js",
+          "backend/src/routes/user.routes.js"
+        ]
       },
       {
-        "id": "feat-024",
-        "titulo": "Configurar CORS",
-        "descricao": "Instalar cors, configurar para permitir requisições do frontend (origin, credentials, methods)",
-        "estimativa": "30min",
+        "id": "feat-030",
+        "titulo": "Criar StudentController e StudentService",
+        "descricao": "Implementar StudentService com lógica de criação de aluno (gerar senha provisória, hash). StudentController com CRUD completo. Criar student.routes.js",
+        "estimativa": "3h",
         "prioridade": "alta",
         "dependencias": [
-          "feat-002"
+          "feat-007",
+          "feat-017",
+          "feat-021"
         ],
-        "status": "Concluída",
-        "dataInicio": "2025-10-28",
-        "dataConclusao": "2025-10-28",
+        "status": "Não Iniciada",
         "tags": [
-          "config",
-          "middleware"
+          "student",
+          "controller",
+          "service",
+          "api"
         ],
         "artefatos": [
-          "configuração cors em server.js"
-        ],
-        "observacoes": "Feature implementada e aprovada"
+          "backend/src/services/student.service.js",
+          "backend/src/controllers/student.controller.js",
+          "backend/src/routes/student.routes.js"
+        ]
       },
       {
-        "id": "feat-025",
-        "titulo": "Criar middleware de validação com express-validator",
-        "descricao": "Instalar express-validator, criar validation.middleware.js com função handleValidationErrors e validadores reutilizáveis (CPF, email, etc)",
-        "estimativa": "1h30min",
-        "prioridade": "alta",
-        "dependencias": [
-          "feat-002"
-        ],
-        "status": "Concluída",
-        "dataInicio": "2025-10-28",
-        "dataConclusao": "2025-10-28",
-        "tags": [
-          "validation",
-          "middleware"
-        ],
-        "artefatos": [
-          "backend/src/middlewares/validation.middleware.js",
-          "backend/src/utils/validators.js"
-        ],
-        "observacoes": "Feature implementada e aprovada"
-      },
-      {
-        "id": "feat-026",
-        "titulo": "Configurar Winston para logging",
-        "descricao": "Instalar winston, criar utils/logger.js com transports para console e arquivo (error.log, combined.log), configurar níveis e formato JSON",
-        "estimativa": "1h",
-        "prioridade": "alta",
-        "dependencias": [
-          "feat-002"
-        ],
-        "status": "Concluída",
-        "dataInicio": "2025-10-28",
-        "dataConclusao": "2025-10-28",
-        "tags": [
-          "logging",
-          "utils"
-        ],
-        "artefatos": [
-          "backend/src/utils/logger.js",
-          "backend/logs/"
-        ],
-        "observacoes": "Feature implementada e aprovada"
-      },
-      {
-        "id": "feat-027",
-        "titulo": "Criar middleware de tratamento de erros",
-        "descricao": "Implementar error.middleware.js com classe AppError e errorHandler que loga erros com Winston e retorna resposta JSON padronizada",
-        "estimativa": "1h30min",
-        "prioridade": "alta",
-        "dependencias": [
-          "feat-026"
-        ],
-        "status": "Concluída",
-        "dataInicio": "2025-10-28",
-        "dataConclusao": "2025-10-28",
-        "tags": [
-          "error-handling",
-          "middleware"
-        ],
-        "artefatos": [
-          "backend/src/middlewares/error.middleware.js"
-        ],
-        "observacoes": "Feature implementada e aprovada"
-      },
-      {
-        "id": "feat-028",
-        "titulo": "Criar utilitários de formatação e constantes",
-        "descricao": "Implementar utils/formatters.js (formatação de CPF, data, moeda) e utils/constants.js (enums de status, roles, etc)",
+        "id": "feat-031",
+        "titulo": "Adicionar endpoint de reset de senha para aluno",
+        "descricao": "Implementar POST /students/:id/reset-password (admin only) que gera nova senha provisória e retorna (será enviada por email posteriormente)",
         "estimativa": "1h",
         "prioridade": "media",
         "dependencias": [
-          "feat-002"
+          "feat-030"
         ],
-        "status": "Concluída",
-        "dataInicio": "2025-10-28",
-        "dataConclusao": "2025-10-28",
+        "status": "Não Iniciada",
         "tags": [
-          "utils"
+          "student",
+          "auth"
         ],
         "artefatos": [
-          "backend/src/utils/formatters.js",
-          "backend/src/utils/constants.js"
+          "método resetPassword em student.controller.js"
+        ]
+      },
+      {
+        "id": "feat-032",
+        "titulo": "Criar TeacherController e rotas",
+        "descricao": "Implementar TeacherController com CRUD (similar a StudentController). Criar teacher.routes.js com validações e autorização admin",
+        "estimativa": "2h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-007",
+          "feat-021"
         ],
-        "observacoes": "Feature implementada e aprovada"
+        "status": "Não Iniciada",
+        "tags": [
+          "teacher",
+          "controller",
+          "api"
+        ],
+        "artefatos": [
+          "backend/src/controllers/teacher.controller.js",
+          "backend/src/routes/teacher.routes.js"
+        ]
       }
     ]
   }

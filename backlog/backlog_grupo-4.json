@@ -20,14 +20,17 @@
         "dependencias": [
           "feat-002"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-28",
+        "dataConclusao": "2025-10-28",
         "tags": [
           "security",
           "middleware"
         ],
         "artefatos": [
           "configuração helmet em server.js"
-        ]
+        ],
+        "observacoes": "Feature implementada e aprovada"
       },
       {
         "id": "feat-024",
@@ -38,14 +41,17 @@
         "dependencias": [
           "feat-002"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-28",
+        "dataConclusao": "2025-10-28",
         "tags": [
           "config",
           "middleware"
         ],
         "artefatos": [
           "configuração cors em server.js"
-        ]
+        ],
+        "observacoes": "Feature implementada e aprovada"
       },
       {
         "id": "feat-025",
@@ -56,7 +62,9 @@
         "dependencias": [
           "feat-002"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-28",
+        "dataConclusao": "2025-10-28",
         "tags": [
           "validation",
           "middleware"
@@ -64,7 +72,8 @@
         "artefatos": [
           "backend/src/middlewares/validation.middleware.js",
           "backend/src/utils/validators.js"
-        ]
+        ],
+        "observacoes": "Feature implementada e aprovada"
       },
       {
         "id": "feat-026",
@@ -75,7 +84,9 @@
         "dependencias": [
           "feat-002"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-28",
+        "dataConclusao": "2025-10-28",
         "tags": [
           "logging",
           "utils"
@@ -83,7 +94,8 @@
         "artefatos": [
           "backend/src/utils/logger.js",
           "backend/logs/"
-        ]
+        ],
+        "observacoes": "Feature implementada e aprovada"
       },
       {
         "id": "feat-027",
@@ -94,14 +106,17 @@
         "dependencias": [
           "feat-026"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-28",
+        "dataConclusao": "2025-10-28",
         "tags": [
           "error-handling",
           "middleware"
         ],
         "artefatos": [
           "backend/src/middlewares/error.middleware.js"
-        ]
+        ],
+        "observacoes": "Feature implementada e aprovada"
       },
       {
         "id": "feat-028",
@@ -112,14 +127,17 @@
         "dependencias": [
           "feat-002"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-28",
+        "dataConclusao": "2025-10-28",
         "tags": [
           "utils"
         ],
         "artefatos": [
           "backend/src/utils/formatters.js",
           "backend/src/utils/constants.js"
-        ]
+        ],
+        "observacoes": "Feature implementada e aprovada"
       }
     ]
   }
