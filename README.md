@@ -933,6 +933,139 @@ npm run start:prod
 
 Consulte o arquivo [contextDoc.md](./docs/contextDoc.md) para instruções detalhadas de deploy no Hostgator.
 
+## 📋 Sistema de Logging
+
+O sistema utiliza **Winston** para logging estruturado, permitindo rastreamento completo de operações e diagnóstico de problemas.
+
+### Configuração
+
+O logger está configurado em `backend/src/utils/logger.js` com:
+
+- **Transports**: Console (sempre) + Arquivos (produção)
+- **Níveis de log**: error, warn, info, http, verbose, debug
+- **Formato**: JSON estruturado em produção, legível em desenvolvimento
+- **Rotação de logs**: Arquivos limitados a 5MB com histórico de 5 arquivos
+
+### Arquivos de Log
+
+```
+backend/logs/
+├── combined.log    # Todos os logs (info, warn, error, etc.)
+└── error.log       # Apenas logs de erro
+```
+
+**⚠️ Importante:**
+- Em produção, logs são salvos em arquivos automaticamente
+- Em desenvolvimento, logs são exibidos apenas no console (a menos que `LOG_TO_FILE=true`)
+- Logs são ignorados pelo Git (configurado em `.gitignore`)
+- Arquivos antigos são automaticamente removidos após atingir o limite
+
+### Variáveis de Ambiente
+
+```env
+# Nível de log (error|warn|info|http|verbose|debug)
+LOG_LEVEL=debug                    # desenvolvimento: debug, produção: info
+
+# Forçar gravação em arquivo mesmo em desenvolvimento
+LOG_TO_FILE=false                  # Padrão: apenas em produção
+
+# NODE_ENV determina automaticamente o comportamento
+NODE_ENV=development               # ou production
+```
+
+### Uso Básico
+
+```javascript
+const logger = require('./utils/logger');
+
+// Logs simples
+logger.info('Usuário criado com sucesso', { userId: 123 });
+logger.warn('Documento rejeitado', { documentId: 456, reason: 'ilegível' });
+logger.error('Erro ao processar matrícula', { error: err.message });
+logger.debug('Processando validação de CPF', { cpf: '123.456.789-00' });
+
+// Helpers especializados
+logger.logUserAction('login', { userId: 123, ip: '192.168.1.1' });
+logger.logError('AuthController.login', error, { userId: 123 });
+
+// Stream para Morgan (logs HTTP)
+const morgan = require('morgan');
+app.use(morgan('combined', { stream: logger.stream }));
+```
+
+### Níveis de Log
+
+| Nível | Quando Usar | Exemplos |
+|-------|-------------|----------|
+| **error** | Erros críticos que impedem funcionamento | Falha ao conectar no banco, exceções não tratadas |
+| **warn** | Situações anormais que não impedem funcionamento | Documento rejeitado, tentativa de login com senha incorreta |
+| **info** | Informações gerais sobre operações | Usuário criado, matrícula aprovada, documento enviado |
+| **http** | Requisições HTTP (integração com Morgan) | GET /api/users 200, POST /api/login 401 |
+| **verbose** | Informações detalhadas para debugging | Detalhes de queries SQL, payloads completos |
+| **debug** | Informações de debug para desenvolvimento | Valores de variáveis, fluxo de execução |
+
+### Formato de Log
+
+**Produção (JSON estruturado):**
+```json
+{
+  "timestamp": "2025-10-28 10:30:00",
+  "level": "info",
+  "message": "User action: login",
+  "action": "login",
+  "userId": 123,
+  "role": "admin",
+  "ip": "192.168.1.1"
+}
+```
+
+**Desenvolvimento (legível):**
+```
+2025-10-28 10:30:00 [info]: User action: login {"action":"login","userId":123,"role":"admin","ip":"192.168.1.1"}
+```
+
+### Operações Logadas Automaticamente
+
+O sistema registra automaticamente:
+
+- ✅ Login/logout de usuários
+- ✅ Criação/edição/exclusão de recursos (alunos, professores, cursos, etc.)
+- ✅ Aprovação/rejeição de documentos
+- ✅ Aprovação/rejeição de solicitações
+- ✅ Upload de arquivos
+- ✅ Geração de PDFs (contratos)
+- ✅ Erros e exceções
+- ✅ Requisições HTTP (se Morgan estiver configurado)
+
+### Monitoramento em Produção
+
+Para monitorar logs em produção:
+
+```bash
+# Ver logs em tempo real
+tail -f backend/logs/combined.log
+
+# Ver apenas erros
+tail -f backend/logs/error.log
+
+# Buscar logs específicos
+grep "userId.*123" backend/logs/combined.log
+
+# Contar erros por tipo
+grep -o '"code":"[^"]*"' backend/logs/error.log | sort | uniq -c
+```
+
+### Integração com Serviços Externos (Opcional)
+
+Winston suporta transports adicionais para serviços de monitoramento:
+
+- **Loggly**: `winston-loggly-bulk`
+- **Papertrail**: `winston-papertrail`
+- **Slack**: `winston-slack-webhook-transport`
+- **Sentry**: `@sentry/node`
+
+Consulte a documentação do Winston para configuração: https://github.com/winstonjs/winston
+
 ## 🔒 Segurança
 
 ### Autenticação e Autorização
