@@ -32,6 +32,7 @@ A **Secretaria Online** é uma aplicação web destinada à automação dos proc
 - bcryptjs (Hash de senhas)
 - Helmet.js (Headers de segurança)
 - CORS (Cross-Origin Resource Sharing)
+- express-validator (Validação de requisições)
 - Nodemailer (Envio de emails)
 - Puppeteer/PDFKit (Geração de PDFs)
 - Winston (Logging)
@@ -1178,8 +1179,72 @@ RATE_LIMIT_LOGIN_WINDOW=15      # Janela em minutos
 
 **⚠️ Nota:** Em ambiente de teste (`NODE_ENV=test`), o rate limiting é automaticamente desabilitado.
 
+#### Validação de Dados (express-validator)
+
+O sistema implementa validação robusta em todas as requisições usando **express-validator** combinado com validadores customizados:
+
+**Validadores disponíveis:**
+- **CPF**: Valida formato e dígitos verificadores
+- **Email**: Validação padrão RFC5322 + normalização
+- **Telefone**: Valida formato brasileiro (10-11 dígitos)
+- **Senha forte**: Mínimo 8 caracteres, maiúsculas, minúsculas e números
+- **Data de nascimento**: Valida idade mínima (16 anos)
+- **Notas**: 0-10 com no máximo 2 casas decimais
+- **Conceitos**: satisfactory/unsatisfactory
+- **Códigos de curso/disciplina**: Formato AAA999
+- **Semestres**: 1-12
+- **Paginação**: Page/limit/sort
+
+**Arquivos implementados:**
+- `backend/src/middlewares/validation.middleware.js`: Middleware com regras de validação pré-configuradas para cada entidade
+- `backend/src/utils/validators.js`: Funções de validação customizadas reutilizáveis
+
+**Uso em rotas:**
+```javascript
+const { studentValidationRules, handleValidationErrors } = require('./middlewares/validation.middleware');
+
+router.post('/students',
+  authenticate,
+  authorizeAdmin,
+  studentValidationRules(),
+  handleValidationErrors,
+  StudentController.create
+);
+```
+
+**Resposta de erro padronizada:**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Dados inválidos fornecidos",
+    "details": [
+      {
+        "field": "cpf",
+        "message": "CPF inválido",
+        "value": "123.456.789-00"
+      }
+    ]
+  }
+}
+```
+
+**Validadores pré-configurados disponíveis:**
+- `studentValidationRules()`: Validação de alunos
+- `teacherValidationRules()`: Validação de professores
+- `courseValidationRules()`: Validação de cursos
+- `disciplineValidationRules()`: Validação de disciplinas
+- `enrollmentValidationRules()`: Validação de matrículas
+- `gradeValidationRules()`: Validação de notas
+- `evaluationValidationRules()`: Validação de avaliações
+- `loginValidationRules()`: Validação de login
+- `changePasswordValidationRules()`: Validação de mudança de senha
+- `idParamValidationRules()`: Validação de parâmetros ID
+- `paginationValidationRules()`: Validação de queries de paginação
+
 #### Outras Medidas de Segurança
-- Validação de inputs no frontend e backend
+- Validação de inputs no frontend e backend (express-validator)
 - Headers de segurança com Helmet.js (CSP, HSTS, X-Frame-Options, etc.)
 - CORS configurado adequadamente
 - Logs estruturados para auditoria de operações críticas

@@ -62,7 +62,9 @@
         "dependencias": [
           "feat-002"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-28",
+        "dataConclusao": "2025-10-28",
         "tags": [
           "validation",
           "middleware"
@@ -70,7 +72,8 @@
         "artefatos": [
           "backend/src/middlewares/validation.middleware.js",
           "backend/src/utils/validators.js"
-        ]
+        ],
+        "observacoes": "Feature implementada e aprovada"
       },
       {
         "id": "feat-026",
