@@ -80,14 +80,17 @@
         "dependencias": [
           "feat-018"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-27",
+        "dataConclusao": "2025-10-27",
         "tags": [
           "auth",
           "middleware"
         ],
         "artefatos": [
           "backend/src/middlewares/auth.middleware.js"
-        ]
+        ],
+        "observacoes": "Feature implementada e aprovada"
       },
       {
         "id": "feat-021",
