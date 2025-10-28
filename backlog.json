@@ -106,14 +106,17 @@
         "dependencias": [
           "feat-026"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-28",
+        "dataConclusao": "2025-10-28",
         "tags": [
           "error-handling",
           "middleware"
         ],
         "artefatos": [
           "backend/src/middlewares/error.middleware.js"
-        ]
+        ],
+        "observacoes": "Feature implementada e aprovada"
       },
       {
         "id": "feat-028",

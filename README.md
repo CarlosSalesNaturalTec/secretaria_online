@@ -933,6 +933,134 @@ npm run start:prod
 
 Consulte o arquivo [contextDoc.md](./docs/contextDoc.md) para instruções detalhadas de deploy no Hostgator.
 
+## ⚠️ Sistema de Tratamento de Erros
+
+O sistema implementa tratamento de erros centralizado com logs estruturados, diferenciando erros operacionais (esperados) de erros de sistema (bugs).
+
+### Classe AppError
+
+Erro customizado para situações operacionais esperadas:
+
+```javascript
+const { AppError } = require('./middlewares/error.middleware');
+
+// Erro de validação
+throw new AppError('CPF inválido', 400, 'VALIDATION_ERROR');
+
+// Erro de recurso não encontrado
+throw new AppError('Aluno não encontrado', 404, 'NOT_FOUND');
+
+// Erro de autorização
+throw new AppError('Acesso negado', 403, 'FORBIDDEN');
+```
+
+### Helpers de Erro
+
+Funções auxiliares para criação de erros comuns:
+
+```javascript
+const {
+  createValidationError,
+  createNotFoundError,
+  createUnauthorizedError,
+  createForbiddenError,
+  createConflictError
+} = require('./middlewares/error.middleware');
+
+// Erros de validação com detalhes
+const errors = [
+  { field: 'cpf', message: 'CPF inválido' },
+  { field: 'email', message: 'Email já cadastrado' }
+];
+throw createValidationError('Dados inválidos', errors);
+
+// Erro de recurso não encontrado
+if (!student) {
+  throw createNotFoundError('Aluno');
+}
+
+// Erro de conflito (duplicação)
+const existingUser = await User.findOne({ where: { cpf } });
+if (existingUser) {
+  throw createConflictError('CPF já cadastrado');
+}
+```
+
+### Resposta de Erro Padronizada
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "CPF inválido",
+    "details": [
+      {
+        "field": "cpf",
+        "message": "CPF deve conter 11 dígitos"
+      }
+    ]
+  }
+}
+```
+
+### Diferenciação de Erros
+
+- **Erros Operacionais** (`isOperational: true`):
+  - Erros esperados no fluxo normal (validação, recurso não encontrado, conflito)
+  - Logados como `warn` (warning)
+  - Mensagem de erro é enviada ao cliente
+  - Exemplos: CPF duplicado, documento não encontrado, permissão negada
+
+- **Erros Não Operacionais** (bugs):
+  - Erros inesperados de programação (exceções não tratadas)
+  - Logados como `error` com stack trace completo
+  - Em produção, retorna mensagem genérica ao cliente
+  - Em desenvolvimento, inclui stack trace na resposta
+  - Exemplos: referência a variável undefined, erro de sintaxe, falha de conexão
+
+### Integração com Winston
+
+Todos os erros são automaticamente logados com Winston:
+
+```javascript
+// Erro operacional (log como warning)
+logger.warn('Erro operacional', {
+  code: 'VALIDATION_ERROR',
+  message: 'CPF inválido',
+  url: '/api/students',
+  method: 'POST',
+  userId: 123
+});
+
+// Erro não operacional (log como error com stack trace)
+logger.error('Erro não operacional detectado', {
+  code: 'INTERNAL_ERROR',
+  message: 'Cannot read property of undefined',
+  stack: err.stack,
+  url: '/api/students',
+  method: 'POST'
+});
+```
+
+### Configuração
+
+O middleware de erro está configurado em `backend/src/server.js`:
+
+```javascript
+const { errorHandler, notFoundHandler } = require('./middlewares/error.middleware');
+
+// Após todas as rotas
+app.use(notFoundHandler);  // Trata rotas 404
+app.use(errorHandler);     // Trata todos os erros (deve ser o último middleware)
+```
+
+**⚠️ Importante:**
+- O `errorHandler` deve sempre ser o **último middleware** registrado
+- O `notFoundHandler` deve vir **antes** do `errorHandler`
+- Em produção, erros não operacionais retornam mensagens genéricas (sem expor detalhes internos)
+- Em desenvolvimento, stack traces são incluídos na resposta para facilitar debugging
+
 ## 📋 Sistema de Logging
 
 O sistema utiliza **Winston** para logging estruturado, permitindo rastreamento completo de operações e diagnóstico de problemas.
