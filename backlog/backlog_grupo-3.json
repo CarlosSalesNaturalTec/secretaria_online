@@ -57,10 +57,9 @@
         "descricao": "Implementar AuthController com endpoints: POST /auth/login, POST /auth/logout, POST /auth/refresh-token, POST /auth/change-password. Criar auth.routes.js",
         "estimativa": "2h",
         "prioridade": "alta",
-        "dependencias": [
-          "feat-018"
-        ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-27",
+        "dataConclusao": "2025-10-27",
         "tags": [
           "auth",
           "controller",
@@ -69,7 +68,8 @@
         "artefatos": [
           "backend/src/controllers/auth.controller.js",
           "backend/src/routes/auth.routes.js"
-        ]
+        ],
+        "observacoes": "Feature implementada e aprovada"
       },
       {
         "id": "feat-020",
