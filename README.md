@@ -792,6 +792,14 @@ npm install
 - `PUT /api/v1/users/:id` - Atualizar usuário
 - `DELETE /api/v1/users/:id` - Excluir usuário (soft delete)
 
+### Estudantes (Admin only)
+
+- `GET /api/v1/students` - Listar todos os estudantes
+- `GET /api/v1/students/:id` - Buscar estudante por ID
+- `POST /api/v1/students` - Criar novo estudante
+- `PUT /api/v1/students/:id` - Atualizar estudante
+- `DELETE /api/v1/students/:id` - Excluir estudante (soft delete)
+
 ## 🧪 Testes
 
 ```bash

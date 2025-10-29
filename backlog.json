@@ -47,7 +47,8 @@
           "feat-017",
           "feat-021"
         ],
-        "status": "Não Iniciada",
+        "status": "Em andamento",
+        "dataInicio": "2025-10-28",
         "tags": [
           "student",
           "controller",
