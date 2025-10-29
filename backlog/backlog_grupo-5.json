@@ -22,7 +22,10 @@
           "feat-021",
           "feat-025"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-28",
+        "dataConclusao": "2025-10-28",
+        "observacoes": "Feature implementada e aprovada",
         "tags": [
           "user",
           "controller",
@@ -44,7 +47,9 @@
           "feat-017",
           "feat-021"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-28",
+        "dataConclusao": "2025-10-28",
         "tags": [
           "student",
           "controller",
@@ -63,10 +68,9 @@
         "descricao": "Implementar POST /students/:id/reset-password (admin only) que gera nova senha provisória e retorna (será enviada por email posteriormente)",
         "estimativa": "1h",
         "prioridade": "media",
-        "dependencias": [
-          "feat-030"
-        ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-28",
+        "dataConclusao": "2025-10-28",
         "tags": [
           "student",
           "auth"
@@ -77,15 +81,17 @@
       },
       {
         "id": "feat-032",
-        "titulo": "Criar TeacherController e rotas",
-        "descricao": "Implementar TeacherController com CRUD (similar a StudentController). Criar teacher.routes.js com validações e autorização admin",
+        "titulo": "Criar TeacherController, TeacherService e rotas",
+        "descricao": "Implementar TeacherController com CRUD (similar a StudentController e StudentService). Criar teacher.routes.js com validações e autorização admin",
         "estimativa": "2h30min",
         "prioridade": "alta",
         "dependencias": [
           "feat-007",
           "feat-021"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-28",
+        "dataConclusao": "2025-10-28",
         "tags": [
           "teacher",
           "controller",

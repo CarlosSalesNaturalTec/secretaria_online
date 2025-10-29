@@ -6,99 +6,110 @@
     "dataGeracao": "2025-10-23"
   },
   "grupo": {
-    "id": "grupo-5",
-    "nome": "Backend - API de Usuários e Estudantes",
-    "descricao": "CRUD de usuários, alunos e professores",
+    "id": "grupo-6",
+    "nome": "Backend - API de Cursos e Turmas",
+    "descricao": "Gestão de cursos, disciplinas e turmas",
     "prioridade": "alta",
     "features": [
       {
-        "id": "feat-029",
-        "titulo": "Criar UserController e rotas básicas",
-        "descricao": "Implementar UserController com métodos: list, getById, create, update, delete. Criar user.routes.js com validações (somente admin)",
-        "estimativa": "2h30min",
-        "prioridade": "alta",
-        "dependencias": [
-          "feat-007",
-          "feat-021",
-          "feat-025"
-        ],
-        "status": "Concluída",
-        "dataInicio": "2025-10-28",
-        "dataConclusao": "2025-10-28",
-        "observacoes": "Feature implementada e aprovada",
-        "tags": [
-          "user",
-          "controller",
-          "api"
-        ],
-        "artefatos": [
-          "backend/src/controllers/user.controller.js",
-          "backend/src/routes/user.routes.js"
-        ]
-      },
-      {
-        "id": "feat-030",
-        "titulo": "Criar StudentController e StudentService",
-        "descricao": "Implementar StudentService com lógica de criação de aluno (gerar senha provisória, hash). StudentController com CRUD completo. Criar student.routes.js",
+        "id": "feat-033",
+        "titulo": "Criar CourseController e DisciplineController",
+        "descricao": "Implementar CRUD para cursos e disciplinas. Criar course.routes.js e discipline.routes.js (admin only)",
         "estimativa": "3h",
         "prioridade": "alta",
         "dependencias": [
-          "feat-007",
-          "feat-017",
+          "feat-008",
           "feat-021"
         ],
-        "status": "Concluída",
-        "dataInicio": "2025-10-28",
-        "dataConclusao": "2025-10-28",
+        "status": "Não Iniciada",
         "tags": [
-          "student",
+          "course",
+          "discipline",
           "controller",
-          "service",
           "api"
         ],
         "artefatos": [
-          "backend/src/services/student.service.js",
-          "backend/src/controllers/student.controller.js",
-          "backend/src/routes/student.routes.js"
+          "backend/src/controllers/course.controller.js",
+          "backend/src/controllers/discipline.controller.js",
+          "backend/src/routes/course.routes.js",
+          "backend/src/routes/discipline.routes.js"
         ]
       },
       {
-        "id": "feat-031",
-        "titulo": "Adicionar endpoint de reset de senha para aluno",
-        "descricao": "Implementar POST /students/:id/reset-password (admin only) que gera nova senha provisória e retorna (será enviada por email posteriormente)",
-        "estimativa": "1h",
-        "prioridade": "media",
-        "status": "Concluída",
-        "dataInicio": "2025-10-28",
-        "dataConclusao": "2025-10-28",
+        "id": "feat-034",
+        "titulo": "Adicionar endpoint para vincular disciplinas a curso",
+        "descricao": "Implementar POST /courses/:id/disciplines para adicionar disciplinas ao curso com semestre. DELETE para remover",
+        "estimativa": "1h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-033",
+          "feat-009"
+        ],
+        "status": "Não Iniciada",
         "tags": [
-          "student",
-          "auth"
+          "course",
+          "discipline",
+          "relationship"
         ],
         "artefatos": [
-          "método resetPassword em student.controller.js"
+          "métodos em course.controller.js"
         ]
       },
       {
-        "id": "feat-032",
-        "titulo": "Criar TeacherController, TeacherService e rotas",
-        "descricao": "Implementar TeacherController com CRUD (similar a StudentController e StudentService). Criar teacher.routes.js com validações e autorização admin",
+        "id": "feat-035",
+        "titulo": "Criar ClassController e rotas",
+        "descricao": "Implementar CRUD de turmas (Class). GET /classes?course_id=x, POST /classes com validação de semestre/ano. Criar class.routes.js",
         "estimativa": "2h30min",
         "prioridade": "alta",
         "dependencias": [
-          "feat-007",
+          "feat-010",
           "feat-021"
         ],
-        "status": "Em Andamento",
-        "dataInicio": "2025-10-28",
+        "status": "Não Iniciada",
         "tags": [
-          "teacher",
+          "class",
           "controller",
           "api"
         ],
         "artefatos": [
-          "backend/src/controllers/teacher.controller.js",
-          "backend/src/routes/teacher.routes.js"
+          "backend/src/controllers/class.controller.js",
+          "backend/src/routes/class.routes.js"
+        ]
+      },
+      {
+        "id": "feat-036",
+        "titulo": "Adicionar endpoints para vincular professores e alunos à turma",
+        "descricao": "Implementar POST /classes/:id/teachers (vincular professor + disciplina), POST /classes/:id/students (vincular aluno). DELETE para desvincular",
+        "estimativa": "2h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-035"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "class",
+          "relationship"
+        ],
+        "artefatos": [
+          "métodos em class.controller.js"
+        ]
+      },
+      {
+        "id": "feat-037",
+        "titulo": "Adicionar endpoint para listar alunos e professores de turma",
+        "descricao": "Implementar GET /classes/:id/students e GET /classes/:id/teachers com eager loading (Sequelize include)",
+        "estimativa": "1h30min",
+        "prioridade": "media",
+        "dependencias": [
+          "feat-036"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "class",
+          "api"
+        ],
+        "artefatos": [
+          "métodos getStudents e getTeachers em class.controller.js"
         ]
       }
     ]
