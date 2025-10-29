@@ -96,6 +96,22 @@ class StudentController {
       next(error);
     }
   }
+
+  /**
+   * Reseta a senha de um estudante.
+   * @param {import('express').Request} req - A requisição.
+   * @param {import('express').Response} res - A resposta.
+   * @param {import('express').NextFunction} next - O próximo middleware.
+   */
+  async resetPassword(req, res, next) {
+    try {
+      const { id } = req.params;
+      const temporaryPassword = await StudentService.resetPassword(id);
+      return res.json({ success: true, data: { temporaryPassword } });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new StudentController();

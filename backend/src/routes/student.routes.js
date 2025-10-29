@@ -61,4 +61,11 @@ router.delete(
   StudentController.delete
 );
 
+router.post(
+  '/:id/reset-password',
+  [param('id').isInt().withMessage('ID inválido.')],
+  handleValidationErrors,
+  StudentController.resetPassword
+);
+
 module.exports = router;

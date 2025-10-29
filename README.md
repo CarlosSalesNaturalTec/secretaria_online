@@ -799,6 +799,8 @@ npm install
 - `POST /api/v1/students` - Criar novo estudante
 - `PUT /api/v1/students/:id` - Atualizar estudante
 - `DELETE /api/v1/students/:id` - Excluir estudante (soft delete)
+- `POST /api/v1/students/:id/reset-password` - Resetar senha do estudante
+
 
 ## 🧪 Testes
 

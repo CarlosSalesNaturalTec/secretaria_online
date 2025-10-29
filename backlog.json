@@ -68,10 +68,8 @@
         "descricao": "Implementar POST /students/:id/reset-password (admin only) que gera nova senha provisória e retorna (será enviada por email posteriormente)",
         "estimativa": "1h",
         "prioridade": "media",
-        "dependencias": [
-          "feat-030"
-        ],
-        "status": "Não Iniciada",
+        "status": "Em Andamento",
+        "dataInicio": "2025-10-28",
         "tags": [
           "student",
           "auth"

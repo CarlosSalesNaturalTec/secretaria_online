@@ -85,6 +85,20 @@ class StudentService {
     const student = await this.getById(id);
     await student.destroy();
   }
+
+  /**
+   * Reseta a senha de um estudante.
+   * @param {number} id - ID do estudante.
+   * @returns {Promise<string>} A nova senha provisória.
+   * @throws {AppError} Se o estudante não for encontrado.
+   */
+  async resetPassword(id) {
+    const student = await this.getById(id);
+    const temporaryPassword = generateProvisionalPassword();
+    student.password = temporaryPassword;
+    await student.save();
+    return temporaryPassword;
+  }
 }
 
 module.exports = new StudentService();
