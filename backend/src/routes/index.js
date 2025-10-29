@@ -10,6 +10,7 @@ const express = require('express');
 const authRoutes = require('./auth.routes');
 const userRoutes = require('./user.routes');
 const studentRoutes = require('./student.routes');
+const teacherRoutes = require('./teacher.routes');
 
 const router = express.Router();
 
@@ -21,5 +22,8 @@ router.use('/users', userRoutes);
 
 // Rotas de gerenciamento de estudantes (admin only)
 router.use('/students', studentRoutes);
+
+// Rotas de gerenciamento de professores (admin only)
+router.use('/teachers', teacherRoutes);
 
 module.exports = router;

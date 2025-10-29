@@ -801,6 +801,14 @@ npm install
 - `DELETE /api/v1/students/:id` - Excluir estudante (soft delete)
 - `POST /api/v1/students/:id/reset-password` - Resetar senha do estudante
 
+### Professores (Admin only)
+
+- `GET /api/v1/teachers` - Listar todos os professores
+- `GET /api/v1/teachers/:id` - Buscar professor por ID
+- `POST /api/v1/teachers` - Criar novo professor
+- `PUT /api/v1/teachers/:id` - Atualizar professor
+- `DELETE /api/v1/teachers/:id` - Excluir professor (soft delete)
+
 
 ## 🧪 Testes
 
