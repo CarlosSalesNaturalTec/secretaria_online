@@ -5,7 +5,7 @@
  * Criado em: 28/10/2025
  */
 
-const { Class, Teacher, Discipline, ClassTeacher } = require('../models');
+const { Class, User, Discipline, ClassTeacher } = require('../models');
 
 class ClassService {
   /**
@@ -73,18 +73,20 @@ class ClassService {
 
   /**
    * Adiciona um Profesor + Disciplina a uma Turma.
-   * @param {number} classId - O ID da Turma.
+   * @param {number} id - O ID da Turma.
    * @param {number} teacherId - O ID do professor.
    * @param {number} disciplineId - O ID da discplina.
    * @returns {Promise<ClassTeacher>} A associação criada.
    */
-  async addTeacherToClass(classId, teacherId, disciplineId) {
-    const turma = await Class.findByPk(classId);
+  async addTeacherToClass(id, teacherId, disciplineId) {
+    const turma = await Class.findOne({
+      where: { id },
+    });
     if (!turma) {
-      throw new Error('Turma não encontrada');
+      throw new Error('Turma não encontrada.');
     }
 
-    const teacher = await Teacher.findByPk(teacherId);
+    const teacher = await User.findOne({ where: { id: teacherId, role: 'teacher' } });
     if (!teacher) {
       throw new Error('Professor não encontrado');
     }
@@ -102,16 +104,18 @@ class ClassService {
   }
 
   /**
-   * Remove professor da turma.
+   * Remove professor/disciplina da turma.
    * @param {number} classId - O ID da turma.
    * @param {number} teacherId - O ID do professor.
+   * @param {number} disciplineId - O ID da disciplina.
    * @returns {Promise<boolean>} True se a associação foi removida.
    */
-  async removeTeacherFromClass(classId, teacherId) {
+  async removeTeacherFromClass(classId, teacherId, disciplineId) {
     const result = await ClassTeacher.destroy({
       where: {
         class_id: classId,
         teacher_id: teacherId,
+        discipline_id: disciplineId,
       },
     });
 

@@ -64,8 +64,7 @@ class ClassController {
 
   async addTeacherToClass(req, res, next) {
     try {
-      const { id } = req.params;
-      const { teacherId, disciplineId } = req.body;
+      const { id, teacherId, disciplineId  } = req.params;      
       const association = await ClassService.addTeacherToClass(id, teacherId, disciplineId);
       res.status(201).json(association);
     } catch (error) {
