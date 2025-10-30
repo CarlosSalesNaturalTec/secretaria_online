@@ -2,7 +2,7 @@
  * Arquivo: backend/src/controllers/teacher.controller.js
  * Descrição: Controlador para o CRUD de professores.
  * Feature: feat-032 - Criar TeacherController, TeacherService e rotas
- * Criado em: 28/10/2025
+ * Criado em: 29/10/2025
  */
 
 const TeacherService = require('../services/teacher.service');
