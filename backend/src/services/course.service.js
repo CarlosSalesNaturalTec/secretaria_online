@@ -1,6 +1,6 @@
 /**
- * Arquivo: backend/src/services/teacher.service.js
- * Descrição: Lógica de negócio para o CRUD de Cursoes
+ * Arquivo: backend/src/services/course.service.js
+ * Descrição: Lógica de negócio para o CRUD de Cursos
  * Feature: feat-033
  * Criado em: 28/10/2025
  */
@@ -49,9 +49,6 @@ class CourseService {
     if (!course) {
       return null;
     }
-
-    // Impede a alteração do papel do usuário
-    delete courseData.role;
 
     await course.update(courseData);
     return course;

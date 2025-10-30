@@ -30,7 +30,7 @@ class CourseController {
     try {
       const course = await CourseService.getById(req.params.id);
       if (!course) {
-        return res.status(404).json({ message: 'Professor não encontrado' });
+        return res.status(404).json({ message: 'Curso não encontrado' });
       }
       res.status(200).json(course);
     } catch (error) {
@@ -42,7 +42,7 @@ class CourseController {
     try {
       const course = await CourseService.update(req.params.id, req.body);
       if (!course) {
-        return res.status(404).json({ message: 'Professor não encontrado' });
+        return res.status(404).json({ message: 'Curso não encontrado' });
       }
       res.status(200).json(course);
     } catch (error) {
@@ -54,7 +54,7 @@ class CourseController {
     try {
       const result = await CourseService.delete(req.params.id);
       if (!result) {
-        return res.status(404).json({ message: 'Professor não encontrado' });
+        return res.status(404).json({ message: 'Curso não encontrado' });
       }
       res.status(204).send();
     } catch (error) {
