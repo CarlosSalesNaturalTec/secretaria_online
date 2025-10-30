@@ -61,6 +61,30 @@ class ClassController {
       next(error);
     }
   }
+
+  async addTeacherToClass(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { teacherId, disciplineId } = req.body;
+      const association = await ClassService.addTeacherToClass(id, teacherId, disciplineId);
+      res.status(201).json(association);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async removeTeacherFromClass(req, res, next) {
+    try {
+      const { id, teacherId, disciplineId } = req.params;
+      const result = await ClassService.removeTeacherFromClass(id, teacherId, disciplineId);
+      if (!result) {
+        return res.status(404).json({ message: 'Associação não encontrada' });
+      }
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new ClassController();
