@@ -5,7 +5,7 @@
  * Criado em: 28/10/2025
  */
 
-const { Course } = require('../models');
+const { Course, Discipline, CourseDiscipline } = require('../models');
 
 class CourseService {
   /**
@@ -26,7 +26,9 @@ class CourseService {
    * @returns {Promise<Course[]>} Uma lista de Cursos.
    */
   async list() {
-    return Course.findAll();
+    return Course.findAll({
+      include: [{ model: Discipline, as: 'disciplines' }],
+    });
   }
 
   /**
@@ -35,7 +37,10 @@ class CourseService {
    * @returns {Promise<Course>} O Curso encontrado.
    */
   async getById(id) {
-    return Course.findOne({ where: { id } });
+    return Course.findOne({
+      where: { id },
+      include: [{ model: Discipline, as: 'disciplines' }],
+    });
   }
 
   /**
@@ -67,6 +72,48 @@ class CourseService {
 
     await course.destroy();
     return true;
+  }
+
+  /**
+   * Adiciona uma disciplina a um curso.
+   * @param {number} courseId - O ID do curso.
+   * @param {number} disciplineId - O ID da disciplina.
+   * @param {number} semester - O semestre em que a disciplina é ofertada.
+   * @returns {Promise<CourseDiscipline>} A associação criada.
+   */
+  async addDisciplineToCourse(courseId, disciplineId, semester) {
+    const course = await Course.findByPk(courseId);
+    if (!course) {
+      throw new Error('Curso não encontrado');
+    }
+
+    const discipline = await Discipline.findByPk(disciplineId);
+    if (!discipline) {
+      throw new Error('Disciplina não encontrada');
+    }
+
+    return CourseDiscipline.create({
+      course_id: courseId,
+      discipline_id: disciplineId,
+      semester,
+    });
+  }
+
+  /**
+   * Remove uma disciplina de um curso.
+   * @param {number} courseId - O ID do curso.
+   * @param {number} disciplineId - O ID da disciplina.
+   * @returns {Promise<boolean>} True se a associação foi removida.
+   */
+  async removeDisciplineFromCourse(courseId, disciplineId) {
+    const result = await CourseDiscipline.destroy({
+      where: {
+        course_id: courseId,
+        discipline_id: disciplineId,
+      },
+    });
+
+    return result > 0;
   }
 }
 

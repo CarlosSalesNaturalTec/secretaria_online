@@ -809,6 +809,15 @@ npm install
 - `PUT /api/v1/teachers/:id` - Atualizar professor
 - `DELETE /api/v1/teachers/:id` - Excluir professor (soft delete)
 
+### Cursos (Admin only)
+
+- `GET /api/v1/courses` - Listar todos os cursos
+- `GET /api/v1/courses/:id` - Buscar curso por ID
+- `POST /api/v1/courses` - Criar novo curso
+- `PUT /api/v1/courses/:id` - Atualizar curso
+- `DELETE /api/v1/courses/:id` - Excluir curso (soft delete)
+- `POST /api/v1/courses/:id/disciplines` - Adicionar disciplina a um curso
+- `DELETE /api/v1/courses/:id/disciplines/:disciplineId` - Remover disciplina de um curso
 
 ## 🧪 Testes
 

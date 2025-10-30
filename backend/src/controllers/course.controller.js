@@ -61,6 +61,30 @@ class CourseController {
       next(error);
     }
   }
+
+  async addDisciplineToCourse(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { disciplineId, semester } = req.body;
+      const association = await CourseService.addDisciplineToCourse(id, disciplineId, semester);
+      res.status(201).json(association);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async removeDisciplineFromCourse(req, res, next) {
+    try {
+      const { id, disciplineId } = req.params;
+      const result = await CourseService.removeDisciplineFromCourse(id, disciplineId);
+      if (!result) {
+        return res.status(404).json({ message: 'Associação não encontrada' });
+      }
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new CourseController();
