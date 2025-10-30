@@ -69,7 +69,9 @@
           "feat-010",
           "feat-021"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-29",
+        "dataConclusao": "2025-10-29",
         "tags": [
           "class",
           "controller",

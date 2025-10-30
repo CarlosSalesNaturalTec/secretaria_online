@@ -1,7 +1,7 @@
 /**
  * Arquivo: backend/src/controllers/course.controller.js
  * Descrição: Controlador para o CRUD de curso.
- * Feature: feat-033
+ * Feature: feat-035
  * Criado em: 29/10/2025
  */
 

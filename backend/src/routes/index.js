@@ -13,6 +13,7 @@ const studentRoutes = require('./student.routes');
 const teacherRoutes = require('./teacher.routes');
 const courseRoutes = require('./course.routes');
 const disciplineRoutes = require('./discipline.routes');
+const classRoutes = require('./class.routes');
 
 const router = express.Router();
 
@@ -33,5 +34,8 @@ router.use('/courses', courseRoutes);
 
 // Rotas de gerenciamento de Disciplinas (admin only)
 router.use('/disciplines', disciplineRoutes);
+
+// Rotas de gerenciamento de Turmas (admin only)
+router.use('/class', classRoutes);
 
 module.exports = router;
