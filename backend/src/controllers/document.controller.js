@@ -538,6 +538,201 @@ class DocumentController {
   }
 
   /**
+   * GET /api/v1/users/:userId/documents ou GET /api/v1/documents/user/:userId
+   * Listar documentos de um usuário específico
+   *
+   * Requisitos:
+   * - Usuário autenticado
+   * - ID do usuário válido na URL
+   * - Permissão: próprio usuário ou admin
+   *
+   * Query params:
+   * - page (optional): Página (padrão: 1)
+   * - limit (optional): Itens por página (padrão: 20)
+   *
+   * @param {Object} req - Request do Express
+   * @param {Object} req.user - Usuário autenticado (injetado pelo auth.middleware)
+   * @param {number} req.params.userId - ID do usuário cujos documentos serão listados
+   * @param {number} req.query.page - Página (padrão: 1)
+   * @param {number} req.query.limit - Itens por página (padrão: 20)
+   * @param {Object} res - Response do Express
+   * @param {Function} next - Próximo middleware/handler
+   *
+   * @returns {void} Resposta JSON com lista de documentos do usuário
+   *
+   * @example
+   * // Request - Admin visualizando documentos de um aluno
+   * GET /api/v1/users/5/documents?page=1&limit=20
+   * Authorization: Bearer <admin_token>
+   *
+   * // Response (200 OK)
+   * {
+   *   "success": true,
+   *   "data": {
+   *     "documents": [
+   *       {
+   *         "id": 1,
+   *         "user_id": 5,
+   *         "document_type_id": 2,
+   *         "file_name": "1698700200000-rg.pdf",
+   *         "file_size": 245632,
+   *         "mime_type": "application/pdf",
+   *         "status": "pending",
+   *         "created_at": "2025-10-30T10:00:00Z",
+   *         "documentType": {
+   *           "id": 2,
+   *           "name": "RG",
+   *           "user_type": "student",
+   *           "is_required": true
+   *         }
+   *       }
+   *     ],
+   *     "total": 5,
+   *     "page": 1,
+   *     "limit": 20,
+   *     "pages": 1
+   *   }
+   * }
+   */
+  async getUserDocuments(req, res, next) {
+    try {
+      const { userId } = req.params;
+      const { page = 1, limit = 20 } = req.query;
+
+      // Validar ID do usuário
+      if (isNaN(userId) || parseInt(userId) <= 0) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'ID do usuário deve ser um número inteiro positivo',
+          },
+        });
+      }
+
+      const userIdInt = parseInt(userId);
+
+      // Validar permissão: apenas admin ou o próprio usuário pode ver os documentos
+      if (req.user.role !== 'admin' && req.user.id !== userIdInt) {
+        return res.status(403).json({
+          success: false,
+          error: {
+            code: 'FORBIDDEN',
+            message: 'Você não tem permissão para visualizar os documentos deste usuário',
+          },
+        });
+      }
+
+      // Validar paginação
+      const pageInt = Math.max(1, parseInt(page) || 1);
+      const limitInt = Math.max(1, Math.min(100, parseInt(limit) || 20)); // Limitar a 100 itens por página
+
+      // Chamar serviço para listar documentos do usuário
+      const result = await DocumentService.getDocumentsByUser(userIdInt, {
+        page: pageInt,
+        limit: limitInt,
+      });
+
+      logger.info('[DocumentController] Documentos do usuário listados', {
+        userId: userIdInt,
+        requestedBy: req.user.id,
+        role: req.user.role,
+        total: result.total,
+      });
+
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/v1/documents/my-documents
+   * Listar documentos do usuário autenticado (próprios documentos)
+   *
+   * Requisitos:
+   * - Usuário autenticado (student ou teacher)
+   *
+   * Query params:
+   * - page (optional): Página (padrão: 1)
+   * - limit (optional): Itens por página (padrão: 20)
+   *
+   * @param {Object} req - Request do Express
+   * @param {Object} req.user - Usuário autenticado (injetado pelo auth.middleware)
+   * @param {number} req.query.page - Página (padrão: 1)
+   * @param {number} req.query.limit - Itens por página (padrão: 20)
+   * @param {Object} res - Response do Express
+   * @param {Function} next - Próximo middleware/handler
+   *
+   * @returns {void} Resposta JSON com lista dos próprios documentos do usuário
+   *
+   * @example
+   * // Request - Aluno visualizando seus próprios documentos
+   * GET /api/v1/documents/my-documents?page=1&limit=20
+   * Authorization: Bearer <student_token>
+   *
+   * // Response (200 OK)
+   * {
+   *   "success": true,
+   *   "data": {
+   *     "documents": [
+   *       {
+   *         "id": 1,
+   *         "user_id": 5,
+   *         "document_type_id": 2,
+   *         "file_name": "1698700200000-rg.pdf",
+   *         "file_size": 245632,
+   *         "mime_type": "application/pdf",
+   *         "status": "pending",
+   *         "created_at": "2025-10-30T10:00:00Z",
+   *         "documentType": {
+   *           "id": 2,
+   *           "name": "RG",
+   *           "user_type": "student",
+   *           "is_required": true
+   *         }
+   *       }
+   *     ],
+   *     "total": 5,
+   *     "page": 1,
+   *     "limit": 20,
+   *     "pages": 1
+   *   }
+   * }
+   */
+  async getMyDocuments(req, res, next) {
+    try {
+      const { page = 1, limit = 20 } = req.query;
+
+      // Validar paginação
+      const pageInt = Math.max(1, parseInt(page) || 1);
+      const limitInt = Math.max(1, Math.min(100, parseInt(limit) || 20)); // Limitar a 100 itens por página
+
+      // Chamar serviço para listar próprios documentos
+      const result = await DocumentService.getDocumentsByUser(req.user.id, {
+        page: pageInt,
+        limit: limitInt,
+      });
+
+      logger.info('[DocumentController] Documentos do usuário autenticado listados', {
+        userId: req.user.id,
+        role: req.user.role,
+        total: result.total,
+      });
+
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * GET /api/v1/documents/:id/download
    * Download de um documento
    *

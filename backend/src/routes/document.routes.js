@@ -194,6 +194,52 @@ router.delete(
 );
 
 /**
+ * GET /api/v1/documents/my-documents
+ * Listar próprios documentos do usuário autenticado
+ *
+ * Autenticação: Requerida (student, teacher ou admin)
+ * Query params:
+ * - page (optional): Página (padrão: 1)
+ * - limit (optional): Itens por página (padrão: 20)
+ *
+ * Status de resposta:
+ * - 200 OK: Lista de documentos do usuário
+ * - 400 Bad Request: Parâmetros inválidos
+ * - 401 Unauthorized: Não autenticado
+ * - 500 Internal Server Error: Erro no servidor
+ *
+ * @example
+ * GET /api/v1/documents/my-documents?page=1&limit=20
+ * Authorization: Bearer <token>
+ */
+router.get('/my-documents', authenticate, DocumentController.getMyDocuments);
+
+/**
+ * GET /api/v1/users/:userId/documents
+ * Listar documentos de um usuário específico
+ *
+ * Autenticação: Requerida
+ * Autorização: Admin ou o próprio usuário
+ * Parâmetros: userId (ID do usuário, inteiro positivo)
+ * Query params:
+ * - page (optional): Página (padrão: 1)
+ * - limit (optional): Itens por página (padrão: 20)
+ *
+ * Status de resposta:
+ * - 200 OK: Lista de documentos do usuário
+ * - 400 Bad Request: ID inválido ou parâmetros inválidos
+ * - 401 Unauthorized: Não autenticado
+ * - 403 Forbidden: Sem permissão para visualizar documentos deste usuário
+ * - 404 Not Found: Usuário não encontrado
+ * - 500 Internal Server Error: Erro no servidor
+ *
+ * @example
+ * GET /api/v1/users/5/documents?page=1&limit=20
+ * Authorization: Bearer <token>
+ */
+router.get('/user/:userId', authenticate, DocumentController.getUserDocuments);
+
+/**
  * GET /api/v1/documents/:id/validate
  * Validar status de documentos obrigatórios
  *

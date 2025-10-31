@@ -82,7 +82,7 @@
         "dependencias": [
           "feat-043"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
         "tags": [
           "document",
           "api"
@@ -100,13 +100,16 @@
         "dependencias": [
           "feat-043"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
         "tags": [
           "document",
           "api"
         ],
         "artefatos": [
-          "método em document.controller.js"
+          "método getDocumentsByUser em document.service.js",
+          "método getUserDocuments em document.controller.js",
+          "método getMyDocuments em document.controller.js",
+          "rotas em document.routes.js"
         ]
       }
     ]

@@ -1173,6 +1173,96 @@ router.post('/documents',
     }
     ```
 
+- **`GET /api/v1/documents/my-documents` - Listar próprios documentos (feat-045)**
+  - **Autenticação:** Requer autenticação (JWT token)
+  - **Autorização:** Qualquer usuário autenticado (aluno, professor ou admin)
+  - **Query params:**
+    - `page` (optional): Página (padrão: 1)
+    - `limit` (optional): Itens por página (padrão: 20, máximo: 100)
+  - **Resposta:** Lista de documentos do usuário autenticado com paginação
+  - **Validações:**
+    - Usuário deve estar autenticado
+    - Valores de page e limit devem ser inteiros positivos
+  - **Exemplo:**
+    ```bash
+    curl -X GET "http://localhost:3000/api/v1/documents/my-documents?page=1&limit=20" \
+      -H "Authorization: Bearer <token>"
+    ```
+  - **Resposta exemplo (200 OK):**
+    ```json
+    {
+      "success": true,
+      "data": {
+        "documents": [
+          {
+            "id": 1,
+            "user_id": 5,
+            "document_type_id": 2,
+            "file_name": "1698700200000-rg.pdf",
+            "file_size": 245632,
+            "mime_type": "application/pdf",
+            "status": "pending",
+            "reviewed_by": null,
+            "reviewed_at": null,
+            "observations": null,
+            "created_at": "2025-10-30T10:00:00Z",
+            "updated_at": "2025-10-30T10:00:00Z",
+            "documentType": {
+              "id": 2,
+              "name": "RG",
+              "user_type": "student",
+              "is_required": true
+            }
+          }
+        ],
+        "total": 5,
+        "page": 1,
+        "limit": 20,
+        "pages": 1
+      }
+    }
+    ```
+
+- **`GET /api/v1/users/:userId/documents` - Listar documentos de um usuário (feat-045)**
+  - **Autenticação:** Requer autenticação (JWT token)
+  - **Autorização:** Admin pode ver documentos de qualquer usuário, usuário comum vê apenas seus próprios
+  - **Parâmetros:** `:userId` (ID do usuário)
+  - **Query params:**
+    - `page` (optional): Página (padrão: 1)
+    - `limit` (optional): Itens por página (padrão: 20, máximo: 100)
+  - **Resposta:** Lista de documentos do usuário especificado
+  - **Validações:**
+    - Usuário deve estar autenticado
+    - ID do usuário deve ser inteiro positivo
+    - Permissão: admin ou proprietário dos documentos
+  - **Exemplo - Admin vizualizando documentos de um aluno:**
+    ```bash
+    curl -X GET "http://localhost:3000/api/v1/users/5/documents?page=1&limit=20" \
+      -H "Authorization: Bearer <admin_token>"
+    ```
+  - **Exemplo - Aluno vizualizando seus próprios documentos:**
+    ```bash
+    curl -X GET "http://localhost:3000/api/v1/users/5/documents?page=1&limit=20" \
+      -H "Authorization: Bearer <student_token>"  # user_id = 5
+    ```
+  - **Resposta exemplo (200 OK):** Mesma estrutura de /my-documents
+  - **Erros possíveis:**
+    - `400 Bad Request`: ID inválido
+    - `401 Unauthorized`: Não autenticado
+    - `403 Forbidden`: Sem permissão para visualizar documentos deste usuário
+    - `404 Not Found`: Usuário não encontrado
+    - `500 Internal Server Error`: Erro no servidor
+  - **Resposta de erro (403 Forbidden):**
+    ```json
+    {
+      "success": false,
+      "error": {
+        "code": "FORBIDDEN",
+        "message": "Você não tem permissão para visualizar os documentos deste usuário"
+      }
+    }
+    ```
+
 ### Matrículas (Admin e Student)
 
 **Regras de Negócio Implementadas:**

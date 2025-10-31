@@ -599,6 +599,102 @@ class DocumentService {
   }
 
   /**
+   * Listar documentos de um usuário específico
+   *
+   * Responsabilidades:
+   * - Buscar todos os documentos de um usuário
+   * - Incluir informações do tipo de documento
+   * - Aplicar paginação
+   * - Ordenar por data de criação (descendente)
+   *
+   * @param {number} userId - ID do usuário cujos documentos serão listados
+   * @param {Object} options - Opções de listagem
+   * @param {number} options.page - Página (padrão: 1)
+   * @param {number} options.limit - Itens por página (padrão: 20)
+   *
+   * @returns {Promise<Object>} { documents, total, page, limit, pages }
+   * @throws {AppError} Usuário não encontrado ou erro ao buscar
+   *
+   * @example
+   * const result = await DocumentService.getDocumentsByUser(5, { page: 1, limit: 20 });
+   * // Retorna:
+   * // {
+   * //   documents: [...],
+   * //   total: 5,
+   * //   page: 1,
+   * //   limit: 20,
+   * //   pages: 1
+   * // }
+   */
+  static async getDocumentsByUser(userId, options = {}) {
+    try {
+      const { page = 1, limit = 20 } = options;
+
+      // 1. Validar se usuário existe
+      const user = await User.findByPk(userId);
+      if (!user) {
+        throw new AppError(
+          'Usuário não encontrado',
+          404,
+          'USER_NOT_FOUND'
+        );
+      }
+
+      // 2. Calcular offset para paginação
+      const offset = (Math.max(1, page) - 1) * limit;
+
+      // 3. Buscar documentos do usuário
+      const { count, rows } = await Document.findAndCountAll({
+        where: { user_id: userId },
+        include: [
+          {
+            association: 'documentType',
+            attributes: ['id', 'name', 'user_type', 'is_required'],
+          },
+          {
+            association: 'reviewer',
+            attributes: ['id', 'name', 'email'],
+            required: false,
+          },
+        ],
+        order: [['created_at', 'DESC']],
+        limit,
+        offset,
+      });
+
+      logger.info('[DocumentService] Documentos do usuário listados', {
+        userId,
+        total: count,
+        page,
+        limit,
+      });
+
+      return {
+        documents: rows,
+        total: count,
+        page,
+        limit,
+        pages: Math.ceil(count / limit),
+      };
+    } catch (error) {
+      if (error.isOperational) {
+        throw error;
+      }
+
+      logger.error('[DocumentService] Erro ao listar documentos do usuário', {
+        userId,
+        error: error.message,
+      });
+
+      throw new AppError(
+        'Erro ao listar documentos do usuário',
+        500,
+        'USER_DOCUMENTS_LIST_ERROR'
+      );
+    }
+  }
+
+  /**
    * Download de um documento
    *
    * Responsabilidades:
