@@ -12,12 +12,12 @@
  * - Aplicar regras de autorização (apenas admin para alterar status)
  *
  * ENDPOINTS:
- * - POST   /enrollments                    - Criar matrícula
- * - GET    /enrollments                    - Listar todas as matrículas
- * - GET    /enrollments/:id                - Buscar matrícula por ID
- * - GET    /students/:studentId/enrollments - Listar matrículas de um aluno
- * - PUT    /enrollments/:id/status         - Alterar status (admin only)
- * - DELETE /enrollments/:id                - Deletar matrícula (soft delete)
+ * - POST   /enrollments                      - Criar matrícula
+ * - GET    /enrollments                      - Listar todas as matrículas
+ * - GET    /students/:studentId/enrollments  - Listar matrículas de um aluno (feat-040)
+ * - GET    /enrollments/:id                  - Buscar matrícula por ID
+ * - PUT    /enrollments/:id/status           - Alterar status (admin only)
+ * - DELETE /enrollments/:id                  - Deletar matrícula (soft delete)
  */
 
 'use strict';

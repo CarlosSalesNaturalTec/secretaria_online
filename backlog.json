@@ -65,13 +65,17 @@
         "dependencias": [
           "feat-039"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-30",
+        "dataConclusao": "2025-10-30",
         "tags": [
           "enrollment",
           "api"
         ],
         "artefatos": [
-          "método em enrollment.controller.js"
+          "backend/src/routes/enrollment.routes.js",
+          "backend/src/controllers/enrollment.controller.js",
+          "docs/testes/plano-testes-feat-040.md"
         ]
       }
     ]

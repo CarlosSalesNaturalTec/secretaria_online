@@ -5,12 +5,12 @@
  * Criado em: 2025-10-30
  *
  * ROTAS DISPONÍVEIS:
- * - POST   /enrollments                    - Criar matrícula (POST cria com status pending)
- * - GET    /enrollments                    - Listar todas as matrículas (admin only)
- * - GET    /enrollments/:id                - Buscar matrícula por ID
- * - GET    /students/:studentId/enrollments - Listar matrículas de um aluno
- * - PUT    /enrollments/:id/status         - Alterar status (admin only)
- * - DELETE /enrollments/:id                - Deletar matrícula (admin only)
+ * - POST   /enrollments                      - Criar matrícula (POST cria com status pending)
+ * - GET    /enrollments                      - Listar todas as matrículas (admin only)
+ * - GET    /students/:studentId/enrollments  - Listar matrículas de um aluno (feat-040)
+ * - GET    /enrollments/:id                  - Buscar matrícula por ID
+ * - PUT    /enrollments/:id/status           - Alterar status (admin only)
+ * - DELETE /enrollments/:id                  - Deletar matrícula (admin only)
  *
  * AUTENTICAÇÃO:
  * - Todas as rotas requerem autenticação (JWT token)
@@ -101,6 +101,43 @@ router.get(
   '/',
   authorizeAdmin,
   EnrollmentController.getAll
+);
+
+/**
+ * GET /students/:studentId/enrollments
+ * Listar matrículas de um aluno específico
+ *
+ * Params:
+ * - studentId: ID do aluno (inteiro)
+ *
+ * Response 200:
+ * {
+ *   "success": true,
+ *   "data": [
+ *     {
+ *       "id": 1,
+ *       "student_id": 1,
+ *       "course_id": 2,
+ *       "status": "pending",
+ *       "enrollment_date": "2025-10-30",
+ *       "course": {
+ *         "id": 2,
+ *         "name": "Engenharia de Software",
+ *         "duration_semesters": 4
+ *       }
+ *     }
+ *   ]
+ * }
+ */
+router.get(
+  '/students/:studentId/enrollments',
+  [
+    param('studentId')
+      .isInt({ min: 1 })
+      .withMessage('studentId deve ser um inteiro positivo'),
+  ],
+  handleValidationErrors,
+  EnrollmentController.getByStudent
 );
 
 /**

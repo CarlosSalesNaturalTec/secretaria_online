@@ -796,6 +796,7 @@ npm install
 
 - `GET /api/v1/students` - Listar todos os estudantes
 - `GET /api/v1/students/:id` - Buscar estudante por ID
+- `GET /api/v1/students/:id/enrollments` - Listar matrículas do aluno (feat-040)
 - `POST /api/v1/students` - Criar novo estudante
 - `PUT /api/v1/students/:id` - Atualizar estudante
 - `DELETE /api/v1/students/:id` - Excluir estudante (soft delete)
@@ -857,9 +858,36 @@ O controller implementa endpoints CRUD para matrículas:
   - Response: Matrícula detalhada com informações de aluno e curso
   - Validação: ID deve ser inteiro positivo
 
-- `GET /api/v1/students/:studentId/enrollments` - Listar matrículas do aluno (requer autenticação)
-  - Response: Array de matrículas do aluno com informações do curso
-  - Validação: studentId deve ser inteiro positivo
+- **`GET /api/v1/students/:studentId/enrollments` - Listar matrículas do aluno (feat-040)**
+  - **Autenticação:** Requer autenticação (JWT token)
+  - **Resposta:** Array de matrículas do aluno com informações do curso
+  - **Parâmetros:** `studentId` (inteiro positivo)
+  - **Exemplo de resposta:**
+    ```json
+    {
+      "success": true,
+      "data": [
+        {
+          "id": 1,
+          "student_id": 5,
+          "course_id": 2,
+          "status": "pending",
+          "enrollment_date": "2025-10-30",
+          "created_at": "2025-10-30T10:00:00Z",
+          "course": {
+            "id": 2,
+            "name": "Engenharia de Software",
+            "duration_semesters": 4
+          }
+        }
+      ]
+    }
+    ```
+  - **Validações:** studentId deve ser inteiro positivo
+  - **Casos de uso:**
+    - Aluno consulta suas próprias matrículas
+    - Admin consulta matrículas de qualquer aluno
+    - Útil para verificar histórico de matrículas e status atual
 
 - `PUT /api/v1/enrollments/:id/status` - Alterar status (admin only)
   - Body: `{ "status": "active|pending|cancelled" }`
