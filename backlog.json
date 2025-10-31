@@ -42,7 +42,9 @@
           "feat-038",
           "feat-021"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-30",
+        "dataConclusao": "2025-10-30",
         "tags": [
           "enrollment",
           "controller",
@@ -50,7 +52,8 @@
         ],
         "artefatos": [
           "backend/src/controllers/enrollment.controller.js",
-          "backend/src/routes/enrollment.routes.js"
+          "backend/src/routes/enrollment.routes.js",
+          "docs/testes/plano-testes-feat-039.md"
         ]
       },
       {
