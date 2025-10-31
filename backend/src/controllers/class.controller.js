@@ -64,7 +64,7 @@ class ClassController {
 
   async addTeacherToClass(req, res, next) {
     try {
-      const { id, teacherId, disciplineId  } = req.params;      
+      const { id, teacherId, disciplineId } = req.params;
       const association = await ClassService.addTeacherToClass(id, teacherId, disciplineId);
       res.status(201).json(association);
     } catch (error) {
@@ -80,6 +80,49 @@ class ClassController {
         return res.status(404).json({ message: 'Associação não encontrada' });
       }
       res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async addStudentToClass(req, res, next) {
+    try {
+      const { id, studentId } = req.params;
+      const association = await ClassService.addStudentToClass(id, studentId);
+      res.status(201).json(association);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async removeStudentFromClass(req, res, next) {
+    try {
+      const { id, studentId } = req.params;
+      const result = await ClassService.removeStudentFromClass(id, studentId);
+      if (!result) {
+        return res.status(404).json({ message: 'Associação não encontrada' });
+      }
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getStudentsByClass(req, res, next) {
+    try {
+      const { id } = req.params;
+      const students = await ClassService.getStudentsByClass(id);
+      res.status(200).json(students);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getTeachersByClass(req, res, next) {
+    try {
+      const { id } = req.params;
+      const data = await ClassService.getTeachersByClass(id);
+      res.status(200).json(data);
     } catch (error) {
       next(error);
     }

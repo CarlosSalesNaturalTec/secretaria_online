@@ -5,7 +5,7 @@
  * Criado em: 28/10/2025
  */
 
-const { Class, User, Discipline, ClassTeacher } = require('../models');
+const { Class, User, Discipline, ClassTeacher, ClassStudent } = require('../models');
 
 class ClassService {
   /**
@@ -97,7 +97,7 @@ class ClassService {
     }
 
     return ClassTeacher.create({
-      class_id: classId,
+      class_id: id,
       teacher_id: teacherId,
       discipline_id: disciplineId,
     });
@@ -120,6 +120,109 @@ class ClassService {
     });
 
     return result > 0;
+  }
+
+  /**
+   * Adiciona um Aluno a uma Turma.
+   * @param {number} classId - O ID da Turma.
+   * @param {number} studentId - O ID do aluno.
+   * @returns {Promise<ClassStudent>} A associação criada.
+   */
+  async addStudentToClass(classId, studentId) {
+    const turma = await Class.findOne({
+      where: { id: classId },
+    });
+    if (!turma) {
+      throw new Error('Turma não encontrada.');
+    }
+
+    const student = await User.findOne({ where: { id: studentId, role: 'student' } });
+    if (!student) {
+      throw new Error('Aluno não encontrado');
+    }
+
+    return ClassStudent.create({
+      class_id: classId,
+      student_id: studentId,
+    });
+  }
+
+  /**
+   * Remove um Aluno de uma Turma.
+   * @param {number} classId - O ID da turma.
+   * @param {number} studentId - O ID do aluno.
+   * @returns {Promise<boolean>} True se a associação foi removida.
+   */
+  async removeStudentFromClass(classId, studentId) {
+    const result = await ClassStudent.destroy({
+      where: {
+        class_id: classId,
+        student_id: studentId,
+      },
+    });
+
+    return result > 0;
+  }
+
+  /**
+   * Lista todos os alunos de uma turma.
+   * @param {number} classId - O ID da turma.
+   * @returns {Promise<User[]>} Lista de alunos da turma.
+   */
+  async getStudentsByClass(classId) {
+    const turma = await Class.findOne({
+      where: { id: classId },
+      include: [
+        {
+          model: User,
+          as: 'students',
+          through: { attributes: [] },
+          attributes: ['id', 'name', 'email', 'cpf'],
+        },
+      ],
+    });
+
+    if (!turma) {
+      throw new Error('Turma não encontrada.');
+    }
+
+    return turma.students || [];
+  }
+
+  /**
+   * Lista todos os professores e disciplinas de uma turma.
+   * @param {number} classId - O ID da turma.
+   * @returns {Promise<Array>} Lista de professores e disciplinas associados.
+   */
+  async getTeachersByClass(classId) {
+    const turma = await Class.findOne({
+      where: { id: classId },
+      include: [
+        {
+          model: User,
+          as: 'teachers',
+          through: {
+            attributes: ['discipline_id'],
+          },
+          attributes: ['id', 'name', 'email'],
+        },
+        {
+          model: Discipline,
+          as: 'disciplines',
+          through: { attributes: [] },
+          attributes: ['id', 'name', 'code'],
+        },
+      ],
+    });
+
+    if (!turma) {
+      throw new Error('Turma não encontrada.');
+    }
+
+    return {
+      teachers: turma.teachers || [],
+      disciplines: turma.disciplines || [],
+    };
   }
 }
 

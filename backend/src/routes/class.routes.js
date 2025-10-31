@@ -22,6 +22,17 @@ router.delete('/:id', ClassController.delete);
 
 // Rotas para vincular/desvincular professores e disciplinas
 router.post('/:id/teachers/:teacherId/discipline/:disciplineId', ClassController.addTeacherToClass);
-router.delete('/:id/teachers/:teacherId/discipline/:disciplineId', ClassController.removeTeacherFromClass);
+router.delete(
+  '/:id/teachers/:teacherId/discipline/:disciplineId',
+  ClassController.removeTeacherFromClass
+);
+
+// Rotas para vincular/desvincular alunos
+router.post('/:id/students/:studentId', ClassController.addStudentToClass);
+router.delete('/:id/students/:studentId', ClassController.removeStudentFromClass);
+
+// Rotas para listar alunos e professores
+router.get('/:id/students', ClassController.getStudentsByClass);
+router.get('/:id/teachers', ClassController.getTeachersByClass);
 
 module.exports = router;
