@@ -41,7 +41,7 @@
         "dependencias": [
           "feat-012"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
         "tags": [
           "document",
           "service",
@@ -62,7 +62,7 @@
           "feat-042",
           "feat-021"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
         "tags": [
           "document",
           "controller",

@@ -15,6 +15,7 @@ const courseRoutes = require('./course.routes');
 const disciplineRoutes = require('./discipline.routes');
 const classRoutes = require('./class.routes');
 const enrollmentRoutes = require('./enrollment.routes');
+const documentRoutes = require('./document.routes');
 
 const router = express.Router();
 
@@ -41,5 +42,8 @@ router.use('/class', classRoutes);
 
 // Rotas de gerenciamento de Matrículas (requer autenticação)
 router.use('/enrollments', enrollmentRoutes);
+
+// Rotas de gerenciamento de Documentos (feat-041, feat-042, feat-043)
+router.use('/documents', documentRoutes);
 
 module.exports = router;

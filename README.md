@@ -985,6 +985,150 @@ router.post('/documents',
 - `POST /api/v1/courses/:id/disciplines` - Adicionar disciplina a um curso
 - `DELETE /api/v1/courses/:id/disciplines/:disciplineId` - Remover disciplina de um curso
 
+### Documentos (feat-041, feat-042, feat-043)
+
+**Endpoints de Documentos:**
+
+- **`POST /api/v1/documents` - Upload de documento (feat-043)**
+  - **Autenticação:** Requer autenticação (JWT token)
+  - **Autorização:** Aluno, professor ou admin
+  - **Body:** Multipart form-data com arquivo + document_type_id
+  - **Resposta:** Documento criado (201 Created)
+  - **Validações:**
+    - Arquivo obrigatório (PDF, JPG, PNG)
+    - Máximo 10MB
+    - document_type_id obrigatório
+    - Não permitir duplicação de documento do mesmo tipo (exceto se rejeitado)
+  - **Exemplo:**
+    ```bash
+    curl -X POST http://localhost:3000/api/v1/documents \
+      -H "Authorization: Bearer <token>" \
+      -F "document=@documento.pdf" \
+      -F "document_type_id=2"
+    ```
+
+- **`GET /api/v1/documents` - Listar documentos (feat-043)**
+  - **Autenticação:** Requer autenticação
+  - **Autorização:** Admin only
+  - **Query params:**
+    - `status`: pending, approved, rejected
+    - `userId`: Filtrar por ID do usuário
+    - `page`: Página (padrão: 1)
+    - `limit`: Itens por página (padrão: 20)
+    - `orderBy`: Campo para ordenar (padrão: created_at)
+    - `order`: ASC ou DESC (padrão: DESC)
+  - **Resposta:** Lista de documentos com paginação
+  - **Exemplo:**
+    ```bash
+    curl -X GET "http://localhost:3000/api/v1/documents?status=pending&page=1&limit=20" \
+      -H "Authorization: Bearer <token>"
+    ```
+
+- **`GET /api/v1/documents/:id` - Buscar documento por ID (feat-043)**
+  - **Autenticação:** Requer autenticação
+  - **Autorização:** Qualquer usuário autenticado
+  - **Parâmetros:** `:id` (inteiro positivo)
+  - **Resposta:** Documento detalhado com informações do usuário
+  - **Exemplo:**
+    ```bash
+    curl -X GET http://localhost:3000/api/v1/documents/10 \
+      -H "Authorization: Bearer <token>"
+    ```
+
+- **`PUT /api/v1/documents/:id/approve` - Aprovar documento (feat-043)**
+  - **Autenticação:** Requer autenticação
+  - **Autorização:** Admin only
+  - **Parâmetros:** `:id` (inteiro positivo)
+  - **Body:**
+    ```json
+    {
+      "observations": "Documento aprovado" // opcional
+    }
+    ```
+  - **Resposta:** Documento atualizado com status 'approved'
+  - **Validações:**
+    - Documento não pode estar já aprovado
+    - Registra quem aprovou e quando
+  - **Exemplo:**
+    ```bash
+    curl -X PUT http://localhost:3000/api/v1/documents/10/approve \
+      -H "Authorization: Bearer <token>" \
+      -H "Content-Type: application/json" \
+      -d '{"observations": "Documento OK"}'
+    ```
+
+- **`PUT /api/v1/documents/:id/reject` - Rejeitar documento (feat-043)**
+  - **Autenticação:** Requer autenticação
+  - **Autorização:** Admin only
+  - **Parâmetros:** `:id` (inteiro positivo)
+  - **Body:**
+    ```json
+    {
+      "observations": "Motivo da rejeição" // obrigatório
+    }
+    ```
+  - **Resposta:** Documento atualizado com status 'rejected'
+  - **Validações:**
+    - Observations é obrigatório
+    - Documento não pode estar já rejeitado
+    - Registra quem rejeitou e quando
+  - **Exemplo:**
+    ```bash
+    curl -X PUT http://localhost:3000/api/v1/documents/10/reject \
+      -H "Authorization: Bearer <token>" \
+      -H "Content-Type: application/json" \
+      -d '{"observations": "Documento ilegível"}'
+    ```
+
+- **`DELETE /api/v1/documents/:id` - Deletar documento (feat-043)**
+  - **Autenticação:** Requer autenticação
+  - **Autorização:** Admin only
+  - **Parâmetros:** `:id` (inteiro positivo)
+  - **Resposta:** 204 No Content
+  - **Ações:**
+    - Remove arquivo do servidor
+    - Faz soft delete no banco
+  - **Exemplo:**
+    ```bash
+    curl -X DELETE http://localhost:3000/api/v1/documents/10 \
+      -H "Authorization: Bearer <token>"
+    ```
+
+- **`GET /api/v1/documents/:id/validate` - Validar documentos obrigatórios (feat-043)**
+  - **Autenticação:** Requer autenticação
+  - **Autorização:** Qualquer usuário autenticado
+  - **Parâmetros:** `:id` (ID do usuário)
+  - **Resposta:** Status de validação dos documentos obrigatórios
+  - **Exemplo:**
+    ```bash
+    curl -X GET http://localhost:3000/api/v1/documents/5/validate \
+      -H "Authorization: Bearer <token>"
+    ```
+  - **Resposta exemplo:**
+    ```json
+    {
+      "success": true,
+      "data": {
+        "allApproved": false,
+        "pending": [
+          {
+            "documentTypeId": 2,
+            "documentTypeName": "RG",
+            "status": "pending"
+          }
+        ],
+        "approved": [
+          {
+            "documentTypeId": 1,
+            "documentTypeName": "CPF",
+            "status": "approved"
+          }
+        ],
+        "rejected": []
+      }
+    }
+    ```
+
 ### Matrículas (Admin e Student)
 
 **Regras de Negócio Implementadas:**
