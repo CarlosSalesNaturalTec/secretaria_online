@@ -20,7 +20,9 @@
         "dependencias": [
           "feat-011"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-29",
+        "dataConclusao": "2025-10-29",
         "tags": [
           "enrollment",
           "service",
