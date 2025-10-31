@@ -819,6 +819,35 @@ npm install
 - `POST /api/v1/courses/:id/disciplines` - Adicionar disciplina a um curso
 - `DELETE /api/v1/courses/:id/disciplines/:disciplineId` - Remover disciplina de um curso
 
+### Matrículas (Admin e Student)
+
+**Regras de Negócio Implementadas:**
+- Um aluno não pode ter matrícula ativa/pendente em dois cursos simultaneamente
+- Matrícula só pode ser ativada se todos os documentos obrigatórios forem aprovados
+- Status padrão de nova matrícula: 'pending' (aguardando aprovação de documentos)
+- Status 'active': matrícula ativada após aprovação de todos os documentos obrigatórios
+
+**EnrollmentService (feat-038):**
+O serviço implementa validações automáticas de regras de negócio:
+- `create(studentId, courseId)` - Cria matrícula com validação de duplicação
+- `canEnroll(studentId, courseId)` - Verifica se aluno pode se matricular
+- `validateDocuments(studentId)` - Valida se todos documentos obrigatórios foram aprovados
+- `activateEnrollment(enrollmentId)` - Ativa matrícula após validação de documentos
+- `getPendingDocuments(studentId)` - Lista documentos obrigatórios pendentes
+- `updateStatus(enrollmentId, newStatus)` - Atualiza status (pending/active/cancelled)
+- `getByStudent(studentId)` - Lista matrículas do aluno
+- `getByCourse(courseId)` - Lista matrículas do curso
+- `cancel(enrollmentId)` - Cancela matrícula
+- `delete(enrollmentId)` - Remove matrícula (soft delete)
+
+**Endpoints de Matrículas:**
+- `GET /api/v1/enrollments` - Listar matrículas (admin only)
+- `GET /api/v1/enrollments/:id` - Buscar matrícula por ID
+- `POST /api/v1/enrollments` - Criar nova matrícula (validações automáticas)
+- `PUT /api/v1/enrollments/:id/status` - Atualizar status (admin only)
+- `DELETE /api/v1/enrollments/:id` - Excluir matrícula (soft delete, admin only)
+- `GET /api/v1/students/:id/enrollments` - Listar matrículas do aluno
+
 ## 🧪 Testes
 
 ```bash
