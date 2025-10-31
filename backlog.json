@@ -6,122 +6,67 @@
     "dataGeracao": "2025-10-23"
   },
   "grupo": {
-    "id": "grupo-6",
-    "nome": "Backend - API de Cursos e Turmas",
-    "descricao": "Gestão de cursos, disciplinas e turmas",
+    "id": "grupo-7",
+    "nome": "Backend - API de Matrículas",
+    "descricao": "Sistema de matrículas de alunos em cursos",
     "prioridade": "alta",
     "features": [
       {
-        "id": "feat-033",
-        "titulo": "Criar CourseController e DisciplineController",
-        "descricao": "Implementar CRUD para cursos e disciplinas. Criar course.routes.js e discipline.routes.js (admin only)",
-        "estimativa": "3h",
-        "prioridade": "alta",
-        "dependencias": [
-          "feat-008",
-          "feat-021"
-        ],
-        "status": "Concluída",
-        "dataInicio": "2025-10-29",
-        "dataConclusao": "2025-10-29",
-        "tags": [
-          "course",
-          "discipline",
-          "controller",
-          "api"
-        ],
-        "artefatos": [
-          "backend/src/controllers/course.controller.js",
-          "backend/src/controllers/discipline.controller.js",
-          "backend/src/routes/course.routes.js",
-          "backend/src/routes/discipline.routes.js"
-        ]
-      },
-      {
-        "id": "feat-034",
-        "titulo": "Adicionar endpoint para vincular disciplinas a curso",
-        "descricao": "Implementar POST /courses/:id/disciplines para adicionar disciplinas ao curso com semestre. DELETE para remover",
-        "estimativa": "1h30min",
-        "prioridade": "alta",
-        "dependencias": [
-          "feat-033",
-          "feat-009"
-        ],
-        "status": "Concluída",
-        "dataInicio": "2025-10-29",
-        "dataConclusao": "2025-10-29",
-        "tags": [
-          "course",
-          "discipline",
-          "relationship"
-        ],
-        "artefatos": [
-          "métodos em course.controller.js"
-        ]
-      },
-      {
-        "id": "feat-035",
-        "titulo": "Criar ClassController e rotas",
-        "descricao": "Implementar CRUD de turmas (Class). GET /classes?course_id=x, POST /classes com validação de semestre/ano. Criar class.routes.js",
-        "estimativa": "2h30min",
-        "prioridade": "alta",
-        "dependencias": [
-          "feat-010",
-          "feat-021"
-        ],
-        "status": "Concluída",
-        "dataInicio": "2025-10-29",
-        "dataConclusao": "2025-10-29",
-        "tags": [
-          "class",
-          "controller",
-          "api"
-        ],
-        "artefatos": [
-          "backend/src/controllers/class.controller.js",
-          "backend/src/routes/class.routes.js"
-        ]
-      },
-      {
-        "id": "feat-036",
-        "titulo": "Adicionar endpoints para vincular professores e alunos à turma",
-        "descricao": "Implementar POST /classes/:id/teachers (vincular professor + disciplina), POST /classes/:id/students (vincular aluno). DELETE para desvincular",
+        "id": "feat-038",
+        "titulo": "Criar EnrollmentService com regras de negócio",
+        "descricao": "Implementar EnrollmentService com validações: aluno não pode ter matrícula ativa no mesmo curso, documentos obrigatórios aprovados antes de ativar",
         "estimativa": "2h",
         "prioridade": "alta",
         "dependencias": [
-          "feat-035"
+          "feat-011"
         ],
-        "status": "Concluída",
-        "dataInicio": "2025-10-29",
-        "dataConclusao": "2025-10-30",
+        "status": "Não Iniciada",
         "tags": [
-          "class",
-          "relationship"
+          "enrollment",
+          "service",
+          "business-logic"
         ],
         "artefatos": [
-          "backend/src/controllers/class.controller.js",
-          "backend/src/services/class.service.js",
-          "backend/src/routes/class.routes.js"
+          "backend/src/services/enrollment.service.js"
         ]
       },
       {
-        "id": "feat-037",
-        "titulo": "Adicionar endpoint para listar alunos e professores de turma",
-        "descricao": "Implementar GET /classes/:id/students e GET /classes/:id/teachers com eager loading (Sequelize include)",
-        "estimativa": "1h30min",
-        "prioridade": "media",
+        "id": "feat-039",
+        "titulo": "Criar EnrollmentController e rotas",
+        "descricao": "Implementar CRUD de matrículas. POST cria matrícula com status pending. PUT /enrollments/:id/status para alterar status (admin only)",
+        "estimativa": "2h30min",
+        "prioridade": "alta",
         "dependencias": [
-          "feat-036"
+          "feat-038",
+          "feat-021"
         ],
-        "status": "Concluída",
-        "dataInicio": "2025-10-29",
-        "dataConclusao": "2025-10-30",
+        "status": "Não Iniciada",
         "tags": [
-          "class",
+          "enrollment",
+          "controller",
           "api"
         ],
         "artefatos": [
-          "métodos getStudents e getTeachers em class.controller.js"
+          "backend/src/controllers/enrollment.controller.js",
+          "backend/src/routes/enrollment.routes.js"
+        ]
+      },
+      {
+        "id": "feat-040",
+        "titulo": "Adicionar endpoint para listar matrículas por aluno",
+        "descricao": "Implementar GET /students/:id/enrollments retornando todas as matrículas do aluno com dados do curso",
+        "estimativa": "1h",
+        "prioridade": "media",
+        "dependencias": [
+          "feat-039"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "enrollment",
+          "api"
+        ],
+        "artefatos": [
+          "método em enrollment.controller.js"
         ]
       }
     ]

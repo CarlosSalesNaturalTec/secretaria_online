@@ -21,7 +21,9 @@
           "feat-008",
           "feat-021"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-29",
+        "dataConclusao": "2025-10-29",
         "tags": [
           "course",
           "discipline",
@@ -45,7 +47,9 @@
           "feat-033",
           "feat-009"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-29",
+        "dataConclusao": "2025-10-29",
         "tags": [
           "course",
           "discipline",
@@ -65,7 +69,9 @@
           "feat-010",
           "feat-021"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-29",
+        "dataConclusao": "2025-10-29",
         "tags": [
           "class",
           "controller",
@@ -85,13 +91,17 @@
         "dependencias": [
           "feat-035"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-29",
+        "dataConclusao": "2025-10-30",
         "tags": [
           "class",
           "relationship"
         ],
         "artefatos": [
-          "métodos em class.controller.js"
+          "backend/src/controllers/class.controller.js",
+          "backend/src/services/class.service.js",
+          "backend/src/routes/class.routes.js"
         ]
       },
       {
@@ -103,7 +113,9 @@
         "dependencias": [
           "feat-036"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-10-29",
+        "dataConclusao": "2025-10-30",
         "tags": [
           "class",
           "api"
