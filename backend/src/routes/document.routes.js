@@ -213,4 +213,32 @@ router.delete(
  */
 router.get('/:id/validate', authenticate, DocumentController.validate);
 
+/**
+ * GET /api/v1/documents/:id/download
+ * Download de um documento
+ *
+ * Autenticação: Requerida
+ * Parâmetros: id (ID do documento, inteiro positivo)
+ * Permissão: Próprio usuário ou admin
+ *
+ * Status de resposta:
+ * - 200 OK: Arquivo enviado como download
+ * - 400 Bad Request: ID inválido
+ * - 401 Unauthorized: Não autenticado
+ * - 403 Forbidden: Sem permissão para acessar o documento
+ * - 404 Not Found: Documento ou arquivo não encontrado
+ * - 500 Internal Server Error: Erro no servidor
+ *
+ * Response Headers:
+ * - Content-Type: application/pdf (ou image/jpeg, image/png, etc.)
+ * - Content-Disposition: attachment; filename="documento.pdf"
+ *
+ * @example
+ * GET /api/v1/documents/10/download
+ * Authorization: Bearer <token>
+ *
+ * Resposta: [arquivo binário com headers de download]
+ */
+router.get('/:id/download', authenticate, DocumentController.download);
+
 module.exports = router;

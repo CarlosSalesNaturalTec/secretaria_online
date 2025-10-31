@@ -1129,6 +1129,50 @@ router.post('/documents',
     }
     ```
 
+- **`GET /api/v1/documents/:id/download` - Download de documento (feat-044)**
+  - **Autenticação:** Requer autenticação (JWT token)
+  - **Autorização:** Próprio usuário ou admin
+  - **Parâmetros:** `:id` (ID do documento)
+  - **Resposta:** Arquivo binário (PDF, JPG ou PNG)
+  - **Headers de resposta:**
+    - `Content-Type`: application/pdf (ou image/jpeg, image/png)
+    - `Content-Disposition`: attachment; filename="documento.pdf"
+  - **Validações:**
+    - Documento deve existir
+    - Usuário deve ser proprietário do documento ou admin
+    - Arquivo deve existir no servidor
+  - **Exemplo:**
+    ```bash
+    curl -X GET http://localhost:3000/api/v1/documents/10/download \
+      -H "Authorization: Bearer <token>" \
+      --output documento_baixado.pdf
+    ```
+  - **Erros possíveis:**
+    - `400 Bad Request`: ID inválido
+    - `401 Unauthorized`: Não autenticado
+    - `403 Forbidden`: Sem permissão para acessar (documento de outro usuário)
+    - `404 Not Found`: Documento ou arquivo não encontrado
+    - `500 Internal Server Error`: Erro no servidor
+  - **Respostas de erro:**
+    ```json
+    {
+      "success": false,
+      "error": {
+        "code": "FORBIDDEN",
+        "message": "Você não tem permissão para acessar este documento"
+      }
+    }
+    ```
+    ```json
+    {
+      "success": false,
+      "error": {
+        "code": "FILE_NOT_FOUND",
+        "message": "Arquivo não encontrado no servidor"
+      }
+    }
+    ```
+
 ### Matrículas (Admin e Student)
 
 **Regras de Negócio Implementadas:**

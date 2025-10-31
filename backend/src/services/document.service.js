@@ -597,6 +597,98 @@ class DocumentService {
       );
     }
   }
+
+  /**
+   * Download de um documento
+   *
+   * Responsabilidades:
+   * - Validar se documento existe
+   * - Validar permissão: usuário do documento ou admin
+   * - Validar se arquivo existe no servidor
+   * - Retornar caminho do arquivo e nome para download
+   *
+   * @param {number} documentId - ID do documento a fazer download
+   * @param {number} userId - ID do usuário que está fazendo download
+   * @param {string} userRole - Role do usuário (admin, teacher, student)
+   *
+   * @returns {Promise<Object>} { filePath, fileName }
+   * @throws {AppError} Documento não encontrado, sem permissão ou arquivo não existe
+   *
+   * @example
+   * const file = await DocumentService.download(10, 5, 'student');
+   * // Retorna: { filePath: 'uploads/documents/5/1698700200000-rg.pdf', fileName: '1698700200000-rg.pdf' }
+   */
+  static async download(documentId, userId, userRole) {
+    try {
+      // 1. Buscar documento
+      const document = await Document.findByPk(documentId);
+
+      if (!document) {
+        throw new AppError(
+          'Documento não encontrado',
+          404,
+          'DOCUMENT_NOT_FOUND'
+        );
+      }
+
+      // 2. Validar permissão (próprio usuário ou admin)
+      if (document.user_id !== userId && userRole !== 'admin') {
+        throw new AppError(
+          'Você não tem permissão para acessar este documento',
+          403,
+          'FORBIDDEN'
+        );
+      }
+
+      // 3. Validar se arquivo existe no servidor
+      const fullPath = path.join(__dirname, '../../', document.file_path);
+
+      try {
+        await fs.access(fullPath);
+      } catch (fileError) {
+        logger.error('[DocumentService] Arquivo não encontrado no servidor', {
+          documentId,
+          filePath: document.file_path,
+          error: fileError.message,
+        });
+
+        throw new AppError(
+          'Arquivo não encontrado no servidor',
+          404,
+          'FILE_NOT_FOUND'
+        );
+      }
+
+      logger.info('[DocumentService] Download autorizado', {
+        documentId,
+        userId,
+        documentOwnerId: document.user_id,
+        fileName: document.file_name,
+      });
+
+      // 4. Retornar informações do arquivo para download
+      return {
+        filePath: fullPath,
+        fileName: document.file_name,
+      };
+    } catch (error) {
+      if (error.isOperational) {
+        throw error;
+      }
+
+      logger.error('[DocumentService] Erro ao preparar download', {
+        documentId,
+        userId,
+        error: error.message,
+      });
+
+      throw new AppError(
+        'Erro ao preparar download do documento',
+        500,
+        'DOWNLOAD_ERROR'
+      );
+    }
+  }
 }
 
 module.exports = DocumentService;

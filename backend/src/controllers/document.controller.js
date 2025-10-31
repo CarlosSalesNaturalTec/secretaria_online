@@ -536,6 +536,80 @@ class DocumentController {
       next(error);
     }
   }
+
+  /**
+   * GET /api/v1/documents/:id/download
+   * Download de um documento
+   *
+   * Requisitos:
+   * - Usuário autenticado
+   * - ID válido na URL
+   * - Permissão: próprio usuário ou admin
+   * - Documento deve existir
+   * - Arquivo deve existir no servidor
+   *
+   * @param {Object} req - Request do Express
+   * @param {Object} req.user - Usuário autenticado (injetado pelo auth.middleware)
+   * @param {Object} req.params.id - ID do documento
+   * @param {Object} res - Response do Express
+   * @param {Function} next - Próximo middleware/handler
+   *
+   * @returns {void} Stream do arquivo ou erro
+   *
+   * @example
+   * // Request
+   * GET /api/v1/documents/10/download
+   * Authorization: Bearer <token>
+   *
+   * // Response (200 OK com arquivo)
+   * Content-Type: application/pdf (ou image/jpeg, etc.)
+   * Content-Disposition: attachment; filename="documento.pdf"
+   * [arquivo binário]
+   *
+   * @example
+   * // Request (sem permissão)
+   * GET /api/v1/documents/10/download (usuário id=5, mas documento do usuário id=3)
+   * Authorization: Bearer <token>
+   *
+   * // Response (403 Forbidden)
+   * {
+   *   "success": false,
+   *   "error": {
+   *     "code": "FORBIDDEN",
+   *     "message": "Você não tem permissão para acessar este documento"
+   *   }
+   * }
+   */
+  async download(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      // Validar ID
+      if (isNaN(id) || parseInt(id) <= 0) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'ID deve ser um número inteiro positivo',
+          },
+        });
+      }
+
+      // Chamar serviço para fazer download com validação de permissão
+      const file = await DocumentService.download(parseInt(id), req.user.id, req.user.role);
+
+      logger.info('[DocumentController] Download de documento realizado', {
+        documentId: id,
+        downloadedBy: req.user.id,
+        fileName: file.fileName,
+      });
+
+      // Enviar arquivo como download
+      res.download(file.filePath, file.fileName);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new DocumentController();
