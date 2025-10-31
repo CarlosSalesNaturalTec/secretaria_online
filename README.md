@@ -33,6 +33,7 @@ A **Secretaria Online** é uma aplicação web destinada à automação dos proc
 - Helmet.js (Headers de segurança)
 - CORS (Cross-Origin Resource Sharing)
 - express-validator (Validação de requisições)
+- Multer (Upload de arquivos) ✨ **feat-041**
 - Nodemailer (Envio de emails)
 - Puppeteer/PDFKit (Geração de PDFs)
 - Winston (Logging)
@@ -773,6 +774,170 @@ npm install
 - [Requirements](./docs/requirements.md) - Requisitos funcionais e não funcionais
 - [Context Documentation](./docs/contextDoc.md) - Arquitetura e padrões técnicos
 - [Backlog](./docs/backlog.json) - Features e roadmap de desenvolvimento
+
+## 📤 Upload de Arquivos (feat-041)
+
+O sistema implementa upload seguro e validado de arquivos utilizando **Multer** com as seguintes características:
+
+### Configuração
+
+**Arquivo de Configuração:** `backend/src/config/upload.js`
+
+- **Diretório de armazenamento**: `backend/uploads/documents/[userId]/`
+- **Tamanho máximo de arquivo**: 10MB
+- **Formatos permitidos**: PDF, JPG, PNG
+- **Máximo de arquivos por requisição**: 5
+
+### Tipos de Arquivo Aceitos
+
+| Formato | MIME Type | Extensão |
+|---------|-----------|----------|
+| PDF | application/pdf | .pdf |
+| JPEG | image/jpeg | .jpg, .jpeg |
+| PNG | image/png | .png |
+
+### Middlewares de Upload
+
+**Arquivo:** `backend/src/middlewares/upload.middleware.js`
+
+- `validateUploadSingle`: Valida upload de um arquivo único
+  - Uso: `router.post('/documents', authenticate, validateUploadSingle, controller)`
+
+- `validateUploadMultiple`: Valida upload de múltiplos arquivos (até 5)
+  - Uso: `router.post('/documents/batch', authenticate, validateUploadMultiple, controller)`
+
+- `cleanupOnError`: Remove arquivo do disco em caso de erro no controller
+  - Uso: Middleware secundário para limpeza de uploads falhados
+
+### Validações Implementadas
+
+✅ **Validação de MIME Type**: Verifica se o tipo do arquivo é permitido
+✅ **Validação de Extensão**: Garante extensão adequada
+✅ **Limite de Tamanho**: Máximo 10MB por arquivo
+✅ **Limite de Quantidade**: Máximo 5 arquivos por requisição
+✅ **Mensagens de Erro Amigáveis**: Feedback claro ao usuário
+
+### Exemplo de Uso
+
+**Requisição:**
+```bash
+curl -X POST http://localhost:3000/api/v1/documents \
+  -H "Authorization: Bearer seu_token_jwt" \
+  -F "document=@documento.pdf"
+```
+
+**Resposta de Sucesso (201):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "userId": 5,
+    "filename": "1698700200000-documento.pdf",
+    "path": "uploads/documents/5/1698700200000-documento.pdf",
+    "mimetype": "application/pdf",
+    "size": 245632,
+    "uploadedAt": "2025-10-30T10:00:00Z"
+  },
+  "message": "Arquivo enviado com sucesso"
+}
+```
+
+**Resposta de Erro (400/413):**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "FILE_TOO_LARGE",
+    "message": "Arquivo muito grande. Tamanho máximo: 10MB"
+  }
+}
+```
+
+### Estrutura de Diretórios
+
+```
+backend/
+├── uploads/
+│   ├── documents/          # Documentos de usuários
+│   │   ├── 1/              # ID do usuário
+│   │   │   ├── 1698700200000-documento.pdf
+│   │   │   └── 1698700200001-certificado.jpg
+│   │   ├── 2/
+│   │   └── ...
+│   ├── contracts/          # PDFs de contratos (feat-042+)
+│   └── temp/               # Arquivos temporários
+└── ...
+```
+
+### Segurança
+
+- ✅ Validação de tipos de arquivo rigorosa
+- ✅ Geração de nomes únicos com timestamps (previne colisões)
+- ✅ Sanitização de nomes de arquivo (remove caracteres perigosos)
+- ✅ Organização por usuário (isolamento de uploads)
+- ✅ Tratamento de erros sem expor caminhos do servidor
+- ✅ Limpeza automática de uploads em caso de erro no controller
+
+### Variáveis de Ambiente
+
+```env
+# UPLOAD DE ARQUIVOS
+MAX_FILE_SIZE=10485760                                    # Tamanho máximo em bytes (10MB)
+UPLOAD_PATH=./uploads                                     # Caminho base de upload
+ALLOWED_FILE_TYPES=application/pdf,image/jpeg,image/png  # MIME types permitidos
+```
+
+### Integração com feat-042 (DocumentService)
+
+A configuração de upload está pronta para ser integrada com o **DocumentService** (feat-042):
+
+```javascript
+// Exemplo de uso no controller (feat-043)
+const { validateUploadSingle } = require('../middlewares/upload.middleware');
+const DocumentService = require('../services/document.service');
+
+router.post('/documents',
+  authenticate,
+  validateUploadSingle,
+  async (req, res, next) => {
+    try {
+      // req.file contém informações do arquivo validado
+      const documentData = {
+        userId: req.user.id,
+        documentTypeId: req.body.document_type_id,
+        filePath: req.file.path,
+        fileName: req.file.filename,
+        fileSize: req.file.size,
+        mimeType: req.file.mimetype
+      };
+
+      const document = await DocumentService.upload(documentData);
+      res.status(201).json({ success: true, data: document });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+```
+
+### Troubleshooting
+
+#### Erro: "Arquivo muito grande"
+- Verifique o tamanho do arquivo (máximo 10MB)
+- Reduza o tamanho ou comprima antes de enviar
+
+#### Erro: "Tipo de arquivo não permitido"
+- Verifique se o arquivo é PDF, JPG ou PNG
+- Alguns arquivos PNG podem ter MIME type diferente; teste com um arquivo conhecido
+
+#### Erro: "Nenhum arquivo foi enviado"
+- Certifique-se de que o parâmetro `document` está sendo enviado no form-data
+- Exemplo com curl: `-F "document=@arquivo.pdf"`
+
+#### Diretório de uploads não encontrado
+- O diretório é criado automaticamente na primeira requisição
+- Se persistir, crie manualmente: `mkdir -p backend/uploads/documents`
 
 ## 🔌 API Endpoints
 
