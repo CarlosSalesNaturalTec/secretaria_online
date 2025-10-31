@@ -16,7 +16,7 @@ const express = require('express');
 const router = express.Router();
 
 // Middlewares
-const { authenticate } = require('../middlewares/auth.middleware');
+const authenticate = require('../middlewares/auth.middleware');
 const { authorize } = require('../middlewares/rbac.middleware');
 const {
   validateUploadSingle,
