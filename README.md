@@ -840,13 +840,36 @@ O serviço implementa validações automáticas de regras de negócio:
 - `cancel(enrollmentId)` - Cancela matrícula
 - `delete(enrollmentId)` - Remove matrícula (soft delete)
 
+**EnrollmentController e Rotas (feat-039):**
+O controller implementa endpoints CRUD para matrículas:
+
 **Endpoints de Matrículas:**
-- `GET /api/v1/enrollments` - Listar matrículas (admin only)
-- `GET /api/v1/enrollments/:id` - Buscar matrícula por ID
-- `POST /api/v1/enrollments` - Criar nova matrícula (validações automáticas)
-- `PUT /api/v1/enrollments/:id/status` - Atualizar status (admin only)
+- `POST /api/v1/enrollments` - Criar nova matrícula (requer autenticação)
+  - Body: `{ "student_id": 1, "course_id": 2, "enrollment_date": "2025-10-30" }`
+  - Response: Matrícula criada com status 'pending' (201 Created)
+  - Validações: student_id e course_id obrigatórios, enrollment_date opcional
+
+- `GET /api/v1/enrollments` - Listar todas as matrículas (admin only)
+  - Response: Array de matrículas com informações de aluno e curso
+  - Ordenação: Por data de matrícula (desc)
+
+- `GET /api/v1/enrollments/:id` - Buscar matrícula por ID (requer autenticação)
+  - Response: Matrícula detalhada com informações de aluno e curso
+  - Validação: ID deve ser inteiro positivo
+
+- `GET /api/v1/students/:studentId/enrollments` - Listar matrículas do aluno (requer autenticação)
+  - Response: Array de matrículas do aluno com informações do curso
+  - Validação: studentId deve ser inteiro positivo
+
+- `PUT /api/v1/enrollments/:id/status` - Alterar status (admin only)
+  - Body: `{ "status": "active|pending|cancelled" }`
+  - Response: Matrícula atualizada
+  - Validações: Status deve ser válido, documentos devem estar aprovados para ativar
+  - Regra de negócio: Apenas pendente → ativa valida documentos automaticamente
+
 - `DELETE /api/v1/enrollments/:id` - Excluir matrícula (soft delete, admin only)
-- `GET /api/v1/students/:id/enrollments` - Listar matrículas do aluno
+  - Response: 204 No Content
+  - Validação: ID deve ser inteiro positivo
 
 ## 🧪 Testes
 

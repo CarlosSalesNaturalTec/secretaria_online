@@ -8,6 +8,7 @@
 const express = require('express');
 const { body, param } = require('express-validator');
 const StudentController = require('../controllers/student.controller');
+const EnrollmentController = require('../controllers/enrollment.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 const { authorizeAdmin } = require('../middlewares/rbac.middleware');
 const { handleValidationErrors } = require('../middlewares/validation.middleware');
@@ -15,10 +16,12 @@ const { validateCPF } = require('../utils/validators');
 
 const router = express.Router();
 
-router.use(authMiddleware, authorizeAdmin);
+router.use(authMiddleware);
 
+// Rotas que requerem admin
 router.post(
   '/',
+  authorizeAdmin,
   [
     body('name').notEmpty().withMessage('O nome é obrigatório.'),
     body('email').isEmail().withMessage('Email inválido.'),
@@ -33,7 +36,11 @@ router.post(
   StudentController.create
 );
 
-router.get('/', StudentController.getAll);
+router.get(
+  '/',
+  authorizeAdmin,
+  StudentController.getAll
+);
 
 router.get(
   '/:id',
@@ -44,6 +51,7 @@ router.get(
 
 router.put(
   '/:id',
+  authorizeAdmin,
   [
     param('id').isInt().withMessage('ID inválido.'),
     body('name').optional().notEmpty().withMessage('O nome é obrigatório.'),
@@ -56,6 +64,7 @@ router.put(
 
 router.delete(
   '/:id',
+  authorizeAdmin,
   [param('id').isInt().withMessage('ID inválido.')],
   handleValidationErrors,
   StudentController.delete
@@ -63,9 +72,18 @@ router.delete(
 
 router.post(
   '/:id/reset-password',
+  authorizeAdmin,
   [param('id').isInt().withMessage('ID inválido.')],
   handleValidationErrors,
   StudentController.resetPassword
+);
+
+// Rotas de matrículas do aluno (requer autenticação mas não necessariamente admin)
+router.get(
+  '/:studentId/enrollments',
+  [param('studentId').isInt({ min: 1 }).withMessage('studentId deve ser um inteiro positivo')],
+  handleValidationErrors,
+  EnrollmentController.getByStudent
 );
 
 module.exports = router;
