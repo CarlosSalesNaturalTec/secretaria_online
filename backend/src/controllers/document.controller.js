@@ -63,7 +63,7 @@ class DocumentController {
    *   "message": "Documento enviado com sucesso"
    * }
    */
-  static async upload(req, res, next) {
+  async upload(req, res, next) {
     try {
       // Validar documento_type_id
       const { document_type_id } = req.body;
@@ -152,7 +152,7 @@ class DocumentController {
    *   }
    * }
    */
-  static async list(req, res, next) {
+  async list(req, res, next) {
     try {
       const {
         status,
@@ -236,7 +236,7 @@ class DocumentController {
    *   }
    * }
    */
-  static async findById(req, res, next) {
+  async findById(req, res, next) {
     try {
       const { id } = req.params;
 
@@ -302,7 +302,7 @@ class DocumentController {
    *   "message": "Documento aprovado com sucesso"
    * }
    */
-  static async approve(req, res, next) {
+  async approve(req, res, next) {
     try {
       const { id } = req.params;
       const { observations } = req.body;
@@ -380,7 +380,7 @@ class DocumentController {
    *   "message": "Documento rejeitado com sucesso"
    * }
    */
-  static async reject(req, res, next) {
+  async reject(req, res, next) {
     try {
       const { id } = req.params;
       const { observations } = req.body;
@@ -450,7 +450,7 @@ class DocumentController {
    *
    * // Response (204 No Content)
    */
-  static async delete(req, res, next) {
+  async delete(req, res, next) {
     try {
       const { id } = req.params;
 
@@ -509,7 +509,7 @@ class DocumentController {
    *   }
    * }
    */
-  static async validate(req, res, next) {
+  async validate(req, res, next) {
     try {
       const { id } = req.params;
 
@@ -538,4 +538,4 @@ class DocumentController {
   }
 }
 
-module.exports = DocumentController;
+module.exports = new DocumentController();
