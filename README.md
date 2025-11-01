@@ -939,6 +939,216 @@ router.post('/documents',
 - O diretório é criado automaticamente na primeira requisição
 - Se persistir, crie manualmente: `mkdir -p backend/uploads/documents`
 
+## 📄 Geração de PDFs - PDFService (feat-047)
+
+O sistema implementa um serviço robusto de geração de PDFs para contratos utilizando **PDFKit** com as seguintes características:
+
+### Configuração
+
+**Arquivo de Serviço:** `backend/src/services/pdf.service.js`
+
+- **Biblioteca**: PDFKit v0.17.2 (leve e eficiente)
+- **Diretório de saída**: `backend/uploads/contracts/`
+- **Formato de saída**: PDF compatível com ISO 32000
+- **Tamanho máximo de PDF**: Sem limite prático (até ~100MB de memória)
+
+### Funcionalidades Principais
+
+#### 1. Geração de Contrato PDF
+
+```javascript
+const PDFService = require('../services/pdf.service');
+
+const contractData = {
+  studentName: 'João Silva da Santos',
+  studentId: 123,
+  courseName: 'Engenharia de Software',
+  courseId: 5,
+  semester: 1,
+  year: 2025,
+  startDate: '01/11/2025',  // opcional
+  duration: '8 semestres',   // opcional
+  institutionName: 'Secretaria Online' // opcional
+};
+
+const templateContent = `
+CONTRATO DE MATRÍCULA
+
+Este contrato formaliza a matrícula de {{studentName}} no curso {{courseName}}.
+
+Dados da Matrícula:
+- ID do Aluno: {{studentId}}
+- ID do Curso: {{courseId}}
+- Semestre: {{semester}}
+- Ano: {{year}}
+- Data de Início: {{startDate}}
+- Duração: {{duration}}
+- Instituição: {{institutionName}}
+
+Data: {{currentDate}}
+`;
+
+// Gerar PDF
+const result = await PDFService.generateContractPDF(
+  contractData,
+  templateContent,
+  'uploads/contracts'
+);
+
+// Resultado contém:
+// {
+//   filePath: 'C:\....\backend\uploads\contracts\contract_123_s1_2025_1635680291234.pdf',
+//   fileName: 'contract_123_s1_2025_1635680291234.pdf',
+//   fileSize: 2048,
+//   relativePath: 'contracts/contract_123_s1_2025_1635680291234.pdf'
+// }
+```
+
+### Placeholders Disponíveis
+
+O serviço substitui automaticamente os seguintes placeholders no template:
+
+| Placeholder | Descrição | Exemplo |
+|-----------|-----------|---------|
+| `{{studentName}}` | Nome do aluno | João Silva |
+| `{{studentId}}` | ID do aluno | 123 |
+| `{{courseName}}` | Nome do curso | Engenharia de Software |
+| `{{courseId}}` | ID do curso | 5 |
+| `{{semester}}` | Número do semestre | 1 |
+| `{{year}}` | Ano da matrícula | 2025 |
+| `{{startDate}}` | Data de início (ou data atual) | 01/11/2025 |
+| `{{duration}}` | Duração do curso | 8 semestres |
+| `{{institutionName}}` | Nome da instituição | Secretaria Online |
+| `{{currentDate}}` | Data atual (formato local) | 01/11/2025 |
+| `{{currentDateTime}}` | Data e hora atuais | 01/11/2025 15:30:45 |
+
+### Formatação de Conteúdo
+
+O serviço suporta formatação simples com Markdown:
+
+```
+**Texto em negrito**  → Texto em bold no PDF
+```
+
+### Métodos Disponíveis
+
+#### `PDFService.generateContractPDF(contractData, templateContent, outputDir)`
+
+Gera um PDF de contrato a partir de dados e template.
+
+**Parâmetros:**
+- `contractData` (Object): Dados para preencher o contrato
+  - `studentName` (String, obrigatório): Nome do aluno
+  - `studentId` (Number, obrigatório): ID do aluno
+  - `courseName` (String, obrigatório): Nome do curso
+  - `courseId` (Number, obrigatório): ID do curso
+  - `semester` (Number, obrigatório): Semestre
+  - `year` (Number, obrigatório): Ano
+  - `startDate`, `duration`, `institutionName` (String, opcional)
+
+- `templateContent` (String): Conteúdo do template com placeholders
+- `outputDir` (String): Diretório de saída (padrão: 'uploads/contracts')
+
+**Retorna:**
+```javascript
+{
+  filePath: String,           // Caminho completo do arquivo
+  fileName: String,           // Nome do arquivo gerado
+  fileSize: Number,           // Tamanho em bytes
+  relativePath: String        // Caminho relativo para armazenar em BD
+}
+```
+
+**Throws:**
+- `Error` com `code: 'VALIDATION_ERROR'` - Dados faltando ou inválidos
+- `Error` com `code: 'DIRECTORY_ERROR'` - Erro ao criar diretório
+- `Error` com `code: 'FILE_WRITE_ERROR'` - Erro ao escrever arquivo
+- `Error` com `code: 'PDF_GENERATION_ERROR'` - Erro ao gerar PDF
+
+#### `PDFService.pdfExists(filePath)`
+
+Verifica se um arquivo PDF existe.
+
+```javascript
+const exists = await PDFService.pdfExists('uploads/contracts/contract_123_s1_2025.pdf');
+// returns: true ou false
+```
+
+#### `PDFService.readPDF(filePath)`
+
+Retorna o conteúdo de um arquivo PDF como Buffer.
+
+```javascript
+const buffer = await PDFService.readPDF('uploads/contracts/contract_123_s1_2025.pdf');
+// Útil para enviar arquivo ao cliente (download, envio por email)
+res.setHeader('Content-Type', 'application/pdf');
+res.setHeader('Content-Disposition', 'attachment; filename="contrato.pdf"');
+res.send(buffer);
+```
+
+#### `PDFService.removePDF(filePath)`
+
+Remove um arquivo PDF do disco.
+
+```javascript
+const removed = await PDFService.removePDF('uploads/contracts/contract_123_s1_2025.pdf');
+// returns: true se removido, false se não existia
+```
+
+### Segurança
+
+- ✅ Validação rigorosa de dados de entrada
+- ✅ Prevenção de path traversal (caminhos seguros)
+- ✅ Geração automática de nomes únicos com timestamps
+- ✅ Tratamento robusto de erros
+- ✅ Logging estruturado de operações críticas
+- ✅ Suporte a soft permissions com isolamento de diretórios
+
+### Variáveis de Ambiente
+
+```env
+# GERAÇÃO DE PDF
+PDF_LIBRARY=pdfkit                          # Biblioteca a usar (pdfkit ou puppeteer)
+CONTRACTS_TEMPLATE_PATH=./templates/contracts # Caminho dos templates
+UPLOAD_PATH=./uploads                       # Caminho base de upload
+```
+
+### Testes
+
+Execute os testes unitários do PDFService:
+
+```bash
+cd backend
+node src/services/pdf.service.test.js
+```
+
+Testes incluem:
+- ✓ Validação de dados obrigatórios
+- ✓ Geração de PDF com dados válidos
+- ✓ Substituição de placeholders
+- ✓ Validação de tipos de dados
+- ✓ Gerenciamento de diretórios
+- ✓ Operações de arquivo (read, exists, remove)
+
+### Troubleshooting
+
+#### Erro: "Campos obrigatórios faltando"
+- Certifique-se de fornecer: `studentName`, `studentId`, `courseName`, `courseId`, `semester`, `year`
+- Todos são obrigatórios para gerar um contrato válido
+
+#### Erro: "Tipo inválido para semester"
+- `semester` deve ser um número (1-12)
+- `year` deve ser um número (2020-2100)
+
+#### Diretório `uploads/contracts` não encontrado
+- O diretório é criado automaticamente na primeira geração
+- Se persistir, crie manualmente: `mkdir -p backend/uploads/contracts`
+
+#### Arquivo PDF vazio ou corrompido
+- Verifique se o PDFKit está corretamente instalado
+- Teste com: `npm list pdfkit`
+- Se necessário, reinstale: `npm install pdfkit@0.17.2`
+
 ## 🔌 API Endpoints
 
 ### Autenticação
