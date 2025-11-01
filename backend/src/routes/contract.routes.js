@@ -26,7 +26,7 @@
 
 const express = require('express');
 const ContractController = require('../controllers/contract.controller');
-const { authenticate } = require('../middlewares/auth.middleware');
+const authenticate = require('../middlewares/auth.middleware');
 const { authorize } = require('../middlewares/rbac.middleware');
 
 const router = express.Router();
