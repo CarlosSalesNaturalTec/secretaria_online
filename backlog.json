@@ -106,13 +106,17 @@
         "dependencias": [
           "feat-013"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-01",
+        "dataConclusao": "2025-11-01",
         "tags": [
           "contract",
-          "template"
+          "template",
+          "seeder"
         ],
         "artefatos": [
-          "backend/database/seeders/*-contract-template.js"
+          "backend/database/seeders/20251101120000-contract-template.js",
+          "README.md (documentação feat-050)"
         ]
       }
     ]
