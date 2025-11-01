@@ -35,7 +35,7 @@ A **Secretaria Online** é uma aplicação web destinada à automação dos proc
 - express-validator (Validação de requisições)
 - Multer (Upload de arquivos) ✨ **feat-041**
 - Nodemailer (Envio de emails)
-- Puppeteer/PDFKit (Geração de PDFs)
+- PDFKit (Geração de PDFs) ✨ **feat-046** (Puppeteer como alternativa)
 - Winston (Logging)
 
 ## 📁 Estrutura do Projeto
