@@ -2139,6 +2139,207 @@ await ContractTemplate.create(teacherTemplate);
 - Verifique se os dados de contrato contêm todos os placeholders necessários
 - Verifique logs do backend para erros de substituição
 
+### Avaliações (feat-051)
+
+**Descrição:** CRUD de avaliações com rotas para professores criar avaliações de turmas, listar avaliações de uma turma ou professor, buscar avaliação por ID, atualizar e deletar avaliações.
+
+**Arquivos Criados:**
+- `backend/src/services/evaluation.service.js` - Serviço de avaliações com lógica de negócio
+- `backend/src/controllers/evaluation.controller.js` - Controlador de avaliações
+- `backend/src/routes/evaluation.routes.js` - Rotas de avaliações
+
+**Endpoints de Avaliações:**
+
+- **`POST /api/v1/evaluations` - Criar nova avaliação (feat-051)**
+  - **Autenticação:** Requer autenticação (JWT token)
+  - **Autorização:** Professor ou Admin
+  - **Body (JSON):**
+    ```json
+    {
+      "class_id": 1,              // Obrigatório: ID da turma
+      "teacher_id": 123,          // Obrigatório: ID do professor
+      "discipline_id": 5,         // Obrigatório: ID da disciplina
+      "name": "Prova de Matemática",  // Obrigatório: Nome da avaliação
+      "date": "2025-11-15",       // Obrigatório: Data (YYYY-MM-DD)
+      "type": "grade"             // Obrigatório: 'grade' (0-10) ou 'concept'
+    }
+    ```
+  - **Resposta:** 201 Created com dados da avaliação criada
+  - **Validações:**
+    - Todos os campos são obrigatórios
+    - `class_id`, `teacher_id`, `discipline_id` devem existir no banco
+    - `type` deve ser 'grade' ou 'concept'
+    - Data deve ser válida
+  - **Exemplo:**
+    ```bash
+    curl -X POST http://localhost:3000/api/v1/evaluations \
+      -H "Authorization: Bearer <token>" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "class_id": 1,
+        "teacher_id": 123,
+        "discipline_id": 5,
+        "name": "Prova de Matemática",
+        "date": "2025-11-15",
+        "type": "grade"
+      }'
+    ```
+
+- **`GET /api/v1/classes/:classId/evaluations` - Listar avaliações de uma turma (feat-051)**
+  - **Autenticação:** Requer autenticação
+  - **Query params:**
+    - `type` (opcional): Filtrar por tipo ('grade' ou 'concept')
+  - **Resposta:** Array de avaliações com informações do professor e disciplina
+  - **Exemplo:**
+    ```bash
+    curl -X GET "http://localhost:3000/api/v1/classes/1/evaluations?type=grade" \
+      -H "Authorization: Bearer <token>"
+    ```
+  - **Resposta exemplo:**
+    ```json
+    {
+      "success": true,
+      "data": [
+        {
+          "id": 42,
+          "class_id": 1,
+          "teacher_id": 123,
+          "discipline_id": 5,
+          "name": "Prova de Matemática",
+          "date": "2025-11-15",
+          "type": "grade",
+          "teacher": {
+            "id": 123,
+            "name": "Prof. João Silva",
+            "email": "joao@email.com"
+          },
+          "discipline": {
+            "id": 5,
+            "name": "Matemática",
+            "code": "MAT001"
+          },
+          "created_at": "2025-11-01T14:30:00Z"
+        }
+      ],
+      "count": 1
+    }
+    ```
+
+- **`GET /api/v1/teachers/:teacherId/evaluations` - Listar avaliações de um professor (feat-051)**
+  - **Autenticação:** Requer autenticação
+  - **Parâmetros:** `:teacherId` (inteiro positivo)
+  - **Resposta:** Array de avaliações criadas pelo professor
+  - **Exemplo:**
+    ```bash
+    curl -X GET http://localhost:3000/api/v1/teachers/123/evaluations \
+      -H "Authorization: Bearer <token>"
+    ```
+
+- **`GET /api/v1/evaluations/:id` - Buscar avaliação por ID (feat-051)**
+  - **Autenticação:** Requer autenticação
+  - **Parâmetros:** `:id` (inteiro positivo)
+  - **Resposta:** Dados completos da avaliação com professor, disciplina e notas associadas
+  - **Exemplo:**
+    ```bash
+    curl -X GET http://localhost:3000/api/v1/evaluations/42 \
+      -H "Authorization: Bearer <token>"
+    ```
+
+- **`PUT /api/v1/evaluations/:id` - Atualizar avaliação (feat-051)**
+  - **Autenticação:** Requer autenticação
+  - **Autorização:** Professor (criador) ou Admin
+  - **Parâmetros:** `:id` (inteiro positivo)
+  - **Body (JSON):** Campos a atualizar (opcionais)
+    ```json
+    {
+      "name": "Prova Revisada",
+      "date": "2025-11-20",
+      "type": "concept"
+    }
+    ```
+  - **Resposta:** 200 OK com dados atualizados
+  - **Exemplo:**
+    ```bash
+    curl -X PUT http://localhost:3000/api/v1/evaluations/42 \
+      -H "Authorization: Bearer <token>" \
+      -H "Content-Type: application/json" \
+      -d '{ "name": "Prova Revisada" }'
+    ```
+
+- **`DELETE /api/v1/evaluations/:id` - Deletar avaliação (feat-051)**
+  - **Autenticação:** Requer autenticação
+  - **Autorização:** Professor (criador) ou Admin
+  - **Parâmetros:** `:id` (inteiro positivo)
+  - **Resposta:** 204 No Content
+  - **Validação:** Avaliação deve existir
+  - **Exemplo:**
+    ```bash
+    curl -X DELETE http://localhost:3000/api/v1/evaluations/42 \
+      -H "Authorization: Bearer <token>"
+    ```
+
+- **`GET /api/v1/classes/:classId/evaluations/upcoming` - Listar avaliações futuras (feat-051)**
+  - **Autenticação:** Requer autenticação
+  - **Parâmetros:** `:classId` (inteiro positivo)
+  - **Resposta:** Array de avaliações com data futura, ordenadas por data ascendente
+  - **Exemplo:**
+    ```bash
+    curl -X GET http://localhost:3000/api/v1/classes/1/evaluations/upcoming \
+      -H "Authorization: Bearer <token>"
+    ```
+
+**EvaluationService (feat-051):**
+O serviço implementa a lógica de negócio para avaliações:
+- `create(evaluationData)` - Cria avaliação com validações de turma, professor e disciplina
+- `listByClass(classId, options)` - Lista avaliações de uma turma com filtro opcional por tipo
+- `listByTeacher(teacherId)` - Lista avaliações criadas por um professor
+- `getById(evaluationId)` - Busca avaliação completa com relacionamentos
+- `update(evaluationId, updateData)` - Atualiza avaliação com validações
+- `delete(evaluationId)` - Deleta avaliação (soft delete)
+- `countByClass(classId)` - Conta avaliações de uma turma
+- `listUpcomingByClass(classId)` - Lista avaliações futuras de uma turma
+
+**Validações Implementadas:**
+- ✅ Turma deve existir
+- ✅ Professor deve existir e ter role 'teacher'
+- ✅ Disciplina deve existir
+- ✅ Type deve ser 'grade' ou 'concept'
+- ✅ Data deve ser válida
+- ✅ Soft delete habilitado (deleted_at)
+
+**Tipos de Avaliação:**
+- `grade`: Avaliação com nota de 0 a 10
+- `concept`: Avaliação com conceito (Satisfatório/Não Satisfatório)
+
+**Exemplos de Uso:**
+
+1. **Professor cria avaliação:**
+   ```bash
+   POST /api/v1/evaluations
+   Body: { "class_id": 1, "teacher_id": 123, "discipline_id": 5, "name": "Prova", "date": "2025-11-15", "type": "grade" }
+   ```
+
+2. **Listar avaliações de uma turma:**
+   ```bash
+   GET /api/v1/classes/1/evaluations
+   ```
+
+3. **Listar avaliações futuras:**
+   ```bash
+   GET /api/v1/classes/1/evaluations/upcoming
+   ```
+
+4. **Professor atualiza avaliação:**
+   ```bash
+   PUT /api/v1/evaluations/42
+   Body: { "date": "2025-11-20" }
+   ```
+
+5. **Deletar avaliação:**
+   ```bash
+   DELETE /api/v1/evaluations/42
+   ```
+
 ### Matrículas (Admin e Student)
 
 **Regras de Negócio Implementadas:**
