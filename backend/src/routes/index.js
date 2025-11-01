@@ -16,6 +16,7 @@ const disciplineRoutes = require('./discipline.routes');
 const classRoutes = require('./class.routes');
 const enrollmentRoutes = require('./enrollment.routes');
 const documentRoutes = require('./document.routes');
+const contractRoutes = require('./contract.routes');
 
 const router = express.Router();
 
@@ -45,5 +46,8 @@ router.use('/enrollments', enrollmentRoutes);
 
 // Rotas de gerenciamento de Documentos (feat-041, feat-042, feat-043)
 router.use('/documents', documentRoutes);
+
+// Rotas de gerenciamento de Contratos (feat-048, feat-049)
+router.use('/contracts', contractRoutes);
 
 module.exports = router;

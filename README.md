@@ -1746,6 +1746,208 @@ UPLOAD_PATH=./uploads                 # Caminho base de upload
     }
     ```
 
+### Contratos (feat-048, feat-049)
+
+**Endpoints de Contratos:**
+
+- **`GET /api/v1/contracts` - Listar contratos (feat-049)**
+  - **Autenticação:** Requer autenticação (JWT token)
+  - **Autorização:**
+    - Admin: pode listar todos os contratos ou filtrar por usuário
+    - Aluno/Professor: lista apenas seus próprios contratos
+  - **Query params:**
+    - `userId` (opcional): ID do usuário para filtrar (admin only)
+    - `status` (opcional): 'pending' ou 'accepted'
+    - `limit` (opcional, padrão: 10): quantidade de registros
+    - `offset` (opcional, padrão: 0): offset para paginação
+  - **Resposta:** Lista de contratos com informações de paginação
+  - **Validações:**
+    - Usuário deve estar autenticado
+    - Aluno/Professor não pode listar contratos de outro usuário
+  - **Exemplo:**
+    ```bash
+    curl -X GET "http://localhost:3000/api/v1/contracts?status=pending" \
+      -H "Authorization: Bearer <token>"
+    ```
+  - **Resposta exemplo:**
+    ```json
+    {
+      "success": true,
+      "data": [
+        {
+          "id": 42,
+          "user_id": 123,
+          "template_id": 1,
+          "file_path": "uploads/contracts/contract_123_s1_2025_1635680291234.pdf",
+          "file_name": "contract_123_s1_2025_1635680291234.pdf",
+          "semester": 1,
+          "year": 2025,
+          "accepted_at": null,
+          "status": "pending",
+          "created_at": "2025-11-01T10:30:00.000Z"
+        }
+      ],
+      "pagination": {
+        "total": 1,
+        "limit": 10,
+        "offset": 0
+      }
+    }
+    ```
+
+- **`GET /api/v1/contracts/:id` - Buscar contrato por ID (feat-049)**
+  - **Autenticação:** Requer autenticação
+  - **Autorização:** Proprietário do contrato ou admin
+  - **Parâmetros:** `:id` (inteiro positivo)
+  - **Resposta:** Dados completos do contrato com informações do usuário e template
+  - **Exemplo:**
+    ```bash
+    curl -X GET http://localhost:3000/api/v1/contracts/42 \
+      -H "Authorization: Bearer <token>"
+    ```
+
+- **`POST /api/v1/contracts` - Gerar novo contrato (feat-049)**
+  - **Autenticação:** Requer autenticação
+  - **Autorização:** Admin only
+  - **Body (JSON):**
+    ```json
+    {
+      "userId": 123,           // Obrigatório: ID do aluno ou professor
+      "userType": "student",   // Obrigatório: 'student' ou 'teacher'
+      "semester": 1,           // Opcional: semestre (padrão: atual)
+      "year": 2025,            // Opcional: ano (padrão: atual)
+      "templateId": 1          // Opcional: ID do template (padrão: primeiro disponível)
+    }
+    ```
+  - **Resposta:** 201 Created com dados do contrato gerado
+  - **Validações:**
+    - userId e userType são obrigatórios
+    - userType deve ser 'student' ou 'teacher'
+    - Usuário deve existir no banco
+    - Deve existir pelo menos um template disponível
+  - **Ações:**
+    - Busca dados da matrícula (se aluno) ou professor
+    - Substitui placeholders do template
+    - Gera PDF automaticamente
+    - Salva contrato no banco com status 'pending'
+  - **Exemplo:**
+    ```bash
+    curl -X POST http://localhost:3000/api/v1/contracts \
+      -H "Authorization: Bearer <token>" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "userId": 123,
+        "userType": "student",
+        "semester": 1,
+        "year": 2025
+      }'
+    ```
+  - **Erros possíveis:**
+    - `400 Bad Request`: Dados obrigatórios faltando
+    - `403 Forbidden`: Usuário não é admin
+    - `404 Not Found`: Usuário ou template não encontrado
+    - `422 Unprocessable Entity`: Nenhum template disponível
+
+- **`POST /api/v1/contracts/:id/accept` - Aceitar contrato (feat-049)**
+  - **Autenticação:** Requer autenticação
+  - **Autorização:** Proprietário do contrato ou admin
+  - **Parâmetros:** `:id` (ID do contrato)
+  - **Resposta:** Contrato atualizado com data de aceite
+  - **Validações:**
+    - Contrato deve existir
+    - Usuário deve ser proprietário (ou ser admin)
+    - Contrato ainda não pode ter sido aceito
+  - **Ações:**
+    - Registra data/hora do aceite
+    - Atualiza campo `accepted_at` no banco
+    - Retorna contrato com status 'accepted'
+  - **Exemplo:**
+    ```bash
+    curl -X POST http://localhost:3000/api/v1/contracts/42/accept \
+      -H "Authorization: Bearer <token>"
+    ```
+  - **Resposta exemplo:**
+    ```json
+    {
+      "success": true,
+      "data": {
+        "id": 42,
+        "user_id": 123,
+        "template_id": 1,
+        "file_path": "uploads/contracts/contract_123_s1_2025_1635680291234.pdf",
+        "file_name": "contract_123_s1_2025_1635680291234.pdf",
+        "semester": 1,
+        "year": 2025,
+        "accepted_at": "2025-11-01T10:35:00.000Z",
+        "status": "accepted",
+        "created_at": "2025-11-01T10:30:00.000Z"
+      },
+      "message": "Contrato aceito com sucesso"
+    }
+    ```
+  - **Erros possíveis:**
+    - `403 Forbidden`: Usuário não é proprietário e não é admin
+    - `404 Not Found`: Contrato não encontrado
+    - `422 Unprocessable Entity`: Contrato já foi aceito
+
+- **`GET /api/v1/contracts/:id/pdf` - Download do PDF do contrato (feat-049)**
+  - **Autenticação:** Requer autenticação
+  - **Autorização:** Proprietário do contrato ou admin
+  - **Parâmetros:** `:id` (ID do contrato)
+  - **Resposta:** Arquivo PDF para download
+  - **Headers de resposta:**
+    - `Content-Type`: application/pdf
+    - `Content-Disposition`: attachment; filename="contract_123_s1_2025_*.pdf"
+  - **Validações:**
+    - Contrato deve existir
+    - Usuário deve ter permissão de acesso
+    - Arquivo PDF deve existir no servidor
+  - **Exemplo:**
+    ```bash
+    curl -X GET http://localhost:3000/api/v1/contracts/42/pdf \
+      -H "Authorization: Bearer <token>" \
+      --output contrato.pdf
+    ```
+  - **Erros possíveis:**
+    - `403 Forbidden`: Sem permissão para baixar arquivo
+    - `404 Not Found`: Contrato ou arquivo não encontrado
+
+**Fluxo Típico de Uso:**
+
+1. **Admin gera contrato para aluno:**
+   ```bash
+   POST /api/v1/contracts
+   { "userId": 123, "userType": "student" }
+   ```
+
+2. **Aluno visualiza contratos pendentes:**
+   ```bash
+   GET /api/v1/contracts?status=pending
+   ```
+
+3. **Aluno baixa PDF do contrato:**
+   ```bash
+   GET /api/v1/contracts/42/pdf
+   ```
+
+4. **Aluno aceita o contrato:**
+   ```bash
+   POST /api/v1/contracts/42/accept
+   ```
+
+5. **Admin verifica contratos aceitos:**
+   ```bash
+   GET /api/v1/contracts?status=accepted
+   ```
+
+**Regras de Negócio Implementadas:**
+- Contratos são gerados automaticamente para alunos ao criar matrícula
+- Contratos devem ser aceitos antes que aluno possa continuar usando o sistema
+- Um contrato só pode ser aceito uma vez
+- Apenas proprietário (ou admin) pode aceitar/acessar contrato
+- Contratos são renovados automaticamente a cada semestre para alunos
+- Professores recebem novos contratos a cada semestre
+
 ### Matrículas (Admin e Student)
 
 **Regras de Negócio Implementadas:**
