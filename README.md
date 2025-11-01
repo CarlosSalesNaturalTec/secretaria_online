@@ -2340,6 +2340,170 @@ O serviço implementa a lógica de negócio para avaliações:
    DELETE /api/v1/evaluations/42
    ```
 
+### Notas (feat-052)
+
+**Descrição:** Serviço de lançamento de notas com validações robustas de tipo de avaliação, valor de nota, e verificação de inscrição do aluno na turma.
+
+**Arquivos Criados:**
+- `backend/src/services/grade.service.js` - Serviço de notas com lógica de negócio validações
+
+**Métodos do GradeService:**
+
+- **`createGrade(gradeData)` - Lançar nota para um aluno**
+  - Validações:
+    - ✅ Avaliação deve existir
+    - ✅ Aluno deve existir e ter role 'student'
+    - ✅ Aluno deve estar inscrito na turma da avaliação
+    - ✅ Tipo de nota deve corresponder ao tipo da avaliação
+    - ✅ Para 'grade': valor deve estar entre 0 e 10
+    - ✅ Para 'concept': valor deve ser 'satisfactory' ou 'unsatisfactory'
+  - Retorna nota criada ou atualizada (idempotente)
+  - Exemplo:
+    ```javascript
+    // Nota numérica
+    const grade = await GradeService.createGrade({
+      evaluation_id: 1,
+      student_id: 5,
+      grade: 8.5
+    });
+
+    // Conceito
+    const grade = await GradeService.createGrade({
+      evaluation_id: 2,
+      student_id: 5,
+      concept: 'satisfactory'
+    });
+    ```
+
+- **`listByEvaluation(evaluationId, options)` - Listar notas de uma avaliação**
+  - Options:
+    - `includePending`: boolean - incluir alunos sem nota lançada (default: false)
+  - Retorna array de notas com informações do aluno
+
+- **`getGradeByEvaluationAndStudent(evaluationId, studentId)` - Buscar nota específica**
+  - Retorna nota do aluno na avaliação ou null se não existe
+
+- **`updateGrade(gradeId, updateData)` - Atualizar nota existente**
+  - Recebe { grade } ou { concept } conforme tipo da avaliação
+  - Valida novo valor antes de atualizar
+
+- **`deleteGrade(gradeId)` - Deletar nota (soft delete)**
+  - Remove logicamente a nota do banco
+
+- **`gradeExists(evaluationId, studentId)` - Verificar se nota foi lançada**
+  - Retorna boolean
+
+- **`listPendingGrades(evaluationId)` - Listar alunos sem nota lançada**
+  - Retorna array com id, name, email dos alunos que ainda não receberam nota
+
+- **`countGradesByEvaluation(evaluationId)` - Contar notas lançadas**
+  - Retorna objeto: { total: number, launched: number, pending: number }
+
+- **`validateGradeInput(data)` - Validar dados de entrada**
+  - Validação básica antes de chamar createGrade
+  - Retorna objeto com erros ou vazio se válido
+
+**Validações Implementadas:**
+
+1. **Validação de Avaliação**
+   - Avaliação deve existir no banco
+   - Tipo da avaliação define qual tipo de nota é aceito
+
+2. **Validação de Aluno**
+   - Aluno deve existir
+   - Aluno deve ter role 'student'
+   - Aluno deve estar inscrito na turma da avaliação
+
+3. **Validação de Nota Numérica (grade)**
+   - Obrigatório quando tipo de avaliação é 'grade'
+   - Deve ser número decimal válido
+   - Deve estar entre 0 e 10
+   - Pode ter até 2 casas decimais (ex: 8.75)
+
+4. **Validação de Conceito (concept)**
+   - Obrigatório quando tipo de avaliação é 'concept'
+   - Deve ser 'satisfactory' ou 'unsatisfactory'
+   - Case-insensitive (será normalizado para minúsculas)
+
+5. **Validação XOR (exclusive OR)**
+   - Apenas UMA das duas opções pode estar preenchida
+   - Não é permitido informar grade E concept simultaneamente
+   - Ambos não podem estar vazios
+
+6. **Validação de Inscrição**
+   - Verifica se aluno está na tabela class_students
+   - Impede lançamento de nota para aluno não inscrito na turma
+
+**Exemplos de Uso Completo:**
+
+1. **Criar nota numérica:**
+   ```javascript
+   try {
+     const grade = await GradeService.createGrade({
+       evaluation_id: 1,
+       student_id: 5,
+       grade: 7.5
+     });
+     console.log('Nota lançada:', grade.id);
+   } catch (error) {
+     console.error(error.message); // Ex: "Aluno não está inscrito na turma"
+   }
+   ```
+
+2. **Listar notas de uma avaliação:**
+   ```javascript
+   const grades = await GradeService.listByEvaluation(1);
+   // Retorna apenas notas lançadas (grade ou concept preenchido)
+
+   const allGrades = await GradeService.listByEvaluation(1, { includePending: true });
+   // Retorna incluindo alunos que ainda não receberam nota
+   ```
+
+3. **Verificar se nota já existe:**
+   ```javascript
+   const exists = await GradeService.gradeExists(1, 5);
+   if (exists) {
+     // Atualizar nota existente
+     await GradeService.updateGrade(gradeId, { grade: 8.0 });
+   } else {
+     // Criar nova nota
+     await GradeService.createGrade({ evaluation_id: 1, student_id: 5, grade: 8.0 });
+   }
+   ```
+
+4. **Listar alunos que ainda não receberam nota:**
+   ```javascript
+   const pending = await GradeService.listPendingGrades(1);
+   // Retorna: [
+   //   { id: 3, name: "João Silva", email: "joao@example.com" },
+   //   { id: 7, name: "Maria Santos", email: "maria@example.com" }
+   // ]
+   ```
+
+5. **Obter estatísticas de lançamento:**
+   ```javascript
+   const stats = await GradeService.countGradesByEvaluation(1);
+   // Retorna: { total: 30, launched: 25, pending: 5 }
+   ```
+
+**Códigos de Erro Retornados:**
+
+| Código | HTTP | Descrição |
+|--------|------|-----------|
+| `EVALUATION_NOT_FOUND` | 404 | Avaliação não encontrada |
+| `STUDENT_NOT_FOUND` | 404 | Aluno não encontrado |
+| `STUDENT_NOT_IN_CLASS` | 422 | Aluno não está inscrito na turma |
+| `INVALID_EVALUATION_TYPE` | 422 | Tipo de avaliação inválido |
+| `MISSING_GRADE_VALUE` | 422 | Nota numérica obrigatória mas não informada |
+| `MISSING_CONCEPT_VALUE` | 422 | Conceito obrigatório mas não informado |
+| `INVALID_GRADE_FORMAT` | 422 | Nota com formato inválido |
+| `GRADE_OUT_OF_RANGE` | 422 | Nota fora do intervalo 0-10 |
+| `INVALID_CONCEPT_VALUE` | 422 | Conceito inválido |
+| `GRADE_NOT_FOUND` | 404 | Nota não encontrada |
+| `GRADE_CREATE_ERROR` | 500 | Erro ao criar nota |
+| `GRADE_UPDATE_ERROR` | 500 | Erro ao atualizar nota |
+| `GRADE_DELETE_ERROR` | 500 | Erro ao deletar nota |
+
 ### Matrículas (Admin e Student)
 
 **Regras de Negócio Implementadas:**
