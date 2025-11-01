@@ -1946,7 +1946,198 @@ UPLOAD_PATH=./uploads                 # Caminho base de upload
 - Um contrato só pode ser aceito uma vez
 - Apenas proprietário (ou admin) pode aceitar/acessar contrato
 - Contratos são renovados automaticamente a cada semestre para alunos
-- Professores recebem novos contratos a cada semestre
+
+## 📝 Template HTML de Contrato Padrão (feat-050)
+
+**Descrição:** Seeder que cria um template HTML profissional para contratos de matrícula com placeholders dinâmicos que serão substituídos pelos dados reais ao gerar PDFs.
+
+**Arquivo de Seeder:** `backend/database/seeders/20251101120000-contract-template.js`
+
+### Características do Template
+
+**Nome do Template:**
+- `Contrato de Matrícula Padrão` (ativo por padrão)
+
+**Seções Incluídas:**
+
+1. **Header Profissional**
+   - Título "CONTRATO DE MATRÍCULA"
+   - Identificação "Secretaria Online - Sistema de Gestão Acadêmica"
+
+2. **Dados do Aluno**
+   - {{studentName}}: Nome completo
+   - {{studentCPF}}: CPF (formatado)
+   - {{studentEmail}}: Email de contato
+   - {{studentPhone}}: Telefone
+   - {{studentAddress}}: Endereço completo
+
+3. **Dados da Matrícula**
+   - {{courseName}}: Nome do curso
+   - {{currentSemester}}: Semestre inicial
+   - {{enrollmentDate}}: Data da matrícula
+   - {{courseDuration}}: Duração total em semestres
+   - {{enrollmentNumber}}: Número/ID da matrícula
+
+4. **Termos e Condições**
+   - Cláusula 1: Obrigações do Aluno
+   - Cláusula 2: Obrigações da Instituição
+   - Cláusula 3: Renovação do Contrato
+   - Cláusula 4: Cancelamento
+   - Cláusula 5: Declaração de Conformidade
+
+5. **Assinaturas**
+   - Espaço para assinatura do aluno
+   - Espaço para assinatura da instituição
+
+6. **Footer**
+   - Data da geração: {{contractDate}}
+   - ID do documento: {{contractId}}
+   - Timestamp de geração: {{generatedAt}}
+
+### Placeholders Disponíveis
+
+| Placeholder | Descrição | Tipo |
+|-------------|-----------|------|
+| {{studentName}} | Nome completo do aluno | string |
+| {{studentCPF}} | CPF formatado do aluno | string |
+| {{studentEmail}} | Email do aluno | string |
+| {{studentPhone}} | Telefone do aluno | string |
+| {{studentAddress}} | Endereço completo do aluno | string |
+| {{courseName}} | Nome do curso | string |
+| {{currentSemester}} | Número do semestre atual | number |
+| {{enrollmentDate}} | Data da matrícula (dd/MM/yyyy) | date |
+| {{courseDuration}} | Total de semestres do curso | number |
+| {{enrollmentNumber}} | ID/número da matrícula | number |
+| {{contractDate}} | Data da geração do contrato | date |
+| {{contractId}} | ID único do contrato | number |
+| {{generatedAt}} | Data e hora de geração (ISO 8601) | datetime |
+
+### Estilização
+
+O template inclui CSS profissional com:
+
+✅ **Layout Responsivo**
+- Suporta impressão e visualização digital
+- Máximo 800px de largura
+- Grid layout para organização de campos
+
+✅ **Design Profissional**
+- Cor primária: Azul (#0066cc)
+- Fontes: Arial, sans-serif
+- Espaçamento apropriado entre seções
+- Bordas e separadores visuais
+
+✅ **Acessibilidade**
+- Alto contraste entre texto e fundo
+- Fontes legíveis em tamanhos 11-24px
+- Media queries para impressão
+
+✅ **Elementos de Segurança Visual**
+- Linhas de assinatura com bordas
+- Campos claramente identificados
+- Cabeçalho com identidade visual
+
+### Uso do Template
+
+**No ContractService (feat-048):**
+
+```javascript
+// 1. Buscar template padrão
+const template = await ContractTemplate.findOne({
+  where: {
+    name: 'Contrato de Matrícula Padrão',
+    is_active: true
+  }
+});
+
+// 2. Substituir placeholders com dados reais
+const contractData = {
+  studentName: 'João Silva Santos',
+  studentCPF: '123.456.789-00',
+  studentEmail: 'joao@email.com',
+  studentPhone: '(11) 98765-4321',
+  studentAddress: 'Rua Principal, 123 - São Paulo, SP',
+  courseName: 'Análise e Desenvolvimento de Sistemas',
+  currentSemester: 1,
+  enrollmentDate: '01/11/2025',
+  courseDuration: 6,
+  enrollmentNumber: 42,
+  contractDate: '01/11/2025',
+  contractId: 1,
+  generatedAt: '2025-11-01T14:30:00Z'
+};
+
+let htmlContent = template.content;
+Object.entries(contractData).forEach(([key, value]) => {
+  htmlContent = htmlContent.replace(
+    new RegExp(`{{${key}}}`, 'g'),
+    value
+  );
+});
+
+// 3. Gerar PDF a partir do HTML
+const pdfBuffer = await PDFService.generateFromHTML(htmlContent);
+
+// 4. Salvar contrato com referência ao template
+const contract = await Contract.create({
+  user_id: userId,
+  template_id: template.id,
+  file_path: pdfPath,
+  file_name: pdfFileName,
+  semester: currentSemester,
+  year: currentYear
+});
+```
+
+### Como Executar o Seeder
+
+```bash
+# Executar todos os seeders (incluindo o novo template)
+npm run db:seed:all
+
+# Ou executar apenas este seeder
+npx sequelize-cli db:seed:all --seed 20251101120000-contract-template.js
+```
+
+### Criando Novos Templates
+
+Você pode criar templates adicionais para casos específicos:
+
+```javascript
+// Exemplo: Template para professor
+const teacherTemplate = {
+  name: 'Contrato de Professor',
+  content: `<html>...</html>`,
+  is_active: true
+};
+
+await ContractTemplate.create(teacherTemplate);
+```
+
+### Validações do Template
+
+- ✅ Nome: String de 3-100 caracteres
+- ✅ Conteúdo: LONGTEXT com estrutura HTML válida
+- ✅ is_active: Boolean (true para templates disponíveis)
+- ✅ Soft delete: Suporta exclusão lógica (deleted_at)
+- ✅ Índices otimizados: Por name, is_active, deleted_at
+
+### Troubleshooting
+
+**Template não aparece ao gerar contrato:**
+- Verifique se `is_active` é true
+- Verifique se `deleted_at` é null
+- Confirme que o template foi inserido: `SELECT * FROM contract_templates;`
+
+**Placeholders não sendo substituídos:**
+- Use a sintaxe exata: `{{placeholderName}}`
+- Certifique-se de que os dados são strings/números válidos
+- Verifique se não há espaços extras: `{{studentName }}` (errado)
+
+**PDF gerado sem dados:**
+- Confirme que o ContractService está using o mesmo template
+- Verifique se os dados de contrato contêm todos os placeholders necessários
+- Verifique logs do backend para erros de substituição
 
 ### Matrículas (Admin e Student)
 
