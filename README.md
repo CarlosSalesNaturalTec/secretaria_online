@@ -3576,6 +3576,309 @@ router.post('/students',
 - Mantenha dependências atualizadas (`npm audit` regularmente)
 - Configure backups automáticos do banco de dados
 
+## 📊 Consulta de Notas do Aluno - GET /my-grades (feat-054)
+
+O sistema implementa um endpoint para alunos consultarem suas próprias notas com suporte a filtros opcionais.
+
+### Descrição
+
+Os alunos podem consultar todas as suas notas em uma única requisição, visualizando informações detalhadas sobre cada avaliação, disciplina e turma. O endpoint suporta filtros por semestre e disciplina para facilitar a busca.
+
+### Funcionalidades
+
+✅ **Listagem Completa**: Ver todas as notas de todas as disciplinas
+✅ **Filtro por Semestre**: Consultar apenas notas de um semestre específico
+✅ **Filtro por Disciplina**: Consultar apenas notas de uma disciplina específica
+✅ **Combinação de Filtros**: Usar semestre E disciplina simultaneamente
+✅ **Detalhes Expandidos**: Cada nota inclui informações de avaliação, disciplina e turma
+✅ **Segurança**: Apenas estudantes autenticados podem acessar suas próprias notas
+
+### Endpoint
+
+**URL:** `GET /api/my-grades`
+
+**Autenticação:** Obrigatória (JWT Token de aluno)
+
+**Restrição:** Apenas para usuários com `role = 'student'`
+
+### Query Parameters (Opcionais)
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+|-----------|------|-----------|---------|
+| `semester` | number | Filtra por número do semestre | `?semester=1` |
+| `discipline_id` | number | Filtra por ID da disciplina | `?discipline_id=3` |
+
+**Combinações válidas:**
+- Sem parâmetros: Retorna todas as notas
+- `?semester=1`: Retorna notas do 1º semestre
+- `?discipline_id=5`: Retorna notas da disciplina ID 5
+- `?semester=1&discipline_id=5`: Retorna notas do 1º semestre DA disciplina ID 5
+
+### Resposta de Sucesso (200)
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "evaluation": {
+        "id": 10,
+        "name": "Prova 1",
+        "date": "2025-10-15",
+        "type": "grade"
+      },
+      "class": {
+        "id": 2,
+        "semester": 1,
+        "year": 2025
+      },
+      "discipline": {
+        "id": 3,
+        "name": "Cálculo I",
+        "code": "MAT101"
+      },
+      "grade": 8.5,
+      "concept": null,
+      "created_at": "2025-10-16T10:30:00.000Z",
+      "updated_at": "2025-10-16T10:30:00.000Z"
+    },
+    {
+      "id": 2,
+      "evaluation": {
+        "id": 11,
+        "name": "Trabalho Final",
+        "date": "2025-10-20",
+        "type": "concept"
+      },
+      "class": {
+        "id": 3,
+        "semester": 1,
+        "year": 2025
+      },
+      "discipline": {
+        "id": 4,
+        "name": "Física I",
+        "code": "FIS101"
+      },
+      "grade": null,
+      "concept": "satisfactory",
+      "created_at": "2025-10-21T14:15:00.000Z",
+      "updated_at": "2025-10-21T14:15:00.000Z"
+    }
+  ],
+  "count": 2,
+  "filters": null
+}
+```
+
+### Resposta com Filtros Aplicados
+
+```bash
+# Requisição
+curl -H "Authorization: Bearer seu_token" \
+  "http://localhost:3000/api/my-grades?semester=1&discipline_id=3"
+
+# Resposta
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "evaluation": { ... },
+      "class": { "semester": 1, ... },
+      "discipline": { "id": 3, ... },
+      "grade": 8.5,
+      ...
+    }
+  ],
+  "count": 1,
+  "filters": {
+    "semester": 1,
+    "discipline_id": 3
+  }
+}
+```
+
+### Respostas de Erro
+
+#### 400 - Parâmetro de Query Inválido
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "INVALID_REQUEST",
+    "message": "Semestre deve ser um número válido maior que 0"
+  }
+}
+```
+
+#### 403 - Usuário Não é Aluno
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "FORBIDDEN",
+    "message": "Apenas alunos podem acessar suas próprias notas"
+  }
+}
+```
+
+#### 404 - Aluno Não Encontrado
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "STUDENT_NOT_FOUND",
+    "message": "Aluno não encontrado"
+  }
+}
+```
+
+#### 500 - Erro do Servidor
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "STUDENT_GRADES_FETCH_ERROR",
+    "message": "Erro ao buscar notas do aluno"
+  }
+}
+```
+
+### Exemplos de Uso
+
+#### JavaScript/Fetch API
+
+```javascript
+// Sem filtros - todas as notas
+const token = localStorage.getItem('authToken');
+const response = await fetch('http://localhost:3000/api/my-grades', {
+  method: 'GET',
+  headers: {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  }
+});
+
+const data = await response.json();
+console.log(data.data); // Array de notas
+```
+
+#### Axios
+
+```javascript
+import axios from 'axios';
+
+const apiClient = axios.create({
+  baseURL: 'http://localhost:3000/api',
+  headers: {
+    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+  }
+});
+
+// Todas as notas
+const { data: allGrades } = await apiClient.get('/my-grades');
+
+// Apenas do 1º semestre
+const { data: semester1 } = await apiClient.get('/my-grades?semester=1');
+
+// Apenas da disciplina ID 3
+const { data: discipline3 } = await apiClient.get('/my-grades?discipline_id=3');
+
+// 1º semestre E disciplina ID 3
+const { data: filtered } = await apiClient.get('/my-grades?semester=1&discipline_id=3');
+```
+
+#### cURL
+
+```bash
+# Sem autenticação (retorna 401)
+curl http://localhost:3000/api/my-grades
+
+# Com token JWT
+TOKEN="seu_token_aqui"
+curl -H "Authorization: Bearer $TOKEN" http://localhost:3000/api/my-grades
+
+# Com filtro de semestre
+curl -H "Authorization: Bearer $TOKEN" "http://localhost:3000/api/my-grades?semester=1"
+
+# Com ambos os filtros
+curl -H "Authorization: Bearer $TOKEN" "http://localhost:3000/api/my-grades?semester=1&discipline_id=3"
+```
+
+### Estrutura de Dados Retornados
+
+Cada nota retornada contém:
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `id` | number | ID único da nota |
+| `evaluation.id` | number | ID da avaliação |
+| `evaluation.name` | string | Nome da avaliação (ex: "Prova 1") |
+| `evaluation.date` | string | Data da avaliação (YYYY-MM-DD) |
+| `evaluation.type` | string | Tipo de avaliação: "grade" ou "concept" |
+| `class.id` | number | ID da turma |
+| `class.semester` | number | Semestre da turma |
+| `class.year` | number | Ano da turma |
+| `discipline.id` | number | ID da disciplina |
+| `discipline.name` | string | Nome da disciplina |
+| `discipline.code` | string | Código da disciplina |
+| `grade` | number\|null | Nota numérica (0-10) ou null se não é tipo "grade" |
+| `concept` | string\|null | Conceito (satisfactory/unsatisfactory) ou null se não é tipo "concept" |
+| `created_at` | string | Timestamp de criação (ISO 8601) |
+| `updated_at` | string | Timestamp da última atualização (ISO 8601) |
+
+### Casos de Uso
+
+1. **Aluno quer ver todas suas notas**: Sem parâmetros
+2. **Aluno quer ver notas do semestre atual**: `?semester=1` (ou o semestre atual)
+3. **Aluno quer revisar notas de uma disciplina específica**: `?discipline_id=5`
+4. **Aluno quer revisar notas de Cálculo I apenas do 1º semestre**: `?semester=1&discipline_id=3`
+
+### Validações Implementadas
+
+✅ Verificação de autenticação (JWT válido)
+✅ Validação de role (apenas estudantes)
+✅ Validação de query parameters (semestre > 0, discipline_id > 0)
+✅ Verificação de existência do aluno
+✅ Validação de tipos de dados
+
+### Performance
+
+- **Índices do banco**: As queries utilizam índices em `student_id`, `evaluation_id` e `discipline_id`
+- **Relacionamentos eager-loaded**: Avalia ções, disciplinas e turmas são carregadas em uma única query
+- **Ordenação**: Notas são ordenadas por data de criação (mais recentes primeiro)
+
+### Segurança
+
+✅ Autenticação obrigatória (sem token, retorna 401)
+✅ Autorização por role (apenas estudantes)
+✅ Isolamento de dados (aluno vê apenas suas próprias notas)
+✅ Validação de inputs (proteção contra injeção SQL via ORM)
+✅ Rate limiting por usuário (prevenção de abuso)
+
+### Logging
+
+Todas as requisições são registradas com informações:
+
+```
+[GradeController.getMyGrades] Notas do aluno obtidas com sucesso
+  studentId: 123
+  count: 5
+  filters: { semester: 1 }
+```
+
+### Arquivos Afetados
+
+- `backend/src/controllers/grade.controller.js` - Método `getMyGrades()`
+- `backend/src/services/grade.service.js` - Método `getStudentGrades()`
+- `backend/src/routes/grade.routes.js` - Rota `GET /my-grades`
+
 ## 🤝 Contribuindo
 
 1. Faça um fork do projeto

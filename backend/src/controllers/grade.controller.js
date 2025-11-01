@@ -495,6 +495,98 @@ class GradeController {
       next(error);
     }
   }
+
+  /**
+   * Obtém todas as notas do aluno autenticado
+   *
+   * GET /api/my-grades
+   *
+   * Query params (opcionais):
+   * - ?semester=1 - Filtrar por semestre
+   * - ?discipline_id=3 - Filtrar por disciplina
+   * - ?semester=1&discipline_id=3 - Combinar filtros
+   *
+   * @param {object} req - Requisição Express
+   * @param {object} req.user - Usuário autenticado
+   * @param {object} req.query - Query parameters
+   * @param {number} req.query.semester - Número do semestre (opcional)
+   * @param {number} req.query.discipline_id - ID da disciplina (opcional)
+   * @param {object} res - Resposta Express
+   * @param {function} next - Middleware next
+   */
+  async getMyGrades(req, res, next) {
+    try {
+      const { id: userId, role } = req.user;
+      const { semester, discipline_id } = req.query;
+
+      // Validar que apenas alunos podem acessar suas próprias notas
+      if (role !== 'student') {
+        logger.warn('[GradeController.getMyGrades] Acesso negado - usuário não é aluno', {
+          userId,
+          role
+        });
+
+        return res.status(403).json({
+          success: false,
+          error: {
+            code: 'FORBIDDEN',
+            message: 'Apenas alunos podem acessar suas próprias notas'
+          }
+        });
+      }
+
+      // Construir filtros
+      const filters = {};
+
+      // Validar e aplicar filtro de semestre
+      if (semester) {
+        const semesterNum = parseInt(semester, 10);
+        if (isNaN(semesterNum) || semesterNum < 1) {
+          return res.status(400).json({
+            success: false,
+            error: {
+              code: 'INVALID_REQUEST',
+              message: 'Semestre deve ser um número válido maior que 0'
+            }
+          });
+        }
+        filters.semester = semesterNum;
+      }
+
+      // Validar e aplicar filtro de disciplina
+      if (discipline_id) {
+        const disciplineNum = parseInt(discipline_id, 10);
+        if (isNaN(disciplineNum) || disciplineNum < 1) {
+          return res.status(400).json({
+            success: false,
+            error: {
+              code: 'INVALID_REQUEST',
+              message: 'Discipline ID deve ser um número válido'
+            }
+          });
+        }
+        filters.discipline_id = disciplineNum;
+      }
+
+      // Obter notas do aluno
+      const grades = await GradeService.getStudentGrades(userId, filters);
+
+      logger.info('[GradeController.getMyGrades] Notas do aluno obtidas com sucesso', {
+        studentId: userId,
+        count: grades.length,
+        filters
+      });
+
+      res.status(200).json({
+        success: true,
+        data: grades,
+        count: grades.length,
+        filters: Object.keys(filters).length > 0 ? filters : null
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new GradeController();

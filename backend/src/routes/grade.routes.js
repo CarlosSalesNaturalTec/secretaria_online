@@ -149,4 +149,57 @@ router.get(
   GradeController.getPending
 );
 
+/**
+ * GET /api/my-grades
+ * Obtém todas as notas do aluno autenticado
+ *
+ * Requer: Autenticado (Estudante)
+ *
+ * Query params (opcionais):
+ * - semester=number - Filtrar por número do semestre
+ * - discipline_id=number - Filtrar por ID da disciplina
+ *
+ * Respostas (200):
+ * {
+ *   success: true,
+ *   data: [
+ *     {
+ *       id: number,
+ *       evaluation: {
+ *         id: number,
+ *         name: string,
+ *         date: string (YYYY-MM-DD),
+ *         type: string (grade|concept)
+ *       },
+ *       class: {
+ *         id: number,
+ *         semester: number,
+ *         year: number
+ *       },
+ *       discipline: {
+ *         id: number,
+ *         name: string,
+ *         code: string
+ *       },
+ *       grade: number|null (0-10),
+ *       concept: string|null (satisfactory|unsatisfactory),
+ *       created_at: string (ISO 8601),
+ *       updated_at: string (ISO 8601)
+ *     }
+ *   ],
+ *   count: number,
+ *   filters: object|null
+ * }
+ *
+ * Respostas de erro:
+ * - 400: Parâmetros de query inválidos
+ * - 403: Usuário não é aluno
+ * - 404: Aluno não encontrado (via service)
+ * - 500: Erro servidor
+ */
+router.get(
+  '/my-grades',
+  GradeController.getMyGrades
+);
+
 module.exports = router;

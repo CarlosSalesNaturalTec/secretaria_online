@@ -87,14 +87,19 @@
         "dependencias": [
           "feat-053"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-01",
+        "dataConclusao": "2025-11-01",
         "tags": [
           "grade",
           "api",
           "student"
         ],
         "artefatos": [
-          "método getMyGrades em grade.controller.js"
+          "método getMyGrades em grade.controller.js",
+          "método getStudentGrades em grade.service.js",
+          "rota GET /my-grades em grade.routes.js",
+          "documentação em README.md"
         ]
       },
       {

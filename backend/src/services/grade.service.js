@@ -621,6 +621,125 @@ class GradeService {
 
     return errors;
   }
+
+  /**
+   * Obtém todas as notas de um aluno com filtros opcionais
+   *
+   * Retorna as notas do aluno com as informações de disciplina, avaliação e turma.
+   * Permite filtrar por semestre e/ou disciplina.
+   *
+   * @param {number} studentId - ID do aluno
+   * @param {object} filters - Filtros opcionais
+   * @param {number} filters.semester - Número do semestre (filtro opcional)
+   * @param {number} filters.discipline_id - ID da disciplina (filtro opcional)
+   * @returns {Promise<Array>} Lista de notas do aluno com detalhes
+   * @throws {AppError} Se aluno não existir
+   *
+   * @example
+   * // Obter todas as notas do aluno
+   * const grades = await GradeService.getStudentGrades(5);
+   *
+   * @example
+   * // Obter notas do 1º semestre
+   * const grades = await GradeService.getStudentGrades(5, { semester: 1 });
+   *
+   * @example
+   * // Obter notas de uma disciplina específica
+   * const grades = await GradeService.getStudentGrades(5, { discipline_id: 3 });
+   */
+  async getStudentGrades(studentId, filters = {}) {
+    try {
+      // 1. Validar que aluno existe
+      await this._getAndValidateStudent(studentId);
+
+      // 2. Construir query com relacionamentos
+      let query = {
+        where: { student_id: studentId },
+        include: [
+          {
+            model: Evaluation,
+            as: 'evaluation',
+            attributes: ['id', 'name', 'date', 'type'],
+            include: [
+              {
+                model: require('../models').Class,
+                as: 'class',
+                attributes: ['id', 'semester', 'year']
+              },
+              {
+                model: require('../models').Discipline,
+                as: 'discipline',
+                attributes: ['id', 'name', 'code']
+              }
+            ]
+          },
+          {
+            model: User,
+            as: 'student',
+            attributes: ['id', 'name', 'email']
+          }
+        ],
+        order: [['created_at', 'DESC']]
+      };
+
+      // 3. Aplicar filtros se fornecidos
+      if (filters.semester) {
+        // Filtro por semestre - filtra notas cujas avaliações pertencem a uma turma do semestre especificado
+        query.include[0].where = {
+          ...query.include[0].where,
+          '$evaluation.class.semester$': filters.semester
+        };
+        query.subQuery = false;
+      }
+
+      if (filters.discipline_id) {
+        // Filtro por disciplina
+        query.include[0].where = {
+          ...query.include[0].where,
+          '$evaluation.discipline_id$': filters.discipline_id
+        };
+        query.subQuery = false;
+      }
+
+      // 4. Buscar notas
+      const grades = await Grade.findAll(query);
+
+      // 5. Estruturar resposta com agrupamento opcional por disciplina
+      return grades.map(g => {
+        const gradeData = g.toJSON();
+        return {
+          id: gradeData.id,
+          evaluation: {
+            id: gradeData.evaluation.id,
+            name: gradeData.evaluation.name,
+            date: gradeData.evaluation.date,
+            type: gradeData.evaluation.type
+          },
+          class: {
+            id: gradeData.evaluation.class.id,
+            semester: gradeData.evaluation.class.semester,
+            year: gradeData.evaluation.class.year
+          },
+          discipline: {
+            id: gradeData.evaluation.discipline.id,
+            name: gradeData.evaluation.discipline.name,
+            code: gradeData.evaluation.discipline.code
+          },
+          grade: gradeData.grade,
+          concept: gradeData.concept,
+          created_at: gradeData.created_at,
+          updated_at: gradeData.updated_at
+        };
+      });
+    } catch (error) {
+      if (error.isOperational) throw error;
+      throw new AppError(
+        'Erro ao buscar notas do aluno',
+        500,
+        'STUDENT_GRADES_FETCH_ERROR'
+      );
+    }
+  }
 }
 
 module.exports = new GradeService();
