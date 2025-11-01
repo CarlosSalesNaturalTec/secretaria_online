@@ -2504,6 +2504,257 @@ O serviço implementa a lógica de negócio para avaliações:
 | `GRADE_UPDATE_ERROR` | 500 | Erro ao atualizar nota |
 | `GRADE_DELETE_ERROR` | 500 | Erro ao deletar nota |
 
+### Lançamento de Notas (feat-053)
+
+**Descrição:** Controlador e rotas para lançamento e gerenciamento de notas individuais. Permite que professores lancem, editem e visualizem notas com validação de permissões.
+
+**Arquivos Criados:**
+- `backend/src/controllers/grade.controller.js` - Controlador para operações CRUD de notas
+- `backend/src/routes/grade.routes.js` - Rotas para endpoints de notas
+
+**Endpoints de Lançamento de Notas:**
+
+- **`POST /api/v1/grades` - Lançar nota para um aluno em uma avaliação (feat-053)**
+  - **Autenticação:** Requer autenticação (JWT token)
+  - **Autorização:** Professor que leciona a disciplina ou Admin
+  - **Body (JSON):**
+    ```json
+    {
+      "evaluation_id": 1,
+      "student_id": 5,
+      "grade": 8.5
+    }
+    // OU para avaliação conceitual
+    {
+      "evaluation_id": 2,
+      "student_id": 5,
+      "concept": "satisfactory"
+    }
+    ```
+  - **Respostas:**
+    - **201 Created** - Nota lançada com sucesso
+      ```json
+      {
+        "success": true,
+        "data": {
+          "id": 1,
+          "evaluation_id": 1,
+          "student_id": 5,
+          "grade": 8.5,
+          "concept": null,
+          "created_at": "2025-11-01T10:00:00Z",
+          "updated_at": "2025-11-01T10:00:00Z"
+        },
+        "message": "Nota lançada com sucesso"
+      }
+      ```
+    - **400 Bad Request** - Dados inválidos ou campos faltando
+    - **403 Forbidden** - Usuário não leciona a disciplina
+    - **422 Unprocessable Entity** - Validação de negócio falhou (aluno não está na turma, valor inválido)
+    - **500 Internal Server Error** - Erro no servidor
+  - **Validações:**
+    - ✅ evaluation_id e student_id obrigatórios
+    - ✅ Ao menos grade ou concept deve estar preenchido
+    - ✅ Professor deve lecionar a disciplina da avaliação
+    - ✅ Aluno deve estar inscrito na turma
+    - ✅ Tipo de nota deve corresponder ao tipo da avaliação
+    - ✅ Se grade: valor entre 0 e 10
+    - ✅ Se concept: 'satisfactory' ou 'unsatisfactory'
+  - **Exemplo com curl:**
+    ```bash
+    curl -X POST http://localhost:3000/api/v1/grades \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer <token>" \
+      -d '{
+        "evaluation_id": 1,
+        "student_id": 5,
+        "grade": 8.5
+      }'
+    ```
+
+- **`PUT /api/v1/grades/:id` - Atualizar nota existente (feat-053)**
+  - **Autenticação:** Requer autenticação (JWT token)
+  - **Autorização:** Professor que leciona ou Admin
+  - **Parâmetros:** `:id` (ID da nota)
+  - **Body (JSON):**
+    ```json
+    {
+      "grade": 9.0
+    }
+    // OU para conceitual
+    {
+      "concept": "unsatisfactory"
+    }
+    ```
+  - **Respostas:**
+    - **200 OK** - Nota atualizada com sucesso
+    - **400 Bad Request** - Dados inválidos
+    - **403 Forbidden** - Sem permissão
+    - **404 Not Found** - Nota não encontrada
+    - **422 Unprocessable Entity** - Validação falhou
+    - **500 Internal Server Error** - Erro no servidor
+  - **Validações:**
+    - ✅ Ao menos grade ou concept deve estar preenchido
+    - ✅ Professor deve lecionar a disciplina
+    - ✅ Tipo de nota deve corresponder ao tipo da avaliação
+  - **Exemplo:**
+    ```bash
+    curl -X PUT http://localhost:3000/api/v1/grades/1 \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer <token>" \
+      -d '{ "grade": 9.0 }'
+    ```
+
+- **`GET /api/v1/evaluations/:evaluationId/grades` - Listar todas as notas de uma avaliação (feat-053)**
+  - **Autenticação:** Requer autenticação (JWT token)
+  - **Autorização:** Professor que leciona a disciplina ou Admin
+  - **Parâmetros:**
+    - `:evaluationId` (ID da avaliação)
+    - Query param `?includePending=true` (opcional) - Incluir alunos sem nota lançada
+  - **Respostas:**
+    - **200 OK** - Lista de notas
+      ```json
+      {
+        "success": true,
+        "data": [
+          {
+            "id": 1,
+            "evaluation_id": 1,
+            "student_id": 5,
+            "grade": 8.5,
+            "concept": null,
+            "student": {
+              "id": 5,
+              "name": "João Silva",
+              "email": "joao@example.com"
+            },
+            "created_at": "2025-11-01T10:00:00Z"
+          }
+        ],
+        "count": 1
+      }
+      ```
+    - **400 Bad Request** - Parâmetros inválidos
+    - **403 Forbidden** - Sem permissão
+    - **404 Not Found** - Avaliação não encontrada
+    - **500 Internal Server Error** - Erro no servidor
+  - **Exemplo:**
+    ```bash
+    curl -X GET http://localhost:3000/api/v1/evaluations/1/grades \
+      -H "Authorization: Bearer <token>"
+    ```
+
+- **`GET /api/v1/evaluations/:evaluationId/grades/stats` - Obter estatísticas de lançamento (feat-053)**
+  - **Autenticação:** Requer autenticação (JWT token)
+  - **Autorização:** Professor que leciona ou Admin
+  - **Parâmetros:** `:evaluationId` (ID da avaliação)
+  - **Respostas:**
+    - **200 OK** - Estatísticas de lançamento
+      ```json
+      {
+        "success": true,
+        "data": {
+          "total": 30,
+          "launched": 25,
+          "pending": 5
+        }
+      }
+      ```
+  - **Exemplo:**
+    ```bash
+    curl -X GET http://localhost:3000/api/v1/evaluations/1/grades/stats \
+      -H "Authorization: Bearer <token>"
+    ```
+
+- **`GET /api/v1/evaluations/:evaluationId/grades/pending` - Listar alunos sem nota (feat-053)**
+  - **Autenticação:** Requer autenticação (JWT token)
+  - **Autorização:** Professor que leciona ou Admin
+  - **Parâmetros:** `:evaluationId` (ID da avaliação)
+  - **Respostas:**
+    - **200 OK** - Lista de alunos sem nota
+      ```json
+      {
+        "success": true,
+        "data": [
+          {
+            "id": 3,
+            "name": "Maria Santos",
+            "email": "maria@example.com"
+          },
+          {
+            "id": 7,
+            "name": "Pedro Costa",
+            "email": "pedro@example.com"
+          }
+        ],
+        "count": 2
+      }
+      ```
+  - **Exemplo:**
+    ```bash
+    curl -X GET http://localhost:3000/api/v1/evaluations/1/grades/pending \
+      -H "Authorization: Bearer <token>"
+    ```
+
+**GradeController (feat-053):**
+O controller implementa a lógica de validação e autorização:
+- `create(req, res, next)` - Lança nota com validação de permissão e dados
+- `update(req, res, next)` - Atualiza nota existente
+- `getByEvaluation(req, res, next)` - Lista notas de uma avaliação
+- `getStats(req, res, next)` - Retorna estatísticas de lançamento
+- `getPending(req, res, next)` - Lista alunos que ainda não receberam nota
+
+**Validações Implementadas:**
+- ✅ Autenticação JWT obrigatória
+- ✅ Autorização: apenas professor que leciona ou admin
+- ✅ Dados de entrada validados (evaluation_id, student_id, grade/concept)
+- ✅ Verificação se professor leciona a disciplina
+- ✅ Delegação de validações de negócio ao GradeService
+- ✅ Tratamento robusto de erros com mensagens amigáveis
+- ✅ Logs estruturados de operações críticas
+
+**Códigos HTTP Utilizados:**
+- `201 Created` - Nota criada com sucesso
+- `200 OK` - Operações de leitura e atualização bem-sucedidas
+- `400 Bad Request` - Dados inválidos ou faltando campos obrigatórios
+- `403 Forbidden` - Sem permissão para realizar operação
+- `404 Not Found` - Recurso não encontrado
+- `422 Unprocessable Entity` - Validação de negócio falhou
+- `500 Internal Server Error` - Erro no servidor
+
+**Exemplo de Fluxo Completo:**
+
+1. **Professor cria avaliação:**
+   ```bash
+   POST /api/v1/evaluations
+   Body: { "class_id": 1, "teacher_id": 123, "discipline_id": 5, "name": "Prova P1", "date": "2025-11-15", "type": "grade" }
+   ```
+
+2. **Professor lança notas dos alunos:**
+   ```bash
+   POST /api/v1/grades
+   Body: { "evaluation_id": 1, "student_id": 5, "grade": 8.5 }
+   POST /api/v1/grades
+   Body: { "evaluation_id": 1, "student_id": 6, "grade": 7.0 }
+   ```
+
+3. **Professor verifica quantas notas foram lançadas:**
+   ```bash
+   GET /api/v1/evaluations/1/grades/stats
+   Response: { total: 30, launched: 2, pending: 28 }
+   ```
+
+4. **Professor vê quem ainda não recebeu nota:**
+   ```bash
+   GET /api/v1/evaluations/1/grades/pending
+   ```
+
+5. **Professor atualiza uma nota:**
+   ```bash
+   PUT /api/v1/grades/1
+   Body: { "grade": 9.0 }
+   ```
+
 ### Matrículas (Admin e Student)
 
 **Regras de Negócio Implementadas:**
