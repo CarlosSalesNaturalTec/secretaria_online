@@ -1149,6 +1149,279 @@ Testes incluem:
 - Teste com: `npm list pdfkit`
 - Se necessário, reinstale: `npm install pdfkit@0.17.2`
 
+## 📋 Gestão de Contratos - ContractService (feat-048)
+
+O sistema implementa um serviço robusto de lógica de negócio para geração e gestão de contratos com as seguintes características:
+
+### Configuração
+
+**Arquivo de Serviço:** `backend/src/services/contract.service.js`
+
+- **Responsabilidades principais:**
+  - Gerar contratos automaticamente para alunos e professores
+  - Buscar templates e substituir placeholders com dados reais
+  - Gerar PDFs de contratos usando PDFService
+  - Registrar contratos gerados no banco de dados
+  - Registrar aceite de contratos (com data/hora)
+  - Validar regras de negócio para geração e aceite
+  - Buscar contratos por usuário, período e status
+
+### Funcionalidades Principais
+
+#### 1. Gerar Contrato para um Usuário
+
+```javascript
+const ContractService = require('../services/contract.service');
+
+// Gerar contrato para aluno
+const contract = await ContractService.generateContract(
+  studentId,
+  'student',
+  {
+    semester: 1,
+    year: 2025,
+    templateId: 1,                    // opcional - usa primeira disponível se omitido
+    outputDir: 'uploads/contracts'   // opcional
+  }
+);
+
+// Resultado contém:
+// {
+//   id: 42,
+//   user_id: 123,
+//   template_id: 1,
+//   file_path: 'C:\...\backend\uploads\contracts\contract_123_s1_2025_1635680291234.pdf',
+//   file_name: 'contract_123_s1_2025_1635680291234.pdf',
+//   semester: 1,
+//   year: 2025,
+//   accepted_at: null,
+//   created_at: '2025-11-01T10:30:00.000Z'
+// }
+```
+
+**FLUXO INTERNO:**
+1. Valida se usuário existe e é aluno ou professor
+2. Busca template disponível (padrão ou especificado)
+3. Se aluno: busca matrícula ativa para obter dados do curso
+4. Se professor: coleta dados do professor
+5. Substitui placeholders do template com dados reais
+6. Gera PDF usando PDFService
+7. Salva registro do contrato no banco de dados
+
+#### 2. Aceitar Contrato
+
+```javascript
+// Aluno/Professor aceita um contrato
+const accepted = await ContractService.acceptContract(contractId, userId);
+
+// Resultado contém:
+// {
+//   id: 42,
+//   user_id: 123,
+//   template_id: 1,
+//   file_path: '...',
+//   file_name: '...',
+//   semester: 1,
+//   year: 2025,
+//   accepted_at: '2025-11-01T10:35:00.000Z',
+//   status: 'accepted',
+//   created_at: '2025-11-01T10:30:00.000Z'
+// }
+```
+
+**FLUXO INTERNO:**
+1. Busca contrato por ID
+2. Valida que contrato ainda não foi aceito
+3. Valida que o usuário é o proprietário do contrato
+4. Registra data/hora do aceite
+5. Salva contrato atualizado no banco
+
+#### 3. Buscar Contratos Pendentes
+
+```javascript
+// Obter contratos pendentes de aceite de um aluno
+const pending = await ContractService.getPendingByUser(studentId);
+
+// Retorna array com contratos pendentes:
+// [
+//   {
+//     id: 42,
+//     user_id: 123,
+//     template_id: 1,
+//     file_path: '...',
+//     file_name: '...',
+//     semester: 1,
+//     year: 2025,
+//     accepted_at: null,
+//     status: 'pending',
+//     created_at: '2025-11-01T10:30:00.000Z'
+//   }
+// ]
+```
+
+#### 4. Buscar Contratos Aceitos
+
+```javascript
+// Obter contratos já aceitos por um aluno
+const accepted = await ContractService.getAcceptedByUser(studentId);
+
+// Retorna array com contratos aceitos (accepted_at não é null)
+```
+
+#### 5. Buscar Todos os Contratos de um Usuário
+
+```javascript
+// Obter todos os contratos (pendentes e aceitos)
+const allContracts = await ContractService.getAllByUser(studentId);
+
+// Retorna array com todos os contratos ordenados por data de criação (DESC)
+```
+
+#### 6. Buscar Contratos de um Período Específico
+
+```javascript
+// Obter contratos de um semestre/ano específico
+const contracts = await ContractService.getByPeriod(studentId, 1, 2025);
+
+// Retorna array com contratos do período especificado
+```
+
+#### 7. Buscar Contrato por ID
+
+```javascript
+// Obter contrato específico com todos os detalhes
+const contract = await ContractService.getById(contractId);
+
+// Resultado contém informações completas incluindo usuário e template
+```
+
+#### 8. Verificar se há Contratos Pendentes
+
+```javascript
+// Verificar se um usuário tem contratos pendentes
+const hasPending = await ContractService.hasPendingContracts(studentId);
+// returns: true ou false
+
+// Contar quantos contratos pendentes um usuário tem
+const count = await ContractService.countPendingContracts(studentId);
+// returns: número de contratos pendentes
+```
+
+### Regras de Negócio Validadas
+
+| Regra | Descrição |
+|-------|-----------|
+| **Usuário válido** | Usuário deve existir no banco de dados |
+| **Template obrigatório** | Deve existir pelo menos um template disponível |
+| **Aceite único** | Um contrato não pode ser aceito duas vezes |
+| **Propriedade** | Apenas o proprietário do contrato pode aceitá-lo |
+| **Dados da matrícula** | Se aluno, busca dados da matrícula ativa para preencher contrato |
+| **Dados do professor** | Se professor, usa dados do usuário para preencher contrato |
+
+### Métodos Disponíveis
+
+| Método | Descrição | Retorna |
+|--------|-----------|---------|
+| `generateContract(userId, userType, options)` | Gera novo contrato para usuário | Object com dados do contrato |
+| `acceptContract(contractId, userId)` | Registra aceite de contrato | Object com contrato aceito |
+| `getPendingByUser(userId)` | Lista contratos pendentes | Array de contratos |
+| `getAcceptedByUser(userId)` | Lista contratos aceitos | Array de contratos |
+| `getAllByUser(userId)` | Lista todos os contratos | Array de contratos |
+| `getByPeriod(userId, semester, year)` | Busca contratos de um período | Array de contratos |
+| `getById(contractId)` | Busca contrato por ID | Object com contrato completo |
+| `hasPendingContracts(userId)` | Verifica se há contratos pendentes | Boolean |
+| `countPendingContracts(userId)` | Conta contratos pendentes | Number |
+| `delete(contractId)` | Deleta um contrato (soft delete) | Void |
+
+### Integração com PDFService
+
+O ContractService utiliza PDFService para gerar os PDFs:
+
+1. **Preparação de dados**: Coleta dados do usuário, matrícula/curso, período
+2. **Substituição de placeholders**: Usa template.replacePlaceholders()
+3. **Geração de PDF**: Chama PDFService.generateContractPDF()
+4. **Armazenamento**: Salva caminho do PDF na tabela contracts
+
+```javascript
+// Fluxo interno de geração:
+const processedContent = template.replacePlaceholders(contractData);
+const pdfResult = await PDFService.generateContractPDF(
+  contractData,
+  processedContent,
+  outputDir
+);
+// Salva pdfResult.filePath e pdfResult.fileName no banco
+```
+
+### Tratamento de Erros
+
+Todos os métodos lançam `AppError` com mensagens claras:
+
+```javascript
+try {
+  await ContractService.generateContract(userId, 'student');
+} catch (error) {
+  if (error.statusCode === 404) {
+    console.log('Usuário não encontrado');
+  } else if (error.statusCode === 422) {
+    console.log('Nenhum template disponível - configure antes de gerar contratos');
+  } else if (error.statusCode === 500) {
+    console.log('Erro ao gerar contrato - verifique logs');
+  }
+}
+```
+
+### Logging Estruturado
+
+Todas as operações críticas são registradas:
+
+```
+[ContractService.generateContract] User: 123, Type: student - Iniciando geração de contrato
+[ContractService.generateContract] Gerando PDF...
+[ContractService.generateContract] Salvando contrato no banco de dados
+[ContractService.generateContract] Contrato gerado com sucesso - Contract ID: 42
+```
+
+### Testes
+
+A implementação segue padrões testáveis:
+
+```javascript
+// Exemplo de teste
+const contract = await ContractService.generateContract(123, 'student');
+assert(contract.id).exists();
+assert(contract.file_path).includes('uploads/contracts');
+assert(contract.accepted_at).isNull();
+```
+
+### Variáveis de Ambiente
+
+```env
+# GERAÇÃO DE PDF
+PDF_LIBRARY=pdfkit                    # Biblioteca a usar
+CONTRACTS_TEMPLATE_PATH=./templates   # Caminho dos templates
+UPLOAD_PATH=./uploads                 # Caminho base de upload
+```
+
+### Troubleshooting
+
+#### Erro: "Usuário não encontrado"
+- Verifique se o ID do usuário é válido
+- Confirme que o usuário existe no banco de dados
+
+#### Erro: "Nenhum template de contrato disponível"
+- Configure pelo menos um template antes de gerar contratos
+- Crie um template via ContractTemplate model
+
+#### Erro: "Contrato já foi aceito"
+- Um contrato só pode ser aceito uma vez
+- Verifique se accepted_at é null antes de aceitar
+
+#### Contrato não está salvando no banco
+- Verifique se a tabela `contracts` existe
+- Execute migrations: `npm run db:migrate`
+- Confirme conexão com banco de dados
+
 ## 🔌 API Endpoints
 
 ### Autenticação
