@@ -6,110 +6,105 @@
     "dataGeracao": "2025-10-23"
   },
   "grupo": {
-    "id": "grupo-8",
-    "nome": "Backend - Upload e Gestão de Documentos",
-    "descricao": "Sistema de upload, validação e aprovação de documentos",
+    "id": "grupo-9",
+    "nome": "Backend - Contratos e Geração de PDF",
+    "descricao": "Sistema de geração, aceite e gestão de contratos em PDF",
     "prioridade": "alta",
     "features": [
       {
-        "id": "feat-041",
-        "titulo": "Configurar Multer para upload de arquivos",
-        "descricao": "Instalar multer, criar config/upload.js com storage (uploads/documents/), limites de tamanho (10MB), filtro de tipos (PDF, JPG, PNG). Criar upload.middleware.js",
-        "estimativa": "1h30min",
+        "id": "feat-046",
+        "titulo": "Instalar e configurar PDFKit ou Puppeteer",
+        "descricao": "Avaliar limitações do Hostgator, escolher entre PDFKit (leve) ou Puppeteer (flexível). Instalar e criar configuração inicial",
+        "estimativa": "1h",
         "prioridade": "alta",
         "dependencias": [
           "feat-002"
         ],
-        "status": "Concluída",
+        "status": "Não Iniciada",
         "tags": [
-          "upload",
-          "config",
-          "middleware"
+          "pdf",
+          "config"
         ],
         "artefatos": [
-          "backend/src/config/upload.js",
-          "backend/src/middlewares/upload.middleware.js",
-          "backend/uploads/documents/"
+          "biblioteca instalada no package.json"
         ]
       },
       {
-        "id": "feat-042",
-        "titulo": "Criar DocumentService com validação",
-        "descricao": "Implementar DocumentService com métodos: upload (salvar registro no DB), approve, reject, delete. Validar se documento é obrigatório para o tipo de usuário",
+        "id": "feat-047",
+        "titulo": "Criar PDFService para geração de contratos",
+        "descricao": "Implementar pdf.service.js com método generateContractPDF(contractData, template) que substitui placeholders e gera PDF em uploads/contracts/",
+        "estimativa": "3h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-046"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "pdf",
+          "service"
+        ],
+        "artefatos": [
+          "backend/src/services/pdf.service.js",
+          "backend/uploads/contracts/"
+        ]
+      },
+      {
+        "id": "feat-048",
+        "titulo": "Criar ContractService com lógica de negócio",
+        "descricao": "Implementar ContractService: generateContract (busca template, gera PDF, salva registro), acceptContract (registra accepted_at)",
         "estimativa": "2h",
         "prioridade": "alta",
         "dependencias": [
-          "feat-012"
+          "feat-013",
+          "feat-047"
         ],
-        "status": "Concluída",
+        "status": "Não Iniciada",
         "tags": [
-          "document",
+          "contract",
           "service",
           "business-logic"
         ],
         "artefatos": [
-          "backend/src/services/document.service.js"
+          "backend/src/services/contract.service.js"
         ]
       },
       {
-        "id": "feat-043",
-        "titulo": "Criar DocumentController e rotas",
-        "descricao": "Implementar DocumentController: POST /documents (upload - aluno/professor), GET /documents (listar - admin filtro por status), PUT /documents/:id/approve e reject (admin)",
-        "estimativa": "3h",
+        "id": "feat-049",
+        "titulo": "Criar ContractController e rotas",
+        "descricao": "Implementar GET /contracts (listar - admin/próprio usuário), POST /contracts (gerar - admin), POST /contracts/:id/accept (aluno aceita), GET /contracts/:id/pdf (download)",
+        "estimativa": "2h30min",
         "prioridade": "alta",
         "dependencias": [
-          "feat-041",
-          "feat-042",
+          "feat-048",
           "feat-021"
         ],
-        "status": "Concluída",
+        "status": "Não Iniciada",
         "tags": [
-          "document",
+          "contract",
           "controller",
           "api"
         ],
         "artefatos": [
-          "backend/src/controllers/document.controller.js",
-          "backend/src/routes/document.routes.js"
+          "backend/src/controllers/contract.controller.js",
+          "backend/src/routes/contract.routes.js"
         ]
       },
       {
-        "id": "feat-044",
-        "titulo": "Adicionar endpoint para download de documento",
-        "descricao": "Implementar GET /documents/:id/download que verifica permissões (próprio usuário ou admin) e retorna arquivo com res.download()",
+        "id": "feat-050",
+        "titulo": "Criar template HTML de contrato padrão",
+        "descricao": "Criar template HTML com placeholders {{studentName}}, {{courseName}}, etc. Salvar como seeder em contract_templates",
         "estimativa": "1h30min",
         "prioridade": "media",
         "dependencias": [
-          "feat-043"
+          "feat-013"
         ],
-        "status": "Concluída",
+        "status": "Não Iniciada",
         "tags": [
-          "document",
-          "api"
+          "contract",
+          "template"
         ],
         "artefatos": [
-          "método download em document.controller.js"
-        ]
-      },
-      {
-        "id": "feat-045",
-        "titulo": "Adicionar endpoint para listar documentos por usuário",
-        "descricao": "Implementar GET /users/:id/documents ou GET /my-documents (estudante/professor vê próprios docs)",
-        "estimativa": "1h",
-        "prioridade": "media",
-        "dependencias": [
-          "feat-043"
-        ],
-        "status": "Concluída",
-        "tags": [
-          "document",
-          "api"
-        ],
-        "artefatos": [
-          "método getDocumentsByUser em document.service.js",
-          "método getUserDocuments em document.controller.js",
-          "método getMyDocuments em document.controller.js",
-          "rotas em document.routes.js"
+          "backend/database/seeders/*-contract-template.js"
         ]
       }
     ]

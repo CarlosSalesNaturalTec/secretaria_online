@@ -20,7 +20,7 @@
         "dependencias": [
           "feat-002"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
         "tags": [
           "upload",
           "config",
@@ -41,7 +41,7 @@
         "dependencias": [
           "feat-012"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
         "tags": [
           "document",
           "service",
@@ -62,7 +62,7 @@
           "feat-042",
           "feat-021"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
         "tags": [
           "document",
           "controller",
@@ -82,7 +82,7 @@
         "dependencias": [
           "feat-043"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
         "tags": [
           "document",
           "api"
@@ -100,13 +100,16 @@
         "dependencias": [
           "feat-043"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
         "tags": [
           "document",
           "api"
         ],
         "artefatos": [
-          "método em document.controller.js"
+          "método getDocumentsByUser em document.service.js",
+          "método getUserDocuments em document.controller.js",
+          "método getMyDocuments em document.controller.js",
+          "rotas em document.routes.js"
         ]
       }
     ]
