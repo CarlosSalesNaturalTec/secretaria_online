@@ -58,24 +58,6 @@ const router = express.Router();
 router.get('/', authenticate, ContractController.list);
 
 /**
- * GET /api/contracts/:id
- *
- * Busca detalhes de um contrato específico
- *
- * COMPORTAMENTO:
- * - Proprietário do contrato: acesso permitido
- * - Admin: acesso permitido
- * - Outro usuário: acesso negado (403)
- *
- * @middleware authenticate - Verifica JWT
- * @param {number} id - ID do contrato
- * @returns {Object} { success, data: Object }
- * @throws {404} Contrato não encontrado
- * @throws {403} Usuário não tem permissão
- */
-router.get('/:id', authenticate, ContractController.getById);
-
-/**
  * POST /api/contracts
  *
  * Gera um novo contrato para um usuário
@@ -115,6 +97,31 @@ router.get('/:id', authenticate, ContractController.getById);
 router.post('/', authenticate, authorize('admin'), ContractController.generateContract);
 
 /**
+ * GET /api/contracts/:id/pdf
+ *
+ * Download do arquivo PDF do contrato
+ *
+ * COMPORTAMENTO:
+ * - Retorna arquivo PDF para download
+ * - Proprietário do contrato: acesso permitido
+ * - Admin: acesso permitido
+ * - Outro usuário: acesso negado (403)
+ * - Header Content-Disposition configura download
+ *
+ * EXEMPLOS:
+ * GET /api/contracts/123/pdf
+ *
+ * @middleware authenticate - Verifica JWT
+ * @param {number} id - ID do contrato
+ * @returns {Buffer} Arquivo PDF
+ * @returns {Headers} Content-Type: application/pdf
+ * @returns {Headers} Content-Disposition: attachment; filename="contract_*.pdf"
+ * @throws {404} Contrato ou arquivo não encontrado
+ * @throws {403} Usuário não tem permissão
+ */
+router.get('/:id/pdf', authenticate, ContractController.getPDF);
+
+/**
  * POST /api/contracts/:id/accept
  *
  * Registra o aceite de um contrato
@@ -145,28 +152,21 @@ router.post('/', authenticate, authorize('admin'), ContractController.generateCo
 router.post('/:id/accept', authenticate, ContractController.acceptContract);
 
 /**
- * GET /api/contracts/:id/pdf
+ * GET /api/contracts/:id
  *
- * Download do arquivo PDF do contrato
+ * Busca detalhes de um contrato específico
  *
  * COMPORTAMENTO:
- * - Retorna arquivo PDF para download
  * - Proprietário do contrato: acesso permitido
  * - Admin: acesso permitido
  * - Outro usuário: acesso negado (403)
- * - Header Content-Disposition configura download
- *
- * EXEMPLOS:
- * GET /api/contracts/123/pdf
  *
  * @middleware authenticate - Verifica JWT
  * @param {number} id - ID do contrato
- * @returns {Buffer} Arquivo PDF
- * @returns {Headers} Content-Type: application/pdf
- * @returns {Headers} Content-Disposition: attachment; filename="contract_*.pdf"
- * @throws {404} Contrato ou arquivo não encontrado
+ * @returns {Object} { success, data: Object }
+ * @throws {404} Contrato não encontrado
  * @throws {403} Usuário não tem permissão
  */
-router.get('/:id/pdf', authenticate, ContractController.getPDF);
+router.get('/:id', authenticate, ContractController.getById);
 
 module.exports = router;
