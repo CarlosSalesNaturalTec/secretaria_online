@@ -62,7 +62,9 @@
           "feat-013",
           "feat-047"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-01",
+        "dataConclusao": "2025-11-01",
         "tags": [
           "contract",
           "service",
