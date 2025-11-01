@@ -20,7 +20,9 @@
         "dependencias": [
           "feat-002"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-01",
+        "dataConclusao": "2025-11-01",
         "tags": [
           "pdf",
           "config"
