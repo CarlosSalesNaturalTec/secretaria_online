@@ -35,7 +35,7 @@
       {
         "id": "feat-052",
         "titulo": "Criar GradeService com validações",
-        "descricao": "Implementar GradeService: lançar nota (validar tipo grade vs concept, valor válido), calcular média, verificar se aluno está na turma",
+        "descricao": "Implementar GradeService: lançar nota (validar tipo grade vs concept, valor válido), verificar se aluno está na turma",
         "estimativa": "2h",
         "prioridade": "alta",
         "dependencias": [
