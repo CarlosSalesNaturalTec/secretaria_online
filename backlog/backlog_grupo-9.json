@@ -20,7 +20,9 @@
         "dependencias": [
           "feat-002"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-01",
+        "dataConclusao": "2025-11-01",
         "tags": [
           "pdf",
           "config"
@@ -38,7 +40,9 @@
         "dependencias": [
           "feat-046"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-01",
+        "dataConclusao": "2025-11-01",
         "tags": [
           "pdf",
           "service"
@@ -58,7 +62,9 @@
           "feat-013",
           "feat-047"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-01",
+        "dataConclusao": "2025-11-01",
         "tags": [
           "contract",
           "service",
@@ -78,7 +84,9 @@
           "feat-048",
           "feat-021"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-01",
+        "dataConclusao": "2025-11-01",
         "tags": [
           "contract",
           "controller",
@@ -98,13 +106,17 @@
         "dependencias": [
           "feat-013"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-01",
+        "dataConclusao": "2025-11-01",
         "tags": [
           "contract",
-          "template"
+          "template",
+          "seeder"
         ],
         "artefatos": [
-          "backend/database/seeders/*-contract-template.js"
+          "backend/database/seeders/20251101120000-contract-template.js",
+          "README.md (documentação feat-050)"
         ]
       }
     ]
