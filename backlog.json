@@ -6,123 +6,49 @@
     "dataGeracao": "2025-10-23"
   },
   "grupo": {
-    "id": "grupo-10",
-    "nome": "Backend - Avaliações e Notas",
-    "descricao": "Sistema de cadastro de avaliações e lançamento de notas",
-    "prioridade": "alta",
+    "id": "grupo-11",
+    "nome": "Backend - Solicitações",
+    "descricao": "Sistema de solicitações de alunos (declarações, requerimentos)",
+    "prioridade": "media",
     "features": [
       {
-        "id": "feat-051",
-        "titulo": "Criar EvaluationController e rotas",
-        "descricao": "Implementar CRUD de avaliações. POST /classes/:classId/evaluations (professor cria avaliação), GET /classes/:classId/evaluations (listar)",
-        "estimativa": "2h30min",
-        "prioridade": "alta",
-        "dependencias": [
-          "feat-014",
-          "feat-021"
-        ],
-        "status": "Concluída",
-        "dataInicio": "2025-11-01",
-        "dataConclusao": "2025-11-01",
-        "tags": [
-          "evaluation",
-          "controller",
-          "api"
-        ],
-        "artefatos": [
-          "backend/src/controllers/evaluation.controller.js",
-          "backend/src/routes/evaluation.routes.js"
-        ]
-      },
-      {
-        "id": "feat-052",
-        "titulo": "Criar GradeService com validações",
-        "descricao": "Implementar GradeService: lançar nota (validar tipo grade vs concept, valor válido), verificar se aluno está na turma",
-        "estimativa": "2h",
-        "prioridade": "alta",
-        "dependencias": [
-          "feat-014"
-        ],
-        "status": "Concluída",
-        "dataInicio": "2025-11-01",
-        "dataConclusao": "2025-11-01",
-        "tags": [
-          "grade",
-          "service",
-          "business-logic"
-        ],
-        "artefatos": [
-          "backend/src/services/grade.service.js"
-        ]
-      },
-      {
-        "id": "feat-053",
-        "titulo": "Criar GradeController e rotas",
-        "descricao": "Implementar POST /grades (professor lança nota), PUT /grades/:id (editar), GET /evaluations/:id/grades (listar notas de avaliação)",
-        "estimativa": "2h30min",
-        "prioridade": "alta",
-        "dependencias": [
-          "feat-052",
-          "feat-021"
-        ],
-        "status": "Concluída",
-        "dataInicio": "2025-11-01",
-        "dataConclusao": "2025-11-01",
-        "tags": [
-          "grade",
-          "controller",
-          "api"
-        ],
-        "artefatos": [
-          "backend/src/controllers/grade.controller.js",
-          "backend/src/routes/grade.routes.js"
-        ]
-      },
-      {
-        "id": "feat-054",
-        "titulo": "Adicionar endpoint para aluno ver próprias notas",
-        "descricao": "Implementar GET /my-grades (estudante vê suas notas de todas as disciplinas) com filtro por semestre/disciplina",
-        "estimativa": "1h30min",
-        "prioridade": "alta",
-        "dependencias": [
-          "feat-053"
-        ],
-        "status": "Concluída",
-        "dataInicio": "2025-11-01",
-        "dataConclusao": "2025-11-01",
-        "tags": [
-          "grade",
-          "api",
-          "student"
-        ],
-        "artefatos": [
-          "método getMyGrades em grade.controller.js",
-          "método getStudentGrades em grade.service.js",
-          "rota GET /my-grades em grade.routes.js",
-          "documentação em README.md"
-        ]
-      },
-      {
-        "id": "feat-055",
-        "titulo": "Adicionar lançamento em lote de notas",
-        "descricao": "Implementar POST /evaluations/:id/grades/batch recebendo array de {student_id, grade/concept} para lançamento rápido pelo professor",
-        "estimativa": "2h",
+        "id": "feat-056",
+        "titulo": "Criar RequestController e rotas",
+        "descricao": "Implementar CRUD de solicitações. POST /requests (aluno cria), GET /requests (admin vê todas, aluno vê próprias), PUT /requests/:id/approve e reject (admin)",
+        "estimativa": "3h",
         "prioridade": "media",
         "dependencias": [
-          "feat-053"
+          "feat-015",
+          "feat-021"
         ],
-        "status": "Concluída",
-        "dataInicio": "2025-11-03",
-        "dataConclusao": "2025-11-03",
+        "status": "Não Iniciada",
         "tags": [
-          "grade",
-          "api",
-          "teacher"
+          "request",
+          "controller",
+          "api"
         ],
         "artefatos": [
-          "método batchCreateGrades em grade.service.js",
-          "método batchCreate em grade.controller.js",
-          "rota POST /evaluations/:id/grades/batch em grade.routes.js"
+          "backend/src/controllers/request.controller.js",
+          "backend/src/routes/request.routes.js"
+        ]
+      },
+      {
+        "id": "feat-057",
+        "titulo": "Adicionar filtros e paginação para solicitações",
+        "descricao": "Adicionar query params para GET /requests: ?status=pending&page=1&limit=20&student_id=x",
+        "estimativa": "1h30min",
+        "prioridade": "baixa",
+        "dependencias": [
+          "feat-056"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "request",
+          "api",
+          "optimization"
+        ],
+        "artefatos": [
+          "melhorias em request.controller.js"
         ]
       }
     ]

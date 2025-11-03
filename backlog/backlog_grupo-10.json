@@ -21,7 +21,9 @@
           "feat-014",
           "feat-021"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-01",
+        "dataConclusao": "2025-11-01",
         "tags": [
           "evaluation",
           "controller",
@@ -35,13 +37,15 @@
       {
         "id": "feat-052",
         "titulo": "Criar GradeService com validações",
-        "descricao": "Implementar GradeService: lançar nota (validar tipo grade vs concept, valor válido), calcular média, verificar se aluno está na turma",
+        "descricao": "Implementar GradeService: lançar nota (validar tipo grade vs concept, valor válido), verificar se aluno está na turma",
         "estimativa": "2h",
         "prioridade": "alta",
         "dependencias": [
           "feat-014"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-01",
+        "dataConclusao": "2025-11-01",
         "tags": [
           "grade",
           "service",
@@ -61,7 +65,9 @@
           "feat-052",
           "feat-021"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-01",
+        "dataConclusao": "2025-11-01",
         "tags": [
           "grade",
           "controller",
@@ -81,14 +87,19 @@
         "dependencias": [
           "feat-053"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-01",
+        "dataConclusao": "2025-11-01",
         "tags": [
           "grade",
           "api",
           "student"
         ],
         "artefatos": [
-          "método getMyGrades em grade.controller.js"
+          "método getMyGrades em grade.controller.js",
+          "método getStudentGrades em grade.service.js",
+          "rota GET /my-grades em grade.routes.js",
+          "documentação em README.md"
         ]
       },
       {
@@ -100,14 +111,18 @@
         "dependencias": [
           "feat-053"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
         "tags": [
           "grade",
           "api",
           "teacher"
         ],
         "artefatos": [
-          "método batchCreate em grade.controller.js"
+          "método batchCreateGrades em grade.service.js",
+          "método batchCreate em grade.controller.js",
+          "rota POST /evaluations/:id/grades/batch em grade.routes.js"
         ]
       }
     ]
