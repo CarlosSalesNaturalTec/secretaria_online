@@ -21,7 +21,9 @@
           "feat-015",
           "feat-021"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
         "tags": [
           "request",
           "controller",
@@ -41,14 +43,16 @@
         "dependencias": [
           "feat-056"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
         "tags": [
           "request",
           "api",
           "optimization"
         ],
         "artefatos": [
-          "melhorias em request.controller.js"
+          "backend/src/controllers/request.controller.js"
         ]
       }
     ]
