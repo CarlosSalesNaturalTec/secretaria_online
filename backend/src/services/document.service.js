@@ -18,6 +18,7 @@ const logger = require('../utils/logger');
 const { Document, DocumentType, User } = require('../models');
 const { AppError } = require('../middlewares/error.middleware');
 const { UPLOAD_CONSTANTS } = require('../config/upload');
+const emailService = require('./email.service');
 
 /**
  * DocumentService
@@ -156,6 +157,7 @@ class DocumentService {
    * - Validar se quem está aprovando é admin
    * - Atualizar status para 'approved'
    * - Registrar informações de quem aprovou e quando
+   * - Enviar email de notificação ao usuário
    *
    * @param {number} documentId - ID do documento a aprovar
    * @param {number} reviewerId - ID do usuário admin que está aprovando
@@ -202,6 +204,38 @@ class DocumentService {
         observations,
       });
 
+      // 4. Enviar email de notificação (operação não-bloqueante)
+      try {
+        if (document.user && document.user.email) {
+          await emailService.sendDocumentApprovedEmail(
+            document.user.email,
+            document.documentType.name,
+            {
+              name: document.user.name,
+              observations: observations,
+            }
+          );
+
+          logger.info('[DocumentService] Email de aprovação enviado', {
+            documentId,
+            userId: document.user_id,
+            email: document.user.email,
+          });
+        } else {
+          logger.warn('[DocumentService] Usuário sem email cadastrado', {
+            documentId,
+            userId: document.user_id,
+          });
+        }
+      } catch (emailError) {
+        // Email é operação secundária, não deve falhar a aprovação
+        logger.error('[DocumentService] Erro ao enviar email de aprovação', {
+          documentId,
+          userId: document.user_id,
+          error: emailError.message,
+        });
+      }
+
       return document;
     } catch (error) {
       if (error.isOperational) {
@@ -230,6 +264,7 @@ class DocumentService {
    * - Validar se quem está rejeitando é admin
    * - Atualizar status para 'rejected' com observações obrigatórias
    * - Registrar informações de quem rejeitou e quando
+   * - Enviar email de notificação ao usuário
    *
    * @param {number} documentId - ID do documento a rejeitar
    * @param {number} reviewerId - ID do usuário admin que está rejeitando
@@ -284,6 +319,38 @@ class DocumentService {
         reviewerId,
         observations,
       });
+
+      // 5. Enviar email de notificação (operação não-bloqueante)
+      try {
+        if (document.user && document.user.email) {
+          await emailService.sendDocumentRejectedEmail(
+            document.user.email,
+            document.documentType.name,
+            observations,
+            {
+              name: document.user.name,
+            }
+          );
+
+          logger.info('[DocumentService] Email de rejeição enviado', {
+            documentId,
+            userId: document.user_id,
+            email: document.user.email,
+          });
+        } else {
+          logger.warn('[DocumentService] Usuário sem email cadastrado', {
+            documentId,
+            userId: document.user_id,
+          });
+        }
+      } catch (emailError) {
+        // Email é operação secundária, não deve falhar a rejeição
+        logger.error('[DocumentService] Erro ao enviar email de rejeição', {
+          documentId,
+          userId: document.user_id,
+          error: emailError.message,
+        });
+      }
 
       return document;
     } catch (error) {

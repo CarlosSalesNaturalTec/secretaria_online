@@ -82,13 +82,15 @@
           "feat-059",
           "feat-042"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
         "tags": [
           "email",
           "document"
         ],
         "artefatos": [
-          "integração em document.service.js"
+          "backend/src/services/document.service.js"
         ]
       }
     ]
