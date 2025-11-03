@@ -21,7 +21,9 @@
           "feat-015",
           "feat-021"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
         "tags": [
           "request",
           "controller",
