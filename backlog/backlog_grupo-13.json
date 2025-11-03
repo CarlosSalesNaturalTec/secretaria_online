@@ -20,13 +20,17 @@
         "dependencias": [
           "feat-002"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
         "tags": [
           "cron",
           "config"
         ],
         "artefatos": [
-          "backend/src/jobs/index.js"
+          "backend/src/jobs/index.js",
+          "backend/src/jobs/example.job.js",
+          "backend/src/jobs/README.md"
         ]
       },
       {
@@ -38,7 +42,9 @@
         "dependencias": [
           "feat-062"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
         "tags": [
           "cron",
           "cleanup"

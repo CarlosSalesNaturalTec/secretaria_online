@@ -127,7 +127,7 @@ function start() {
     }
 
     registeredJobs.forEach(job => {
-      if (!job.cronJob.options.scheduled) {
+      if (job.options.scheduled === false) {
         job.cronJob.start();
         logger.info(`[JOBS] Job '${job.name}' iniciado manualmente.`);
       }
@@ -294,17 +294,27 @@ registerJob(
 );
 */
 
-// TODO: Importar e registrar jobs conforme forem implementados
-// Exemplos de jobs que serão implementados:
-//
+// ====================================================================
+// IMPORTAÇÃO DE JOBS
+// ====================================================================
+
 // feat-063: Limpeza de arquivos temporários
-// const cleanupTempJob = require('./cleanupTemp.job');
-// registerJob(
-//   cleanupTempJob.name,
-//   cleanupTempJob.schedule,
-//   cleanupTempJob.execute,
-//   { timezone: 'America/Sao_Paulo' }
-// );
+const cleanupTempJob = require('./cleanupTemp.job');
+
+// ====================================================================
+// REGISTRO DE JOBS
+// ====================================================================
+
+// Job de limpeza de arquivos temporários (diariamente às 2h)
+registerJob(
+  cleanupTempJob.name,
+  cleanupTempJob.schedule,
+  cleanupTempJob.execute,
+  { timezone: 'America/Sao_Paulo' }
+);
+
+// TODO: Registrar novos jobs conforme forem implementados
+// Exemplos de jobs futuros:
 //
 // contractRenewal.job.js: Renovação automática de contratos
 // const contractRenewalJob = require('./contractRenewal.job');

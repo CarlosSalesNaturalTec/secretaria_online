@@ -140,11 +140,6 @@ const PORT = process.env.PORT || 3000;
 
 // Inicialização do servidor
 app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
-  console.log(`📍 Health check: http://localhost:${PORT}/health`);
-  console.log(`📍 API Base: http://localhost:${PORT}/api/v1`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-
   // Iniciar sistema de cron jobs
   try {
     jobs.start();
@@ -152,6 +147,11 @@ app.listen(PORT, () => {
   } catch (error) {
     logger.error('Erro ao inicializar sistema de cron jobs:', error);
   }
+  
+  console.log(`🚀 Server is running on port ${PORT}`);
+  console.log(`📍 Health check: http://localhost:${PORT}/health`);
+  console.log(`📍 API Base: http://localhost:${PORT}/api/v1`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
 module.exports = app;

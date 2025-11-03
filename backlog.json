@@ -6,47 +6,59 @@
     "dataGeracao": "2025-10-23"
   },
   "grupo": {
-    "id": "grupo-13",
-    "nome": "Backend - Jobs e Tarefas Agendadas",
-    "descricao": "Cron jobs para limpeza e automação",
-    "prioridade": "baixa",
+    "id": "grupo-14",
+    "nome": "Backend - Agregador de Rotas e Server",
+    "descricao": "Configuração final do servidor Express",
+    "prioridade": "alta",
     "features": [
       {
-        "id": "feat-062",
-        "titulo": "Configurar node-cron",
-        "descricao": "Instalar node-cron, criar jobs/index.js para registrar todas as tarefas agendadas",
-        "estimativa": "30min",
-        "prioridade": "baixa",
-        "dependencias": [
-          "feat-002"
-        ],
-        "status": "Concluída",
-        "tags": [
-          "cron",
-          "config"
-        ],
-        "artefatos": [
-          "backend/src/jobs/index.js",
-          "backend/src/jobs/example.job.js",
-          "backend/src/jobs/README.md"
-        ]
-      },
-      {
-        "id": "feat-063",
-        "titulo": "Criar job de limpeza de arquivos temporários",
-        "descricao": "Implementar cleanupTemp.job.js que roda diariamente e remove arquivos em uploads/temp/ mais antigos que 7 dias",
+        "id": "feat-064",
+        "titulo": "Criar agregador de rotas routes/index.js",
+        "descricao": "Criar routes/index.js que importa todas as rotas e as monta no Express com prefixo /api/v1",
         "estimativa": "1h",
-        "prioridade": "baixa",
+        "prioridade": "alta",
         "dependencias": [
-          "feat-062"
+          "feat-019",
+          "feat-029",
+          "feat-030",
+          "feat-032",
+          "feat-033",
+          "feat-035",
+          "feat-039",
+          "feat-043",
+          "feat-049",
+          "feat-051",
+          "feat-053",
+          "feat-056"
         ],
         "status": "Não Iniciada",
         "tags": [
-          "cron",
-          "cleanup"
+          "routes",
+          "config"
         ],
         "artefatos": [
-          "backend/src/jobs/cleanupTemp.job.js"
+          "backend/src/routes/index.js"
+        ]
+      },
+      {
+        "id": "feat-065",
+        "titulo": "Configurar server.js completo",
+        "descricao": "Montar server.js com: middlewares (helmet, cors, json, urlencoded), rotas, error handler, inicialização do servidor na porta do .env",
+        "estimativa": "1h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-064",
+          "feat-023",
+          "feat-024",
+          "feat-027"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "server",
+          "config"
+        ],
+        "artefatos": [
+          "backend/src/server.js"
         ]
       }
     ]
