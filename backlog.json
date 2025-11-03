@@ -61,13 +61,15 @@
           "feat-059",
           "feat-030"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
         "tags": [
           "email",
           "student"
         ],
         "artefatos": [
-          "integração em student.service.js"
+          "backend/src/services/student.service.js"
         ]
       },
       {

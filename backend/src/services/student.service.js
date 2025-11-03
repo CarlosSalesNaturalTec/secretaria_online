@@ -2,40 +2,84 @@
  * Arquivo: backend/src/services/student.service.js
  * Descrição: Lógica de negócio para o CRUD de estudantes.
  * Feature: feat-030 - Criar StudentController e StudentService
+ * Feature: feat-060 - Integrar envio de email na criação de aluno
  * Criado em: 28/10/2025
+ * Atualizado em: 2025-11-03
  */
 
 const { User } = require('../models');
 const { AppError } = require('../middlewares/error.middleware');
 const { generateProvisionalPassword } = require('../utils/generators');
+const EmailService = require('./email.service');
+const logger = require('../utils/logger');
 
 class StudentService {
   /**
-   * Cria um novo estudante.
+   * Cria um novo estudante e envia email com senha provisória.
+   *
    * @param {object} studentData - Dados do estudante.
+   * @param {string} studentData.name - Nome completo do estudante.
+   * @param {string} studentData.email - Email do estudante.
+   * @param {string} studentData.cpf - CPF do estudante.
+   * @param {string} studentData.login - Login de acesso do estudante.
    * @returns {Promise<User>} O estudante criado.
    * @throws {AppError} Se o CPF ou email já estiverem em uso.
    */
   async create(studentData) {
-    const { email, cpf } = studentData;
+    const { email, cpf, name, login } = studentData;
 
+    // Validação de unicidade de email
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
       throw new AppError('Email já está em uso.', 409);
     }
 
+    // Validação de unicidade de CPF
     const existingCpf = await User.findOne({ where: { cpf } });
     if (existingCpf) {
         throw new AppError('CPF já está em uso.', 409);
     }
 
+    // Geração de senha provisória
     const temporaryPassword = generateProvisionalPassword();
-    
+
+    // Criação do estudante no banco de dados
     const student = await User.create({
       ...studentData,
       role: 'student',
       password: temporaryPassword,
     });
+
+    logger.info('[STUDENT_SERVICE] Estudante criado com sucesso', {
+      studentId: student.id,
+      email: student.email,
+      name: student.name,
+    });
+
+    // Envio de email com senha provisória
+    // O envio do email NÃO bloqueia a criação do aluno
+    // Se falhar, o aluno é criado normalmente e um log de erro é registrado
+    try {
+      await EmailService.sendPasswordEmail(email, temporaryPassword, {
+        name,
+        login,
+      });
+
+      logger.info('[STUDENT_SERVICE] Email de senha provisória enviado com sucesso', {
+        studentId: student.id,
+        email: student.email,
+      });
+    } catch (emailError) {
+      // Log de erro mas não interrompe o fluxo
+      logger.error('[STUDENT_SERVICE] Erro ao enviar email de senha provisória', {
+        studentId: student.id,
+        email: student.email,
+        error: emailError.message,
+      });
+
+      // NOTA: O aluno foi criado com sucesso, mas o email falhou
+      // A secretaria pode reenviar a senha manualmente se necessário
+    }
 
     return student;
   }
@@ -87,7 +131,11 @@ class StudentService {
   }
 
   /**
-   * Reseta a senha de um estudante.
+   * Reseta a senha de um estudante e envia email com nova senha provisória.
+   *
+   * Este método é chamado quando um administrador regenera a senha
+   * de um aluno através da funcionalidade de reset de senha.
+   *
    * @param {number} id - ID do estudante.
    * @returns {Promise<string>} A nova senha provisória.
    * @throws {AppError} Se o estudante não for encontrado.
@@ -97,6 +145,35 @@ class StudentService {
     const temporaryPassword = generateProvisionalPassword();
     student.password = temporaryPassword;
     await student.save();
+
+    logger.info('[STUDENT_SERVICE] Senha do estudante resetada com sucesso', {
+      studentId: student.id,
+      email: student.email,
+    });
+
+    // Envio de email com nova senha provisória
+    // Se falhar, a senha é resetada normalmente mas o email não é enviado
+    try {
+      await EmailService.sendPasswordEmail(student.email, temporaryPassword, {
+        name: student.name,
+        login: student.login,
+      });
+
+      logger.info('[STUDENT_SERVICE] Email de reset de senha enviado com sucesso', {
+        studentId: student.id,
+        email: student.email,
+      });
+    } catch (emailError) {
+      logger.error('[STUDENT_SERVICE] Erro ao enviar email de reset de senha', {
+        studentId: student.id,
+        email: student.email,
+        error: emailError.message,
+      });
+
+      // NOTA: A senha foi resetada com sucesso, mas o email falhou
+      // A secretaria deve informar a senha manualmente ao aluno
+    }
+
     return temporaryPassword;
   }
 }
