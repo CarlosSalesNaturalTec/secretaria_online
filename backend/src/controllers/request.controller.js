@@ -2,7 +2,9 @@
  * Arquivo: backend/src/controllers/request.controller.js
  * Descrição: Controller para gerenciar solicitações de alunos
  * Feature: feat-056 - Criar RequestController e rotas
+ * Modificado: feat-057 - Adicionar filtros e paginação para solicitações
  * Criado em: 2025-11-03
+ * Atualizado em: 2025-11-03
  */
 
 const { Request, RequestType, User } = require('../models');
@@ -185,15 +187,22 @@ class RequestController {
    *
    * - Admins veem todas as solicitações
    * - Alunos veem apenas suas próprias solicitações
+   * - Suporta paginação e filtros
+   *
+   * Query params:
+   * - status: pending|approved|rejected
+   * - student_id: ID do aluno (apenas para admins)
+   * - page: Número da página (padrão: 1)
+   * - limit: Itens por página (padrão: 20, máx: 100)
    *
    * @param {object} req - Objeto de requisição do Express
    * @param {object} res - Objeto de resposta do Express
-   * @returns {Promise<object>} Lista de solicitações
+   * @returns {Promise<object>} Lista de solicitações com metadados de paginação
    */
   async list(req, res) {
     try {
       const { user } = req;
-      const { status, student_id } = req.query;
+      const { status, student_id, page, limit } = req.query;
 
       let whereConditions = {
         deleted_at: null
@@ -243,17 +252,64 @@ class RequestController {
         whereConditions.status = status;
       }
 
-      // Buscar solicitações
-      const requests = await Request.scope('withRelations').findAll({
+      // Configurar paginação
+      const pageNumber = parseInt(page) || 1;
+      let limitNumber = parseInt(limit) || 20;
+
+      // Validar valores de paginação
+      if (pageNumber < 1) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Número da página deve ser maior ou igual a 1'
+          }
+        });
+      }
+
+      if (limitNumber < 1) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Limite deve ser maior ou igual a 1'
+          }
+        });
+      }
+
+      // Limitar o máximo de itens por página
+      if (limitNumber > 100) {
+        limitNumber = 100;
+      }
+
+      const offset = (pageNumber - 1) * limitNumber;
+
+      // Buscar solicitações com paginação
+      const { count, rows: requests } = await Request.scope('withRelations').findAndCountAll({
         where: whereConditions,
-        order: [['created_at', 'DESC']]
+        order: [['created_at', 'DESC']],
+        limit: limitNumber,
+        offset: offset
       });
 
-      console.log(`[RequestController] Listando ${requests.length} solicitações para usuário ${user.id} (${user.role})`);
+      // Calcular metadados de paginação
+      const totalPages = Math.ceil(count / limitNumber);
+      const hasNextPage = pageNumber < totalPages;
+      const hasPreviousPage = pageNumber > 1;
+
+      console.log(`[RequestController] Listando ${requests.length} de ${count} solicitações (página ${pageNumber}/${totalPages}) para usuário ${user.id} (${user.role})`);
 
       return res.json({
         success: true,
-        data: requests
+        data: requests,
+        pagination: {
+          total: count,
+          page: pageNumber,
+          limit: limitNumber,
+          totalPages: totalPages,
+          hasNextPage: hasNextPage,
+          hasPreviousPage: hasPreviousPage
+        }
       });
     } catch (error) {
       console.error('[RequestController] Erro ao listar solicitações:', error);
