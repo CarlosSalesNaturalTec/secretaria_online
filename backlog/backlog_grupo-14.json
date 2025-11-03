@@ -31,7 +31,9 @@
           "feat-053",
           "feat-056"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
         "tags": [
           "routes",
           "config"
@@ -52,7 +54,9 @@
           "feat-024",
           "feat-027"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
         "tags": [
           "server",
           "config"
