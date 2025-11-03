@@ -150,6 +150,59 @@ router.get(
 );
 
 /**
+ * POST /api/evaluations/:id/grades/batch
+ * Lança múltiplas notas em lote para uma avaliação
+ *
+ * Requer: Autenticado (Professor que leciona ou Admin)
+ *
+ * Parâmetros:
+ * - id (number): ID da avaliação
+ *
+ * Body:
+ * {
+ *   grades: [
+ *     {
+ *       student_id: number (obrigatório),
+ *       grade?: number (0-10) - para avaliações numéricas,
+ *       concept?: string (satisfactory|unsatisfactory) - para avaliações conceituais
+ *     },
+ *     ...
+ *   ]
+ * }
+ *
+ * Respostas:
+ * - 201: Todas as notas lançadas com sucesso
+ * - 207: Processamento parcial (algumas notas falharam)
+ * - 400: Dados inválidos
+ * - 403: Sem permissão (não leciona a disciplina)
+ * - 422: Todas as notas falharam
+ * - 500: Erro servidor
+ *
+ * Resposta de sucesso (200/207):
+ * {
+ *   success: boolean,
+ *   data: {
+ *     total: number,
+ *     success: number,
+ *     failed: number,
+ *     results: [
+ *       {
+ *         student_id: number,
+ *         status: 'success'|'failed',
+ *         grade?: object (se success),
+ *         error?: string (se failed)
+ *       }
+ *     ]
+ *   },
+ *   message: string
+ * }
+ */
+router.post(
+  '/evaluations/:id/grades/batch',
+  GradeController.batchCreate
+);
+
+/**
  * GET /api/my-grades
  * Obtém todas as notas do aluno autenticado
  *

@@ -111,14 +111,18 @@
         "dependencias": [
           "feat-053"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
         "tags": [
           "grade",
           "api",
           "teacher"
         ],
         "artefatos": [
-          "método batchCreate em grade.controller.js"
+          "método batchCreateGrades em grade.service.js",
+          "método batchCreate em grade.controller.js",
+          "rota POST /evaluations/:id/grades/batch em grade.routes.js"
         ]
       }
     ]

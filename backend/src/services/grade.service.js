@@ -623,6 +623,187 @@ class GradeService {
   }
 
   /**
+   * Lança múltiplas notas em lote para uma avaliação
+   *
+   * Permite lançar notas para vários alunos de uma vez.
+   * Executa operação em transação para garantir atomicidade.
+   *
+   * @param {number} evaluationId - ID da avaliação
+   * @param {Array<object>} gradesData - Array de notas a lançar
+   * @param {number} gradesData[].student_id - ID do aluno
+   * @param {number} gradesData[].grade - Nota numérica (0-10) - opcional
+   * @param {string} gradesData[].concept - Conceito (satisfactory/unsatisfactory) - opcional
+   * @returns {Promise<object>} Resultado do processamento em lote
+   * @throws {AppError} Se houver erro na validação ou processamento
+   *
+   * @example
+   * // Lançar notas para múltiplos alunos
+   * const result = await GradeService.batchCreateGrades(1, [
+   *   { student_id: 5, grade: 8.5 },
+   *   { student_id: 6, grade: 7.0 },
+   *   { student_id: 7, grade: 9.5 }
+   * ]);
+   * // Retorna:
+   * // {
+   * //   total: 3,
+   * //   success: 3,
+   * //   failed: 0,
+   * //   results: [
+   * //     { student_id: 5, status: 'success', grade: {...} },
+   * //     { student_id: 6, status: 'success', grade: {...} },
+   * //     { student_id: 7, status: 'success', grade: {...} }
+   * //   ]
+   * // }
+   */
+  async batchCreateGrades(evaluationId, gradesData) {
+    const { sequelize } = require('../models');
+    const transaction = await sequelize.transaction();
+
+    try {
+      // 1. Validar avaliação existe
+      const evaluation = await this._getAndValidateEvaluation(evaluationId);
+
+      // 2. Validar array de entrada
+      if (!Array.isArray(gradesData) || gradesData.length === 0) {
+        throw new AppError(
+          'É necessário fornecer um array de notas não vazio',
+          400,
+          'INVALID_BATCH_DATA'
+        );
+      }
+
+      // 3. Validar limite razoável (evitar sobrecarga)
+      if (gradesData.length > 200) {
+        throw new AppError(
+          'O limite máximo é de 200 notas por lote',
+          400,
+          'BATCH_SIZE_EXCEEDED'
+        );
+      }
+
+      // 4. Buscar todos os alunos da turma uma única vez (otimização)
+      const classStudents = await ClassStudent.findAll({
+        where: { class_id: evaluation.class_id },
+        attributes: ['student_id']
+      });
+      const validStudentIds = new Set(classStudents.map(cs => cs.student_id));
+
+      // 5. Processar cada nota
+      const results = [];
+      let successCount = 0;
+      let failedCount = 0;
+
+      for (const gradeData of gradesData) {
+        try {
+          // Validar estrutura básica
+          if (!gradeData.student_id) {
+            results.push({
+              student_id: gradeData.student_id || null,
+              status: 'failed',
+              error: 'student_id é obrigatório'
+            });
+            failedCount++;
+            continue;
+          }
+
+          // Validar se grade ou concept foi informado
+          if (gradeData.grade === undefined && gradeData.concept === undefined) {
+            results.push({
+              student_id: gradeData.student_id,
+              status: 'failed',
+              error: 'É necessário informar grade ou concept'
+            });
+            failedCount++;
+            continue;
+          }
+
+          // Validar se aluno está na turma
+          if (!validStudentIds.has(gradeData.student_id)) {
+            results.push({
+              student_id: gradeData.student_id,
+              status: 'failed',
+              error: `Aluno ID ${gradeData.student_id} não está inscrito na turma`
+            });
+            failedCount++;
+            continue;
+          }
+
+          // Validar tipo e valor da nota
+          const validatedGrade = this._validateGradeValue(
+            evaluation.type,
+            gradeData.grade,
+            gradeData.concept
+          );
+
+          // Verificar se nota já existe
+          const existingGrade = await Grade.findOne({
+            where: {
+              evaluation_id: evaluationId,
+              student_id: gradeData.student_id
+            },
+            transaction
+          });
+
+          let grade;
+
+          if (existingGrade) {
+            // Atualizar nota existente
+            await existingGrade.update({
+              grade: validatedGrade.grade,
+              concept: validatedGrade.concept
+            }, { transaction });
+            grade = existingGrade;
+          } else {
+            // Criar nova nota
+            grade = await Grade.create({
+              evaluation_id: evaluationId,
+              student_id: gradeData.student_id,
+              grade: validatedGrade.grade,
+              concept: validatedGrade.concept
+            }, { transaction });
+          }
+
+          results.push({
+            student_id: gradeData.student_id,
+            status: 'success',
+            grade: grade.toJSON()
+          });
+          successCount++;
+        } catch (error) {
+          // Tratar erro específico deste item
+          results.push({
+            student_id: gradeData.student_id,
+            status: 'failed',
+            error: error.isOperational ? error.message : 'Erro ao processar nota'
+          });
+          failedCount++;
+        }
+      }
+
+      // 6. Commit da transação
+      await transaction.commit();
+
+      // 7. Retornar resultado consolidado
+      return {
+        total: gradesData.length,
+        success: successCount,
+        failed: failedCount,
+        results
+      };
+    } catch (error) {
+      // Rollback em caso de erro
+      await transaction.rollback();
+
+      if (error.isOperational) throw error;
+      throw new AppError(
+        'Erro ao processar lançamento em lote de notas',
+        500,
+        'BATCH_GRADE_CREATE_ERROR'
+      );
+    }
+  }
+
+  /**
    * Obtém todas as notas de um aluno com filtros opcionais
    *
    * Retorna as notas do aluno com as informações de disciplina, avaliação e turma.

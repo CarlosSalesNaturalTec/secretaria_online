@@ -497,6 +497,127 @@ class GradeController {
   }
 
   /**
+   * Lança múltiplas notas em lote para uma avaliação
+   *
+   * POST /api/evaluations/:id/grades/batch
+   *
+   * Body:
+   * {
+   *   grades: [
+   *     {
+   *       student_id: number,
+   *       grade?: number (0-10),
+   *       concept?: string (satisfactory|unsatisfactory)
+   *     },
+   *     ...
+   *   ]
+   * }
+   *
+   * @param {object} req - Requisição Express
+   * @param {object} req.user - Usuário autenticado
+   * @param {object} req.params - Parâmetros da rota
+   * @param {number} req.params.id - ID da avaliação
+   * @param {object} req.body - Dados do lote
+   * @param {Array} req.body.grades - Array de notas a lançar
+   * @param {object} res - Resposta Express
+   * @param {function} next - Middleware next
+   */
+  async batchCreate(req, res, next) {
+    try {
+      const { id: evaluationId } = req.params;
+      const { grades } = req.body;
+      const { id: teacherId, role } = req.user;
+
+      // Validar ID da avaliação
+      if (!evaluationId || isNaN(parseInt(evaluationId))) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            code: 'INVALID_REQUEST',
+            message: 'ID da avaliação inválido'
+          }
+        });
+      }
+
+      // Validar que body contém array de notas
+      if (!grades || !Array.isArray(grades)) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            code: 'INVALID_REQUEST',
+            message: 'É necessário fornecer um array de notas no campo "grades"'
+          }
+        });
+      }
+
+      if (grades.length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            code: 'INVALID_REQUEST',
+            message: 'O array de notas não pode estar vazio'
+          }
+        });
+      }
+
+      // Apenas professores e admins podem lançar notas em lote
+      if (!['teacher', 'admin'].includes(role)) {
+        return res.status(403).json({
+          success: false,
+          error: {
+            code: 'FORBIDDEN',
+            message: 'Apenas professores podem lançar notas em lote'
+          }
+        });
+      }
+
+      // Se for professor, validar se leciona a disciplina
+      if (role === 'teacher') {
+        const isTeacherValid = await this._validateTeacherOwnership(teacherId, evaluationId);
+
+        if (!isTeacherValid) {
+          logger.warn('[GradeController.batchCreate] Professor tentou lançar notas em lote em avaliação não lecionada', {
+            teacherId,
+            evaluationId
+          });
+
+          return res.status(403).json({
+            success: false,
+            error: {
+              code: 'FORBIDDEN',
+              message: 'Você não leciona a disciplina desta avaliação'
+            }
+          });
+        }
+      }
+
+      // Processar lançamento em lote via service
+      const result = await GradeService.batchCreateGrades(evaluationId, grades);
+
+      logger.info('[GradeController.batchCreate] Lançamento em lote processado', {
+        evaluationId,
+        teacherId,
+        total: result.total,
+        success: result.success,
+        failed: result.failed
+      });
+
+      // Determinar status HTTP baseado no resultado
+      const statusCode = result.failed === 0 ? 201 : (result.success === 0 ? 422 : 207); // 207 = Multi-Status
+
+      res.status(statusCode).json({
+        success: result.failed === 0,
+        data: result,
+        message: result.failed === 0
+          ? `Todas as ${result.success} notas foram lançadas com sucesso`
+          : `${result.success} notas lançadas com sucesso, ${result.failed} falharam`
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * Obtém todas as notas do aluno autenticado
    *
    * GET /api/my-grades
