@@ -20,7 +20,9 @@
         "dependencias": [
           "feat-003"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
         "tags": [
           "ui",
           "component"
@@ -38,7 +40,9 @@
         "dependencias": [
           "feat-003"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
         "tags": [
           "ui",
           "component"
@@ -56,7 +60,9 @@
         "dependencias": [
           "feat-003"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
         "tags": [
           "ui",
           "component"
@@ -74,7 +80,9 @@
         "dependencias": [
           "feat-003"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
         "tags": [
           "ui",
           "component"
@@ -92,7 +100,9 @@
         "dependencias": [
           "feat-003"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
         "tags": [
           "ui",
           "component",
