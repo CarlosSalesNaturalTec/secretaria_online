@@ -2,7 +2,7 @@
  * Arquivo: backend/src/routes/index.js
  * Descrição: Agregador de rotas.
  * Feature: [feat-019] - Criar AuthController e rotas de autenticação
- * Atualizado em: 2025-10-28 (feat-029 - Adicionar rotas de usuários)
+ * Atualizado em: 2025-11-03 (feat-056 - Adicionar rotas de solicitações)
  * Criado em: 27/10/2025
  */
 
@@ -19,6 +19,7 @@ const documentRoutes = require('./document.routes');
 const contractRoutes = require('./contract.routes');
 const evaluationRoutes = require('./evaluation.routes');
 const gradeRoutes = require('./grade.routes');
+const requestRoutes = require('./request.routes');
 
 const router = express.Router();
 
@@ -57,5 +58,8 @@ router.use('/evaluations', evaluationRoutes);
 
 // Rotas de gerenciamento de Notas (feat-053)
 router.use('/grades', gradeRoutes);
+
+// Rotas de gerenciamento de Solicitações (feat-056)
+router.use('/requests', requestRoutes);
 
 module.exports = router;
