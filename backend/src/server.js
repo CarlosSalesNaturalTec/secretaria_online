@@ -9,6 +9,8 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const dotenv = require('dotenv');
+const logger = require('./utils/logger');
+const jobs = require('./jobs');
 
 // Carregar variáveis de ambiente
 dotenv.config();
@@ -142,6 +144,14 @@ app.listen(PORT, () => {
   console.log(`📍 Health check: http://localhost:${PORT}/health`);
   console.log(`📍 API Base: http://localhost:${PORT}/api/v1`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+
+  // Iniciar sistema de cron jobs
+  try {
+    jobs.start();
+    logger.info('Sistema de cron jobs inicializado com sucesso');
+  } catch (error) {
+    logger.error('Erro ao inicializar sistema de cron jobs:', error);
+  }
 });
 
 module.exports = app;

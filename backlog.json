@@ -20,13 +20,15 @@
         "dependencias": [
           "feat-002"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
         "tags": [
           "cron",
           "config"
         ],
         "artefatos": [
-          "backend/src/jobs/index.js"
+          "backend/src/jobs/index.js",
+          "backend/src/jobs/example.job.js",
+          "backend/src/jobs/README.md"
         ]
       },
       {
