@@ -138,13 +138,16 @@
           "feat-069",
           "feat-068"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
         "tags": [
           "admin",
           "page",
           "class"
         ],
         "artefatos": [
+          "frontend/src/types/class.types.ts",
           "frontend/src/services/class.service.ts",
           "frontend/src/pages/admin/Classes.tsx",
           "frontend/src/components/forms/ClassForm.tsx"
