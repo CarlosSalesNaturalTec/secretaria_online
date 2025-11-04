@@ -22,7 +22,9 @@
           "feat-078",
           "feat-067"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
         "tags": [
           "auth",
           "page"
@@ -41,7 +43,9 @@
           "feat-078",
           "feat-067"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
         "tags": [
           "auth",
           "page"
