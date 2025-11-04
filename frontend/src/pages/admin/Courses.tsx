@@ -15,11 +15,11 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, AlertCircle, BookOpen } from 'lucide-react';
-import { Table, Column } from '@/components/ui/Table';
+import { Table, type Column } from '@/components/ui/Table';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { CourseForm } from '@/components/forms/CourseForm';
-import * as CourseService from '@/services/course.service';
+import CourseService from '@/services/course.service';
 import type { ICourse } from '@/types/course.types';
 import type { ICreateCourseData, IUpdateCourseData } from '@/services/course.service';
 
@@ -131,10 +131,10 @@ export default function CoursesPage() {
   /**
    * Handler de criação de curso
    */
-  const handleCreate = async (data: ICreateCourseData) => {
+  const handleCreate = async (data: ICreateCourseData | IUpdateCourseData) => {
     try {
       setIsSubmitting(true);
-      await CourseService.create(data);
+      await CourseService.create(data as ICreateCourseData);
       setSuccessMessage('Curso cadastrado com sucesso!');
       handleCloseModal();
       await loadCourses();
@@ -151,7 +151,7 @@ export default function CoursesPage() {
   /**
    * Handler de atualização de curso
    */
-  const handleUpdate = async (data: IUpdateCourseData) => {
+  const handleUpdate = async (data: ICreateCourseData | IUpdateCourseData) => {
     if (!selectedCourse) return;
 
     try {

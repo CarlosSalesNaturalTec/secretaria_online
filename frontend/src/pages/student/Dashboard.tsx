@@ -25,9 +25,8 @@ import {
   Clock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import type { IGradeSummary, IGradeWithEvaluation, IEvaluation } from '@/types/grade.types';
+import type { IGradeWithEvaluation, IEvaluation } from '@/types/grade.types';
 import type { IDocument } from '@/types/document.types';
-import type { IRequest } from '@/types/request.types';
 
 /**
  * StudentDashboard - Dashboard do aluno
@@ -50,7 +49,6 @@ export default function StudentDashboard() {
   const [recentGrades, setRecentGrades] = useState<IGradeWithEvaluation[]>([]);
   const [upcomingEvaluations, setUpcomingEvaluations] = useState<IEvaluation[]>([]);
   const [pendingDocuments, setPendingDocuments] = useState<IDocument[]>([]);
-  const [recentRequests, setRecentRequests] = useState<IRequest[]>([]);
   const [overallAverage, setOverallAverage] = useState<number | null>(null);
 
   /**
@@ -185,7 +183,6 @@ export default function StudentDashboard() {
       ]);
 
       setPendingDocuments([]);
-      setRecentRequests([]);
       setOverallAverage(8.75);
     } catch (err) {
       console.error('[StudentDashboard] Erro ao carregar dados:', err);

@@ -38,16 +38,16 @@ import * as TeacherService from '@/services/teacher.service';
  * Valida todos os campos obrigatórios com suas respectivas regras
  */
 const classFormSchema = z.object({
-  courseId: z.coerce.number()
+  courseId: z.number()
     .int('Curso deve ser selecionado')
     .min(1, 'Curso é obrigatório'),
 
-  semester: z.coerce.number()
+  semester: z.number()
     .int('Semestre deve ser um número inteiro')
     .min(1, 'Semestre mínimo é 1')
     .max(20, 'Semestre máximo é 20'),
 
-  year: z.coerce.number()
+  year: z.number()
     .int('Ano deve ser um número inteiro')
     .min(new Date().getFullYear() - 10, `Ano mínimo é ${new Date().getFullYear() - 10}`)
     .max(new Date().getFullYear() + 10, `Ano máximo é ${new Date().getFullYear() + 10}`),

@@ -455,7 +455,7 @@ export default function AdminRequests() {
                           <AlertTriangle
                             className="text-red-600"
                             size={16}
-                            title="Solicitação atrasada"
+                            aria-label="Solicitação atrasada"
                           />
                         )}
                       </div>

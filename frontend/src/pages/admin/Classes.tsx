@@ -15,11 +15,11 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, AlertCircle, Users, GraduationCap } from 'lucide-react';
-import { Table, Column } from '@/components/ui/Table';
+import { Table, type Column } from '@/components/ui/Table';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { ClassForm } from '@/components/forms/ClassForm';
-import * as ClassService from '@/services/class.service';
+import ClassService from '@/services/class.service';
 import type { IClass } from '@/types/class.types';
 import type { ICreateClassData, IUpdateClassData } from '@/services/class.service';
 
@@ -139,10 +139,10 @@ export default function ClassesPage() {
   /**
    * Handler de criação de turma
    */
-  const handleCreate = async (data: ICreateClassData) => {
+  const handleCreate = async (data: ICreateClassData | IUpdateClassData) => {
     try {
       setIsSubmitting(true);
-      await ClassService.create(data);
+      await ClassService.create(data as ICreateClassData);
       setSuccessMessage('Turma cadastrada com sucesso!');
       handleCloseModal();
       await loadClasses();
@@ -159,7 +159,7 @@ export default function ClassesPage() {
   /**
    * Handler de atualização de turma
    */
-  const handleUpdate = async (data: IUpdateClassData) => {
+  const handleUpdate = async (data: ICreateClassData | IUpdateClassData) => {
     if (!selectedClass) return;
 
     try {

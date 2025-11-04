@@ -37,7 +37,7 @@ const courseFormSchema = z.object({
     .max(500, 'Descrição deve ter no máximo 500 caracteres')
     .trim(),
 
-  durationSemesters: z.coerce.number()
+  durationSemesters: z.number()
     .int('Duração deve ser um número inteiro')
     .min(1, 'Duração mínima é 1 semestre')
     .max(20, 'Duração máxima é 20 semestres'),

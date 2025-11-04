@@ -15,11 +15,11 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, KeyRound, AlertCircle } from 'lucide-react';
-import { Table, Column } from '@/components/ui/Table';
+import { Table, type Column } from '@/components/ui/Table';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { StudentForm } from '@/components/forms/StudentForm';
-import * as StudentService from '@/services/student.service';
+import StudentService from '@/services/student.service';
 import type { IUser } from '@/types/user.types';
 import type { ICreateStudentData, IUpdateStudentData } from '@/services/student.service';
 
@@ -139,10 +139,10 @@ export default function StudentsPage() {
   /**
    * Handler de criação de aluno
    */
-  const handleCreate = async (data: ICreateStudentData) => {
+  const handleCreate = async (data: ICreateStudentData | IUpdateStudentData) => {
     try {
       setIsSubmitting(true);
-      await StudentService.create(data);
+      await StudentService.create(data as ICreateStudentData);
       setSuccessMessage('Aluno cadastrado com sucesso!');
       handleCloseModal();
       await loadStudents();
@@ -159,7 +159,7 @@ export default function StudentsPage() {
   /**
    * Handler de atualização de aluno
    */
-  const handleUpdate = async (data: IUpdateStudentData) => {
+  const handleUpdate = async (data: ICreateStudentData | IUpdateStudentData) => {
     if (!selectedStudent) return;
 
     try {

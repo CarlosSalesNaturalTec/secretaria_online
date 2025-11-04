@@ -15,11 +15,11 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, KeyRound, AlertCircle } from 'lucide-react';
-import { Table, Column } from '@/components/ui/Table';
+import { Table, type Column } from '@/components/ui/Table';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { TeacherForm } from '@/components/forms/TeacherForm';
-import * as TeacherService from '@/services/teacher.service';
+import TeacherService from '@/services/teacher.service';
 import type { IUser } from '@/types/user.types';
 import type { ICreateTeacherData, IUpdateTeacherData } from '@/services/teacher.service';
 
@@ -139,10 +139,10 @@ export default function TeachersPage() {
   /**
    * Handler de criação de professor
    */
-  const handleCreate = async (data: ICreateTeacherData) => {
+  const handleCreate = async (data: ICreateTeacherData | IUpdateTeacherData) => {
     try {
       setIsSubmitting(true);
-      await TeacherService.create(data);
+      await TeacherService.create(data as ICreateTeacherData);
       setSuccessMessage('Professor cadastrado com sucesso!');
       handleCloseModal();
       await loadTeachers();
@@ -159,7 +159,7 @@ export default function TeachersPage() {
   /**
    * Handler de atualização de professor
    */
-  const handleUpdate = async (data: IUpdateTeacherData) => {
+  const handleUpdate = async (data: ICreateTeacherData | IUpdateTeacherData) => {
     if (!selectedTeacher) return;
 
     try {

@@ -147,7 +147,6 @@ export function TeacherForm({
     handleSubmit,
     formState: { errors },
     reset,
-    setValue,
   } = useForm<TeacherFormData>({
     resolver: zodResolver(teacherFormSchema),
     defaultValues: {
