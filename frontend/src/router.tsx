@@ -17,7 +17,7 @@ import { PrivateRoute } from './components';
  * Páginas de Autenticação
  * Carregadas normalmente pois são públicas e pequenas
  */
-// import Login from './pages/auth/Login';
+import Login from './pages/auth/Login';
 // import FirstAccess from './pages/auth/FirstAccess';
 
 /**
@@ -69,7 +69,7 @@ function LoadingFallback() {
 const publicRoutes: RouteObject[] = [
   {
     path: '/login',
-    element: <div>Login Page (to be implemented)</div>, // TODO: Implementar Login
+    element: <Login />,
     errorElement: <div>Erro ao carregar página de login</div>,
   },
   {

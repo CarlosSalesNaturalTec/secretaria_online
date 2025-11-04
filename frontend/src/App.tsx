@@ -6,19 +6,25 @@
  */
 
 import { RouterProvider } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 import router from './router';
 
 /**
  * App - Componente raiz da aplicação
  *
  * Responsabilidades:
+ * - Fornecedor de contexto de autenticação para toda a aplicação
  * - Fornecedor de rotas para toda a aplicação
  * - Ponto de entrada para o RouterProvider
  *
  * @returns Aplicação com roteamento configurado
  */
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  );
 }
 
 export default App;

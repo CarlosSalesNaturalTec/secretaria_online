@@ -13,7 +13,7 @@
  */
 
 import api from './api';
-import type { ILoginCredentials, IChangePassword, IAuthUser } from '@/types/user.types';
+import type { ILoginCredentials, IAuthUser } from '@/types/user.types';
 import type { ApiResponse } from '@/types/api.types';
 
 /**
