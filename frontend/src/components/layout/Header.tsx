@@ -12,7 +12,7 @@
 
 import { Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react';
-import { ChevronDownIcon, KeyIcon, LogOutIcon, UserIcon } from 'lucide-react';
+import { ChevronDownIcon, KeyIcon, LogOutIcon, UserIcon, MenuIcon } from 'lucide-react';
 
 /**
  * Props do componente Header
@@ -22,13 +22,14 @@ interface HeaderProps {
   userRole: string;
   onChangePassword: () => void;
   onLogout: () => void;
+  onToggleSidebar?: () => void;
 }
 
 /**
  * Componente Header
  *
  * Exibe o cabeçalho principal do sistema com logo, informações do usuário
- * e menu dropdown para ações de perfil
+ * e menu dropdown para ações de perfil. Inclui botão de toggle para sidebar em mobile.
  *
  * @param {HeaderProps} props - Propriedades do componente
  * @returns {JSX.Element} Componente Header renderizado
@@ -39,9 +40,16 @@ interface HeaderProps {
  *   userRole="admin"
  *   onChangePassword={() => navigate('/change-password')}
  *   onLogout={() => handleLogout()}
+ *   onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
  * />
  */
-export function Header({ userName, userRole, onChangePassword, onLogout }: HeaderProps) {
+export function Header({
+  userName,
+  userRole,
+  onChangePassword,
+  onLogout,
+  onToggleSidebar
+}: HeaderProps) {
   /**
    * Formata o nome da role para exibição
    *
@@ -62,7 +70,18 @@ export function Header({ userName, userRole, onChangePassword, onLogout }: Heade
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo e Nome da Aplicação */}
-          <div className="flex items-center">
+          <div className="flex items-center space-x-4">
+            {/* Botão de Toggle para Sidebar (mobile) */}
+            {onToggleSidebar && (
+              <button
+                onClick={onToggleSidebar}
+                className="p-2 rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 lg:hidden transition-colors"
+                aria-label="Abrir/fechar menu"
+              >
+                <MenuIcon className="w-6 h-6" />
+              </button>
+            )}
+
             <div className="flex-shrink-0">
               <div className="flex items-center space-x-3">
                 {/* Logo Icon */}
