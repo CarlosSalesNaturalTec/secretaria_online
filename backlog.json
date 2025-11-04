@@ -60,7 +60,9 @@
         "dependencias": [
           "feat-076"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
         "tags": [
           "auth",
           "hook"
