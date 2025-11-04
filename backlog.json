@@ -163,7 +163,9 @@
           "feat-075",
           "feat-069"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
         "tags": [
           "admin",
           "page",
