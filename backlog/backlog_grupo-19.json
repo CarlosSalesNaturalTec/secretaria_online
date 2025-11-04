@@ -21,7 +21,9 @@
           "feat-073",
           "feat-074"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
         "tags": [
           "admin",
           "page",
@@ -40,7 +42,9 @@
         "dependencias": [
           "feat-075"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
         "tags": [
           "student",
           "service"
@@ -60,7 +64,9 @@
           "feat-069",
           "feat-068"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
         "tags": [
           "admin",
           "page",
@@ -82,7 +88,9 @@
           "feat-069",
           "feat-068"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
         "tags": [
           "admin",
           "page",
@@ -105,7 +113,9 @@
           "feat-069",
           "feat-068"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
         "tags": [
           "admin",
           "page",
@@ -128,13 +138,16 @@
           "feat-069",
           "feat-068"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
         "tags": [
           "admin",
           "page",
           "class"
         ],
         "artefatos": [
+          "frontend/src/types/class.types.ts",
           "frontend/src/services/class.service.ts",
           "frontend/src/pages/admin/Classes.tsx",
           "frontend/src/components/forms/ClassForm.tsx"
@@ -150,7 +163,9 @@
           "feat-075",
           "feat-069"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
         "tags": [
           "admin",
           "page",
@@ -171,7 +186,9 @@
           "feat-075",
           "feat-069"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
         "tags": [
           "admin",
           "page",
