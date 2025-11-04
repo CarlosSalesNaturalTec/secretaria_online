@@ -82,14 +82,21 @@
         "dependencias": [
           "feat-003"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
         "tags": [
           "routing",
           "auth"
         ],
         "artefatos": [
           "frontend/src/router.tsx",
-          "componente PrivateRoute"
+          "frontend/src/components/PrivateRoute.tsx",
+          "frontend/src/components/index.ts",
+          "frontend/src/App.tsx",
+          "frontend/src/pages/admin/Dashboard.tsx",
+          "frontend/src/pages/teacher/Dashboard.tsx",
+          "frontend/src/pages/student/Dashboard.tsx"
         ]
       }
     ]
