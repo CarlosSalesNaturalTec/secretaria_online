@@ -24,7 +24,7 @@ import {
   ClipboardListIcon,
   SchoolIcon,
 } from 'lucide-react';
-import { UserRole } from '@/types/user.types';
+import { type UserRole } from '@/types/user.types';
 
 /**
  * Interface para item de navegação

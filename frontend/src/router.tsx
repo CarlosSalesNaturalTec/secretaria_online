@@ -6,7 +6,7 @@
  */
 
 import { lazy, Suspense } from 'react';
-import { createBrowserRouter, RouteObject } from 'react-router-dom';
+import { createBrowserRouter, type RouteObject } from 'react-router-dom';
 import { PrivateRoute } from './components';
 
 // ============================================================================

@@ -5,11 +5,11 @@
  * Criado em: 2025-11-03
  */
 
-import { ReactNode, useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { useAuth } from '@/hooks/useAuth';
-import { UserRole } from '@/types/user.types';
+import { type UserRole } from '@/types/user.types';
 
 /**
  * Props do componente DashboardLayout

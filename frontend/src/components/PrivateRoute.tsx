@@ -5,7 +5,7 @@
  * Criado em: 2025-11-03
  */
 
-import { ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 
 interface PrivateRouteProps {
