@@ -6,97 +6,81 @@
     "dataGeracao": "2025-10-23"
   },
   "grupo": {
-    "id": "grupo-16",
-    "nome": "Frontend - Layout e Navegação",
-    "descricao": "Componentes de layout (Header, Sidebar, Footer) e configuração de rotas",
+    "id": "grupo-17",
+    "nome": "Frontend - Autenticação e Contexto",
+    "descricao": "Context API, hooks de autenticação e serviços de API",
     "prioridade": "alta",
     "features": [
       {
-        "id": "feat-071",
-        "titulo": "Criar componente Header",
-        "descricao": "Implementar components/layout/Header.tsx com logo, nome do usuário logado, dropdown de perfil (trocar senha, logout)",
+        "id": "feat-075",
+        "titulo": "Configurar Axios e interceptors",
+        "descricao": "Criar services/api.ts com instância Axios configurada (baseURL, timeout), interceptors para adicionar token JWT no header e tratar erros 401",
+        "estimativa": "1h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-003"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "api",
+          "config"
+        ],
+        "artefatos": [
+          "frontend/src/services/api.ts"
+        ]
+      },
+      {
+        "id": "feat-076",
+        "titulo": "Criar AuthContext e AuthProvider",
+        "descricao": "Implementar contexts/AuthContext.tsx com estado de user, token, loading. Métodos: login, logout, updateUser. Persistência em localStorage",
         "estimativa": "2h",
         "prioridade": "alta",
         "dependencias": [
           "feat-003"
         ],
-        "status": "Concluída",
-        "dataInicio": "2025-11-03",
-        "dataConclusao": "2025-11-03",
+        "status": "Não Iniciada",
         "tags": [
-          "layout",
-          "component"
+          "auth",
+          "context"
         ],
         "artefatos": [
-          "frontend/src/components/layout/Header.tsx"
+          "frontend/src/contexts/AuthContext.tsx"
         ]
       },
       {
-        "id": "feat-072",
-        "titulo": "Criar componente Sidebar",
-        "descricao": "Implementar components/layout/Sidebar.tsx com navegação dinâmica baseada no role do usuário (admin, teacher, student)",
-        "estimativa": "2h30min",
+        "id": "feat-077",
+        "titulo": "Criar hook useAuth",
+        "descricao": "Implementar hooks/useAuth.ts que consome AuthContext e expõe user, login, logout, isAuthenticated",
+        "estimativa": "30min",
         "prioridade": "alta",
         "dependencias": [
-          "feat-003"
+          "feat-076"
         ],
-        "status": "Concluída",
-        "dataInicio": "2025-11-03",
-        "dataConclusao": "2025-11-03",
+        "status": "Não Iniciada",
         "tags": [
-          "layout",
-          "component"
+          "auth",
+          "hook"
         ],
         "artefatos": [
-          "frontend/src/components/layout/Sidebar.tsx"
+          "frontend/src/hooks/useAuth.ts"
         ]
       },
       {
-        "id": "feat-073",
-        "titulo": "Criar componente DashboardLayout",
-        "descricao": "Implementar components/layout/DashboardLayout.tsx que compõe Header + Sidebar + children (área de conteúdo)",
+        "id": "feat-078",
+        "titulo": "Criar auth.service.ts",
+        "descricao": "Implementar services/auth.service.ts com funções: login(credentials), logout(), changePassword(oldPassword, newPassword) que chamam API",
         "estimativa": "1h",
         "prioridade": "alta",
         "dependencias": [
-          "feat-071",
-          "feat-072"
+          "feat-075"
         ],
-        "status": "Concluída",
-        "dataInicio": "2025-11-03",
-        "dataConclusao": "2025-11-03",
+        "status": "Não Iniciada",
         "tags": [
-          "layout",
-          "component"
+          "auth",
+          "service"
         ],
         "artefatos": [
-          "frontend/src/components/layout/DashboardLayout.tsx",
-          "frontend/src/components/layout/index.ts"
-        ]
-      },
-      {
-        "id": "feat-074",
-        "titulo": "Configurar React Router com rotas protegidas",
-        "descricao": "Criar router.tsx com rotas públicas (/login, /first-access) e privadas (dashboards). Implementar PrivateRoute wrapper que verifica autenticação",
-        "estimativa": "2h",
-        "prioridade": "alta",
-        "dependencias": [
-          "feat-003"
-        ],
-        "status": "Concluída",
-        "dataInicio": "2025-11-03",
-        "dataConclusao": "2025-11-03",
-        "tags": [
-          "routing",
-          "auth"
-        ],
-        "artefatos": [
-          "frontend/src/router.tsx",
-          "frontend/src/components/PrivateRoute.tsx",
-          "frontend/src/components/index.ts",
-          "frontend/src/App.tsx",
-          "frontend/src/pages/admin/Dashboard.tsx",
-          "frontend/src/pages/teacher/Dashboard.tsx",
-          "frontend/src/pages/student/Dashboard.tsx"
+          "frontend/src/services/auth.service.ts"
         ]
       }
     ]
