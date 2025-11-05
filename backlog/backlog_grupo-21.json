@@ -21,7 +21,9 @@
           "feat-073",
           "feat-074"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
         "tags": [
           "teacher",
           "page",
@@ -40,7 +42,9 @@
         "dependencias": [
           "feat-086"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
         "tags": [
           "teacher",
           "page",
@@ -59,7 +63,9 @@
         "dependencias": [
           "feat-086"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
         "tags": [
           "teacher",
           "page",
@@ -78,7 +84,9 @@
         "dependencias": [
           "feat-075"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
         "tags": [
           "evaluation",
           "service"
@@ -98,7 +106,9 @@
           "feat-090",
           "feat-069"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
         "tags": [
           "teacher",
           "page",
