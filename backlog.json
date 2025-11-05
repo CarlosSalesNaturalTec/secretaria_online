@@ -20,14 +20,17 @@
         "dependencias": [
           "feat-003"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataConclusao": "2025-11-04",
         "tags": [
           "test",
           "setup"
         ],
         "artefatos": [
           "frontend/jest.config.js",
-          "frontend/src/setupTests.ts"
+          "frontend/src/setupTests.ts",
+          "frontend/src/__tests__/setup.test.ts",
+          "frontend/src/jest.d.ts"
         ]
       },
       {
