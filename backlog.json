@@ -21,14 +21,19 @@
           "feat-002",
           "feat-003"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-05",
+        "dataConclusao": "2025-11-05",
         "tags": [
           "deploy",
           "scripts"
         ],
         "artefatos": [
           "deploy.sh",
-          "scripts em package.json"
+          "scripts em package.json",
+          "docs/deploy-guide.md",
+          "docs/deploy-quick-reference.md",
+          "backend/.env.production.example"
         ]
       },
       {

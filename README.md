@@ -3879,6 +3879,71 @@ Todas as requisições são registradas com informações:
 - `backend/src/services/grade.service.js` - Método `getStudentGrades()`
 - `backend/src/routes/grade.routes.js` - Rota `GET /my-grades`
 
+## 🚀 Deploy em Produção
+
+### Deploy Automatizado
+
+O projeto inclui um script de deploy automatizado que facilita o processo de envio para produção:
+
+```bash
+# Deploy completo (frontend + backend)
+./deploy.sh
+
+# Deploy apenas do frontend
+./deploy.sh frontend
+
+# Deploy apenas do backend
+./deploy.sh backend
+```
+
+### Configuração do Deploy
+
+1. **Edite o arquivo `deploy.sh`** e configure as variáveis de conexão SSH:
+
+```bash
+SSH_USER="seu_usuario_ssh"
+SSH_HOST="seu-dominio.com"
+SSH_PORT="22"
+REMOTE_PUBLIC_HTML="/home/seu_usuario/public_html"
+REMOTE_API_PATH="/home/seu_usuario/api"
+PM2_APP_NAME="secretaria-api"
+```
+
+2. **Configure variáveis de ambiente no servidor:**
+
+Copie o arquivo `.env.production.example` para `.env` no servidor e preencha com os valores de produção.
+
+### Scripts de Build
+
+**Frontend:**
+```bash
+cd frontend
+npm run build        # Build de produção (gera pasta dist/)
+```
+
+**Backend:**
+```bash
+cd backend
+npm run start:prod   # Inicia em modo produção (NODE_ENV=production)
+```
+
+### Documentação Completa
+
+Para instruções detalhadas de deploy, configuração de PM2, troubleshooting e mais, consulte:
+
+- 📖 **[Guia Completo de Deploy](./docs/deploy-guide.md)** - Instruções detalhadas passo a passo
+- ⚡ **[Quick Reference de Deploy](./docs/deploy-quick-reference.md)** - Comandos úteis para consulta rápida
+
+### Requisitos no Servidor
+
+- Node.js v20 LTS
+- PM2 instalado globalmente (`npm install -g pm2`)
+- MySQL 8.0
+- Certificado SSL configurado
+- Acesso SSH habilitado
+
+---
+
 ## 🤝 Contribuindo
 
 1. Faça um fork do projeto
