@@ -13,7 +13,7 @@
  * - Mostrar feedback visual de sucesso/erro
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type JSX } from 'react';
 import {
   FileText,
   Upload,
@@ -604,7 +604,7 @@ export default function Documents() {
                         onClick={() => {
                           setSelectedDocTypeId(document.documentTypeId);
                           // Focar no formulário de upload
-                          document.getElementById('file-input')?.focus();
+                          globalThis.document.getElementById('file-input')?.focus();
                         }}
                         className="p-2 hover:bg-red-100 rounded-lg transition-colors"
                         title="Reenviar"

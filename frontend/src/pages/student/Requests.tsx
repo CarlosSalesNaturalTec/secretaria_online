@@ -13,7 +13,7 @@
  * - Exibir observações do revisor quando disponível
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type JSX } from 'react';
 import {
   FileText,
   Plus,
