@@ -44,7 +44,9 @@
           "feat-085",
           "feat-086"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
         "tags": [
           "hooks",
           "state-management"
@@ -53,7 +55,8 @@
           "frontend/src/hooks/useStudents.ts",
           "frontend/src/hooks/useTeachers.ts",
           "frontend/src/hooks/useCourses.ts",
-          "frontend/src/hooks/useClasses.ts"
+          "frontend/src/hooks/useClasses.ts",
+          "frontend/src/hooks/index.ts"
         ]
       }
     ]
