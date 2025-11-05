@@ -71,3 +71,119 @@ export default defineConfig([
   },
 ])
 ```
+
+## Testes (Jest + React Testing Library)
+
+### Configuração
+
+O projeto está configurado com Jest e React Testing Library para testes de componentes React.
+
+### Dependências de Teste
+
+- **jest**: Framework de testes
+- **@testing-library/react**: Utilitários para testar componentes React
+- **@testing-library/jest-dom**: Matchers customizados do Jest para DOM
+- **ts-jest**: Preset do Jest para TypeScript
+- **jest-environment-jsdom**: Ambiente de teste para DOM
+
+### Scripts Disponíveis
+
+```bash
+npm test              # Executa testes uma vez
+npm run test:watch   # Executa testes em modo watch
+npm run test:coverage # Executa testes e gera relatório de cobertura
+```
+
+### Estrutura de Testes
+
+Os testes devem ser criados em uma das seguintes estruturas:
+
+```
+src/__tests__/       # Diretório de testes
+src/components/__tests__/
+src/hooks/__tests__/
+src/services/__tests__/
+```
+
+Ou com sufixo:
+- `*.test.ts`
+- `*.test.tsx`
+- `*.spec.ts`
+- `*.spec.tsx`
+
+### Configuração de Teste
+
+**Arquivo de configuração**: `jest.config.js`
+
+**Arquivo de setup**: `src/setupTests.ts`
+
+O arquivo de setup configura:
+- Matchers do jest-dom
+- Mocks de APIs do navegador (localStorage, sessionStorage, etc.)
+- Mocks de IntersectionObserver e ResizeObserver
+- Mock do Axios
+
+### Exemplo de Teste
+
+```typescript
+// src/components/__tests__/Button.test.tsx
+import { render, screen } from '@testing-library/react';
+import { Button } from '../Button';
+
+describe('Button Component', () => {
+  it('should render button with text', () => {
+    render(<Button>Click me</Button>);
+    expect(screen.getByRole('button', { name: /click me/i })).toBeInTheDocument();
+  });
+
+  it('should call onClick when clicked', () => {
+    const onClick = jest.fn();
+    render(<Button onClick={onClick}>Click me</Button>);
+    screen.getByRole('button').click();
+    expect(onClick).toHaveBeenCalled();
+  });
+});
+```
+
+### Matchers Disponíveis
+
+Além dos matchers padrão do Jest, temos acesso aos matchers do jest-dom:
+
+- `toBeInTheDocument()`
+- `toBeVisible()`
+- `toBeDisabled()`
+- `toBeEnabled()`
+- `toHaveValue()`
+- `toHaveTextContent()`
+- `toHaveClass()`
+- `toHaveStyle()`
+- E muitos outros...
+
+### Cobertura de Testes
+
+A configuração padrão tem threshold 0% para permitir crescimento gradual da cobertura.
+
+Para aumentar o threshold, edite `jest.config.js`:
+
+```javascript
+coverageThreshold: {
+  global: {
+    branches: 50,
+    functions: 50,
+    lines: 50,
+    statements: 50,
+  },
+}
+```
+
+### Troubleshooting
+
+**Problema**: "Cannot find module '@testing-library/react'"
+
+**Solução**: Instale as dependências: `npm install`
+
+**Problema**: "jsdom is not available"
+
+**Solução**: Instale jest-environment-jsdom: `npm install --save-dev jest-environment-jsdom`
+
+Para mais informações sobre React Testing Library: https://testing-library.com/docs/react-testing-library/intro/
