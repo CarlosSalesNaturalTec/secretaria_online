@@ -46,13 +46,17 @@
           "feat-068",
           "feat-069"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataConclusao": "2025-11-04",
         "tags": [
           "test",
           "ui"
         ],
         "artefatos": [
-          "frontend/src/components/ui/__tests__/"
+          "frontend/src/components/ui/__tests__/Button.test.tsx",
+          "frontend/src/components/ui/__tests__/Input.test.tsx",
+          "frontend/src/components/ui/__tests__/Modal.test.tsx",
+          "frontend/src/components/ui/__tests__/Table.test.tsx"
         ]
       }
     ]

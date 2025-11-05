@@ -41,17 +41,23 @@ export default {
       statements: 0,
     },
   },
-  globals: {
-    'ts-jest': {
-      tsconfig: {
-        jsx: 'react-jsx',
-        esModuleInterop: true,
-        allowSyntheticDefaultImports: true,
-        module: 'esnext',
-        target: 'es2020',
-        types: ['jest', '@testing-library/jest-dom', 'node'],
+  transform: {
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        tsconfig: {
+          jsx: 'react-jsx',
+          esModuleInterop: true,
+          allowSyntheticDefaultImports: true,
+          module: 'esnext',
+          target: 'es2020',
+          types: ['jest', '@testing-library/jest-dom', 'node'],
+          skipLibCheck: true,
+          moduleResolution: 'bundler',
+        },
+        isolatedModules: false,
       },
-    },
+    ],
   },
   moduleDirectories: ['node_modules', 'src'],
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
