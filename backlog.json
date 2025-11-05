@@ -85,7 +85,9 @@
         "dependencias": [
           "feat-001"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-05",
+        "dataConclusao": "2025-11-05",
         "tags": [
           "documentation"
         ],

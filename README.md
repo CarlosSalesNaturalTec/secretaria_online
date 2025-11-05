@@ -2973,23 +2973,121 @@ Adicione ao `package.json` (raiz):
 
 ### Frontend
 
+O build do frontend gera arquivos otimizados para produção (minificados, com assets hasheados e tree-shaking):
+
 ```bash
 cd frontend
-npm run build
+npm run build              # Build de produção
 ```
 
-Os arquivos otimizados serão gerados na pasta `dist/`.
+**O que acontece:**
+- ✅ Código TypeScript compilado para JavaScript
+- ✅ Assets otimizados (minificação, compressão)
+- ✅ CSS extraído e minificado
+- ✅ Code splitting automático
+- ✅ Hash nos nomes de arquivos para cache busting
+- ✅ Source maps para debugging (opcional)
+
+**Resultado:**
+Os arquivos otimizados serão gerados na pasta `frontend/dist/`:
+```
+dist/
+├── index.html
+├── assets/
+│   ├── index-[hash].js
+│   ├── index-[hash].css
+│   └── [outros assets]
+└── favicon.ico
+```
+
+**Preview do build localmente:**
+```bash
+npm run preview            # Roda servidor local com o build
+```
 
 ### Backend
 
+O backend Node.js não requer build (JavaScript é executado diretamente), mas deve ser iniciado em modo produção:
+
 ```bash
 cd backend
-npm run start:prod
+npm run start:prod         # Inicia com NODE_ENV=production
+```
+
+**Diferenças entre desenvolvimento e produção:**
+
+| Aspecto | Desenvolvimento | Produção |
+|---------|----------------|----------|
+| Logs | Verbosos (debug, verbose) | Apenas importantes (info, warn, error) |
+| Arquivos de log | Apenas console | Console + arquivos em `logs/` |
+| Stack traces | Incluídos em erros | Removidos de erros públicos |
+| Auto-reload | Sim (nodemon) | Não |
+| Performance | Modo debug | Otimizado |
+
+**Scripts disponíveis:**
+```bash
+npm start              # Modo normal (sem auto-reload)
+npm run dev            # Desenvolvimento com nodemon
+npm run start:prod     # Produção (NODE_ENV=production)
 ```
 
 ## 🚀 Deploy
 
-Consulte o arquivo [contextDoc.md](./docs/contextDoc.md) para instruções detalhadas de deploy no Hostgator.
+### Deploy Automatizado (Recomendado)
+
+O projeto inclui um script de deploy automatizado que simplifica todo o processo:
+
+```bash
+# Deploy completo (frontend + backend)
+./deploy.sh
+
+# Deploy apenas do frontend
+./deploy.sh frontend
+
+# Deploy apenas do backend
+./deploy.sh backend
+```
+
+### Documentação Detalhada
+
+Para instruções completas sobre deploy, configuração de servidor, troubleshooting e mais:
+
+- 📖 **[Guia Completo de Deploy](./docs/deploy-guide.md)** - Instruções detalhadas passo a passo
+- ⚡ **[Quick Reference de Deploy](./docs/deploy-quick-reference.md)** - Comandos úteis para consulta rápida
+- 📋 **[Documentação de Contexto](./docs/contextDoc.md)** - Arquitetura e padrões do projeto
+
+### Pré-requisitos no Servidor
+
+Antes de fazer deploy, certifique-se de que o servidor possui:
+
+- ✅ Node.js v20 LTS ou superior
+- ✅ PM2 instalado globalmente (`npm install -g pm2`)
+- ✅ MySQL 8.0 configurado
+- ✅ Certificado SSL ativo
+- ✅ Acesso SSH habilitado
+
+### Comandos de Build
+
+**Frontend:**
+```bash
+cd frontend
+npm run build              # Build de produção (gera pasta dist/)
+npm run preview            # Preview do build localmente
+```
+
+**Backend:**
+```bash
+cd backend
+npm run start:prod         # Inicia em modo produção (NODE_ENV=production)
+```
+
+### Configuração Rápida
+
+1. Edite o arquivo `deploy.sh` com suas credenciais SSH
+2. Configure o arquivo `.env` no servidor (use `backend/.env.production.example` como base)
+3. Execute `./deploy.sh` para fazer o deploy completo
+
+Para mais detalhes, consulte o [Guia Completo de Deploy](./docs/deploy-guide.md).
 
 ## ⚠️ Sistema de Tratamento de Erros
 
