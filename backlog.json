@@ -6,57 +6,50 @@
     "dataGeracao": "2025-10-23"
   },
   "grupo": {
-    "id": "grupo-23",
-    "nome": "Configuração TanStack Query",
-    "descricao": "Setup do React Query para cache e gerenciamento de estado servidor",
-    "prioridade": "media",
+    "id": "grupo-24",
+    "nome": "Testes e Qualidade",
+    "descricao": "Configuração de testes e validações de qualidade",
+    "prioridade": "baixa",
     "features": [
       {
-        "id": "feat-103",
-        "titulo": "Configurar TanStack Query (React Query)",
-        "descricao": "Instalar @tanstack/react-query, criar QueryClientProvider em App.tsx, configurar devtools e opções padrão (staleTime, cacheTime)",
-        "estimativa": "1h",
-        "prioridade": "media",
+        "id": "feat-105",
+        "titulo": "Configurar Jest e React Testing Library",
+        "descricao": "Instalar jest, @testing-library/react, configurar para TypeScript, criar setup de testes",
+        "estimativa": "1h30min",
+        "prioridade": "baixa",
         "dependencias": [
           "feat-003"
         ],
-        "status": "Concluída",
-        "dataInicio": "2025-11-04",
-        "dataConclusao": "2025-11-04",
+        "status": "Não Iniciada",
         "tags": [
-          "config",
-          "state-management"
+          "test",
+          "setup"
         ],
         "artefatos": [
-          "configuração em App.tsx"
+          "frontend/jest.config.js",
+          "frontend/src/setupTests.ts"
         ]
       },
       {
-        "id": "feat-104",
-        "titulo": "Criar custom hooks com React Query",
-        "descricao": "Implementar hooks: useStudents, useTeachers, useCourses, useClasses com useQuery e useMutation para operações CRUD",
-        "estimativa": "2h30min",
+        "id": "feat-106",
+        "titulo": "Escrever testes para componentes UI",
+        "descricao": "Criar testes unitários para Button, Input, Modal, Table verificando renderização e interações",
+        "estimativa": "3h",
         "prioridade": "baixa",
         "dependencias": [
-          "feat-103",
-          "feat-082",
-          "feat-084",
-          "feat-085",
-          "feat-086"
+          "feat-105",
+          "feat-066",
+          "feat-067",
+          "feat-068",
+          "feat-069"
         ],
-        "status": "Concluída",
-        "dataInicio": "2025-11-04",
-        "dataConclusao": "2025-11-04",
+        "status": "Não Iniciada",
         "tags": [
-          "hooks",
-          "state-management"
+          "test",
+          "ui"
         ],
         "artefatos": [
-          "frontend/src/hooks/useStudents.ts",
-          "frontend/src/hooks/useTeachers.ts",
-          "frontend/src/hooks/useCourses.ts",
-          "frontend/src/hooks/useClasses.ts",
-          "frontend/src/hooks/index.ts"
+          "frontend/src/components/ui/__tests__/"
         ]
       }
     ]
