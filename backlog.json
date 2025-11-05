@@ -6,98 +6,52 @@
     "dataGeracao": "2025-10-23"
   },
   "grupo": {
-    "id": "grupo-22",
-    "nome": "Frontend - Utilitários e Types",
-    "descricao": "Funções auxiliares, validadores e tipos TypeScript",
+    "id": "grupo-23",
+    "nome": "Configuração TanStack Query",
+    "descricao": "Setup do React Query para cache e gerenciamento de estado servidor",
     "prioridade": "media",
     "features": [
       {
-        "id": "feat-099",
-        "titulo": "Criar validators.ts com Zod schemas",
-        "descricao": "Implementar utils/validators.ts com schemas Zod: studentSchema, teacherSchema, loginSchema, cpfValidator, emailValidator",
-        "estimativa": "2h",
-        "prioridade": "alta",
-        "dependencias": [
-          "feat-003"
-        ],
-        "status": "Concluída",
-        "dataInicio": "2025-11-04",
-        "dataConclusao": "2025-11-04",
-        "tags": [
-          "validation",
-          "utils"
-        ],
-        "artefatos": [
-          "frontend/src/utils/validators.ts"
-        ]
-      },
-      {
-        "id": "feat-100",
-        "titulo": "Criar formatters.ts",
-        "descricao": "Implementar utils/formatters.ts com funções: formatCPF, formatPhone, formatDate, formatCurrency",
+        "id": "feat-103",
+        "titulo": "Configurar TanStack Query (React Query)",
+        "descricao": "Instalar @tanstack/react-query, criar QueryClientProvider em App.tsx, configurar devtools e opções padrão (staleTime, cacheTime)",
         "estimativa": "1h",
         "prioridade": "media",
         "dependencias": [
           "feat-003"
         ],
-        "status": "Concluída",
-        "dataInicio": "2025-11-04",
-        "dataConclusao": "2025-11-04",
+        "status": "Não Iniciada",
         "tags": [
-          "utils"
+          "config",
+          "state-management"
         ],
         "artefatos": [
-          "frontend/src/utils/formatters.ts"
+          "configuração em App.tsx"
         ]
       },
       {
-        "id": "feat-101",
-        "titulo": "Criar types TypeScript",
-        "descricao": "Criar types/*.types.ts com interfaces: IUser, IStudent, ITeacher, ICourse, IClass, IEnrollment, IDocument, IGrade, IRequest",
-        "estimativa": "2h",
-        "prioridade": "alta",
+        "id": "feat-104",
+        "titulo": "Criar custom hooks com React Query",
+        "descricao": "Implementar hooks: useStudents, useTeachers, useCourses, useClasses com useQuery e useMutation para operações CRUD",
+        "estimativa": "2h30min",
+        "prioridade": "baixa",
         "dependencias": [
-          "feat-003"
+          "feat-103",
+          "feat-082",
+          "feat-084",
+          "feat-085",
+          "feat-086"
         ],
-        "status": "Concluída",
-        "dataInicio": "2025-11-04",
-        "dataConclusao": "2025-11-04",
+        "status": "Não Iniciada",
         "tags": [
-          "types",
-          "typescript"
+          "hooks",
+          "state-management"
         ],
         "artefatos": [
-          "frontend/src/types/user.types.ts",
-          "frontend/src/types/student.types.ts",
-          "frontend/src/types/teacher.types.ts",
-          "frontend/src/types/course.types.ts",
-          "frontend/src/types/class.types.ts",
-          "frontend/src/types/enrollment.types.ts",
-          "frontend/src/types/document.types.ts",
-          "frontend/src/types/grade.types.ts",
-          "frontend/src/types/request.types.ts",
-          "frontend/src/types/index.ts",
-          "docs/types-guide.md"
-        ]
-      },
-      {
-        "id": "feat-102",
-        "titulo": "Criar constants.ts",
-        "descricao": "Implementar utils/constants.ts com constantes: USER_ROLES, ENROLLMENT_STATUS, DOCUMENT_STATUS, REQUEST_STATUS, API_ROUTES",
-        "estimativa": "45min",
-        "prioridade": "media",
-        "dependencias": [
-          "feat-003"
-        ],
-        "status": "Concluída",
-        "dataInicio": "2025-11-04",
-        "dataConclusao": "2025-11-04",
-        "tags": [
-          "utils",
-          "constants"
-        ],
-        "artefatos": [
-          "frontend/src/utils/constants.ts"
+          "frontend/src/hooks/useStudents.ts",
+          "frontend/src/hooks/useTeachers.ts",
+          "frontend/src/hooks/useCourses.ts",
+          "frontend/src/hooks/useClasses.ts"
         ]
       }
     ]
