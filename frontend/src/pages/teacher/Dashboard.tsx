@@ -26,7 +26,6 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { getAll as getAllClasses } from '@/services/class.service';
-import { getById as getTeacher } from '@/services/teacher.service';
 import type { IClass } from '@/types/class.types';
 import type { IUser } from '@/types/user.types';
 
@@ -123,22 +122,6 @@ export default function TeacherDashboard() {
     } finally {
       setLoading(false);
     }
-  };
-
-  /**
-   * Formata data para exibição
-   *
-   * @param {string} dateString - Data em formato ISO
-   * @returns {string} Data formatada (dd/mm/yyyy HH:mm)
-   */
-  const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
   };
 
   /**
