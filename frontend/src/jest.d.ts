@@ -8,7 +8,7 @@
 /// <reference types="jest" />
 /// <reference types="react" />
 /// <reference types="react/jsx-runtime" />
-import type '@testing-library/jest-dom';
+/// <reference types="@testing-library/jest-dom" />
 
 declare global {
   namespace jest {

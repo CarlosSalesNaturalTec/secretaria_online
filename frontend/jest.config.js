@@ -21,6 +21,8 @@ export default {
     '!src/**/*.d.ts',
     '!src/main.tsx',
     '!src/vite-env.d.ts',
+    '!src/jest.d.ts',
+    '!src/setupTests.ts',
     '!src/types/**',
     '!src/hooks/index.ts',
     '!src/components/index.ts',
@@ -39,19 +41,17 @@ export default {
       statements: 0,
     },
   },
-  transform: {
-    '^.+\\.tsx?$': [
-      'ts-jest',
-      {
-        tsconfig: {
-          jsx: 'react-jsx',
-          esModuleInterop: true,
-          allowSyntheticDefaultImports: true,
-          module: 'esnext',
-          target: 'es2020',
-        },
+  globals: {
+    'ts-jest': {
+      tsconfig: {
+        jsx: 'react-jsx',
+        esModuleInterop: true,
+        allowSyntheticDefaultImports: true,
+        module: 'esnext',
+        target: 'es2020',
+        types: ['jest', '@testing-library/jest-dom', 'node'],
       },
-    ],
+    },
   },
   moduleDirectories: ['node_modules', 'src'],
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
