@@ -2,6 +2,7 @@
  * Arquivo: frontend/src/types/class.types.ts
  * Descrição: Tipos e interfaces para turmas
  * Feature: feat-086 - Criar class.service.ts e página Classes
+ * Feature: feat-101 - Criar types TypeScript (atualização)
  * Criado em: 2025-11-04
  */
 
@@ -148,4 +149,157 @@ export interface IClass {
    * Data de exclusão (soft delete)
    */
   deletedAt?: string | null;
+}
+
+/**
+ * Dados para criar nova turma
+ */
+export interface IClassCreateRequest {
+  /**
+   * ID do curso
+   */
+  courseId: number;
+
+  /**
+   * Semestre/período
+   */
+  semester: number;
+
+  /**
+   * Ano letivo
+   */
+  year: number;
+
+  /**
+   * Professores a vincular (opcional)
+   */
+  teachers?: Array<{
+    teacherId: number;
+    disciplineId: number;
+  }>;
+}
+
+/**
+ * Dados para editar turma
+ */
+export interface IClassUpdateRequest {
+  /**
+   * Semestre (opcional)
+   */
+  semester?: number;
+
+  /**
+   * Ano letivo (opcional)
+   */
+  year?: number;
+}
+
+/**
+ * Dados para adicionar professor à turma
+ */
+export interface IAddTeacherToClassRequest {
+  /**
+   * ID do professor
+   */
+  teacherId: number;
+
+  /**
+   * ID da disciplina que o professor vai lecionar
+   */
+  disciplineId: number;
+}
+
+/**
+ * Dados para adicionar aluno à turma
+ */
+export interface IAddStudentToClassRequest {
+  /**
+   * ID do aluno
+   */
+  studentId: number;
+}
+
+/**
+ * Resposta ao listar turmas
+ */
+export interface IClassListResponse {
+  /**
+   * Indica sucesso da operação
+   */
+  success: boolean;
+
+  /**
+   * Array de turmas
+   */
+  data: IClass[];
+
+  /**
+   * Informações de paginação
+   */
+  pagination?: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
+
+/**
+ * Resposta ao consultar turma específica
+ */
+export interface IClassResponse {
+  /**
+   * Indica sucesso da operação
+   */
+  success: boolean;
+
+  /**
+   * Dados da turma
+   */
+  data: IClass;
+
+  /**
+   * Mensagem de sucesso (opcional)
+   */
+  message?: string;
+}
+
+/**
+ * Filtros para busca de turmas
+ */
+export interface IClassFilters {
+  /**
+   * Buscar por ID de curso
+   */
+  courseId?: number;
+
+  /**
+   * Buscar por semestre
+   */
+  semester?: number;
+
+  /**
+   * Buscar por ano letivo
+   */
+  year?: number;
+
+  /**
+   * Página atual
+   */
+  page?: number;
+
+  /**
+   * Limite de registros por página
+   */
+  limit?: number;
+
+  /**
+   * Campo para ordenação
+   */
+  sortBy?: 'year' | 'semester' | 'createdAt';
+
+  /**
+   * Ordem de classificação
+   */
+  sortOrder?: 'ASC' | 'DESC';
 }

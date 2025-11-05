@@ -2,6 +2,7 @@
  * Arquivo: frontend/src/types/document.types.ts
  * Descrição: Interfaces TypeScript para documentos
  * Feature: feat-087 - Criar document.service.ts e página Documents Admin
+ * Feature: feat-101 - Criar types TypeScript (atualização)
  * Criado em: 2025-11-04
  */
 

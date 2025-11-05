@@ -2,6 +2,7 @@
  * Arquivo: frontend/src/types/grade.types.ts
  * Descrição: Types e interfaces para o módulo de notas e avaliações
  * Feature: feat-089 - Criar página Dashboard Aluno
+ * Feature: feat-101 - Criar types TypeScript (atualização)
  * Criado em: 2025-11-04
  */
 
@@ -137,4 +138,114 @@ export interface IGradeFilters {
   classId?: number;
   page?: number;
   limit?: number;
+}
+
+/**
+ * Dados para criar nova avaliação
+ */
+export interface ICreateEvaluationRequest {
+  /**
+   * ID da turma
+   */
+  classId: number;
+
+  /**
+   * ID da disciplina
+   */
+  disciplineId: number;
+
+  /**
+   * Nome da avaliação
+   */
+  name: string;
+
+  /**
+   * Data da avaliação
+   */
+  date: string;
+
+  /**
+   * Tipo de avaliação
+   */
+  type: EvaluationType;
+}
+
+/**
+ * Dados para atualizar avaliação
+ */
+export interface IUpdateEvaluationRequest {
+  /**
+   * Nome (opcional)
+   */
+  name?: string;
+
+  /**
+   * Data (opcional)
+   */
+  date?: string;
+
+  /**
+   * Tipo (opcional)
+   */
+  type?: EvaluationType;
+}
+
+/**
+ * Dados para lançar nota individual
+ */
+export interface ICreateGradeRequest {
+  /**
+   * ID da avaliação
+   */
+  evaluationId: number;
+
+  /**
+   * ID do aluno
+   */
+  studentId: number;
+
+  /**
+   * Nota (0-10) para avaliações do tipo 'grade'
+   */
+  grade?: number;
+
+  /**
+   * Conceito para avaliações do tipo 'concept'
+   */
+  concept?: GradeConcept;
+}
+
+/**
+ * Dados para atualizar nota
+ */
+export interface IUpdateGradeRequest {
+  /**
+   * Nota (opcional)
+   */
+  grade?: number;
+
+  /**
+   * Conceito (opcional)
+   */
+  concept?: GradeConcept;
+}
+
+/**
+ * Dados para lançar média final
+ */
+export interface ISetFinalAverageRequest {
+  /**
+   * ID do aluno
+   */
+  studentId: number;
+
+  /**
+   * ID da disciplina
+   */
+  disciplineId: number;
+
+  /**
+   * Média final (0-10)
+   */
+  average: number;
 }

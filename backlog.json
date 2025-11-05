@@ -59,7 +59,9 @@
         "dependencias": [
           "feat-003"
         ],
-        "status": "Não Iniciada",
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
         "tags": [
           "types",
           "typescript"
@@ -69,7 +71,13 @@
           "frontend/src/types/student.types.ts",
           "frontend/src/types/teacher.types.ts",
           "frontend/src/types/course.types.ts",
-          "outros arquivos de types"
+          "frontend/src/types/class.types.ts",
+          "frontend/src/types/enrollment.types.ts",
+          "frontend/src/types/document.types.ts",
+          "frontend/src/types/grade.types.ts",
+          "frontend/src/types/request.types.ts",
+          "frontend/src/types/index.ts",
+          "docs/types-guide.md"
         ]
       },
       {

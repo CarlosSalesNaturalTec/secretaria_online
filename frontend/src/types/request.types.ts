@@ -2,6 +2,7 @@
  * Arquivo: frontend/src/types/request.types.ts
  * Descrição: Types e interfaces para o módulo de solicitações
  * Feature: feat-088 - Criar request.service.ts e página Requests Admin
+ * Feature: feat-101 - Criar types TypeScript (atualização)
  * Criado em: 2025-11-04
  */
 
@@ -133,4 +134,79 @@ export interface IRequestType {
   expectedDays: number;
   createdAt: string;
   updatedAt: string;
+}
+
+/**
+ * Dados para criar nova solicitação (admin)
+ */
+export interface ICreateRequestTypeRequest {
+  /**
+   * Nome do tipo de solicitação
+   */
+  name: string;
+
+  /**
+   * Descrição
+   */
+  description: string;
+
+  /**
+   * Prazo esperado em dias úteis
+   */
+  expectedDays: number;
+}
+
+/**
+ * Dados para editar tipo de solicitação
+ */
+export interface IUpdateRequestTypeRequest {
+  /**
+   * Nome (opcional)
+   */
+  name?: string;
+
+  /**
+   * Descrição (opcional)
+   */
+  description?: string;
+
+  /**
+   * Prazo em dias úteis (opcional)
+   */
+  expectedDays?: number;
+}
+
+/**
+ * Dados para aluno criar solicitação
+ */
+export interface IStudentCreateRequestRequest {
+  /**
+   * ID do tipo de solicitação
+   */
+  requestTypeId: number;
+
+  /**
+   * Descrição/detalhes da solicitação
+   */
+  description: string;
+}
+
+/**
+ * Resposta ao criar solicitação
+ */
+export interface ICreateRequestResponse {
+  /**
+   * Indica sucesso
+   */
+  success: boolean;
+
+  /**
+   * Dados da solicitação criada
+   */
+  data: IRequest;
+
+  /**
+   * Mensagem de sucesso
+   */
+  message: string;
 }
