@@ -21,6 +21,8 @@
           "feat-003"
         ],
         "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
         "tags": [
           "validation",
           "utils"
