@@ -6,116 +6,106 @@
     "dataGeracao": "2025-10-23"
   },
   "grupo": {
-    "id": "grupo-20",
-    "nome": "Frontend - Dashboard Aluno",
-    "descricao": "Dashboard e páginas para estudantes",
+    "id": "grupo-21",
+    "nome": "Frontend - Dashboard Professor",
+    "descricao": "Dashboard e páginas para professores",
     "prioridade": "alta",
     "features": [
       {
-        "id": "feat-089",
-        "titulo": "Criar página Dashboard Aluno",
-        "descricao": "Implementar pages/student/Dashboard.tsx com resumo de notas, documentos pendentes, próximas avaliações",
-        "estimativa": "2h30min",
+        "id": "feat-094",
+        "titulo": "Criar página Dashboard Professor",
+        "descricao": "Implementar pages/teacher/Dashboard.tsx com listagem de turmas do professor, próximas avaliações",
+        "estimativa": "2h",
         "prioridade": "alta",
         "dependencias": [
           "feat-073",
           "feat-074"
         ],
-        "status": "Concluída",
-        "dataInicio": "2025-11-04",
-        "dataConclusao": "2025-11-04",
+        "status": "Não Iniciada",
         "tags": [
-          "student",
+          "teacher",
           "page",
           "dashboard"
         ],
         "artefatos": [
-          "frontend/src/pages/student/Dashboard.tsx"
+          "frontend/src/pages/teacher/Dashboard.tsx"
         ]
       },
       {
-        "id": "feat-090",
-        "titulo": "Criar grade.service.ts",
-        "descricao": "Implementar services/grade.service.ts com funções: getMyGrades (aluno), getGradesByEvaluation (professor), createGrade, updateGrade",
+        "id": "feat-095",
+        "titulo": "Criar página Classes (professor)",
+        "descricao": "Implementar pages/teacher/Classes.tsx com listagem de turmas do professor, link para ver alunos e lançar notas",
+        "estimativa": "2h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-086"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "teacher",
+          "page",
+          "class"
+        ],
+        "artefatos": [
+          "frontend/src/pages/teacher/Classes.tsx"
+        ]
+      },
+      {
+        "id": "feat-096",
+        "titulo": "Criar página Students (professor - visualização)",
+        "descricao": "Implementar pages/teacher/Students.tsx mostrando alunos da turma selecionada (read-only)",
+        "estimativa": "1h30min",
+        "prioridade": "media",
+        "dependencias": [
+          "feat-086"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "teacher",
+          "page",
+          "student"
+        ],
+        "artefatos": [
+          "frontend/src/pages/teacher/Students.tsx"
+        ]
+      },
+      {
+        "id": "feat-097",
+        "titulo": "Criar evaluation.service.ts",
+        "descricao": "Implementar services/evaluation.service.ts com funções: create, getByClass, update, delete",
         "estimativa": "1h",
         "prioridade": "alta",
         "dependencias": [
           "feat-075"
         ],
-        "status": "Concluída",
-        "dataInicio": "2025-11-04",
-        "dataConclusao": "2025-11-04",
+        "status": "Não Iniciada",
         "tags": [
-          "grade",
+          "evaluation",
           "service"
         ],
         "artefatos": [
-          "frontend/src/services/grade.service.ts"
+          "frontend/src/services/evaluation.service.ts"
         ]
       },
       {
-        "id": "feat-091",
-        "titulo": "Criar página Grades (aluno)",
-        "descricao": "Implementar pages/student/Grades.tsx mostrando todas as notas do aluno agrupadas por disciplina/semestre",
-        "estimativa": "2h30min",
+        "id": "feat-098",
+        "titulo": "Criar página Grades (professor - lançamento)",
+        "descricao": "Implementar pages/teacher/Grades.tsx com criação de avaliações, lançamento de notas (individual ou em lote)",
+        "estimativa": "4h",
         "prioridade": "alta",
         "dependencias": [
+          "feat-097",
           "feat-090",
           "feat-069"
         ],
-        "status": "Concluída",
-        "dataInicio": "2025-11-04",
-        "dataConclusao": "2025-11-04",
+        "status": "Não Iniciada",
         "tags": [
-          "student",
+          "teacher",
           "page",
           "grade"
         ],
         "artefatos": [
-          "frontend/src/pages/student/Grades.tsx"
-        ]
-      },
-      {
-        "id": "feat-092",
-        "titulo": "Criar página Documents (aluno)",
-        "descricao": "Implementar pages/student/Documents.tsx com upload de documentos, listagem de enviados (status: pendente/aprovado/rejeitado)",
-        "estimativa": "3h",
-        "prioridade": "alta",
-        "dependencias": [
-          "feat-087",
-          "feat-070"
-        ],
-        "status": "Concluída",
-        "dataInicio": "2025-11-04",
-        "dataConclusao": "2025-11-04",
-        "tags": [
-          "student",
-          "page",
-          "document"
-        ],
-        "artefatos": [
-          "frontend/src/pages/student/Documents.tsx"
-        ]
-      },
-      {
-        "id": "feat-093",
-        "titulo": "Criar página Requests (aluno)",
-        "descricao": "Implementar pages/student/Requests.tsx com formulário para criar solicitação, listagem de solicitações enviadas",
-        "estimativa": "2h30min",
-        "prioridade": "media",
-        "dependencias": [
-          "feat-088"
-        ],
-        "status": "Concluída",
-        "dataInicio": "2025-11-04",
-        "dataConclusao": "2025-11-04",
-        "tags": [
-          "student",
-          "page",
-          "request"
-        ],
-        "artefatos": [
-          "frontend/src/pages/student/Requests.tsx"
+          "frontend/src/pages/teacher/Grades.tsx"
         ]
       }
     ]
