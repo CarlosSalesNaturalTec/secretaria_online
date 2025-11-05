@@ -15,10 +15,13 @@ import {
   useQuery,
   useMutation,
   useQueryClient,
+} from '@tanstack/react-query';
+import type {
   UseQueryResult,
   UseMutationResult,
 } from '@tanstack/react-query';
-import TeacherService, {
+import TeacherService from '@/services/teacher.service';
+import type {
   ICreateTeacherData,
   IUpdateTeacherData,
 } from '@/services/teacher.service';
