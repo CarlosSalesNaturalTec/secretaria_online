@@ -6,57 +6,82 @@
     "dataGeracao": "2025-10-23"
   },
   "grupo": {
-    "id": "grupo-24",
-    "nome": "Testes e Qualidade",
-    "descricao": "Configuração de testes e validações de qualidade",
-    "prioridade": "baixa",
+    "id": "grupo-25",
+    "nome": "Deploy e Documentação",
+    "descricao": "Configuração de deploy, scripts e documentação final",
+    "prioridade": "media",
     "features": [
       {
-        "id": "feat-105",
-        "titulo": "Configurar Jest e React Testing Library",
-        "descricao": "Instalar jest, @testing-library/react, configurar para TypeScript, criar setup de testes",
-        "estimativa": "1h30min",
-        "prioridade": "baixa",
+        "id": "feat-107",
+        "titulo": "Criar scripts de build e deploy",
+        "descricao": "Criar scripts em package.json: frontend (npm run build), backend (npm run start:prod). Criar deploy.sh para upload via SSH",
+        "estimativa": "2h",
+        "prioridade": "media",
         "dependencias": [
+          "feat-002",
           "feat-003"
         ],
-        "status": "Concluída",
-        "dataConclusao": "2025-11-04",
+        "status": "Não Iniciada",
         "tags": [
-          "test",
-          "setup"
+          "deploy",
+          "scripts"
         ],
         "artefatos": [
-          "frontend/jest.config.js",
-          "frontend/src/setupTests.ts",
-          "frontend/src/__tests__/setup.test.ts",
-          "frontend/src/jest.d.ts"
+          "deploy.sh",
+          "scripts em package.json"
         ]
       },
       {
-        "id": "feat-106",
-        "titulo": "Escrever testes para componentes UI",
-        "descricao": "Criar testes unitários para Button, Input, Modal, Table verificando renderização e interações",
+        "id": "feat-108",
+        "titulo": "Configurar PM2 para produção",
+        "descricao": "Instalar pm2, criar ecosystem.config.js para gerenciar processo Node.js em produção",
+        "estimativa": "1h",
+        "prioridade": "media",
+        "dependencias": [
+          "feat-002"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "deploy",
+          "production"
+        ],
+        "artefatos": [
+          "backend/ecosystem.config.js"
+        ]
+      },
+      {
+        "id": "feat-109",
+        "titulo": "Documentar API com Swagger ou arquivo Markdown",
+        "descricao": "Criar docs/api-documentation.md documentando todos os endpoints, payloads, responses e códigos de erro",
         "estimativa": "3h",
         "prioridade": "baixa",
         "dependencias": [
-          "feat-105",
-          "feat-066",
-          "feat-067",
-          "feat-068",
-          "feat-069"
+          "feat-064"
         ],
-        "status": "Concluída",
-        "dataConclusao": "2025-11-04",
+        "status": "Não Iniciada",
         "tags": [
-          "test",
-          "ui"
+          "documentation",
+          "api"
         ],
         "artefatos": [
-          "frontend/src/components/ui/__tests__/Button.test.tsx",
-          "frontend/src/components/ui/__tests__/Input.test.tsx",
-          "frontend/src/components/ui/__tests__/Modal.test.tsx",
-          "frontend/src/components/ui/__tests__/Table.test.tsx"
+          "docs/api-documentation.md"
+        ]
+      },
+      {
+        "id": "feat-110",
+        "titulo": "Criar documentação de setup e instalação",
+        "descricao": "Atualizar README.md com instruções de instalação local, variáveis de ambiente, comandos de build e deploy",
+        "estimativa": "2h",
+        "prioridade": "baixa",
+        "dependencias": [
+          "feat-001"
+        ],
+        "status": "Não Iniciada",
+        "tags": [
+          "documentation"
+        ],
+        "artefatos": [
+          "README.md atualizado"
         ]
       }
     ]
