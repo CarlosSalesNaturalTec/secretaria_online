@@ -40,6 +40,8 @@ const StudentDashboard = lazy(() => import('./pages/student/Dashboard'));
  * Páginas de Professor (Lazy Loading)
  */
 const TeacherDashboard = lazy(() => import('./pages/teacher/Dashboard'));
+const TeacherClasses = lazy(() => import('./pages/teacher/Classes'));
+const TeacherStudents = lazy(() => import('./pages/teacher/Students'));
 
 // ============================================================================
 // LOADING FALLBACK
@@ -127,11 +129,25 @@ const privateRoutes: RouteObject[] = [
           </Suspense>
         ),
       },
+      {
+        path: 'classes',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <TeacherClasses />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'classes/:classId/students',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <TeacherStudents />
+          </Suspense>
+        ),
+      },
       /**
        * TODO: Adicionar rotas filhas do professor
-       * - /teacher/classes
-       * - /teacher/students
-       * - /teacher/grades
+       * - /teacher/classes/:classId/grades
        */
     ],
   },
