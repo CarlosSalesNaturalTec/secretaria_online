@@ -69,15 +69,25 @@ export async function getUserById(id: number): Promise<IUser> {
  * Cria um novo usuário
  */
 export async function createUser(userData: ICreateUser): Promise<IUser> {
-  const response = await api.post<ApiResponse<IUser>>('/users', userData);
+  try {
+    const response = await api.post<ApiResponse<IUser>>('/users', userData);
 
-  if (!response.data.success || !response.data.data) {
-    throw new Error(
-      response.data.error?.message || 'Erro ao criar usuário'
-    );
+    if (!response.data.success || !response.data.data) {
+      throw new Error(
+        response.data.error?.message || 'Erro ao criar usuário'
+      );
+    }
+
+    return response.data.data;
+  } catch (error: any) {
+    // Extrai mensagem de erro mais específica
+    const errorMessage = error.response?.data?.error?.message
+      || error.response?.data?.message
+      || error.message
+      || 'Erro ao criar usuário';
+
+    throw new Error(errorMessage);
   }
-
-  return response.data.data;
 }
 
 /**
@@ -87,30 +97,50 @@ export async function updateUser(
   id: number,
   userData: IUpdateUser
 ): Promise<IUser> {
-  const response = await api.put<ApiResponse<IUser>>(
-    `/users/${id}`,
-    userData
-  );
-
-  if (!response.data.success || !response.data.data) {
-    throw new Error(
-      response.data.error?.message || 'Erro ao atualizar usuário'
+  try {
+    const response = await api.put<ApiResponse<IUser>>(
+      `/users/${id}`,
+      userData
     );
-  }
 
-  return response.data.data;
+    if (!response.data.success || !response.data.data) {
+      throw new Error(
+        response.data.error?.message || 'Erro ao atualizar usuário'
+      );
+    }
+
+    return response.data.data;
+  } catch (error: any) {
+    // Extrai mensagem de erro mais específica
+    const errorMessage = error.response?.data?.error?.message
+      || error.response?.data?.message
+      || error.message
+      || 'Erro ao atualizar usuário';
+
+    throw new Error(errorMessage);
+  }
 }
 
 /**
  * Deleta um usuário (soft delete)
  */
 export async function deleteUser(id: number): Promise<void> {
-  const response = await api.delete<ApiResponse<void>>(`/users/${id}`);
+  try {
+    const response = await api.delete<ApiResponse<void>>(`/users/${id}`);
 
-  if (!response.data.success) {
-    throw new Error(
-      response.data.error?.message || 'Erro ao deletar usuário'
-    );
+    if (!response.data.success) {
+      throw new Error(
+        response.data.error?.message || 'Erro ao deletar usuário'
+      );
+    }
+  } catch (error: any) {
+    // Extrai mensagem de erro mais específica
+    const errorMessage = error.response?.data?.error?.message
+      || error.response?.data?.message
+      || error.message
+      || 'Erro ao deletar usuário';
+
+    throw new Error(errorMessage);
   }
 }
 

@@ -162,6 +162,12 @@ api.interceptors.response.use(
         break;
       }
 
+      case 409: {
+        // Conflict - Conflito (ex: CPF ou email já cadastrado)
+        console.error('[API] 409 Conflict:', errorMessage);
+        break;
+      }
+
       case 422: {
         // Unprocessable Entity - Validação de negócio falhou
         console.error('[API] 422 Validation Error:', errorMessage);
