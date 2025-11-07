@@ -11,7 +11,7 @@ class DisciplineController {
   async create(req, res, next) {
     try {
       const discipline = await DisciplineService.create(req.body);
-      res.status(201).json(discipline);
+      res.status(201).json({ success: true, data: discipline });
     } catch (error) {
       next(error);
     }
@@ -20,7 +20,7 @@ class DisciplineController {
   async list(req, res, next) {
     try {
       const disciplines = await DisciplineService.list();
-      res.status(200).json(disciplines);
+      res.status(200).json({ success: true, data: disciplines });
     } catch (error) {
       next(error);
     }
@@ -30,9 +30,12 @@ class DisciplineController {
     try {
       const discipline = await DisciplineService.getById(req.params.id);
       if (!discipline) {
-        return res.status(404).json({ message: 'Disciplina não encontrado' });
+        return res.status(404).json({
+          success: false,
+          error: { code: 'NOT_FOUND', message: 'Disciplina não encontrada' },
+        });
       }
-      res.status(200).json(discipline);
+      res.status(200).json({ success: true, data: discipline });
     } catch (error) {
       next(error);
     }
@@ -42,9 +45,12 @@ class DisciplineController {
     try {
       const discipline = await DisciplineService.update(req.params.id, req.body);
       if (!discipline) {
-        return res.status(404).json({ message: 'Disciplina não encontrada' });
+        return res.status(404).json({
+          success: false,
+          error: { code: 'NOT_FOUND', message: 'Disciplina não encontrada' },
+        });
       }
-      res.status(200).json(discipline);
+      res.status(200).json({ success: true, data: discipline });
     } catch (error) {
       next(error);
     }
@@ -54,7 +60,10 @@ class DisciplineController {
     try {
       const result = await DisciplineService.delete(req.params.id);
       if (!result) {
-        return res.status(404).json({ message: 'Disciplina não encontrado' });
+        return res.status(404).json({
+          success: false,
+          error: { code: 'NOT_FOUND', message: 'Disciplina não encontrada' },
+        });
       }
       res.status(204).send();
     } catch (error) {

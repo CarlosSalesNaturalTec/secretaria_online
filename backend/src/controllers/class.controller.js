@@ -11,7 +11,7 @@ class ClassController {
   async create(req, res, next) {
     try {
       const turma = await ClassService.create(req.body);
-      res.status(201).json(turma);
+      res.status(201).json({ success: true, data: turma });
     } catch (error) {
       next(error);
     }
@@ -20,7 +20,7 @@ class ClassController {
   async list(req, res, next) {
     try {
       const classs = await ClassService.list();
-      res.status(200).json(classs);
+      res.status(200).json({ success: true, data: classs });
     } catch (error) {
       next(error);
     }
@@ -30,9 +30,12 @@ class ClassController {
     try {
       const turma = await ClassService.getById(req.params.id);
       if (!turma) {
-        return res.status(404).json({ message: 'Turma não encontrada' });
+        return res.status(404).json({
+          success: false,
+          error: { code: 'NOT_FOUND', message: 'Turma não encontrada' },
+        });
       }
-      res.status(200).json(turma);
+      res.status(200).json({ success: true, data: turma });
     } catch (error) {
       next(error);
     }
@@ -42,9 +45,12 @@ class ClassController {
     try {
       const turma = await ClassService.update(req.params.id, req.body);
       if (!turma) {
-        return res.status(404).json({ message: 'Turma não encontrada' });
+        return res.status(404).json({
+          success: false,
+          error: { code: 'NOT_FOUND', message: 'Turma não encontrada' },
+        });
       }
-      res.status(200).json(turma);
+      res.status(200).json({ success: true, data: turma });
     } catch (error) {
       next(error);
     }
@@ -54,7 +60,10 @@ class ClassController {
     try {
       const result = await ClassService.delete(req.params.id);
       if (!result) {
-        return res.status(404).json({ message: 'Turma não encontrado' });
+        return res.status(404).json({
+          success: false,
+          error: { code: 'NOT_FOUND', message: 'Turma não encontrada' },
+        });
       }
       res.status(204).send();
     } catch (error) {
@@ -66,7 +75,7 @@ class ClassController {
     try {
       const { id, teacherId, disciplineId } = req.params;
       const association = await ClassService.addTeacherToClass(id, teacherId, disciplineId);
-      res.status(201).json(association);
+      res.status(201).json({ success: true, data: association });
     } catch (error) {
       next(error);
     }
@@ -77,7 +86,10 @@ class ClassController {
       const { id, teacherId, disciplineId } = req.params;
       const result = await ClassService.removeTeacherFromClass(id, teacherId, disciplineId);
       if (!result) {
-        return res.status(404).json({ message: 'Associação não encontrada' });
+        return res.status(404).json({
+          success: false,
+          error: { code: 'NOT_FOUND', message: 'Associação não encontrada' },
+        });
       }
       res.status(204).send();
     } catch (error) {
@@ -89,7 +101,7 @@ class ClassController {
     try {
       const { id, studentId } = req.params;
       const association = await ClassService.addStudentToClass(id, studentId);
-      res.status(201).json(association);
+      res.status(201).json({ success: true, data: association });
     } catch (error) {
       next(error);
     }
@@ -100,7 +112,10 @@ class ClassController {
       const { id, studentId } = req.params;
       const result = await ClassService.removeStudentFromClass(id, studentId);
       if (!result) {
-        return res.status(404).json({ message: 'Associação não encontrada' });
+        return res.status(404).json({
+          success: false,
+          error: { code: 'NOT_FOUND', message: 'Associação não encontrada' },
+        });
       }
       res.status(204).send();
     } catch (error) {
@@ -112,7 +127,7 @@ class ClassController {
     try {
       const { id } = req.params;
       const students = await ClassService.getStudentsByClass(id);
-      res.status(200).json(students);
+      res.status(200).json({ success: true, data: students });
     } catch (error) {
       next(error);
     }
@@ -122,7 +137,7 @@ class ClassController {
     try {
       const { id } = req.params;
       const data = await ClassService.getTeachersByClass(id);
-      res.status(200).json(data);
+      res.status(200).json({ success: true, data: data });
     } catch (error) {
       next(error);
     }

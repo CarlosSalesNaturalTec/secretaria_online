@@ -11,7 +11,7 @@ class CourseController {
   async create(req, res, next) {
     try {
       const course = await CourseService.create(req.body);
-      res.status(201).json(course);
+      res.status(201).json({ success: true, data: course });
     } catch (error) {
       next(error);
     }
@@ -20,7 +20,7 @@ class CourseController {
   async list(req, res, next) {
     try {
       const courses = await CourseService.list();
-      res.status(200).json(courses);
+      res.status(200).json({ success: true, data: courses });
     } catch (error) {
       next(error);
     }
@@ -30,9 +30,12 @@ class CourseController {
     try {
       const course = await CourseService.getById(req.params.id);
       if (!course) {
-        return res.status(404).json({ message: 'Curso não encontrado' });
+        return res.status(404).json({
+          success: false,
+          error: { code: 'NOT_FOUND', message: 'Curso não encontrado' },
+        });
       }
-      res.status(200).json(course);
+      res.status(200).json({ success: true, data: course });
     } catch (error) {
       next(error);
     }
@@ -42,9 +45,12 @@ class CourseController {
     try {
       const course = await CourseService.update(req.params.id, req.body);
       if (!course) {
-        return res.status(404).json({ message: 'Curso não encontrado' });
+        return res.status(404).json({
+          success: false,
+          error: { code: 'NOT_FOUND', message: 'Curso não encontrado' },
+        });
       }
-      res.status(200).json(course);
+      res.status(200).json({ success: true, data: course });
     } catch (error) {
       next(error);
     }
@@ -54,7 +60,10 @@ class CourseController {
     try {
       const result = await CourseService.delete(req.params.id);
       if (!result) {
-        return res.status(404).json({ message: 'Curso não encontrado' });
+        return res.status(404).json({
+          success: false,
+          error: { code: 'NOT_FOUND', message: 'Curso não encontrado' },
+        });
       }
       res.status(204).send();
     } catch (error) {
@@ -67,7 +76,7 @@ class CourseController {
       const { id } = req.params;
       const { disciplineId, semester } = req.body;
       const association = await CourseService.addDisciplineToCourse(id, disciplineId, semester);
-      res.status(201).json(association);
+      res.status(201).json({ success: true, data: association });
     } catch (error) {
       next(error);
     }
@@ -78,7 +87,10 @@ class CourseController {
       const { id, disciplineId } = req.params;
       const result = await CourseService.removeDisciplineFromCourse(id, disciplineId);
       if (!result) {
-        return res.status(404).json({ message: 'Associação não encontrada' });
+        return res.status(404).json({
+          success: false,
+          error: { code: 'NOT_FOUND', message: 'Associação não encontrada' },
+        });
       }
       res.status(204).send();
     } catch (error) {
