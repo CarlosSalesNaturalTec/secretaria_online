@@ -6,7 +6,7 @@
  */
 
 import { type ReactNode, useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { useAuth } from '@/hooks/useAuth';
@@ -50,7 +50,8 @@ interface DashboardLayoutProps {
  */
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   /**
    * Alterna o estado de abertura/fechamento da sidebar
@@ -77,8 +78,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   const handleLogout = () => {
-    // Será implementado posteriormente na feat de logout
-    console.log('[DashboardLayout] Logout');
+    console.log('[DashboardLayout] Realizando logout...');
+    logout();
+    navigate('/login', { replace: true });
   };
 
   // Renderização segura com valores padrão
