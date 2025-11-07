@@ -11,7 +11,7 @@ class TeacherController {
   async create(req, res, next) {
     try {
       const teacher = await TeacherService.create(req.body);
-      res.status(201).json(teacher);
+      res.status(201).json({ success: true, data: teacher });
     } catch (error) {
       next(error);
     }
@@ -20,7 +20,7 @@ class TeacherController {
   async list(req, res, next) {
     try {
       const teachers = await TeacherService.list();
-      res.status(200).json(teachers);
+      res.status(200).json({ success: true, data: teachers });
     } catch (error) {
       next(error);
     }
@@ -30,9 +30,12 @@ class TeacherController {
     try {
       const teacher = await TeacherService.getById(req.params.id);
       if (!teacher) {
-        return res.status(404).json({ message: 'Professor não encontrado' });
+        return res.status(404).json({
+          success: false,
+          error: { code: 'NOT_FOUND', message: 'Professor não encontrado' },
+        });
       }
-      res.status(200).json(teacher);
+      res.status(200).json({ success: true, data: teacher });
     } catch (error) {
       next(error);
     }
@@ -42,9 +45,12 @@ class TeacherController {
     try {
       const teacher = await TeacherService.update(req.params.id, req.body);
       if (!teacher) {
-        return res.status(404).json({ message: 'Professor não encontrado' });
+        return res.status(404).json({
+          success: false,
+          error: { code: 'NOT_FOUND', message: 'Professor não encontrado' },
+        });
       }
-      res.status(200).json(teacher);
+      res.status(200).json({ success: true, data: teacher });
     } catch (error) {
       next(error);
     }
@@ -54,7 +60,10 @@ class TeacherController {
     try {
       const result = await TeacherService.delete(req.params.id);
       if (!result) {
-        return res.status(404).json({ message: 'Professor não encontrado' });
+        return res.status(404).json({
+          success: false,
+          error: { code: 'NOT_FOUND', message: 'Professor não encontrado' },
+        });
       }
       res.status(204).send();
     } catch (error) {
