@@ -10,6 +10,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Edit, Trash2, UserPlus, X } from 'lucide-react';
 import UserService, { type IUserFilters } from '@/services/user.service';
 import type { IUser, ICreateUser, IUpdateUser } from '@/types/user.types';
+import { maskCPF, formatCPF } from '@/utils/formatters';
 
 // Modal de Criação de Usuário
 interface CreateUserModalProps {
@@ -30,12 +31,15 @@ function CreateUserModal({ onClose, onSubmit, isLoading }: CreateUserModalProps)
   });
 
   // Atualiza senha automaticamente quando CPF muda
-  const handleCpfChange = (cpf: string) => {
-    const cpfOnlyNumbers = cpf.replace(/\D/g, '');
+  const handleCpfChange = (value: string) => {
+    // Aplica máscara de CPF
+    const maskedCpf = maskCPF(value);
+    const cpfOnlyNumbers = maskedCpf.replace(/\D/g, '');
+
     // Gera senha no formato: @Cpf + números do CPF
     // Exemplo: @Cpf61254037500 (atende requisitos: maiúscula, minúscula, número, especial)
     const password = cpfOnlyNumbers ? `@Cpf${cpfOnlyNumbers}` : '';
-    setFormData({ ...formData, cpf, password });
+    setFormData({ ...formData, cpf: maskedCpf, password });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -121,6 +125,7 @@ function CreateUserModal({ onClose, onSubmit, isLoading }: CreateUserModalProps)
                 value={formData.cpf}
                 onChange={(e) => handleCpfChange(e.target.value)}
                 placeholder="000.000.000-00"
+                maxLength={14}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 disabled={isLoading}
               />
@@ -180,9 +185,15 @@ function EditUserModal({ user, onClose, onSubmit, isLoading }: EditUserModalProp
     email: user.email,
     login: user.login,
     role: user.role,
-    cpf: user.cpf,
+    cpf: maskCPF(user.cpf), // Aplica máscara ao carregar
     rg: user.rg || '',
   });
+
+  // Atualiza CPF com máscara
+  const handleCpfChange = (value: string) => {
+    const maskedCpf = maskCPF(value);
+    setFormData({ ...formData, cpf: maskedCpf });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -255,21 +266,6 @@ function EditUserModal({ user, onClose, onSubmit, isLoading }: EditUserModalProp
             </div>
           </div>
 
-          {/* Senha */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Senha Provisória *
-            </label>
-            <input
-              type="password"
-              required
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              disabled={isLoading}
-            />
-          </div>
-
           {/* CPF e RG */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -280,8 +276,9 @@ function EditUserModal({ user, onClose, onSubmit, isLoading }: EditUserModalProp
                 type="text"
                 required
                 value={formData.cpf}
-                onChange={(e) => setFormData({ ...formData, cpf: e.target.value })}
+                onChange={(e) => handleCpfChange(e.target.value)}
                 placeholder="000.000.000-00"
+                maxLength={14}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 disabled={isLoading}
               />
@@ -566,7 +563,7 @@ export default function AdminUsers() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{user.cpf}</div>
+                      <div className="text-sm text-gray-500">{formatCPF(user.cpf)}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button

@@ -119,6 +119,37 @@ export function unformatCPF(cpf: string): string {
 }
 
 /**
+ * Aplica máscara de CPF enquanto o usuário digita
+ * Aceita entrada parcial e formata progressivamente
+ *
+ * @param {string} value - Valor digitado pelo usuário
+ * @returns {string} Valor com máscara aplicada
+ *
+ * @example
+ * maskCPF('123') // retorna '123'
+ * maskCPF('12345') // retorna '123.45'
+ * maskCPF('12345678901') // retorna '123.456.789-01'
+ */
+export function maskCPF(value: string): string {
+  // Remove tudo que não é dígito
+  const cleanValue = value.replace(/\D/g, '');
+
+  // Limita a 11 dígitos
+  const limitedValue = cleanValue.slice(0, 11);
+
+  // Aplica máscara progressivamente
+  if (limitedValue.length <= 3) {
+    return limitedValue;
+  } else if (limitedValue.length <= 6) {
+    return limitedValue.replace(/(\d{3})(\d{0,3})/, '$1.$2');
+  } else if (limitedValue.length <= 9) {
+    return limitedValue.replace(/(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3');
+  } else {
+    return limitedValue.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+  }
+}
+
+/**
  * Remove formatação de telefone, retornando apenas dígitos
  *
  * @param {string} phone - Telefone formatado

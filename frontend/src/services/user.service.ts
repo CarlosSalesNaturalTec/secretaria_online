@@ -30,9 +30,6 @@ export async function getUsers(
     { params: filters }
   );
 
-  console.log('Response completa:', response);
-  console.log('Response.data:', response.data);
-
   if (!response.data.success) {
     throw new Error('Erro ao buscar usuários');
   }
