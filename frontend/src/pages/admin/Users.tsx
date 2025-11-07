@@ -11,6 +11,8 @@ import { Plus, Search, Edit, Trash2, UserPlus, X } from 'lucide-react';
 import UserService, { type IUserFilters } from '@/services/user.service';
 import type { IUser, ICreateUser, IUpdateUser } from '@/types/user.types';
 import { maskCPF, formatCPF } from '@/utils/formatters';
+import Toast, { type ToastType } from '@/components/ui/Toast';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 // Modal de Criação de Usuário
 interface CreateUserModalProps {
@@ -346,6 +348,14 @@ export default function AdminUsers() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: ToastType;
+  } | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<{
+    userId: number;
+    userName: string;
+  } | null>(null);
 
   // Query para buscar usuários
   const { data, isLoading, error } = useQuery({
@@ -359,10 +369,16 @@ export default function AdminUsers() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       setShowCreateModal(false);
-      alert('Usuário criado com sucesso!');
+      setToast({
+        message: 'Usuário criado com sucesso!',
+        type: 'success',
+      });
     },
     onError: (error: Error) => {
-      alert(`Erro ao criar usuário: ${error.message}`);
+      setToast({
+        message: error.message || 'Erro ao criar usuário',
+        type: 'error',
+      });
     },
   });
 
@@ -374,10 +390,16 @@ export default function AdminUsers() {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       setShowEditModal(false);
       setSelectedUser(null);
-      alert('Usuário atualizado com sucesso!');
+      setToast({
+        message: 'Usuário atualizado com sucesso!',
+        type: 'success',
+      });
     },
     onError: (error: Error) => {
-      alert(`Erro ao atualizar usuário: ${error.message}`);
+      setToast({
+        message: error.message || 'Erro ao atualizar usuário',
+        type: 'error',
+      });
     },
   });
 
@@ -386,10 +408,16 @@ export default function AdminUsers() {
     mutationFn: UserService.deleteUser,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
-      alert('Usuário deletado com sucesso!');
+      setToast({
+        message: 'Usuário deletado com sucesso!',
+        type: 'success',
+      });
     },
     onError: (error: Error) => {
-      alert(`Erro ao deletar usuário: ${error.message}`);
+      setToast({
+        message: error.message || 'Erro ao deletar usuário',
+        type: 'error',
+      });
     },
   });
 
@@ -401,9 +429,17 @@ export default function AdminUsers() {
     setFilters({ ...filters, role, page: 1 });
   };
 
-  const handleDelete = (userId: number) => {
-    if (confirm('Tem certeza que deseja deletar este usuário?')) {
-      deleteMutation.mutate(userId);
+  const handleDelete = (user: IUser) => {
+    setConfirmDelete({
+      userId: user.id,
+      userName: user.name,
+    });
+  };
+
+  const confirmDeleteUser = () => {
+    if (confirmDelete) {
+      deleteMutation.mutate(confirmDelete.userId);
+      setConfirmDelete(null);
     }
   };
 
@@ -573,8 +609,9 @@ export default function AdminUsers() {
                         <Edit className="h-5 w-5" />
                       </button>
                       <button
-                        onClick={() => handleDelete(user.id)}
+                        onClick={() => handleDelete(user)}
                         className="text-red-600 hover:text-red-900"
+                        title="Deletar usuário"
                       >
                         <Trash2 className="h-5 w-5" />
                       </button>
@@ -678,6 +715,29 @@ export default function AdminUsers() {
           }}
           onSubmit={(data) => updateMutation.mutate({ id: selectedUser.id, data })}
           isLoading={updateMutation.isPending}
+        />
+      )}
+
+      {/* Modal de Confirmação de Exclusão */}
+      {confirmDelete && (
+        <ConfirmModal
+          title="Confirmar Exclusão"
+          message={`Tem certeza que deseja deletar o usuário "${confirmDelete.userName}"? Esta ação não pode ser desfeita.`}
+          confirmText="Deletar"
+          cancelText="Cancelar"
+          type="danger"
+          onConfirm={confirmDeleteUser}
+          onCancel={() => setConfirmDelete(null)}
+          isLoading={deleteMutation.isPending}
+        />
+      )}
+
+      {/* Toast de Notificação */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
         />
       )}
     </div>
