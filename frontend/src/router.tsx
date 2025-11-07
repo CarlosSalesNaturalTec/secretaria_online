@@ -23,7 +23,7 @@ import Login from './pages/auth/Login';
 /**
  * Layouts
  */
-// import DashboardLayout from './components/layout/DashboardLayout';
+import DashboardLayout from './components/layout/DashboardLayout';
 
 /**
  * Páginas Administrativas (Lazy Loading)
@@ -92,7 +92,7 @@ const publicRoutes: RouteObject[] = [
 const privateRoutes: RouteObject[] = [
   {
     path: '/admin',
-    element: <PrivateRoute requiredRole="admin"><div>Admin Layout (to be implemented)</div></PrivateRoute>,
+    element: <PrivateRoute requiredRole="admin"><DashboardLayout /></PrivateRoute>,
     errorElement: <div>Erro ao carregar área administrativa</div>,
     children: [
       {
@@ -118,7 +118,7 @@ const privateRoutes: RouteObject[] = [
   },
   {
     path: '/teacher',
-    element: <PrivateRoute requiredRole="teacher"><div>Teacher Layout (to be implemented)</div></PrivateRoute>,
+    element: <PrivateRoute requiredRole="teacher"><DashboardLayout /></PrivateRoute>,
     errorElement: <div>Erro ao carregar área do professor</div>,
     children: [
       {
@@ -153,7 +153,7 @@ const privateRoutes: RouteObject[] = [
   },
   {
     path: '/student',
-    element: <PrivateRoute requiredRole="student"><div>Student Layout (to be implemented)</div></PrivateRoute>,
+    element: <PrivateRoute requiredRole="student"><DashboardLayout /></PrivateRoute>,
     errorElement: <div>Erro ao carregar área do aluno</div>,
     children: [
       {
