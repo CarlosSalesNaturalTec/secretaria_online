@@ -57,17 +57,13 @@ export async function login(credentials: ILoginCredentials): Promise<IAuthUser> 
     }
 
     // Chamada à API
-    const response = await api.post<ApiResponse<IAuthUser>>('/auth/login', {
+    const response = await api.post<IAuthUser>('/auth/login', {
       login: credentials.login.trim(),
       password: credentials.password,
     });
 
-    // Validação da resposta
-    if (!response.data.success || !response.data.data) {
-      throw new Error(response.data.error?.message || 'Erro ao realizar login');
-    }
-
-    const { user, token } = response.data.data;
+    // A resposta já vem direto com user e token
+    const { user, token } = response.data;
 
     // Validação dos dados retornados
     if (!user || !token) {

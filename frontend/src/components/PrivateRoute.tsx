@@ -34,7 +34,7 @@ export function PrivateRoute({ children, requiredRole }: PrivateRouteProps) {
   const location = useLocation();
 
   // Obter token JWT do localStorage
-  const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem('token');
 
   // Se não houver token, redirecionar para login
   if (!token) {
