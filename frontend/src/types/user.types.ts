@@ -46,30 +46,30 @@ export interface IUser {
 
   /** Nome da mãe */
   motherName?: string;
+  mother_name?: string;
 
   /** Nome do pai */
   fatherName?: string;
+  father_name?: string;
 
   /** Endereço completo */
   address?: string;
 
-  /** Título/cargo */
-  title?: string;
-
-  /** Indicador se é reservista */
-  reservist?: string;
-
   /** Data do primeiro acesso (null se nunca acessou) */
   firstAccessAt?: string;
+  first_access_at?: string;
 
   /** Data de criação */
-  createdAt: string;
+  createdAt?: string;
+  created_at?: string;
 
   /** Data da última atualização */
-  updatedAt: string;
+  updatedAt?: string;
+  updated_at?: string;
 
   /** Data de exclusão lógica (soft delete) */
   deletedAt?: string | null;
+  deleted_at?: string | null;
 }
 
 /**
@@ -203,8 +203,6 @@ export interface ICreateUser {
   motherName?: string;
   fatherName?: string;
   address?: string;
-  title?: string;
-  reservist?: string;
 }
 
 /**
@@ -221,8 +219,6 @@ export interface IUpdateUser {
   motherName?: string;
   fatherName?: string;
   address?: string;
-  title?: string;
-  reservist?: string;
 }
 
 /**

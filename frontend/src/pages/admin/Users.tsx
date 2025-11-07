@@ -7,9 +7,336 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, Edit, Trash2, UserPlus } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, UserPlus, X } from 'lucide-react';
 import UserService, { type IUserFilters } from '@/services/user.service';
 import type { IUser, ICreateUser, IUpdateUser } from '@/types/user.types';
+
+// Modal de Criação de Usuário
+interface CreateUserModalProps {
+  onClose: () => void;
+  onSubmit: (data: ICreateUser) => void;
+  isLoading: boolean;
+}
+
+function CreateUserModal({ onClose, onSubmit, isLoading }: CreateUserModalProps) {
+  const [formData, setFormData] = useState<ICreateUser>({
+    name: '',
+    email: '',
+    login: '',
+    password: '',
+    role: 'admin',
+    cpf: '',
+    rg: '',
+  });
+
+  // Atualiza senha automaticamente quando CPF muda
+  const handleCpfChange = (cpf: string) => {
+    const cpfOnlyNumbers = cpf.replace(/\D/g, '');
+    // Gera senha no formato: @Cpf + números do CPF
+    // Exemplo: @Cpf61254037500 (atende requisitos: maiúscula, minúscula, número, especial)
+    const password = cpfOnlyNumbers ? `@Cpf${cpfOnlyNumbers}` : '';
+    setFormData({ ...formData, cpf, password });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Remove formatação do CPF e RG antes de enviar
+    const dataToSubmit = {
+      ...formData,
+      cpf: formData.cpf.replace(/\D/g, ''),
+      rg: formData.rg?.replace(/\D/g, '') || '',
+    };
+    onSubmit(dataToSubmit);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">Criar Novo Usuário</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+            disabled={isLoading}
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Nome */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nome Completo *
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={isLoading}
+            />
+          </div>
+
+          {/* Email e Login */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email *
+              </label>
+              <input
+                type="email"
+                required
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={isLoading}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Login *
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.login}
+                onChange={(e) => setFormData({ ...formData, login: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={isLoading}
+              />
+            </div>
+          </div>
+
+          {/* CPF e RG */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                CPF *
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.cpf}
+                onChange={(e) => handleCpfChange(e.target.value)}
+                placeholder="000.000.000-00"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={isLoading}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                A senha será gerada automaticamente: @Cpf{formData.cpf.replace(/\D/g, '')}
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                RG
+              </label>
+              <input
+                type="text"
+                value={formData.rg}
+                onChange={(e) => setFormData({ ...formData, rg: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={isLoading}
+              />
+            </div>
+          </div>
+
+          {/* Botões */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+              disabled={isLoading}
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Criando...' : 'Criar Usuário'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// Modal de Edição de Usuário
+interface EditUserModalProps {
+  user: IUser;
+  onClose: () => void;
+  onSubmit: (data: IUpdateUser) => void;
+  isLoading: boolean;
+}
+
+function EditUserModal({ user, onClose, onSubmit, isLoading }: EditUserModalProps) {
+  const [formData, setFormData] = useState<IUpdateUser>({
+    name: user.name,
+    email: user.email,
+    login: user.login,
+    role: user.role,
+    cpf: user.cpf,
+    rg: user.rg || '',
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Remove formatação do CPF e RG antes de enviar
+    const dataToSubmit = {
+      ...formData,
+      cpf: formData.cpf?.replace(/\D/g, ''),
+      rg: formData.rg?.replace(/\D/g, ''),
+    };
+    onSubmit(dataToSubmit);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">Editar Usuário</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+            disabled={isLoading}
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Nome */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nome Completo *
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={isLoading}
+            />
+          </div>
+
+          {/* Email e Login */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email *
+              </label>
+              <input
+                type="email"
+                required
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={isLoading}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Login *
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.login}
+                onChange={(e) => setFormData({ ...formData, login: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={isLoading}
+              />
+            </div>
+          </div>
+
+          {/* Senha */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Senha Provisória *
+            </label>
+            <input
+              type="password"
+              required
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={isLoading}
+            />
+          </div>
+
+          {/* CPF e RG */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                CPF *
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.cpf}
+                onChange={(e) => setFormData({ ...formData, cpf: e.target.value })}
+                placeholder="000.000.000-00"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={isLoading}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                RG
+              </label>
+              <input
+                type="text"
+                value={formData.rg}
+                onChange={(e) => setFormData({ ...formData, rg: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={isLoading}
+              />
+            </div>
+          </div>
+
+          {/* Nova Senha (opcional) */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nova Senha (deixe em branco para não alterar)
+            </label>
+            <input
+              type="password"
+              value={formData.password || ''}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={isLoading}
+            />
+          </div>
+
+          {/* Botões */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+              disabled={isLoading}
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Salvando...' : 'Salvar Alterações'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminUsers() {
   const queryClient = useQueryClient();
@@ -335,46 +662,26 @@ export default function AdminUsers() {
         )}
       </div>
 
-      {/* Modal Criar (placeholder - será implementado) */}
+      {/* Modal Criar */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4">Criar Novo Usuário</h2>
-            <p className="text-gray-600 mb-4">
-              Funcionalidade em desenvolvimento. Por favor, use a API diretamente.
-            </p>
-            <button
-              onClick={() => setShowCreateModal(false)}
-              className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-            >
-              Fechar
-            </button>
-          </div>
-        </div>
+        <CreateUserModal
+          onClose={() => setShowCreateModal(false)}
+          onSubmit={(data) => createMutation.mutate(data)}
+          isLoading={createMutation.isPending}
+        />
       )}
 
-      {/* Modal Editar (placeholder - será implementado) */}
+      {/* Modal Editar */}
       {showEditModal && selectedUser && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4">Editar Usuário</h2>
-            <p className="text-gray-600 mb-4">
-              Editando: {selectedUser.name}
-            </p>
-            <p className="text-gray-600 mb-4">
-              Funcionalidade em desenvolvimento. Por favor, use a API diretamente.
-            </p>
-            <button
-              onClick={() => {
-                setShowEditModal(false);
-                setSelectedUser(null);
-              }}
-              className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-            >
-              Fechar
-            </button>
-          </div>
-        </div>
+        <EditUserModal
+          user={selectedUser}
+          onClose={() => {
+            setShowEditModal(false);
+            setSelectedUser(null);
+          }}
+          onSubmit={(data) => updateMutation.mutate({ id: selectedUser.id, data })}
+          isLoading={updateMutation.isPending}
+        />
       )}
     </div>
   );
