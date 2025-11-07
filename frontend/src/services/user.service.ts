@@ -25,16 +25,31 @@ export interface IUserFilters {
 export async function getUsers(
   filters?: IUserFilters
 ): Promise<PaginatedResponse<IUser>> {
-  const response = await api.get<ApiResponse<PaginatedResponse<IUser>>>(
+  const response = await api.get<any>(
     '/users',
     { params: filters }
   );
 
-  if (!response.data.success || !response.data.data) {
+  console.log('Response completa:', response);
+  console.log('Response.data:', response.data);
+
+  if (!response.data.success) {
     throw new Error('Erro ao buscar usuários');
   }
 
-  return response.data.data;
+  // Backend retorna diretamente: { success: true, data: [...], pagination: {...} }
+  const users = response.data.data || [];
+  const pagination = response.data.pagination || {};
+
+  return {
+    data: users,
+    pagination: {
+      page: pagination.currentPage || 1,
+      limit: pagination.recordsPerPage || 10,
+      total: pagination.totalRecords || 0,
+      totalPages: pagination.totalPages || 1,
+    },
+  };
 }
 
 /**
