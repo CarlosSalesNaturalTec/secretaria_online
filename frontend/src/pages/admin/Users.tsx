@@ -142,6 +142,7 @@ function CreateUserModal({ onClose, onSubmit, isLoading }: CreateUserModalProps)
               <input
                 type="text"
                 value={formData.rg}
+                maxLength={20}
                 onChange={(e) => setFormData({ ...formData, rg: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 disabled={isLoading}
@@ -292,6 +293,7 @@ function EditUserModal({ user, onClose, onSubmit, isLoading }: EditUserModalProp
               <input
                 type="text"
                 value={formData.rg}
+                maxLength={20}
                 onChange={(e) => setFormData({ ...formData, rg: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 disabled={isLoading}
