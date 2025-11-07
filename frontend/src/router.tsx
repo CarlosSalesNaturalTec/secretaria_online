@@ -30,6 +30,15 @@ import DashboardLayout from './components/layout/DashboardLayout';
  * Carregadas apenas quando acessadas
  */
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
+const AdminUsers = lazy(() => import('./pages/admin/Users'));
+const AdminStudents = lazy(() => import('./pages/admin/Students'));
+const AdminTeachers = lazy(() => import('./pages/admin/Teachers'));
+const AdminCourses = lazy(() => import('./pages/admin/Courses'));
+const AdminDisciplines = lazy(() => import('./pages/admin/Disciplines'));
+const AdminClasses = lazy(() => import('./pages/admin/Classes'));
+const AdminEnrollments = lazy(() => import('./pages/admin/Enrollments'));
+const AdminDocuments = lazy(() => import('./pages/admin/Documents'));
+const AdminRequests = lazy(() => import('./pages/admin/Requests'));
 
 /**
  * Páginas de Aluno (Lazy Loading)
@@ -103,17 +112,78 @@ const privateRoutes: RouteObject[] = [
           </Suspense>
         ),
       },
-      /**
-       * TODO: Adicionar rotas filhas do admin
-       * - /admin/students
-       * - /admin/teachers
-       * - /admin/courses
-       * - /admin/classes
-       * - /admin/enrollments
-       * - /admin/documents
-       * - /admin/contracts
-       * - /admin/requests
-       */
+      {
+        path: 'users',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AdminUsers />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'students',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AdminStudents />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'teachers',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AdminTeachers />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'courses',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AdminCourses />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'disciplines',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AdminDisciplines />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'classes',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AdminClasses />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'enrollments',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AdminEnrollments />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'documents',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AdminDocuments />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'requests',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AdminRequests />
+          </Suspense>
+        ),
+      },
     ],
   },
   {

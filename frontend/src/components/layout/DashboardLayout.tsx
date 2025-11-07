@@ -6,6 +6,7 @@
  */
 
 import { type ReactNode, useState } from 'react';
+import { Outlet } from 'react-router-dom';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { useAuth } from '@/hooks/useAuth';
@@ -15,10 +16,10 @@ import { type UserRole } from '@/types/user.types';
  * Props do componente DashboardLayout
  *
  * @interface DashboardLayoutProps
- * @property {ReactNode} children - Conteúdo principal a ser renderizado
+ * @property {ReactNode} children - Conteúdo principal a ser renderizado (opcional, usado apenas para compatibilidade)
  */
 interface DashboardLayoutProps {
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 /**
@@ -27,7 +28,7 @@ interface DashboardLayoutProps {
  * Responsabilidades:
  * - Compor Header (fixo no topo)
  * - Compor Sidebar (menu lateral responsivo)
- * - Renderizar conteúdo principal (children)
+ * - Renderizar conteúdo principal via Outlet (rotas filhas do React Router)
  * - Gerenciar estado de abertura/fechamento da sidebar em mobile
  * - Garantir layout responsivo para desktop, tablet e mobile
  *
@@ -37,16 +38,14 @@ interface DashboardLayoutProps {
  * ├──────────┬──────────────────────────┤
  * │          │                          │
  * │ Sidebar  │   Conteúdo Principal    │
- * │          │   (children)            │
+ * │          │   (Outlet)              │
  * │          │                          │
  * └──────────┴──────────────────────────┘
  *
  * @component
  * @example
  * ```tsx
- * <DashboardLayout>
- *   <div>Conteúdo do dashboard</div>
- * </DashboardLayout>
+ * <DashboardLayout />
  * ```
  */
 export function DashboardLayout({ children }: DashboardLayoutProps) {
@@ -118,7 +117,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Conteúdo Principal */}
         <div className="flex-1 overflow-auto">
           <main className="px-4 py-8 sm:px-6 lg:px-8">
-            {children}
+            {/* Renderiza rotas filhas do React Router ou children para compatibilidade */}
+            {children || <Outlet />}
           </main>
         </div>
       </div>

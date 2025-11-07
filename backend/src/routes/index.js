@@ -63,6 +63,9 @@ const gradeRoutes = require('./grade.routes');
 // Gerenciamento de Solicitações (feat-056)
 const requestRoutes = require('./request.routes');
 
+// Funcionalidades Administrativas (feat-081)
+const adminRoutes = require('./admin.routes');
+
 // ============================================================================
 // INICIALIZAÇÃO DO ROUTER
 // ============================================================================
@@ -291,6 +294,17 @@ router.use('/grades', gradeRoutes);
  * Permissões: Admin (full access + gestão de tipos), Student (criar e visualizar próprias)
  */
 router.use('/requests', requestRoutes);
+
+/**
+ * Rotas de Funcionalidades Administrativas
+ * Base: /api/v1/admin
+ *
+ * Endpoints:
+ * - GET /admin/dashboard/stats - Estatísticas do dashboard
+ *
+ * Permissões: Admin only
+ */
+router.use('/admin', adminRoutes);
 
 // ============================================================================
 // EXPORTAÇÃO
