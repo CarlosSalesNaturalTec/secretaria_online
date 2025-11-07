@@ -169,22 +169,22 @@ router.use('/disciplines', disciplineRoutes);
 
 /**
  * Rotas de Gerenciamento de Turmas
- * Base: /api/v1/class
+ * Base: /api/v1/classes
  *
  * Endpoints:
- * - GET /class - Listar todas as turmas
- * - GET /class/:id - Buscar turma por ID
- * - POST /class - Criar nova turma
- * - PUT /class/:id - Atualizar turma
- * - DELETE /class/:id - Deletar turma (soft delete)
- * - GET /class/:id/students - Listar alunos da turma
- * - POST /class/:id/students - Vincular alunos à turma
- * - GET /class/:id/teachers - Listar professores da turma
- * - POST /class/:id/teachers - Vincular professores à turma
+ * - GET /classes - Listar todas as turmas
+ * - GET /classes/:id - Buscar turma por ID
+ * - POST /classes - Criar nova turma
+ * - PUT /classes/:id - Atualizar turma
+ * - DELETE /classes/:id - Deletar turma (soft delete)
+ * - GET /classes/:id/students - Listar alunos da turma
+ * - POST /classes/:id/students - Vincular alunos à turma
+ * - GET /classes/:id/teachers - Listar professores da turma
+ * - POST /classes/:id/teachers - Vincular professores à turma
  *
  * Permissões: Admin (CRUD), Professor (visualização de suas turmas)
  */
-router.use('/class', classRoutes);
+router.use('/classes', classRoutes);
 
 /**
  * Rotas de Gerenciamento de Matrículas
