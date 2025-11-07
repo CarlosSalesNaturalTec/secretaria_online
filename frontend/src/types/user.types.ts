@@ -190,6 +190,42 @@ export interface IUserCreateRequest {
 }
 
 /**
+ * Dados para criação de usuário (alias)
+ */
+export interface ICreateUser {
+  name: string;
+  email: string;
+  login: string;
+  password: string;
+  role: UserRole;
+  cpf: string;
+  rg?: string;
+  motherName?: string;
+  fatherName?: string;
+  address?: string;
+  title?: string;
+  reservist?: string;
+}
+
+/**
+ * Dados para atualização de usuário (alias)
+ */
+export interface IUpdateUser {
+  name?: string;
+  email?: string;
+  login?: string;
+  password?: string;
+  role?: UserRole;
+  cpf?: string;
+  rg?: string;
+  motherName?: string;
+  fatherName?: string;
+  address?: string;
+  title?: string;
+  reservist?: string;
+}
+
+/**
  * Dados para edição de usuário
  */
 export interface IUserUpdateRequest {
