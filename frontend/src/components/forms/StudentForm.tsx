@@ -64,12 +64,12 @@ const studentFormSchema = z.object({
     .optional()
     .or(z.literal('')),
 
-  motherName: z.string()
+  mother_name: z.string()
     .min(1, 'Nome da mãe é obrigatório')
     .min(3, 'Nome da mãe deve ter entre 3 e 255 caracteres')
     .max(255, 'Nome da mãe deve ter entre 3 e 255 caracteres'),
 
-  fatherName: z.string()
+  father_name: z.string()
     .min(1, 'Nome do pai é obrigatório')
     .min(3, 'Nome do pai deve ter entre 3 e 255 caracteres')
     .max(255, 'Nome do pai deve ter entre 3 e 255 caracteres'),
@@ -79,7 +79,7 @@ const studentFormSchema = z.object({
     .min(10, 'Endereço deve ter no mínimo 10 caracteres')
     .max(200, 'Endereço deve ter no máximo 200 caracteres'),
 
-  title: z.string()
+  voter_title: z.string()
     .min(1, 'Título de eleitor é obrigatório para alunos')
     .max(20, 'Título de eleitor deve ter no máximo 20 caracteres'),
 
@@ -165,19 +165,16 @@ export function StudentForm({
       login: '',
       cpf: '',
       rg: '',
-      motherName: '',
-      fatherName: '',
+      mother_name: '',
+      father_name: '',
       address: '',
-      title: '',
+      voter_title: '',
       reservist: '',
     },
   });
 
   /**
    * Preenche formulário com dados iniciais quando em modo edição
-   *
-   * Nota: O backend retorna campos em snake_case (voter_title, mother_name, father_name)
-   * mas o formulário usa camelCase. Este useEffect mapeia ambas as formas.
    */
   useEffect(() => {
     if (initialData) {
@@ -187,12 +184,10 @@ export function StudentForm({
         login: initialData.login || '',
         cpf: initialData.cpf || '',
         rg: initialData.rg || '',
-        // Mapear tanto snake_case quanto camelCase
-        motherName: (initialData.motherName || initialData.mother_name) || '',
-        fatherName: (initialData.fatherName || initialData.father_name) || '',
+        mother_name: initialData.mother_name || '',
+        father_name: initialData.father_name || '',
         address: initialData.address || '',
-        // Backend envia como voter_title, mas formulário usa title
-        title: (initialData.title || initialData.voter_title) || '',
+        voter_title: initialData.voter_title || '',
         reservist: initialData.reservist || '',
       });
     }
@@ -205,7 +200,7 @@ export function StudentForm({
    * Campos que recebem limpeza:
    * - cpf: Remove máscara (###.###.###-##) → apenas números
    * - rg: Remove qualquer caractere não numérico
-   * - title: Remove qualquer caractere não numérico (título de eleitor)
+   * - voter_title: Remove qualquer caractere não numérico (título de eleitor)
    * - reservist: Remove qualquer caractere não numérico (número de reservista)
    */
   const handleFormSubmit = async (data: StudentFormData) => {
@@ -217,11 +212,11 @@ export function StudentForm({
         // Remove máscaras e espaços dos campos opcionais
         rg: data.rg ? data.rg.replace(/\D/g, '').trim() || undefined : undefined,
         // Campos obrigatórios para alunos
-        motherName: data.motherName?.trim(),
-        fatherName: data.fatherName?.trim(),
+        mother_name: data.mother_name?.trim(),
+        father_name: data.father_name?.trim(),
         address: data.address?.trim(),
         // Remove máscara do título de eleitor (se houver espaços ou caracteres especiais)
-        title: data.title ? data.title.replace(/\D/g, '').trim() : undefined,
+        voter_title: data.voter_title ? data.voter_title.replace(/\D/g, '').trim() : undefined,
         // Remove máscara do número de reservista (se houver espaços ou caracteres especiais)
         reservist: data.reservist ? data.reservist.replace(/\D/g, '').trim() : undefined,
       };
@@ -306,10 +301,10 @@ export function StudentForm({
 
           {/* Título de eleitor */}
           <Input
-            {...register('title')}
+            {...register('voter_title')}
             label="Título de eleitor"
             placeholder="0000 0000 0000"
-            error={errors.title?.message}
+            error={errors.voter_title?.message}
             required
             disabled={loading}
           />
@@ -333,20 +328,20 @@ export function StudentForm({
         <div className="space-y-3">
           {/* Nome da mãe */}
           <Input
-            {...register('motherName')}
+            {...register('mother_name')}
             label="Nome da mãe"
             placeholder="Digite o nome da mãe"
-            error={errors.motherName?.message}
+            error={errors.mother_name?.message}
             required
             disabled={loading}
           />
 
           {/* Nome do pai */}
           <Input
-            {...register('fatherName')}
+            {...register('father_name')}
             label="Nome do pai"
             placeholder="Digite o nome do pai"
-            error={errors.fatherName?.message}
+            error={errors.father_name?.message}
             required
             disabled={loading}
           />
