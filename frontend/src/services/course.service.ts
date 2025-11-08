@@ -72,7 +72,7 @@ export async function getAll(): Promise<ICourse[]> {
       console.log('[CourseService] Buscando todos os cursos...');
     }
 
-    const response = await api.get<ApiResponse<ICourse[]>>('/courses');
+    const response = await api.get<ApiResponse<any[]>>('/courses');
 
     if (!response.data.success || !response.data.data) {
       throw new Error(
@@ -80,11 +80,23 @@ export async function getAll(): Promise<ICourse[]> {
       );
     }
 
+    // Converte snake_case do backend para camelCase
+    const courses: ICourse[] = response.data.data.map((course: any) => ({
+      id: course.id,
+      name: course.name,
+      description: course.description,
+      durationSemesters: course.duration_semesters || course.durationSemesters,
+      disciplines: course.disciplines,
+      createdAt: course.created_at || course.createdAt,
+      updatedAt: course.updated_at || course.updatedAt,
+      deletedAt: course.deleted_at || course.deletedAt,
+    }));
+
     if (import.meta.env.DEV) {
-      console.log('[CourseService] Cursos recuperados:', response.data.data.length);
+      console.log('[CourseService] Cursos recuperados:', courses.length);
     }
 
-    return response.data.data;
+    return courses;
   } catch (error) {
     console.error('[CourseService] Erro ao buscar cursos:', error);
 
@@ -125,7 +137,7 @@ export async function getById(id: number): Promise<ICourse> {
       console.log('[CourseService] Buscando curso por ID:', id);
     }
 
-    const response = await api.get<ApiResponse<ICourse>>(`/courses/${id}`);
+    const response = await api.get<ApiResponse<any>>(`/courses/${id}`);
 
     if (!response.data.success || !response.data.data) {
       throw new Error(
@@ -133,11 +145,23 @@ export async function getById(id: number): Promise<ICourse> {
       );
     }
 
+    // Converte snake_case do backend para camelCase
+    const course: ICourse = {
+      id: response.data.data.id,
+      name: response.data.data.name,
+      description: response.data.data.description,
+      durationSemesters: response.data.data.duration_semesters || response.data.data.durationSemesters,
+      disciplines: response.data.data.disciplines,
+      createdAt: response.data.data.created_at || response.data.data.createdAt,
+      updatedAt: response.data.data.updated_at || response.data.data.updatedAt,
+      deletedAt: response.data.data.deleted_at || response.data.data.deletedAt,
+    };
+
     if (import.meta.env.DEV) {
-      console.log('[CourseService] Curso encontrado:', response.data.data.name);
+      console.log('[CourseService] Curso encontrado:', course.name);
     }
 
-    return response.data.data;
+    return course;
   } catch (error) {
     console.error('[CourseService] Erro ao buscar curso:', error);
 
@@ -204,7 +228,7 @@ export async function create(data: ICreateCourseData): Promise<ICourse> {
       description: data.description.trim(),
     };
 
-    const response = await api.post<ApiResponse<ICourse>>('/courses', payload);
+    const response = await api.post<ApiResponse<any>>('/courses', payload);
 
     if (!response.data.success || !response.data.data) {
       throw new Error(
@@ -212,11 +236,23 @@ export async function create(data: ICreateCourseData): Promise<ICourse> {
       );
     }
 
+    // Converte snake_case do backend para camelCase
+    const course: ICourse = {
+      id: response.data.data.id,
+      name: response.data.data.name,
+      description: response.data.data.description,
+      durationSemesters: response.data.data.duration_semesters || response.data.data.durationSemesters,
+      disciplines: response.data.data.disciplines,
+      createdAt: response.data.data.created_at || response.data.data.createdAt,
+      updatedAt: response.data.data.updated_at || response.data.data.updatedAt,
+      deletedAt: response.data.data.deleted_at || response.data.data.deletedAt,
+    };
+
     if (import.meta.env.DEV) {
-      console.log('[CourseService] Curso criado com sucesso:', response.data.data.id);
+      console.log('[CourseService] Curso criado com sucesso:', course.id);
     }
 
-    return response.data.data;
+    return course;
   } catch (error) {
     console.error('[CourseService] Erro ao criar curso:', error);
 
@@ -290,7 +326,7 @@ export async function update(
     if (data.durationSemesters !== undefined) payload.durationSemesters = data.durationSemesters;
     if (data.disciplineIds !== undefined) payload.disciplineIds = data.disciplineIds;
 
-    const response = await api.put<ApiResponse<ICourse>>(
+    const response = await api.put<ApiResponse<any>>(
       `/courses/${id}`,
       payload
     );
@@ -301,11 +337,23 @@ export async function update(
       );
     }
 
+    // Converte snake_case do backend para camelCase
+    const course: ICourse = {
+      id: response.data.data.id,
+      name: response.data.data.name,
+      description: response.data.data.description,
+      durationSemesters: response.data.data.duration_semesters || response.data.data.durationSemesters,
+      disciplines: response.data.data.disciplines,
+      createdAt: response.data.data.created_at || response.data.data.createdAt,
+      updatedAt: response.data.data.updated_at || response.data.data.updatedAt,
+      deletedAt: response.data.data.deleted_at || response.data.data.deletedAt,
+    };
+
     if (import.meta.env.DEV) {
-      console.log('[CourseService] Curso atualizado com sucesso:', response.data.data.id);
+      console.log('[CourseService] Curso atualizado com sucesso:', course.id);
     }
 
-    return response.data.data;
+    return course;
   } catch (error) {
     console.error('[CourseService] Erro ao atualizar curso:', error);
 
