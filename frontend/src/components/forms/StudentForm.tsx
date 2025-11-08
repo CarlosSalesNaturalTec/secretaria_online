@@ -65,17 +65,14 @@ const studentFormSchema = z.object({
     .or(z.literal('')),
 
   mother_name: z.string()
-    .min(1, 'Nome da mãe é obrigatório')
-    .min(3, 'Nome da mãe deve ter entre 3 e 255 caracteres')
-    .max(255, 'Nome da mãe deve ter entre 3 e 255 caracteres'),
+    .min(3, 'Nome da mãe deve ter no mínimo 3 caracteres')
+    .max(255, 'Nome da mãe deve ter no máximo 255 caracteres'),
 
   father_name: z.string()
-    .min(1, 'Nome do pai é obrigatório')
-    .min(3, 'Nome do pai deve ter entre 3 e 255 caracteres')
-    .max(255, 'Nome do pai deve ter entre 3 e 255 caracteres'),
+    .min(3, 'Nome do pai deve ter no mínimo 3 caracteres')
+    .max(255, 'Nome do pai deve ter no máximo 255 caracteres'),
 
   address: z.string()
-    .min(1, 'Endereço é obrigatório')
     .min(10, 'Endereço deve ter no mínimo 10 caracteres')
     .max(200, 'Endereço deve ter no máximo 200 caracteres'),
 
