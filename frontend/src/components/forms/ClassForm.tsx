@@ -195,6 +195,8 @@ export function ClassForm({
    */
   useEffect(() => {
     if (initialData) {
+      console.log('[ClassForm] initialData recebido:', initialData);
+
       reset({
         courseId: initialData.courseId || 0,
         semester: initialData.semester || 1,
@@ -204,24 +206,36 @@ export function ClassForm({
       // Preencher professores vinculados
       // O backend retorna professores dentro da classe com discipline_id na tabela pivot
       if (initialData.teachers && initialData.teachers.length > 0) {
+        console.log('[ClassForm] Teachers estrutura:', initialData.teachers);
+
         const teacherAssignments = initialData.teachers.map((teacher: any) => {
+          console.log('[ClassForm] Teacher individual:', teacher);
+
           // A disciplina pode estar em class_teachers.discipline_id ou em teacher_association (Sequelize)
           const disciplineId = teacher.class_teachers?.discipline_id ||
                                teacher.dataValues?.class_teachers?.discipline_id ||
                                0;
+
+          console.log('[ClassForm] Disciplina extraída:', { teacherId: teacher.id, disciplineId });
 
           return {
             teacherId: teacher.id,
             disciplineId: parseInt(disciplineId, 10) || 0,
           };
         });
+
+        console.log('[ClassForm] Teacher assignments finais:', teacherAssignments);
         setSelectedTeachers(teacherAssignments);
       }
 
       // Preencher alunos vinculados
       // O backend retorna estudantes dentro da classe
       if (initialData.students && initialData.students.length > 0) {
+        console.log('[ClassForm] Students estrutura:', initialData.students);
+
         const studentIds = initialData.students.map((student: any) => student.id);
+
+        console.log('[ClassForm] Student IDs finais:', studentIds);
         setSelectedStudents(studentIds);
       }
     }
