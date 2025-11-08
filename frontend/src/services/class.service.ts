@@ -243,9 +243,26 @@ export async function create(data: ICreateClassData): Promise<IClass> {
       });
     }
 
-    const response = await api.post<ApiResponse<IClass>>('/classes', data);
+    // Converter camelCase para snake_case para o backend
+    const payload = {
+      course_id: data.courseId,
+      semester: data.semester,
+      year: data.year,
+      teachers: data.teachers,
+      student_ids: data.studentIds,
+    };
+
+    if (import.meta.env.DEV) {
+      console.log('[ClassService] Enviando payload:', payload);
+    }
+
+    const response = await api.post<ApiResponse<IClass>>('/classes', payload);
 
     if (!response.data.success || !response.data.data) {
+      console.error('[ClassService] Erro da API:', {
+        status: response.status,
+        data: response.data,
+      });
       throw new Error(
         response.data.error?.message || 'Erro ao criar turma'
       );
@@ -349,9 +366,21 @@ export async function update(
       console.log('[ClassService] Atualizando turma:', id, data);
     }
 
+    // Converter camelCase para snake_case para o backend
+    const payload: any = {};
+    if (data.courseId !== undefined) payload.course_id = data.courseId;
+    if (data.semester !== undefined) payload.semester = data.semester;
+    if (data.year !== undefined) payload.year = data.year;
+    if (data.teachers !== undefined) payload.teachers = data.teachers;
+    if (data.studentIds !== undefined) payload.student_ids = data.studentIds;
+
+    if (import.meta.env.DEV) {
+      console.log('[ClassService] Enviando payload atualização:', payload);
+    }
+
     const response = await api.put<ApiResponse<IClass>>(
       `/classes/${id}`,
-      data
+      payload
     );
 
     if (!response.data.success || !response.data.data) {
