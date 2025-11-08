@@ -1,8 +1,10 @@
 /**
  * Arquivo: frontend/src/components/ui/Toast.tsx
- * Descrição: Componente de notificação toast elegante
+ * Descrição: Componente de notificação toast elegante com z-index alto para aparecer sobre modais
  * Feature: feat-083 - Melhorar feedback visual com Toast
+ * Feature: feat-105 - Corrigir z-index do Toast para aparecer sobre modais
  * Criado em: 2025-11-07
+ * Atualizado em: 2025-11-08
  */
 
 import { useEffect } from 'react';
@@ -54,7 +56,7 @@ export default function Toast({
 
   return (
     <div
-      className={`fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-lg border shadow-lg ${colors[type]} animate-slideIn`}
+      className={`fixed top-4 right-4 z-[9999] flex items-center gap-3 px-4 py-3 rounded-lg border shadow-lg ${colors[type]} animate-slideIn`}
       role="alert"
     >
       <div className={iconColors[type]}>{icons[type]}</div>

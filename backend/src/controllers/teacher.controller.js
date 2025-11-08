@@ -11,7 +11,11 @@ class TeacherController {
   async create(req, res, next) {
     try {
       const teacher = await TeacherService.create(req.body);
-      res.status(201).json({ success: true, data: teacher });
+      res.status(201).json({
+        success: true,
+        data: teacher,
+        message: 'Professor criado com sucesso',
+      });
     } catch (error) {
       next(error);
     }

@@ -18,6 +18,7 @@ import { Plus, Pencil, Trash2, KeyRound, AlertCircle } from 'lucide-react';
 import { Table, type Column } from '@/components/ui/Table';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
+import Toast, { type ToastType } from '@/components/ui/Toast';
 import { StudentForm } from '@/components/forms/StudentForm';
 import StudentService from '@/services/student.service';
 import type { IUser } from '@/types/user.types';
@@ -54,6 +55,12 @@ export default function StudentsPage() {
 
   // Estado de mensagens de feedback
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Estado do toast de notificação
+  const [toast, setToast] = useState<{
+    message: string;
+    type: ToastType;
+  } | null>(null);
 
   /**
    * Carrega lista de alunos ao montar o componente
@@ -143,13 +150,19 @@ export default function StudentsPage() {
     try {
       setIsSubmitting(true);
       await StudentService.create(data as ICreateStudentData);
-      setSuccessMessage('Aluno cadastrado com sucesso!');
+      setToast({
+        message: 'Aluno cadastrado com sucesso!',
+        type: 'success',
+      });
       handleCloseModal();
       await loadStudents();
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Erro ao cadastrar aluno';
-      alert(errorMessage);
+      setToast({
+        message: errorMessage,
+        type: 'error',
+      });
       console.error('[StudentsPage] Erro ao criar aluno:', err);
     } finally {
       setIsSubmitting(false);
@@ -165,13 +178,19 @@ export default function StudentsPage() {
     try {
       setIsSubmitting(true);
       await StudentService.update(selectedStudent.id, data);
-      setSuccessMessage('Aluno atualizado com sucesso!');
+      setToast({
+        message: 'Aluno atualizado com sucesso!',
+        type: 'success',
+      });
       handleCloseModal();
       await loadStudents();
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Erro ao atualizar aluno';
-      alert(errorMessage);
+      setToast({
+        message: errorMessage,
+        type: 'error',
+      });
       console.error('[StudentsPage] Erro ao atualizar aluno:', err);
     } finally {
       setIsSubmitting(false);
@@ -187,13 +206,19 @@ export default function StudentsPage() {
     try {
       setIsSubmitting(true);
       await StudentService.delete(selectedStudent.id);
-      setSuccessMessage('Aluno removido com sucesso!');
+      setToast({
+        message: 'Aluno removido com sucesso!',
+        type: 'success',
+      });
       handleCloseModal();
       await loadStudents();
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Erro ao remover aluno';
-      alert(errorMessage);
+      setToast({
+        message: errorMessage,
+        type: 'error',
+      });
       console.error('[StudentsPage] Erro ao deletar aluno:', err);
     } finally {
       setIsSubmitting(false);
@@ -209,14 +234,18 @@ export default function StudentsPage() {
     try {
       setIsSubmitting(true);
       await StudentService.resetPassword(selectedStudent.id);
-      setSuccessMessage(
-        'Senha provisória regenerada e enviada para o email do aluno!'
-      );
+      setToast({
+        message: 'Senha provisória regenerada e enviada para o email do aluno!',
+        type: 'success',
+      });
       handleCloseModal();
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Erro ao regenerar senha';
-      alert(errorMessage);
+      setToast({
+        message: errorMessage,
+        type: 'error',
+      });
       console.error('[StudentsPage] Erro ao resetar senha:', err);
     } finally {
       setIsSubmitting(false);
@@ -477,6 +506,15 @@ export default function StudentsPage() {
           </div>
         </div>
       </Modal>
+
+      {/* Toast de notificação */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }

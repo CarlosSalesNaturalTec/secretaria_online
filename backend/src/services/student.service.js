@@ -57,19 +57,19 @@ class StudentService {
     // Validação de unicidade de email
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
-      throw new AppError('Email já está em uso.', 409);
+      throw new AppError('Email já cadastrado no sistema', 409, 'EMAIL_ALREADY_EXISTS');
     }
 
     // Validação de unicidade de CPF
     const existingCpf = await User.findOne({ where: { cpf } });
     if (existingCpf) {
-      throw new AppError('CPF já está em uso.', 409);
+      throw new AppError('CPF já cadastrado no sistema', 409, 'CPF_ALREADY_EXISTS');
     }
 
     // Validação de unicidade de login
     const existingLogin = await User.findOne({ where: { login } });
     if (existingLogin) {
-      throw new AppError('Login já está em uso.', 409);
+      throw new AppError('Login já cadastrado no sistema', 409, 'LOGIN_ALREADY_EXISTS');
     }
 
     // Geração de senha provisória

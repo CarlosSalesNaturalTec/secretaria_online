@@ -23,7 +23,11 @@ class StudentController {
       }
 
       const student = await StudentService.create(req.body);
-      return res.status(201).json({ success: true, data: student });
+      return res.status(201).json({
+        success: true,
+        data: student,
+        message: 'Estudante criado com sucesso',
+      });
     } catch (error) {
       next(error);
     }
