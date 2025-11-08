@@ -158,8 +158,10 @@ export function ClassForm({
 
   /**
    * Observa mudanças no curso selecionado para carregar disciplinas
+   * Converte para número para comparação correta
    */
-  const selectedCourseId = watch('courseId');
+  const watchedCourseId = watch('courseId');
+  const selectedCourseId = typeof watchedCourseId === 'string' ? Number(watchedCourseId) : watchedCourseId;
 
   /**
    * Carrega dados necessários ao montar o componente
@@ -174,8 +176,20 @@ export function ClassForm({
   useEffect(() => {
     if (selectedCourseId > 0) {
       const course = courses.find(c => c.id === Number(selectedCourseId));
-      if (course && course.disciplines) {
-        const courseDisciplines = course.disciplines.map(cd => cd.discipline!).filter(Boolean);
+
+      if (course && course.disciplines && course.disciplines.length > 0) {
+        // Handle both ICourseDiscipline[] and direct IDiscipline[]
+        const courseDisciplines = course.disciplines
+          .map(cd => {
+            // Se cd tem uma propriedade 'discipline', retorna ela
+            if ('discipline' in cd && cd.discipline) {
+              return cd.discipline;
+            }
+            // Senão, assume que cd já é uma disciplina
+            return cd as any;
+          })
+          .filter(Boolean);
+
         setDisciplines(courseDisciplines);
       } else {
         setDisciplines([]);
@@ -183,7 +197,7 @@ export function ClassForm({
     } else {
       setDisciplines([]);
     }
-  }, [selectedCourseId, courses]);
+  }, [selectedCourseId, courses, watchedCourseId]);
 
   /**
    * Preenche formulário com dados iniciais quando em modo edição
@@ -327,7 +341,7 @@ export function ClassForm({
           </label>
           <select
             id="courseId"
-            {...register('courseId')}
+            {...register('courseId', { valueAsNumber: true })}
             disabled={loading}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
           >

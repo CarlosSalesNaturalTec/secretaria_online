@@ -86,14 +86,30 @@ export async function getAll(): Promise<ICourse[]> {
       name: course.name,
       description: course.description,
       durationSemesters: course.duration_semesters || course.durationSemesters,
-      disciplines: course.disciplines,
+      disciplines: course.disciplines ? course.disciplines.map((cd: any) => ({
+        id: cd.id,
+        courseId: cd.course_id || cd.courseId,
+        disciplineId: cd.discipline_id || cd.disciplineId,
+        semester: cd.semester,
+        discipline: cd.discipline ? {
+          id: cd.discipline.id,
+          name: cd.discipline.name,
+          code: cd.discipline.code,
+          workloadHours: cd.discipline.workload_hours || cd.discipline.workloadHours,
+          createdAt: cd.discipline.created_at || cd.discipline.createdAt,
+          updatedAt: cd.discipline.updated_at || cd.discipline.updatedAt,
+          deletedAt: cd.discipline.deleted_at || cd.discipline.deletedAt,
+        } : undefined,
+        createdAt: cd.created_at || cd.createdAt,
+        updatedAt: cd.updated_at || cd.updatedAt,
+      })) : undefined,
       createdAt: course.created_at || course.createdAt,
       updatedAt: course.updated_at || course.updatedAt,
       deletedAt: course.deleted_at || course.deletedAt,
     }));
 
     if (import.meta.env.DEV) {
-      console.log('[CourseService] Cursos recuperados:', courses.length);
+      console.log('[CourseService] Cursos recuperados:', courses);
     }
 
     return courses;
@@ -146,19 +162,36 @@ export async function getById(id: number): Promise<ICourse> {
     }
 
     // Converte snake_case do backend para camelCase
+    const courseData = response.data.data;
     const course: ICourse = {
-      id: response.data.data.id,
-      name: response.data.data.name,
-      description: response.data.data.description,
-      durationSemesters: response.data.data.duration_semesters || response.data.data.durationSemesters,
-      disciplines: response.data.data.disciplines,
-      createdAt: response.data.data.created_at || response.data.data.createdAt,
-      updatedAt: response.data.data.updated_at || response.data.data.updatedAt,
-      deletedAt: response.data.data.deleted_at || response.data.data.deletedAt,
+      id: courseData.id,
+      name: courseData.name,
+      description: courseData.description,
+      durationSemesters: courseData.duration_semesters || courseData.durationSemesters,
+      disciplines: courseData.disciplines ? courseData.disciplines.map((cd: any) => ({
+        id: cd.id,
+        courseId: cd.course_id || cd.courseId,
+        disciplineId: cd.discipline_id || cd.disciplineId,
+        semester: cd.semester,
+        discipline: cd.discipline ? {
+          id: cd.discipline.id,
+          name: cd.discipline.name,
+          code: cd.discipline.code,
+          workloadHours: cd.discipline.workload_hours || cd.discipline.workloadHours,
+          createdAt: cd.discipline.created_at || cd.discipline.createdAt,
+          updatedAt: cd.discipline.updated_at || cd.discipline.updatedAt,
+          deletedAt: cd.discipline.deleted_at || cd.discipline.deletedAt,
+        } : undefined,
+        createdAt: cd.created_at || cd.createdAt,
+        updatedAt: cd.updated_at || cd.updatedAt,
+      })) : undefined,
+      createdAt: courseData.created_at || courseData.createdAt,
+      updatedAt: courseData.updated_at || courseData.updatedAt,
+      deletedAt: courseData.deleted_at || courseData.deletedAt,
     };
 
     if (import.meta.env.DEV) {
-      console.log('[CourseService] Curso encontrado:', course.name);
+      console.log('[CourseService] Curso encontrado:', course);
     }
 
     return course;
@@ -237,19 +270,36 @@ export async function create(data: ICreateCourseData): Promise<ICourse> {
     }
 
     // Converte snake_case do backend para camelCase
+    const courseData = response.data.data;
     const course: ICourse = {
-      id: response.data.data.id,
-      name: response.data.data.name,
-      description: response.data.data.description,
-      durationSemesters: response.data.data.duration_semesters || response.data.data.durationSemesters,
-      disciplines: response.data.data.disciplines,
-      createdAt: response.data.data.created_at || response.data.data.createdAt,
-      updatedAt: response.data.data.updated_at || response.data.data.updatedAt,
-      deletedAt: response.data.data.deleted_at || response.data.data.deletedAt,
+      id: courseData.id,
+      name: courseData.name,
+      description: courseData.description,
+      durationSemesters: courseData.duration_semesters || courseData.durationSemesters,
+      disciplines: courseData.disciplines ? courseData.disciplines.map((cd: any) => ({
+        id: cd.id,
+        courseId: cd.course_id || cd.courseId,
+        disciplineId: cd.discipline_id || cd.disciplineId,
+        semester: cd.semester,
+        discipline: cd.discipline ? {
+          id: cd.discipline.id,
+          name: cd.discipline.name,
+          code: cd.discipline.code,
+          workloadHours: cd.discipline.workload_hours || cd.discipline.workloadHours,
+          createdAt: cd.discipline.created_at || cd.discipline.createdAt,
+          updatedAt: cd.discipline.updated_at || cd.discipline.updatedAt,
+          deletedAt: cd.discipline.deleted_at || cd.discipline.deletedAt,
+        } : undefined,
+        createdAt: cd.created_at || cd.createdAt,
+        updatedAt: cd.updated_at || cd.updatedAt,
+      })) : undefined,
+      createdAt: courseData.created_at || courseData.createdAt,
+      updatedAt: courseData.updated_at || courseData.updatedAt,
+      deletedAt: courseData.deleted_at || courseData.deletedAt,
     };
 
     if (import.meta.env.DEV) {
-      console.log('[CourseService] Curso criado com sucesso:', course.id);
+      console.log('[CourseService] Curso criado com sucesso:', course);
     }
 
     return course;
@@ -338,19 +388,36 @@ export async function update(
     }
 
     // Converte snake_case do backend para camelCase
+    const courseData = response.data.data;
     const course: ICourse = {
-      id: response.data.data.id,
-      name: response.data.data.name,
-      description: response.data.data.description,
-      durationSemesters: response.data.data.duration_semesters || response.data.data.durationSemesters,
-      disciplines: response.data.data.disciplines,
-      createdAt: response.data.data.created_at || response.data.data.createdAt,
-      updatedAt: response.data.data.updated_at || response.data.data.updatedAt,
-      deletedAt: response.data.data.deleted_at || response.data.data.deletedAt,
+      id: courseData.id,
+      name: courseData.name,
+      description: courseData.description,
+      durationSemesters: courseData.duration_semesters || courseData.durationSemesters,
+      disciplines: courseData.disciplines ? courseData.disciplines.map((cd: any) => ({
+        id: cd.id,
+        courseId: cd.course_id || cd.courseId,
+        disciplineId: cd.discipline_id || cd.disciplineId,
+        semester: cd.semester,
+        discipline: cd.discipline ? {
+          id: cd.discipline.id,
+          name: cd.discipline.name,
+          code: cd.discipline.code,
+          workloadHours: cd.discipline.workload_hours || cd.discipline.workloadHours,
+          createdAt: cd.discipline.created_at || cd.discipline.createdAt,
+          updatedAt: cd.discipline.updated_at || cd.discipline.updatedAt,
+          deletedAt: cd.discipline.deleted_at || cd.discipline.deletedAt,
+        } : undefined,
+        createdAt: cd.created_at || cd.createdAt,
+        updatedAt: cd.updated_at || cd.updatedAt,
+      })) : undefined,
+      createdAt: courseData.created_at || courseData.createdAt,
+      updatedAt: courseData.updated_at || courseData.updatedAt,
+      deletedAt: courseData.deleted_at || courseData.deletedAt,
     };
 
     if (import.meta.env.DEV) {
-      console.log('[CourseService] Curso atualizado com sucesso:', course.id);
+      console.log('[CourseService] Curso atualizado com sucesso:', course);
     }
 
     return course;
