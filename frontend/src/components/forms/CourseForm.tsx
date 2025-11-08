@@ -190,7 +190,7 @@ export function CourseForm({
 
           {/* Duração em semestres */}
           <Input
-            {...register('durationSemesters')}
+            {...register('durationSemesters', { valueAsNumber: true })}
             type="number"
             label="Duração (semestres)"
             placeholder="8"

@@ -221,11 +221,11 @@ export async function create(data: ICreateCourseData): Promise<ICourse> {
       });
     }
 
-    // Preparar dados para envio (remover espaços em branco)
+    // Preparar dados para envio (remover espaços em branco e converter para snake_case)
     const payload = {
-      ...data,
       name: data.name.trim(),
       description: data.description.trim(),
+      duration_semesters: data.durationSemesters,
     };
 
     const response = await api.post<ApiResponse<any>>('/courses', payload);
@@ -318,12 +318,12 @@ export async function update(
       console.log('[CourseService] Atualizando curso:', id, data);
     }
 
-    // Preparar dados para envio (remover espaços em branco)
-    const payload: IUpdateCourseData = {};
+    // Preparar dados para envio (remover espaços em branco e converter para snake_case)
+    const payload: any = {};
 
     if (data.name !== undefined) payload.name = data.name.trim();
     if (data.description !== undefined) payload.description = data.description.trim();
-    if (data.durationSemesters !== undefined) payload.durationSemesters = data.durationSemesters;
+    if (data.durationSemesters !== undefined) payload.duration_semesters = data.durationSemesters;
     if (data.disciplineIds !== undefined) payload.disciplineIds = data.disciplineIds;
 
     const response = await api.put<ApiResponse<any>>(
