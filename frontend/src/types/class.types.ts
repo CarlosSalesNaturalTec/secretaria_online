@@ -126,14 +126,20 @@ export interface IClass {
   course?: ICourse;
 
   /**
-   * Lista de professores e disciplinas vinculados à turma
+   * Lista de professores vinculados à turma
+   * Estrutura retornada pela API: { id, name, email, class_teachers: { discipline_id } }
    */
-  teachers?: IClassTeacher[];
+  teachers?: IUser[];
 
   /**
    * Lista de alunos matriculados na turma
    */
-  students?: IClassStudent[];
+  students?: IUser[];
+
+  /**
+   * Lista de disciplinas da turma
+   */
+  disciplines?: IDiscipline[];
 
   /**
    * Data de criação

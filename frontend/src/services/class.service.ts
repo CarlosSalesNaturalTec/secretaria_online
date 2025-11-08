@@ -37,6 +37,15 @@ function mapClassData(classData: any): IClass {
     } : undefined,
     students: classData.students,
     teachers: classData.teachers,
+    // Mapear disciplinas - converte snake_case para camelCase se necessário
+    disciplines: classData.disciplines?.map((d: any) => ({
+      id: d.id,
+      name: d.name,
+      code: d.code,
+      createdAt: d.created_at || d.createdAt,
+      updatedAt: d.updated_at || d.updatedAt,
+      deletedAt: d.deleted_at || d.deletedAt,
+    })),
     createdAt: classData.created_at || classData.createdAt,
     updatedAt: classData.updated_at || classData.updatedAt,
     deletedAt: classData.deleted_at || classData.deletedAt,

@@ -509,14 +509,35 @@ export default function ClassesPage() {
               </h4>
               {selectedClass.teachers && selectedClass.teachers.length > 0 ? (
                 <div className="space-y-2">
-                  {selectedClass.teachers.map((ct) => (
-                    <div key={ct.id} className="bg-gray-50 rounded-md p-3">
-                      <p className="font-medium text-gray-900">{ct.teacher?.name || 'Nome não disponível'}</p>
-                      <p className="text-sm text-gray-600">
-                        Disciplina: {ct.discipline?.name || 'Não informada'} ({ct.discipline?.code || '-'})
-                      </p>
-                    </div>
-                  ))}
+                  {selectedClass.teachers.map((teacher: any) => {
+                    // Tentar encontrar a disciplina associada ao professor
+                    let disciplineId = 0;
+
+                    // Verificar diferentes estruturas possíveis
+                    if (teacher.class_teachers?.discipline_id) {
+                      disciplineId = teacher.class_teachers.discipline_id;
+                    } else if (teacher.dataValues?.class_teachers?.discipline_id) {
+                      disciplineId = teacher.dataValues.class_teachers.discipline_id;
+                    } else if (Array.isArray(teacher.class_teachers) && teacher.class_teachers.length > 0) {
+                      disciplineId = teacher.class_teachers[0].discipline_id;
+                    }
+
+                    const discipline = disciplineId > 0 && selectedClass.disciplines
+                      ? selectedClass.disciplines.find((d: any) => d.id === disciplineId)
+                      : null;
+
+                    return (
+                      <div key={teacher.id} className="bg-gray-50 rounded-md p-3">
+                        <p className="font-medium text-gray-900">{teacher.name || 'Nome não disponível'}</p>
+                        <p className="text-sm text-gray-600">{teacher.email || 'Email não disponível'}</p>
+                        {discipline && (
+                          <p className="text-sm text-blue-600 mt-1">
+                            📚 {discipline.name} ({discipline.code})
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-sm text-gray-600 italic">Nenhum professor vinculado</p>
@@ -531,10 +552,10 @@ export default function ClassesPage() {
               </h4>
               {selectedClass.students && selectedClass.students.length > 0 ? (
                 <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {selectedClass.students.map((cs) => (
-                    <div key={cs.id} className="bg-gray-50 rounded-md p-3">
-                      <p className="font-medium text-gray-900">{cs.student?.name || 'Nome não disponível'}</p>
-                      <p className="text-sm text-gray-600">{cs.student?.email || 'Email não disponível'}</p>
+                  {selectedClass.students.map((student) => (
+                    <div key={student.id} className="bg-gray-50 rounded-md p-3">
+                      <p className="font-medium text-gray-900">{student.name || 'Nome não disponível'}</p>
+                      <p className="text-sm text-gray-600">{student.email || 'Email não disponível'}</p>
                     </div>
                   ))}
                 </div>
