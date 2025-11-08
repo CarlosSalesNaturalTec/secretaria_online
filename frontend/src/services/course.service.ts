@@ -86,23 +86,28 @@ export async function getAll(): Promise<ICourse[]> {
       name: course.name,
       description: course.description,
       durationSemesters: course.duration_semesters || course.durationSemesters,
-      disciplines: course.disciplines ? course.disciplines.map((cd: any) => ({
-        id: cd.id,
-        courseId: cd.course_id || cd.courseId,
-        disciplineId: cd.discipline_id || cd.disciplineId,
-        semester: cd.semester,
-        discipline: cd.discipline ? {
-          id: cd.discipline.id,
-          name: cd.discipline.name,
-          code: cd.discipline.code,
-          workloadHours: cd.discipline.workload_hours || cd.discipline.workloadHours,
-          createdAt: cd.discipline.created_at || cd.discipline.createdAt,
-          updatedAt: cd.discipline.updated_at || cd.discipline.updatedAt,
-          deletedAt: cd.discipline.deleted_at || cd.discipline.deletedAt,
-        } : undefined,
-        createdAt: cd.created_at || cd.createdAt,
-        updatedAt: cd.updated_at || cd.updatedAt,
-      })) : undefined,
+      disciplines: course.disciplines ? course.disciplines.map((cd: any) => {
+        // Extrai a disciplina - pode estar em cd.discipline ou ser o próprio cd
+        const disciplineData = cd.discipline || cd;
+
+        return {
+          id: cd.id,
+          courseId: cd.course_id || cd.courseId,
+          disciplineId: cd.discipline_id || cd.disciplineId,
+          semester: cd.semester,
+          discipline: {
+            id: disciplineData.id,
+            name: disciplineData.name,
+            code: disciplineData.code,
+            workloadHours: disciplineData.workload_hours || disciplineData.workloadHours,
+            createdAt: disciplineData.created_at || disciplineData.createdAt,
+            updatedAt: disciplineData.updated_at || disciplineData.updatedAt,
+            deletedAt: disciplineData.deleted_at || disciplineData.deletedAt,
+          },
+          createdAt: cd.created_at || cd.createdAt,
+          updatedAt: cd.updated_at || cd.updatedAt,
+        };
+      }) : undefined,
       createdAt: course.created_at || course.createdAt,
       updatedAt: course.updated_at || course.updatedAt,
       deletedAt: course.deleted_at || course.deletedAt,
@@ -168,23 +173,28 @@ export async function getById(id: number): Promise<ICourse> {
       name: courseData.name,
       description: courseData.description,
       durationSemesters: courseData.duration_semesters || courseData.durationSemesters,
-      disciplines: courseData.disciplines ? courseData.disciplines.map((cd: any) => ({
-        id: cd.id,
-        courseId: cd.course_id || cd.courseId,
-        disciplineId: cd.discipline_id || cd.disciplineId,
-        semester: cd.semester,
-        discipline: cd.discipline ? {
-          id: cd.discipline.id,
-          name: cd.discipline.name,
-          code: cd.discipline.code,
-          workloadHours: cd.discipline.workload_hours || cd.discipline.workloadHours,
-          createdAt: cd.discipline.created_at || cd.discipline.createdAt,
-          updatedAt: cd.discipline.updated_at || cd.discipline.updatedAt,
-          deletedAt: cd.discipline.deleted_at || cd.discipline.deletedAt,
-        } : undefined,
-        createdAt: cd.created_at || cd.createdAt,
-        updatedAt: cd.updated_at || cd.updatedAt,
-      })) : undefined,
+      disciplines: courseData.disciplines ? courseData.disciplines.map((cd: any) => {
+        // Extrai a disciplina - pode estar em cd.discipline ou ser o próprio cd
+        const disciplineData = cd.discipline || cd;
+
+        return {
+          id: cd.id,
+          courseId: cd.course_id || cd.courseId,
+          disciplineId: cd.discipline_id || cd.disciplineId,
+          semester: cd.semester,
+          discipline: {
+            id: disciplineData.id,
+            name: disciplineData.name,
+            code: disciplineData.code,
+            workloadHours: disciplineData.workload_hours || disciplineData.workloadHours,
+            createdAt: disciplineData.created_at || disciplineData.createdAt,
+            updatedAt: disciplineData.updated_at || disciplineData.updatedAt,
+            deletedAt: disciplineData.deleted_at || disciplineData.deletedAt,
+          },
+          createdAt: cd.created_at || cd.createdAt,
+          updatedAt: cd.updated_at || cd.updatedAt,
+        };
+      }) : undefined,
       createdAt: courseData.created_at || courseData.createdAt,
       updatedAt: courseData.updated_at || courseData.updatedAt,
       deletedAt: courseData.deleted_at || courseData.deletedAt,
@@ -276,23 +286,28 @@ export async function create(data: ICreateCourseData): Promise<ICourse> {
       name: courseData.name,
       description: courseData.description,
       durationSemesters: courseData.duration_semesters || courseData.durationSemesters,
-      disciplines: courseData.disciplines ? courseData.disciplines.map((cd: any) => ({
-        id: cd.id,
-        courseId: cd.course_id || cd.courseId,
-        disciplineId: cd.discipline_id || cd.disciplineId,
-        semester: cd.semester,
-        discipline: cd.discipline ? {
-          id: cd.discipline.id,
-          name: cd.discipline.name,
-          code: cd.discipline.code,
-          workloadHours: cd.discipline.workload_hours || cd.discipline.workloadHours,
-          createdAt: cd.discipline.created_at || cd.discipline.createdAt,
-          updatedAt: cd.discipline.updated_at || cd.discipline.updatedAt,
-          deletedAt: cd.discipline.deleted_at || cd.discipline.deletedAt,
-        } : undefined,
-        createdAt: cd.created_at || cd.createdAt,
-        updatedAt: cd.updated_at || cd.updatedAt,
-      })) : undefined,
+      disciplines: courseData.disciplines ? courseData.disciplines.map((cd: any) => {
+        // Extrai a disciplina - pode estar em cd.discipline ou ser o próprio cd
+        const disciplineData = cd.discipline || cd;
+
+        return {
+          id: cd.id,
+          courseId: cd.course_id || cd.courseId,
+          disciplineId: cd.discipline_id || cd.disciplineId,
+          semester: cd.semester,
+          discipline: {
+            id: disciplineData.id,
+            name: disciplineData.name,
+            code: disciplineData.code,
+            workloadHours: disciplineData.workload_hours || disciplineData.workloadHours,
+            createdAt: disciplineData.created_at || disciplineData.createdAt,
+            updatedAt: disciplineData.updated_at || disciplineData.updatedAt,
+            deletedAt: disciplineData.deleted_at || disciplineData.deletedAt,
+          },
+          createdAt: cd.created_at || cd.createdAt,
+          updatedAt: cd.updated_at || cd.updatedAt,
+        };
+      }) : undefined,
       createdAt: courseData.created_at || courseData.createdAt,
       updatedAt: courseData.updated_at || courseData.updatedAt,
       deletedAt: courseData.deleted_at || courseData.deletedAt,
@@ -394,23 +409,28 @@ export async function update(
       name: courseData.name,
       description: courseData.description,
       durationSemesters: courseData.duration_semesters || courseData.durationSemesters,
-      disciplines: courseData.disciplines ? courseData.disciplines.map((cd: any) => ({
-        id: cd.id,
-        courseId: cd.course_id || cd.courseId,
-        disciplineId: cd.discipline_id || cd.disciplineId,
-        semester: cd.semester,
-        discipline: cd.discipline ? {
-          id: cd.discipline.id,
-          name: cd.discipline.name,
-          code: cd.discipline.code,
-          workloadHours: cd.discipline.workload_hours || cd.discipline.workloadHours,
-          createdAt: cd.discipline.created_at || cd.discipline.createdAt,
-          updatedAt: cd.discipline.updated_at || cd.discipline.updatedAt,
-          deletedAt: cd.discipline.deleted_at || cd.discipline.deletedAt,
-        } : undefined,
-        createdAt: cd.created_at || cd.createdAt,
-        updatedAt: cd.updated_at || cd.updatedAt,
-      })) : undefined,
+      disciplines: courseData.disciplines ? courseData.disciplines.map((cd: any) => {
+        // Extrai a disciplina - pode estar em cd.discipline ou ser o próprio cd
+        const disciplineData = cd.discipline || cd;
+
+        return {
+          id: cd.id,
+          courseId: cd.course_id || cd.courseId,
+          disciplineId: cd.discipline_id || cd.disciplineId,
+          semester: cd.semester,
+          discipline: {
+            id: disciplineData.id,
+            name: disciplineData.name,
+            code: disciplineData.code,
+            workloadHours: disciplineData.workload_hours || disciplineData.workloadHours,
+            createdAt: disciplineData.created_at || disciplineData.createdAt,
+            updatedAt: disciplineData.updated_at || disciplineData.updatedAt,
+            deletedAt: disciplineData.deleted_at || disciplineData.deletedAt,
+          },
+          createdAt: cd.created_at || cd.createdAt,
+          updatedAt: cd.updated_at || cd.updatedAt,
+        };
+      }) : undefined,
       createdAt: courseData.created_at || courseData.createdAt,
       updatedAt: courseData.updated_at || courseData.updatedAt,
       deletedAt: courseData.deleted_at || courseData.deletedAt,

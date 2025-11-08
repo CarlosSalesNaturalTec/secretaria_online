@@ -158,10 +158,8 @@ export function ClassForm({
 
   /**
    * Observa mudanças no curso selecionado para carregar disciplinas
-   * Converte para número para comparação correta
    */
-  const watchedCourseId = watch('courseId');
-  const selectedCourseId = typeof watchedCourseId === 'string' ? Number(watchedCourseId) : watchedCourseId;
+  const selectedCourseId = watch('courseId');
 
   /**
    * Carrega dados necessários ao montar o componente
@@ -175,19 +173,12 @@ export function ClassForm({
    */
   useEffect(() => {
     if (selectedCourseId > 0) {
-      const course = courses.find(c => c.id === Number(selectedCourseId));
+      const course = courses.find(c => c.id === selectedCourseId);
 
       if (course && course.disciplines && course.disciplines.length > 0) {
-        // Handle both ICourseDiscipline[] and direct IDiscipline[]
+        // Extrai as disciplinas do array de ICourseDiscipline
         const courseDisciplines = course.disciplines
-          .map(cd => {
-            // Se cd tem uma propriedade 'discipline', retorna ela
-            if ('discipline' in cd && cd.discipline) {
-              return cd.discipline;
-            }
-            // Senão, assume que cd já é uma disciplina
-            return cd as any;
-          })
+          .map(cd => cd.discipline)
           .filter(Boolean);
 
         setDisciplines(courseDisciplines);
@@ -197,7 +188,7 @@ export function ClassForm({
     } else {
       setDisciplines([]);
     }
-  }, [selectedCourseId, courses, watchedCourseId]);
+  }, [selectedCourseId, courses]);
 
   /**
    * Preenche formulário com dados iniciais quando em modo edição
@@ -365,7 +356,7 @@ export function ClassForm({
             required
             min={1}
             max={20}
-            {...register('semester')}
+            {...register('semester', { valueAsNumber: true })}
             error={errors.semester?.message}
             disabled={loading}
           />
@@ -376,7 +367,7 @@ export function ClassForm({
             required
             min={new Date().getFullYear() - 10}
             max={new Date().getFullYear() + 10}
-            {...register('year')}
+            {...register('year', { valueAsNumber: true })}
             error={errors.year?.message}
             disabled={loading}
           />
