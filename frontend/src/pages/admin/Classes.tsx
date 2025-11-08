@@ -187,12 +187,17 @@ export default function ClassesPage() {
 
   /**
    * Handler de atualização de turma
+   *
+   * Nota: O backend agora sincroniza automaticamente os professores e alunos
+   * quando o método update é chamado com teachers e student_ids no payload
    */
   const handleUpdate = async (data: ICreateClassData | IUpdateClassData) => {
     if (!selectedClass) return;
 
     try {
       setIsSubmitting(true);
+      // O backend agora sincroniza automaticamente professores e alunos
+      // Não é necessário chamar addTeacherToClass, removeTeacherFromClass, etc.
       await ClassService.update(selectedClass.id, data);
       setSuccessMessage('Turma atualizada com sucesso!');
       handleCloseModal();

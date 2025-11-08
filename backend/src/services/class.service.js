@@ -84,10 +84,10 @@ class ClassService {
   }
 
   /**
-   * Atualiza um Turma.
+   * Atualiza um Turma e sincroniza professores e alunos.
    * @param {number} id - O ID do Turma.
    * @param {object} classData - Dados do Turma a serem atualizados.
-   * @returns {Promise<Class>} O Turma atualizado.
+   * @returns {Promise<Class>} O Turma atualizado com professores e alunos sincronizados.
    */
   async update(id, classData) {
     const turma = await this.getById(id);
@@ -95,8 +95,55 @@ class ClassService {
       return null;
     }
 
-    await turma.update(classData);
-    return turma;
+    // Extrair professores e alunos dos dados
+    const { teachers, student_ids, ...basicData } = classData;
+
+    // Atualizar dados básicos da turma
+    await turma.update(basicData);
+
+    // Sincronizar professores se fornecidos
+    if (teachers !== undefined && Array.isArray(teachers)) {
+      // Remover todos os professores atuais
+      await ClassTeacher.destroy({
+        where: { class_id: id }
+      });
+
+      // Adicionar novos professores
+      if (teachers.length > 0) {
+        for (const teacher of teachers) {
+          if (teacher.teacherId > 0 && teacher.disciplineId > 0) {
+            await ClassTeacher.create({
+              class_id: id,
+              teacher_id: teacher.teacherId,
+              discipline_id: teacher.disciplineId,
+            });
+          }
+        }
+      }
+    }
+
+    // Sincronizar alunos se fornecidos
+    if (student_ids !== undefined && Array.isArray(student_ids)) {
+      // Remover todos os alunos atuais
+      await ClassStudent.destroy({
+        where: { class_id: id }
+      });
+
+      // Adicionar novos alunos
+      if (student_ids.length > 0) {
+        for (const studentId of student_ids) {
+          if (studentId > 0) {
+            await ClassStudent.create({
+              class_id: id,
+              student_id: studentId,
+            });
+          }
+        }
+      }
+    }
+
+    // Retornar turma atualizada com todas as associações
+    return this.getById(id);
   }
 
   /**
