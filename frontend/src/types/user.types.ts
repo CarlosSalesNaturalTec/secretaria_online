@@ -44,6 +44,13 @@ export interface IUser {
   /** RG do usuário */
   rg?: string;
 
+  /** Título de eleitor */
+  title?: string;
+  voter_title?: string;
+
+  /** Número de reservista */
+  reservist?: string;
+
   /** Nome da mãe */
   motherName?: string;
   mother_name?: string;

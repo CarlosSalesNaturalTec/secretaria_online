@@ -2,7 +2,12 @@
  * Arquivo: backend/src/routes/user.routes.js
  * Descrição: Rotas para gerenciamento de usuários administrativos
  * Feature: feat-029 - Criar UserController e rotas básicas
+ * Feature: feat-100 - Validações condicionais para usuários admin
  * Criado em: 2025-10-28
+ * Atualizado em: 2025-11-08
+ *
+ * NOTA: Este arquivo é para gerenciamento de usuários ADMIN apenas.
+ * Para criar alunos e professores, use /students e /teachers endpoints.
  */
 
 const express = require('express');
@@ -15,7 +20,12 @@ const { handleValidationErrors } = require('../middlewares/validation.middleware
 const { validateCPF, validateStrongPassword } = require('../utils/validators');
 
 /**
- * Regras de validação para criação de usuário
+ * Regras de validação para criação de usuário ADMIN
+ *
+ * IMPORTANTE: Este é apenas para criar usuários admin.
+ * Campos extras (voter_title, reservist, mother_name, father_name, address)
+ * NÃO são obrigatórios para admins.
+ * Use /students ou /teachers endpoints para criar alunos e professores.
  */
 const createUserValidationRules = () => [
   body('name')
@@ -37,22 +47,16 @@ const createUserValidationRules = () => [
     .trim()
     .notEmpty()
     .withMessage('Login é obrigatório')
-    .isLength({ min: 3, max: 50 })
-    .withMessage('Login deve ter entre 3 e 50 caracteres')
-    .matches(/^[a-zA-Z0-9._-]+$/)
-    .withMessage('Login deve conter apenas letras, números, pontos, hífens ou underscores'),
+    .isLength({ min: 3, max: 100 })
+    .withMessage('Login deve ter entre 3 e 100 caracteres')
+    .isAlphanumeric()
+    .withMessage('Login deve conter apenas letras e números'),
 
   body('password')
     .notEmpty()
     .withMessage('Senha é obrigatória')
-    .custom(validateStrongPassword)
-    .withMessage('Senha deve ter no mínimo 8 caracteres, incluindo letras maiúsculas, minúsculas, números e caracteres especiais'),
-
-  body('role')
-    .notEmpty()
-    .withMessage('Role é obrigatória')
-    .isIn(['admin', 'teacher', 'student'])
-    .withMessage('Role deve ser: admin, teacher ou student'),
+    .isLength({ min: 6, max: 100 })
+    .withMessage('Senha deve ter entre 6 e 100 caracteres'),
 
   body('cpf')
     .trim()
@@ -64,38 +68,39 @@ const createUserValidationRules = () => [
   body('rg')
     .optional()
     .trim()
-    .isLength({ min: 5, max: 20 })
-    .withMessage('RG deve ter entre 5 e 20 caracteres'),
+    .isLength({ max: 20 })
+    .withMessage('RG deve ter no máximo 20 caracteres'),
 
-  body('motherName')
+  // Campos extras NÃO são obrigatórios para admin
+  body('voter_title')
     .optional()
     .trim()
-    .isLength({ min: 3, max: 255 })
-    .withMessage('Nome da mãe deve ter entre 3 e 255 caracteres'),
+    .isLength({ max: 20 })
+    .withMessage('Título de eleitor deve ter no máximo 20 caracteres'),
 
-  body('fatherName')
+  body('reservist')
     .optional()
     .trim()
-    .isLength({ min: 3, max: 255 })
-    .withMessage('Nome do pai deve ter entre 3 e 255 caracteres'),
+    .isLength({ max: 20 })
+    .withMessage('Número de reservista deve ter no máximo 20 caracteres'),
+
+  body('mother_name')
+    .optional()
+    .trim()
+    .isLength({ max: 255 })
+    .withMessage('Nome da mãe deve ter no máximo 255 caracteres'),
+
+  body('father_name')
+    .optional()
+    .trim()
+    .isLength({ max: 255 })
+    .withMessage('Nome do pai deve ter no máximo 255 caracteres'),
 
   body('address')
     .optional()
     .trim()
     .isLength({ max: 500 })
     .withMessage('Endereço deve ter no máximo 500 caracteres'),
-
-  body('title')
-    .optional()
-    .trim()
-    .isLength({ max: 100 })
-    .withMessage('Título deve ter no máximo 100 caracteres'),
-
-  body('reservist')
-    .optional()
-    .trim()
-    .isLength({ max: 50 })
-    .withMessage('Reservista deve ter no máximo 50 caracteres'),
 ];
 
 /**

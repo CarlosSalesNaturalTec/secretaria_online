@@ -159,26 +159,24 @@ class UserController {
   }
 
   /**
-   * Cria um novo usuário administrativo
+   * Cria um novo usuário administrativo (sem campos extras obrigatórios)
+   *
+   * NOTA: Este método é especificamente para criar usuários admin.
+   * Para criar alunos ou professores, use StudentService ou TeacherService.
    *
    * @param {Object} req - Request object
    * @param {Object} req.body - Dados do usuário
-   * @param {string} req.body.name - Nome completo
-   * @param {string} req.body.email - Email
-   * @param {string} req.body.login - Login único
-   * @param {string} req.body.password - Senha (será hasheada)
-   * @param {string} req.body.role - Role (admin, teacher, student)
-   * @param {string} req.body.cpf - CPF
-   * @param {string} req.body.rg - RG
-   * @param {string} req.body.motherName - Nome da mãe
-   * @param {string} req.body.fatherName - Nome do pai
-   * @param {string} req.body.address - Endereço completo
-   * @param {string} req.body.title - Título/Formação
-   * @param {string} req.body.reservist - Número do reservista
+   * @param {string} req.body.name - Nome completo (obrigatório)
+   * @param {string} req.body.email - Email (obrigatório)
+   * @param {string} req.body.login - Login único (obrigatório)
+   * @param {string} req.body.password - Senha (será hasheada, obrigatório)
+   * @param {string} req.body.role - Role (deve ser 'admin' para este endpoint, obrigatório)
+   * @param {string} req.body.cpf - CPF (obrigatório)
+   * @param {string} req.body.rg - RG (opcional)
    * @param {Object} res - Response object
    * @param {Function} next - Next middleware
    * @returns {Promise<Object>} Usuário criado
-   * @throws {Error} Se CPF, email ou login já existirem
+   * @throws {Error} Se CPF, email ou login já existirem ou dados obrigatórios faltarem
    */
   async create(req, res, next) {
     try {
@@ -187,15 +185,26 @@ class UserController {
         email,
         login,
         password,
-        role,
+        role = 'admin',
         cpf,
         rg,
-        motherName,
-        fatherName,
-        address,
-        title,
-        reservist,
       } = req.body;
+
+      // Validação: role deve ser 'admin' para este endpoint
+      if (role !== 'admin') {
+        logger.warn('[UserController] Tentativa de criar usuário não-admin via endpoint /users', {
+          requestedRole: role,
+          requestedBy: req.user.id,
+        });
+
+        return res.status(400).json({
+          success: false,
+          error: {
+            code: 'INVALID_ROLE',
+            message: 'Este endpoint é apenas para criar usuários admin. Use /students ou /teachers para criar alunos ou professores.',
+          },
+        });
+      }
 
       // Verificar se CPF já existe
       const existingCPF = await User.findOne({ where: { cpf } });
@@ -248,27 +257,23 @@ class UserController {
         });
       }
 
-      // Criar usuário (password_hash será gerado automaticamente pelo hook do model)
+      // Criar usuário admin (password_hash será gerado automaticamente pelo hook do model)
       const user = await User.create({
         name,
         email,
         login,
         password, // Campo virtual - O hook beforeValidate irá hashear e definir password_hash
-        role,
+        role: 'admin',
         cpf,
         rg,
-        motherName,
-        fatherName,
-        address,
-        title,
-        reservist,
+        // Campos extras NOT necessários para admin (não incluídos)
       });
 
       // Remover password_hash da resposta (já é excluído pelo defaultScope, mas garantir)
       const userResponse = user.toJSON();
       delete userResponse.password_hash;
 
-      logger.info('[UserController] Usuário criado com sucesso', {
+      logger.info('[UserController] Usuário admin criado com sucesso', {
         userId: user.id,
         role: user.role,
         createdBy: req.user.id,
@@ -277,10 +282,10 @@ class UserController {
       return res.status(201).json({
         success: true,
         data: userResponse,
-        message: 'Usuário criado com sucesso',
+        message: 'Usuário admin criado com sucesso',
       });
     } catch (error) {
-      logger.error('[UserController] Erro ao criar usuário', {
+      logger.error('[UserController] Erro ao criar usuário admin', {
         error: error.message,
         stack: error.stack,
         requestedBy: req.user.id,

@@ -23,14 +23,69 @@ router.post(
   '/',
   authorizeAdmin,
   [
-    body('name').notEmpty().withMessage('O nome é obrigatório.'),
-    body('email').isEmail().withMessage('Email inválido.'),
-    body('cpf').custom(validateCPF).withMessage('CPF inválido.'),
-    body('rg').notEmpty().withMessage('O RG é obrigatório.'),
-    body('mother_name').notEmpty().withMessage('O nome da mãe é obrigatório.'),
-    body('father_name').notEmpty().withMessage('O nome do pai é obrigatório.'),
-    body('address').notEmpty().withMessage('O endereço é obrigatório.'),
-    body('login').notEmpty().withMessage('O login é obrigatório.'),
+    // Campos básicos (obrigatórios)
+    body('name')
+      .trim()
+      .notEmpty()
+      .withMessage('O nome é obrigatório.')
+      .isLength({ min: 3, max: 255 })
+      .withMessage('O nome deve ter entre 3 e 255 caracteres.'),
+    body('email')
+      .trim()
+      .isEmail()
+      .withMessage('Email inválido.')
+      .notEmpty()
+      .withMessage('O email é obrigatório.'),
+    body('cpf')
+      .trim()
+      .custom(validateCPF)
+      .withMessage('CPF inválido.'),
+    body('rg')
+      .trim()
+      .notEmpty()
+      .withMessage('O RG é obrigatório.')
+      .isLength({ max: 20 })
+      .withMessage('O RG deve ter no máximo 20 caracteres.'),
+    body('login')
+      .trim()
+      .notEmpty()
+      .withMessage('O login é obrigatório.')
+      .isAlphanumeric()
+      .withMessage('O login deve conter apenas letras e números.')
+      .isLength({ min: 3, max: 100 })
+      .withMessage('O login deve ter entre 3 e 100 caracteres.'),
+
+    // Campos condicionais obrigatórios para alunos
+    body('voter_title')
+      .trim()
+      .notEmpty()
+      .withMessage('O título de eleitor é obrigatório para alunos.')
+      .isLength({ max: 20 })
+      .withMessage('O título de eleitor deve ter no máximo 20 caracteres.'),
+    body('reservist')
+      .trim()
+      .notEmpty()
+      .withMessage('O número de reservista é obrigatório para alunos.')
+      .isLength({ max: 20 })
+      .withMessage('O número de reservista deve ter no máximo 20 caracteres.'),
+    body('mother_name')
+      .trim()
+      .notEmpty()
+      .withMessage('O nome da mãe é obrigatório para alunos.')
+      .isLength({ min: 3, max: 255 })
+      .withMessage('O nome da mãe deve ter entre 3 e 255 caracteres.'),
+    body('father_name')
+      .trim()
+      .notEmpty()
+      .withMessage('O nome do pai é obrigatório para alunos.')
+      .isLength({ min: 3, max: 255 })
+      .withMessage('O nome do pai deve ter entre 3 e 255 caracteres.'),
+    body('address')
+      .trim()
+      .notEmpty()
+      .withMessage('O endereço é obrigatório para alunos.')
+      .isLength({ min: 10 })
+      .withMessage('O endereço deve ter no mínimo 10 caracteres.'),
   ],
   handleValidationErrors,
   StudentController.create

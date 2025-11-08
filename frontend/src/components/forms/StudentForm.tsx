@@ -2,13 +2,16 @@
  * Arquivo: frontend/src/components/forms/StudentForm.tsx
  * Descrição: Formulário de cadastro e edição de alunos
  * Feature: feat-083 - Criar página Students (listagem e CRUD)
+ * Feature: feat-102 - Remover máscaras de campos numéricos antes de enviar
  * Criado em: 2025-11-04
+ * Atualizado em: 2025-11-08
  *
  * Responsabilidades:
  * - Renderizar formulário completo de aluno
  * - Validar dados com Zod schema
  * - Suportar modo criação e edição
  * - Integrar com React Hook Form
+ * - Remover máscaras de todos os campos numéricos antes de submissão
  */
 
 import { useEffect } from 'react';
@@ -24,6 +27,12 @@ import type { ICreateStudentData, IUpdateStudentData } from '@/services/student.
  * Schema de validação Zod para formulário de aluno
  *
  * Valida todos os campos obrigatórios e opcionais com suas respectivas regras
+ *
+ * IMPORTANTE: Validação de CPF
+ * - Aceita CPF COM máscara (###.###.###-##) ou SEM máscara (apenas números)
+ * - Usa .refine() para validar removendo caracteres especiais
+ * - A máscara é removida apenas no handler de submit, não na validação
+ * - Isso permite que o formulário aceite tanto "12345678901" quanto "123.456.789-01"
  */
 const studentFormSchema = z.object({
   name: z.string()
@@ -44,8 +53,11 @@ const studentFormSchema = z.object({
     .regex(/^[a-z0-9._-]+$/, 'Login deve conter apenas letras minúsculas, números e os caracteres . _ -'),
 
   cpf: z.string()
-    .min(11, 'CPF deve ter 11 dígitos')
-    .regex(/^\d{11}$/, 'CPF deve conter apenas números'),
+    .min(1, 'CPF é obrigatório')
+    .refine(
+      (cpf) => cpf.replace(/\D/g, '').length === 11,
+      'CPF deve ter 11 dígitos'
+    ),
 
   rg: z.string()
     .max(20, 'RG deve ter no máximo 20 caracteres')
@@ -53,29 +65,27 @@ const studentFormSchema = z.object({
     .or(z.literal('')),
 
   motherName: z.string()
-    .max(100, 'Nome da mãe deve ter no máximo 100 caracteres')
-    .optional()
-    .or(z.literal('')),
+    .min(1, 'Nome da mãe é obrigatório')
+    .min(3, 'Nome da mãe deve ter entre 3 e 255 caracteres')
+    .max(255, 'Nome da mãe deve ter entre 3 e 255 caracteres'),
 
   fatherName: z.string()
-    .max(100, 'Nome do pai deve ter no máximo 100 caracteres')
-    .optional()
-    .or(z.literal('')),
+    .min(1, 'Nome do pai é obrigatório')
+    .min(3, 'Nome do pai deve ter entre 3 e 255 caracteres')
+    .max(255, 'Nome do pai deve ter entre 3 e 255 caracteres'),
 
   address: z.string()
-    .max(200, 'Endereço deve ter no máximo 200 caracteres')
-    .optional()
-    .or(z.literal('')),
+    .min(1, 'Endereço é obrigatório')
+    .min(10, 'Endereço deve ter no mínimo 10 caracteres')
+    .max(200, 'Endereço deve ter no máximo 200 caracteres'),
 
   title: z.string()
-    .max(20, 'Título de eleitor deve ter no máximo 20 caracteres')
-    .optional()
-    .or(z.literal('')),
+    .min(1, 'Título de eleitor é obrigatório para alunos')
+    .max(20, 'Título de eleitor deve ter no máximo 20 caracteres'),
 
   reservist: z.string()
-    .max(20, 'Número do reservista deve ter no máximo 20 caracteres')
-    .optional()
-    .or(z.literal('')),
+    .min(1, 'Número de reservista é obrigatório para alunos')
+    .max(20, 'Número do reservista deve ter no máximo 20 caracteres'),
 });
 
 /**
@@ -165,6 +175,9 @@ export function StudentForm({
 
   /**
    * Preenche formulário com dados iniciais quando em modo edição
+   *
+   * Nota: O backend retorna campos em snake_case (voter_title, mother_name, father_name)
+   * mas o formulário usa camelCase. Este useEffect mapeia ambas as formas.
    */
   useEffect(() => {
     if (initialData) {
@@ -174,10 +187,12 @@ export function StudentForm({
         login: initialData.login || '',
         cpf: initialData.cpf || '',
         rg: initialData.rg || '',
-        motherName: initialData.motherName || '',
-        fatherName: initialData.fatherName || '',
+        // Mapear tanto snake_case quanto camelCase
+        motherName: (initialData.motherName || initialData.mother_name) || '',
+        fatherName: (initialData.fatherName || initialData.father_name) || '',
         address: initialData.address || '',
-        title: initialData.title || '',
+        // Backend envia como voter_title, mas formulário usa title
+        title: (initialData.title || initialData.voter_title) || '',
         reservist: initialData.reservist || '',
       });
     }
@@ -185,21 +200,30 @@ export function StudentForm({
 
   /**
    * Handler de submit do formulário
-   * Remove máscara do CPF antes de enviar
+   * Remove máscaras de todos os campos numéricos antes de enviar
+   *
+   * Campos que recebem limpeza:
+   * - cpf: Remove máscara (###.###.###-##) → apenas números
+   * - rg: Remove qualquer caractere não numérico
+   * - title: Remove qualquer caractere não numérico (título de eleitor)
+   * - reservist: Remove qualquer caractere não numérico (número de reservista)
    */
   const handleFormSubmit = async (data: StudentFormData) => {
     try {
-      // Remove caracteres não numéricos do CPF (caso tenha máscara)
       const cleanedData = {
         ...data,
+        // Remove máscara do CPF: ###.###.###-## → apenas números
         cpf: data.cpf.replace(/\D/g, ''),
-        // Remove campos vazios opcionais
-        rg: data.rg?.trim() || undefined,
-        motherName: data.motherName?.trim() || undefined,
-        fatherName: data.fatherName?.trim() || undefined,
-        address: data.address?.trim() || undefined,
-        title: data.title?.trim() || undefined,
-        reservist: data.reservist?.trim() || undefined,
+        // Remove máscaras e espaços dos campos opcionais
+        rg: data.rg ? data.rg.replace(/\D/g, '').trim() || undefined : undefined,
+        // Campos obrigatórios para alunos
+        motherName: data.motherName?.trim(),
+        fatherName: data.fatherName?.trim(),
+        address: data.address?.trim(),
+        // Remove máscara do título de eleitor (se houver espaços ou caracteres especiais)
+        title: data.title ? data.title.replace(/\D/g, '').trim() : undefined,
+        // Remove máscara do número de reservista (se houver espaços ou caracteres especiais)
+        reservist: data.reservist ? data.reservist.replace(/\D/g, '').trim() : undefined,
       };
 
       await onSubmit(cleanedData);
@@ -286,6 +310,7 @@ export function StudentForm({
             label="Título de eleitor"
             placeholder="0000 0000 0000"
             error={errors.title?.message}
+            required
             disabled={loading}
           />
 
@@ -295,6 +320,7 @@ export function StudentForm({
             label="Certificado de reservista"
             placeholder="000000000"
             error={errors.reservist?.message}
+            required
             disabled={loading}
           />
         </div>
@@ -311,6 +337,7 @@ export function StudentForm({
             label="Nome da mãe"
             placeholder="Digite o nome da mãe"
             error={errors.motherName?.message}
+            required
             disabled={loading}
           />
 
@@ -320,6 +347,7 @@ export function StudentForm({
             label="Nome do pai"
             placeholder="Digite o nome do pai"
             error={errors.fatherName?.message}
+            required
             disabled={loading}
           />
 
@@ -329,6 +357,7 @@ export function StudentForm({
             label="Endereço completo"
             placeholder="Rua, número, bairro, cidade, estado"
             error={errors.address?.message}
+            required
             disabled={loading}
           />
         </div>

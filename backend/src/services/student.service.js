@@ -17,16 +17,42 @@ class StudentService {
   /**
    * Cria um novo estudante e envia email com senha provisória.
    *
-   * @param {object} studentData - Dados do estudante.
+   * @param {object} studentData - Dados do estudante (obrigatório incluir campos condicionais).
    * @param {string} studentData.name - Nome completo do estudante.
    * @param {string} studentData.email - Email do estudante.
-   * @param {string} studentData.cpf - CPF do estudante.
+   * @param {string} studentData.cpf - CPF do estudante (11 dígitos).
    * @param {string} studentData.login - Login de acesso do estudante.
+   * @param {string} studentData.rg - RG do estudante.
+   * @param {string} studentData.voter_title - Título de eleitor (obrigatório).
+   * @param {string} studentData.reservist - Número de reservista (obrigatório).
+   * @param {string} studentData.mother_name - Nome da mãe (obrigatório).
+   * @param {string} studentData.father_name - Nome do pai (obrigatório).
+   * @param {string} studentData.address - Endereço residencial (obrigatório).
    * @returns {Promise<User>} O estudante criado.
-   * @throws {AppError} Se o CPF ou email já estiverem em uso.
+   * @throws {AppError} Se o CPF ou email já estiverem em uso ou campos obrigatórios faltarem.
    */
   async create(studentData) {
-    const { email, cpf, name, login } = studentData;
+    const { email, cpf, name, login, voter_title, reservist, mother_name, father_name, address } = studentData;
+
+    // Validação de campos obrigatórios extras para alunos
+    const requiredFields = {
+      voter_title: 'Título de eleitor',
+      reservist: 'Número de reservista',
+      mother_name: 'Nome da mãe',
+      father_name: 'Nome do pai',
+      address: 'Endereço',
+    };
+
+    const missingFields = [];
+    for (const [field, label] of Object.entries(requiredFields)) {
+      if (!studentData[field] || (typeof studentData[field] === 'string' && !studentData[field].trim())) {
+        missingFields.push(label);
+      }
+    }
+
+    if (missingFields.length > 0) {
+      throw new AppError(`Os seguintes campos são obrigatórios para alunos: ${missingFields.join(', ')}`, 400);
+    }
 
     // Validação de unicidade de email
     const existingUser = await User.findOne({ where: { email } });
@@ -37,7 +63,13 @@ class StudentService {
     // Validação de unicidade de CPF
     const existingCpf = await User.findOne({ where: { cpf } });
     if (existingCpf) {
-        throw new AppError('CPF já está em uso.', 409);
+      throw new AppError('CPF já está em uso.', 409);
+    }
+
+    // Validação de unicidade de login
+    const existingLogin = await User.findOne({ where: { login } });
+    if (existingLogin) {
+      throw new AppError('Login já está em uso.', 409);
     }
 
     // Geração de senha provisória

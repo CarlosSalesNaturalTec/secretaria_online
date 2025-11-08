@@ -256,6 +256,60 @@ module.exports = (sequelize, DataTypes) => {
         },
         comment: 'RG do usuário',
       },
+
+      voter_title: {
+        type: DataTypes.STRING(20),
+        allowNull: true,
+        validate: {
+          len: {
+            args: [0, 20],
+            msg: 'Título de eleitor deve ter no máximo 20 caracteres',
+          },
+        },
+        comment: 'Título de eleitor - obrigatório para alunos e professores',
+      },
+
+      reservist: {
+        type: DataTypes.STRING(20),
+        allowNull: true,
+        validate: {
+          len: {
+            args: [0, 20],
+            msg: 'Número de reservista deve ter no máximo 20 caracteres',
+          },
+        },
+        comment: 'Número de reservista - obrigatório para alunos e professores',
+      },
+
+      mother_name: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+        validate: {
+          len: {
+            args: [0, 255],
+            msg: 'Nome da mãe deve ter no máximo 255 caracteres',
+          },
+        },
+        comment: 'Nome da mãe - obrigatório para alunos e professores',
+      },
+
+      father_name: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+        validate: {
+          len: {
+            args: [0, 255],
+            msg: 'Nome do pai deve ter no máximo 255 caracteres',
+          },
+        },
+        comment: 'Nome do pai - obrigatório para alunos e professores',
+      },
+
+      address: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        comment: 'Endereço residencial - obrigatório para alunos e professores',
+      },
     },
     {
       // Opções do model
@@ -270,7 +324,7 @@ module.exports = (sequelize, DataTypes) => {
       hooks: {
         /**
          * Hook executado antes de validar (antes de criar ou atualizar)
-         * Responsável por fazer hash da senha
+         * Responsável por fazer hash da senha e validar campos condicionais
          *
          * @param {User} user - Instância do usuário
          *
@@ -285,10 +339,33 @@ module.exports = (sequelize, DataTypes) => {
          * Solução: Usar user.changed('password_hash', true) para forçar detecção
          * Data: 2025-10-26
          *
+         * FIX v4: Validação condicional de campos para alunos e professores
+         * Problema: Alunos e professores precisam de campos extras obrigatórios
+         * Solução: Adicionar validação condicional baseada em role antes de validações normais
+         * Data: 2025-11-08
+         *
          * beforeValidate é executado ANTES de beforeCreate/beforeUpdate, garantindo que
          * password_hash esteja preenchido antes das validações de NOT NULL
          */
         beforeValidate: async (user) => {
+          // Validação condicional: alunos e professores precisam de campos extras
+          if (user.role === 'student' || user.role === 'teacher') {
+            const requiredFields = ['voter_title', 'reservist', 'mother_name', 'father_name', 'address'];
+            const missingFields = [];
+
+            requiredFields.forEach(field => {
+              if (!user[field] || (typeof user[field] === 'string' && !user[field].trim())) {
+                missingFields.push(field);
+              }
+            });
+
+            if (missingFields.length > 0) {
+              throw new Error(
+                `Os seguintes campos são obrigatórios para ${user.role === 'student' ? 'alunos' : 'professores'}: ${missingFields.join(', ')}`
+              );
+            }
+          }
+
           // Verificar se há senha marcada para hash pelo setter
           if (user._passwordNeedsHash) {
             const password = user._passwordNeedsHash;
@@ -377,7 +454,7 @@ module.exports = (sequelize, DataTypes) => {
    * res.json(user.getPublicData());
    */
   User.prototype.getPublicData = function () {
-    return {
+    const publicData = {
       id: this.id,
       role: this.role,
       name: this.name,
@@ -388,6 +465,17 @@ module.exports = (sequelize, DataTypes) => {
       created_at: this.created_at,
       updated_at: this.updated_at,
     };
+
+    // Adicionar campos condicionais se existirem (para alunos e professores)
+    if (this.role === 'student' || this.role === 'teacher') {
+      publicData.voter_title = this.voter_title;
+      publicData.reservist = this.reservist;
+      publicData.mother_name = this.mother_name;
+      publicData.father_name = this.father_name;
+      publicData.address = this.address;
+    }
+
+    return publicData;
   };
 
   /**

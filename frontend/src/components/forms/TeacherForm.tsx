@@ -44,8 +44,11 @@ const teacherFormSchema = z.object({
     .regex(/^[a-z0-9._-]+$/, 'Login deve conter apenas letras minúsculas, números e os caracteres . _ -'),
 
   cpf: z.string()
-    .min(11, 'CPF deve ter 11 dígitos')
-    .regex(/^\d{11}$/, 'CPF deve conter apenas números'),
+    .min(1, 'CPF é obrigatório')
+    .refine(
+      (cpf) => cpf.replace(/\D/g, '').length === 11,
+      'CPF deve ter 11 dígitos'
+    ),
 
   rg: z.string()
     .max(20, 'RG deve ter no máximo 20 caracteres')
@@ -53,29 +56,27 @@ const teacherFormSchema = z.object({
     .or(z.literal('')),
 
   motherName: z.string()
-    .max(100, 'Nome da mãe deve ter no máximo 100 caracteres')
-    .optional()
-    .or(z.literal('')),
+    .min(1, 'Nome da mãe é obrigatório')
+    .min(3, 'Nome da mãe deve ter entre 3 e 255 caracteres')
+    .max(255, 'Nome da mãe deve ter entre 3 e 255 caracteres'),
 
   fatherName: z.string()
-    .max(100, 'Nome do pai deve ter no máximo 100 caracteres')
-    .optional()
-    .or(z.literal('')),
+    .min(1, 'Nome do pai é obrigatório')
+    .min(3, 'Nome do pai deve ter entre 3 e 255 caracteres')
+    .max(255, 'Nome do pai deve ter entre 3 e 255 caracteres'),
 
   address: z.string()
-    .max(200, 'Endereço deve ter no máximo 200 caracteres')
-    .optional()
-    .or(z.literal('')),
+    .min(1, 'Endereço é obrigatório')
+    .min(10, 'Endereço deve ter no mínimo 10 caracteres')
+    .max(200, 'Endereço deve ter no máximo 200 caracteres'),
 
   title: z.string()
-    .max(20, 'Título de eleitor deve ter no máximo 20 caracteres')
-    .optional()
-    .or(z.literal('')),
+    .min(1, 'Título de eleitor é obrigatório para professores')
+    .max(20, 'Título de eleitor deve ter no máximo 20 caracteres'),
 
   reservist: z.string()
-    .max(20, 'Número do reservista deve ter no máximo 20 caracteres')
-    .optional()
-    .or(z.literal('')),
+    .min(1, 'Número de reservista é obrigatório para professores')
+    .max(20, 'Número do reservista deve ter no máximo 20 caracteres'),
 });
 
 /**
@@ -185,21 +186,30 @@ export function TeacherForm({
 
   /**
    * Handler de submit do formulário
-   * Remove máscara do CPF antes de enviar
+   * Remove máscaras de todos os campos numéricos antes de enviar
+   *
+   * Campos que recebem limpeza:
+   * - cpf: Remove máscara (###.###.###-##) → apenas números
+   * - rg: Remove qualquer caractere não numérico
+   * - title: Remove qualquer caractere não numérico (título de eleitor)
+   * - reservist: Remove qualquer caractere não numérico (número de reservista)
    */
   const handleFormSubmit = async (data: TeacherFormData) => {
     try {
-      // Remove caracteres não numéricos do CPF (caso tenha máscara)
       const cleanedData = {
         ...data,
+        // Remove máscara do CPF: ###.###.###-## → apenas números
         cpf: data.cpf.replace(/\D/g, ''),
-        // Remove campos vazios opcionais
-        rg: data.rg?.trim() || undefined,
-        motherName: data.motherName?.trim() || undefined,
-        fatherName: data.fatherName?.trim() || undefined,
-        address: data.address?.trim() || undefined,
-        title: data.title?.trim() || undefined,
-        reservist: data.reservist?.trim() || undefined,
+        // Remove máscaras e espaços dos campos opcionais
+        rg: data.rg ? data.rg.replace(/\D/g, '').trim() || undefined : undefined,
+        // Campos obrigatórios para professores
+        motherName: data.motherName?.trim(),
+        fatherName: data.fatherName?.trim(),
+        address: data.address?.trim(),
+        // Remove máscara do título de eleitor (se houver espaços ou caracteres especiais)
+        title: data.title ? data.title.replace(/\D/g, '').trim() : undefined,
+        // Remove máscara do número de reservista (se houver espaços ou caracteres especiais)
+        reservist: data.reservist ? data.reservist.replace(/\D/g, '').trim() : undefined,
       };
 
       await onSubmit(cleanedData);
@@ -286,6 +296,7 @@ export function TeacherForm({
             label="Título de eleitor"
             placeholder="0000 0000 0000"
             error={errors.title?.message}
+            required
             disabled={loading}
           />
 
@@ -295,6 +306,7 @@ export function TeacherForm({
             label="Certificado de reservista"
             placeholder="000000000"
             error={errors.reservist?.message}
+            required
             disabled={loading}
           />
         </div>
@@ -311,6 +323,7 @@ export function TeacherForm({
             label="Nome da mãe"
             placeholder="Digite o nome da mãe"
             error={errors.motherName?.message}
+            required
             disabled={loading}
           />
 
@@ -320,6 +333,7 @@ export function TeacherForm({
             label="Nome do pai"
             placeholder="Digite o nome do pai"
             error={errors.fatherName?.message}
+            required
             disabled={loading}
           />
 
@@ -329,6 +343,7 @@ export function TeacherForm({
             label="Endereço completo"
             placeholder="Rua, número, bairro, cidade, estado"
             error={errors.address?.message}
+            required
             disabled={loading}
           />
         </div>

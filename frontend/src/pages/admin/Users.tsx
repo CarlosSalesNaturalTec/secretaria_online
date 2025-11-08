@@ -2,12 +2,14 @@
  * Arquivo: frontend/src/pages/admin/Users.tsx
  * Descrição: Página de gerenciamento de usuários administradores
  * Feature: feat-082 - Implementar página de usuários admin
+ * Feature: feat-101 - Remover filtros de role, exibir apenas admins
  * Criado em: 2025-11-07
+ * Atualizado em: 2025-11-08
  */
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, Edit, Trash2, UserPlus, X } from 'lucide-react';
+import { Search, Edit, Trash2, UserPlus, X } from 'lucide-react';
 import UserService, { type IUserFilters } from '@/services/user.service';
 import type { IUser, ICreateUser, IUpdateUser } from '@/types/user.types';
 import { maskCPF, formatCPF } from '@/utils/formatters';
@@ -427,10 +429,6 @@ export default function AdminUsers() {
     setFilters({ ...filters, search: searchTerm, page: 1 });
   };
 
-  const handleRoleFilter = (role: 'admin' | 'teacher' | 'student' | undefined) => {
-    setFilters({ ...filters, role, page: 1 });
-  };
-
   const handleDelete = (user: IUser) => {
     setConfirmDelete({
       userId: user.id,
@@ -460,7 +458,7 @@ export default function AdminUsers() {
         </p>
       </div>
 
-      {/* Filtros e Busca */}
+      {/* Barra de Busca e Ação */}
       <div className="bg-white rounded-lg shadow p-4 mb-6">
         <div className="flex flex-col md:flex-row gap-4">
           {/* Busca */}
@@ -478,54 +476,10 @@ export default function AdminUsers() {
             </div>
           </div>
 
-          {/* Filtro por Role */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => handleRoleFilter(undefined)}
-              className={`px-4 py-2 rounded-lg ${
-                !filters.role
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Todos
-            </button>
-            <button
-              onClick={() => handleRoleFilter('admin')}
-              className={`px-4 py-2 rounded-lg ${
-                filters.role === 'admin'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Admin
-            </button>
-            <button
-              onClick={() => handleRoleFilter('teacher')}
-              className={`px-4 py-2 rounded-lg ${
-                filters.role === 'teacher'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Professor
-            </button>
-            <button
-              onClick={() => handleRoleFilter('student')}
-              className={`px-4 py-2 rounded-lg ${
-                filters.role === 'student'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Aluno
-            </button>
-          </div>
-
           {/* Botão Criar */}
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 whitespace-nowrap"
           >
             <UserPlus className="h-5 w-5" />
             Novo Usuário

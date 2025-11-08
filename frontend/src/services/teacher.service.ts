@@ -33,16 +33,16 @@ export interface ICreateTeacherData {
   cpf: string;
   /** RG (opcional) */
   rg?: string;
-  /** Nome da mãe (opcional) */
-  motherName?: string;
-  /** Nome do pai (opcional) */
-  fatherName?: string;
-  /** Endereço completo (opcional) */
-  address?: string;
-  /** Título de eleitor (opcional) */
-  title?: string;
-  /** Número do reservista (opcional) */
-  reservist?: string;
+  /** Nome da mãe (obrigatório para professores) */
+  motherName: string;
+  /** Nome do pai (obrigatório para professores) */
+  fatherName: string;
+  /** Endereço completo (obrigatório para professores) */
+  address: string;
+  /** Título de eleitor (obrigatório para professores) */
+  title: string;
+  /** Número do reservista (obrigatório para professores) */
+  reservist: string;
 }
 
 /**
@@ -199,7 +199,7 @@ export async function getById(id: number): Promise<IUser> {
  */
 export async function create(data: ICreateTeacherData): Promise<IUser> {
   try {
-    // Validações de campos obrigatórios
+    // Validações de campos obrigatórios básicos
     if (!data.name || data.name.trim().length < 3) {
       throw new Error('Nome é obrigatório e deve ter no mínimo 3 caracteres');
     }
@@ -222,6 +222,27 @@ export async function create(data: ICreateTeacherData): Promise<IUser> {
       throw new Error('CPF deve conter apenas números');
     }
 
+    // Validações de campos obrigatórios para professores
+    if (!data.motherName || data.motherName.trim().length < 3) {
+      throw new Error('Nome da mãe é obrigatório e deve ter no mínimo 3 caracteres');
+    }
+
+    if (!data.fatherName || data.fatherName.trim().length < 3) {
+      throw new Error('Nome do pai é obrigatório e deve ter no mínimo 3 caracteres');
+    }
+
+    if (!data.address || data.address.trim().length < 10) {
+      throw new Error('Endereço é obrigatório e deve ter no mínimo 10 caracteres');
+    }
+
+    if (!data.title || data.title.trim().length === 0) {
+      throw new Error('Título de eleitor é obrigatório para professores');
+    }
+
+    if (!data.reservist || data.reservist.trim().length === 0) {
+      throw new Error('Número de reservista é obrigatório para professores');
+    }
+
     if (import.meta.env.DEV) {
       console.log('[TeacherService] Criando novo professor:', {
         name: data.name,
@@ -238,11 +259,11 @@ export async function create(data: ICreateTeacherData): Promise<IUser> {
       login: data.login.trim().toLowerCase(),
       cpf: cpfClean,
       rg: data.rg?.trim(),
-      motherName: data.motherName?.trim(),
-      fatherName: data.fatherName?.trim(),
-      address: data.address?.trim(),
-      title: data.title?.trim(),
-      reservist: data.reservist?.trim(),
+      motherName: data.motherName.trim(),
+      fatherName: data.fatherName.trim(),
+      address: data.address.trim(),
+      title: data.title.replace(/\D/g, '').trim(),
+      reservist: data.reservist.replace(/\D/g, '').trim(),
     };
 
     const response = await api.post<ApiResponse<IUser>>('/teachers', payload);
