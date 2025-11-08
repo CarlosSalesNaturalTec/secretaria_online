@@ -21,6 +21,7 @@ import type { ApiResponse } from '@/types/api.types';
  * Interface para dados de criação de professor
  *
  * Contém todos os campos obrigatórios e opcionais para cadastro de professor
+ * Usa snake_case para compatibilidade com o backend
  */
 export interface ICreateTeacherData {
   /** Nome completo do professor */
@@ -34,13 +35,13 @@ export interface ICreateTeacherData {
   /** RG (opcional) */
   rg?: string;
   /** Nome da mãe (obrigatório para professores) */
-  motherName: string;
+  mother_name: string;
   /** Nome do pai (obrigatório para professores) */
-  fatherName: string;
+  father_name: string;
   /** Endereço completo (obrigatório para professores) */
   address: string;
   /** Título de eleitor (obrigatório para professores) */
-  title: string;
+  voter_title: string;
   /** Número do reservista (obrigatório para professores) */
   reservist: string;
 }
@@ -49,6 +50,7 @@ export interface ICreateTeacherData {
  * Interface para dados de atualização de professor
  *
  * Todos os campos são opcionais, permitindo atualização parcial
+ * Usa snake_case para compatibilidade com o backend
  */
 export interface IUpdateTeacherData {
   /** Nome completo do professor */
@@ -62,13 +64,13 @@ export interface IUpdateTeacherData {
   /** RG (opcional) */
   rg?: string;
   /** Nome da mãe (opcional) */
-  motherName?: string;
+  mother_name?: string;
   /** Nome do pai (opcional) */
-  fatherName?: string;
+  father_name?: string;
   /** Endereço completo (opcional) */
   address?: string;
   /** Título de eleitor (opcional) */
-  title?: string;
+  voter_title?: string;
   /** Número do reservista (opcional) */
   reservist?: string;
 }
@@ -223,11 +225,11 @@ export async function create(data: ICreateTeacherData): Promise<IUser> {
     }
 
     // Validações de campos obrigatórios para professores
-    if (!data.motherName || data.motherName.trim().length < 3) {
+    if (!data.mother_name || data.mother_name.trim().length < 3) {
       throw new Error('Nome da mãe é obrigatório e deve ter no mínimo 3 caracteres');
     }
 
-    if (!data.fatherName || data.fatherName.trim().length < 3) {
+    if (!data.father_name || data.father_name.trim().length < 3) {
       throw new Error('Nome do pai é obrigatório e deve ter no mínimo 3 caracteres');
     }
 
@@ -235,7 +237,7 @@ export async function create(data: ICreateTeacherData): Promise<IUser> {
       throw new Error('Endereço é obrigatório e deve ter no mínimo 10 caracteres');
     }
 
-    if (!data.title || data.title.trim().length === 0) {
+    if (!data.voter_title || data.voter_title.trim().length === 0) {
       throw new Error('Título de eleitor é obrigatório para professores');
     }
 
@@ -253,16 +255,15 @@ export async function create(data: ICreateTeacherData): Promise<IUser> {
 
     // Preparar dados para envio (remover espaços em branco)
     const payload = {
-      ...data,
       name: data.name.trim(),
       email: data.email.trim().toLowerCase(),
       login: data.login.trim().toLowerCase(),
       cpf: cpfClean,
       rg: data.rg?.trim(),
-      motherName: data.motherName.trim(),
-      fatherName: data.fatherName.trim(),
+      mother_name: data.mother_name.trim(),
+      father_name: data.father_name.trim(),
       address: data.address.trim(),
-      title: data.title.replace(/\D/g, '').trim(),
+      voter_title: data.voter_title.replace(/\D/g, '').trim(),
       reservist: data.reservist.replace(/\D/g, '').trim(),
     };
 
@@ -347,17 +348,17 @@ export async function update(
     }
 
     // Preparar dados para envio (remover espaços em branco)
-    const payload: IUpdateTeacherData = {};
+    const payload: any = {};
 
     if (data.name !== undefined) payload.name = data.name.trim();
     if (data.email !== undefined) payload.email = data.email.trim().toLowerCase();
     if (data.login !== undefined) payload.login = data.login.trim().toLowerCase();
     if (data.cpf !== undefined) payload.cpf = data.cpf.replace(/\D/g, '');
     if (data.rg !== undefined) payload.rg = data.rg.trim();
-    if (data.motherName !== undefined) payload.motherName = data.motherName.trim();
-    if (data.fatherName !== undefined) payload.fatherName = data.fatherName.trim();
+    if (data.mother_name !== undefined) payload.mother_name = data.mother_name.trim();
+    if (data.father_name !== undefined) payload.father_name = data.father_name.trim();
     if (data.address !== undefined) payload.address = data.address.trim();
-    if (data.title !== undefined) payload.title = data.title.trim();
+    if (data.voter_title !== undefined) payload.voter_title = data.voter_title.trim();
     if (data.reservist !== undefined) payload.reservist = data.reservist.trim();
 
     const response = await api.put<ApiResponse<IUser>>(

@@ -21,6 +21,7 @@ import type { ApiResponse } from '@/types/api.types';
  * Interface para dados de criação de aluno
  *
  * Contém todos os campos obrigatórios e opcionais para cadastro de aluno
+ * Usa snake_case para compatibilidade com o backend
  */
 export interface ICreateStudentData {
   /** Nome completo do aluno */
@@ -34,13 +35,13 @@ export interface ICreateStudentData {
   /** RG (opcional) */
   rg?: string;
   /** Nome da mãe (obrigatório para alunos) */
-  motherName: string;
+  mother_name: string;
   /** Nome do pai (obrigatório para alunos) */
-  fatherName: string;
+  father_name: string;
   /** Endereço completo (obrigatório para alunos) */
   address: string;
   /** Título de eleitor (obrigatório para alunos) */
-  title: string;
+  voter_title: string;
   /** Número do reservista (obrigatório para alunos) */
   reservist: string;
 }
@@ -49,6 +50,7 @@ export interface ICreateStudentData {
  * Interface para dados de atualização de aluno
  *
  * Todos os campos são opcionais, permitindo atualização parcial
+ * Usa snake_case para compatibilidade com o backend
  */
 export interface IUpdateStudentData {
   /** Nome completo do aluno */
@@ -62,13 +64,13 @@ export interface IUpdateStudentData {
   /** RG (opcional) */
   rg?: string;
   /** Nome da mãe (opcional) */
-  motherName?: string;
+  mother_name?: string;
   /** Nome do pai (opcional) */
-  fatherName?: string;
+  father_name?: string;
   /** Endereço completo (opcional) */
   address?: string;
   /** Título de eleitor (opcional) */
-  title?: string;
+  voter_title?: string;
   /** Número do reservista (opcional) */
   reservist?: string;
 }
@@ -223,11 +225,11 @@ export async function create(data: ICreateStudentData): Promise<IUser> {
     }
 
     // Validações de campos obrigatórios para alunos
-    if (!data.motherName || data.motherName.trim().length < 3) {
+    if (!data.mother_name || data.mother_name.trim().length < 3) {
       throw new Error('Nome da mãe é obrigatório e deve ter no mínimo 3 caracteres');
     }
 
-    if (!data.fatherName || data.fatherName.trim().length < 3) {
+    if (!data.father_name || data.father_name.trim().length < 3) {
       throw new Error('Nome do pai é obrigatório e deve ter no mínimo 3 caracteres');
     }
 
@@ -235,7 +237,7 @@ export async function create(data: ICreateStudentData): Promise<IUser> {
       throw new Error('Endereço é obrigatório e deve ter no mínimo 10 caracteres');
     }
 
-    if (!data.title || data.title.trim().length === 0) {
+    if (!data.voter_title || data.voter_title.trim().length === 0) {
       throw new Error('Título de eleitor é obrigatório para alunos');
     }
 
@@ -252,17 +254,16 @@ export async function create(data: ICreateStudentData): Promise<IUser> {
     }
 
     // Preparar dados para envio (remover espaços em branco)
-    // Mapear para os nomes corretos esperados pelo backend (snake_case)
     const payload = {
       name: data.name.trim(),
       email: data.email.trim().toLowerCase(),
       login: data.login.trim().toLowerCase(),
       cpf: cpfClean,
       rg: data.rg?.trim(),
-      voter_title: data.title.replace(/\D/g, '').trim(),      // Backend usa voter_title, remove máscaras
+      voter_title: data.voter_title.replace(/\D/g, '').trim(),
       reservist: data.reservist.replace(/\D/g, '').trim(),
-      mother_name: data.motherName.trim(), // Backend usa mother_name, não motherName
-      father_name: data.fatherName.trim(), // Backend usa father_name, não fatherName
+      mother_name: data.mother_name.trim(),
+      father_name: data.father_name.trim(),
       address: data.address.trim(),
     };
 
@@ -351,7 +352,6 @@ export async function update(
     }
 
     // Preparar dados para envio (remover espaços em branco)
-    // Mapear para os nomes corretos esperados pelo backend (snake_case)
     const payload: any = {};
 
     if (data.name !== undefined) payload.name = data.name.trim();
@@ -359,10 +359,10 @@ export async function update(
     if (data.login !== undefined) payload.login = data.login.trim().toLowerCase();
     if (data.cpf !== undefined) payload.cpf = data.cpf.replace(/\D/g, '');
     if (data.rg !== undefined) payload.rg = data.rg.trim();
-    if (data.motherName !== undefined) payload.mother_name = data.motherName.trim();
-    if (data.fatherName !== undefined) payload.father_name = data.fatherName.trim();
+    if (data.mother_name !== undefined) payload.mother_name = data.mother_name.trim();
+    if (data.father_name !== undefined) payload.father_name = data.father_name.trim();
     if (data.address !== undefined) payload.address = data.address.trim();
-    if (data.title !== undefined) payload.voter_title = data.title.trim();
+    if (data.voter_title !== undefined) payload.voter_title = data.voter_title.trim();
     if (data.reservist !== undefined) payload.reservist = data.reservist.trim();
 
     if (import.meta.env.DEV) {
