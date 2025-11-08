@@ -142,7 +142,36 @@ export default function ClassesPage() {
   const handleCreate = async (data: ICreateClassData | IUpdateClassData) => {
     try {
       setIsSubmitting(true);
-      await ClassService.create(data as ICreateClassData);
+
+      // Criar turma
+      const createdClass = await ClassService.create(data as ICreateClassData);
+
+      // Vincular professores
+      const createClassData = data as ICreateClassData;
+      if (createClassData.teachers && createClassData.teachers.length > 0) {
+        for (const teacher of createClassData.teachers) {
+          if (teacher.teacherId > 0 && teacher.disciplineId > 0) {
+            await ClassService.addTeacherToClass(
+              createdClass.id,
+              teacher.teacherId,
+              teacher.disciplineId
+            );
+          }
+        }
+      }
+
+      // Vincular alunos
+      if (createClassData.studentIds && createClassData.studentIds.length > 0) {
+        for (const studentId of createClassData.studentIds) {
+          if (studentId > 0) {
+            await ClassService.addStudentToClass(
+              createdClass.id,
+              studentId
+            );
+          }
+        }
+      }
+
       setSuccessMessage('Turma cadastrada com sucesso!');
       handleCloseModal();
       await loadClasses();

@@ -461,13 +461,98 @@ export async function deleteClass(id: number): Promise<void> {
 }
 
 /**
+ * Vincula um professor a uma turma com uma disciplina específica
+ *
+ * @param {number} classId - ID da turma
+ * @param {number} teacherId - ID do professor
+ * @param {number} disciplineId - ID da disciplina
+ * @returns {Promise<void>}
+ * @throws {Error} Quando IDs são inválidos ou erro na API
+ */
+export async function addTeacherToClass(
+  classId: number,
+  teacherId: number,
+  disciplineId: number
+): Promise<void> {
+  try {
+    if (!classId || classId <= 0) {
+      throw new Error('ID da turma é obrigatório');
+    }
+    if (!teacherId || teacherId <= 0) {
+      throw new Error('ID do professor é obrigatório');
+    }
+    if (!disciplineId || disciplineId <= 0) {
+      throw new Error('ID da disciplina é obrigatório');
+    }
+
+    const response = await api.post<ApiResponse<void>>(
+      `/classes/${classId}/teachers/${teacherId}/discipline/${disciplineId}`
+    );
+
+    if (!response.data.success) {
+      throw new Error(
+        response.data.error?.message || 'Erro ao vincular professor'
+      );
+    }
+  } catch (error) {
+    console.error('[ClassService] Erro ao vincular professor:', error);
+
+    if (error instanceof Error) {
+      throw error;
+    }
+
+    throw new Error('Falha ao vincular professor. Tente novamente.');
+  }
+}
+
+/**
+ * Vincula um aluno a uma turma
+ *
+ * @param {number} classId - ID da turma
+ * @param {number} studentId - ID do aluno
+ * @returns {Promise<void>}
+ * @throws {Error} Quando IDs são inválidos ou erro na API
+ */
+export async function addStudentToClass(
+  classId: number,
+  studentId: number
+): Promise<void> {
+  try {
+    if (!classId || classId <= 0) {
+      throw new Error('ID da turma é obrigatório');
+    }
+    if (!studentId || studentId <= 0) {
+      throw new Error('ID do aluno é obrigatório');
+    }
+
+    const response = await api.post<ApiResponse<void>>(
+      `/classes/${classId}/students/${studentId}`
+    );
+
+    if (!response.data.success) {
+      throw new Error(
+        response.data.error?.message || 'Erro ao vincular aluno'
+      );
+    }
+  } catch (error) {
+    console.error('[ClassService] Erro ao vincular aluno:', error);
+
+    if (error instanceof Error) {
+      throw error;
+    }
+
+    throw new Error('Falha ao vincular aluno. Tente novamente.');
+  }
+}
+
+/**
  * Exporta todas as funções do serviço como objeto
  *
  * Permite importação nomeada ou import do objeto completo
  *
  * @example
  * // Importação nomeada (recomendado)
- * import { getAll, getById, create, update, deleteClass } from '@/services/class.service';
+ * import { getAll, getById, create, update, deleteClass, addTeacherToClass, addStudentToClass } from '@/services/class.service';
  *
  * // Importação do objeto completo
  * import ClassService from '@/services/class.service';
@@ -479,6 +564,8 @@ const ClassService = {
   create,
   update,
   delete: deleteClass,
+  addTeacherToClass,
+  addStudentToClass,
 };
 
 export default ClassService;
