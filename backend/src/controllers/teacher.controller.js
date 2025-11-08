@@ -74,6 +74,16 @@ class TeacherController {
       next(error);
     }
   }
+
+  async resetPassword(req, res, next) {
+    try {
+      const { id } = req.params;
+      const temporaryPassword = await TeacherService.resetPassword(id);
+      return res.json({ success: true, data: { temporaryPassword } });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new TeacherController();

@@ -166,6 +166,57 @@ class TeacherService {
     await teacher.destroy();
     return true;
   }
+
+  /**
+   * Reseta a senha de um professor e envia email com nova senha provisória.
+   *
+   * Este método é chamado quando um administrador regenera a senha
+   * de um professor através da funcionalidade de reset de senha.
+   *
+   * @param {number} id - ID do professor.
+   * @returns {Promise<string>} A nova senha provisória.
+   * @throws {AppError} Se o professor não for encontrado.
+   */
+  async resetPassword(id) {
+    const teacher = await this.getById(id);
+    if (!teacher) {
+      throw new AppError('Professor não encontrado', 404);
+    }
+
+    const temporaryPassword = generateProvisionalPassword();
+    teacher.password = temporaryPassword;
+    await teacher.save();
+
+    logger.info('[TEACHER_SERVICE] Senha do professor resetada com sucesso', {
+      teacherId: teacher.id,
+      email: teacher.email,
+    });
+
+    // Envio de email com nova senha provisória
+    // Se falhar, a senha é resetada normalmente mas o email não é enviado
+    try {
+      await EmailService.sendPasswordEmail(teacher.email, temporaryPassword, {
+        name: teacher.name,
+        login: teacher.login,
+      });
+
+      logger.info('[TEACHER_SERVICE] Email de reset de senha enviado com sucesso', {
+        teacherId: teacher.id,
+        email: teacher.email,
+      });
+    } catch (emailError) {
+      logger.error('[TEACHER_SERVICE] Erro ao enviar email de reset de senha', {
+        teacherId: teacher.id,
+        email: teacher.email,
+        error: emailError.message,
+      });
+
+      // NOTA: A senha foi resetada com sucesso, mas o email falhou
+      // A secretaria deve informar a senha manualmente ao professor
+    }
+
+    return temporaryPassword;
+  }
 }
 
 module.exports = new TeacherService();

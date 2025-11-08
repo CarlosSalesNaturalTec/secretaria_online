@@ -123,4 +123,12 @@ router.delete(
   TeacherController.delete
 );
 
+// Resetar senha do professor
+router.post(
+  '/:id/reset-password',
+  [param('id').isInt().withMessage('ID inválido.')],
+  handleValidationErrors,
+  TeacherController.resetPassword
+);
+
 module.exports = router;
