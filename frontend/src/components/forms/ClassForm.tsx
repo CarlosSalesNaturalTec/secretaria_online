@@ -202,17 +202,26 @@ export function ClassForm({
       });
 
       // Preencher professores vinculados
+      // O backend retorna professores dentro da classe com discipline_id na tabela pivot
       if (initialData.teachers && initialData.teachers.length > 0) {
-        const teacherAssignments = initialData.teachers.map(ct => ({
-          teacherId: ct.teacherId,
-          disciplineId: ct.disciplineId,
-        }));
+        const teacherAssignments = initialData.teachers.map((teacher: any) => {
+          // A disciplina pode estar em class_teachers.discipline_id ou em teacher_association (Sequelize)
+          const disciplineId = teacher.class_teachers?.discipline_id ||
+                               teacher.dataValues?.class_teachers?.discipline_id ||
+                               0;
+
+          return {
+            teacherId: teacher.id,
+            disciplineId: parseInt(disciplineId, 10) || 0,
+          };
+        });
         setSelectedTeachers(teacherAssignments);
       }
 
       // Preencher alunos vinculados
+      // O backend retorna estudantes dentro da classe
       if (initialData.students && initialData.students.length > 0) {
-        const studentIds = initialData.students.map(cs => cs.studentId);
+        const studentIds = initialData.students.map((student: any) => student.id);
         setSelectedStudents(studentIds);
       }
     }

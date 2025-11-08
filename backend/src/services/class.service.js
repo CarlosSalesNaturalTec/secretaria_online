@@ -40,6 +40,11 @@ class ClassService {
         {
           association: 'teachers',
           attributes: ['id', 'name', 'email'],
+          through: { attributes: ['discipline_id'] }
+        },
+        {
+          association: 'disciplines',
+          attributes: ['id', 'name', 'code'],
           through: { attributes: [] }
         }
       ]
@@ -67,6 +72,11 @@ class ClassService {
         {
           association: 'teachers',
           attributes: ['id', 'name', 'email'],
+          through: { attributes: ['discipline_id'] }
+        },
+        {
+          association: 'disciplines',
+          attributes: ['id', 'name', 'code'],
           through: { attributes: [] }
         }
       ]
