@@ -407,9 +407,13 @@ export async function deleteClass(id: number): Promise<void> {
 
     const response = await api.delete<ApiResponse<void>>(`/classes/${id}`);
 
-    if (!response.data.success) {
+    // Handle 204 No Content (successful deletion with no body)
+    // The response.data may be undefined or empty for 204 status
+    const responseData = response.data as any;
+
+    if (responseData && !responseData.success) {
       throw new Error(
-        response.data.error?.message || 'Erro ao remover turma'
+        responseData.error?.message || 'Erro ao remover turma'
       );
     }
 

@@ -394,9 +394,13 @@ export async function deleteEvaluation(id: number): Promise<void> {
       `/evaluations/${id}`
     );
 
-    if (!response.data.success) {
+    // Handle 204 No Content (successful deletion with no body)
+    // The response.data may be undefined or empty for 204 status
+    const responseData = response.data as any;
+
+    if (responseData && !responseData.success) {
       throw new Error(
-        response.data.error?.message || 'Erro ao remover avaliação'
+        responseData.error?.message || 'Erro ao remover avaliação'
       );
     }
 
