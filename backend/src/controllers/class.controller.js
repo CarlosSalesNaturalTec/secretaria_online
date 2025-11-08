@@ -35,6 +35,12 @@ class ClassController {
           error: { code: 'NOT_FOUND', message: 'Turma não encontrada' },
         });
       }
+
+      // Debug: Log da estrutura dos professores
+      if (turma.teachers && turma.teachers.length > 0) {
+        console.log('[ClassController] Teacher structure:', JSON.stringify(turma.teachers[0], null, 2));
+      }
+
       res.status(200).json({ success: true, data: turma });
     } catch (error) {
       next(error);
