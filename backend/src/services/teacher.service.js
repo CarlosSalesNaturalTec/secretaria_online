@@ -32,7 +32,7 @@ class TeacherService {
    * @throws {AppError} Se o CPF ou email já estiverem em uso ou campos obrigatórios faltarem.
    */
   async create(teacherData) {
-    const { email, cpf, name, login } = teacherData;
+    const { email, cpf, name, login, voter_title, reservist, mother_name, father_name, address } = teacherData;
 
     // Validação de campos obrigatórios extras para professores
     const requiredFields = {
@@ -73,10 +73,7 @@ class TeacherService {
     }
 
     // Geração de senha provisória
-    const temporaryPassword = generateProvisionalPassword({
-      length: 10,
-      numbers: true,
-    });
+    const temporaryPassword = generateProvisionalPassword();
 
     // Criação do professor no banco de dados
     const teacher = await User.create({
