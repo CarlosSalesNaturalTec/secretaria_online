@@ -23,20 +23,53 @@ class ClassService {
 
   /**
    * Lista todos os Turmas.
-   * @returns {Promise<Class[]>} Uma lista de Turmas.
+   * @returns {Promise<Class[]>} Uma lista de Turmas com curso, alunos e professores.
    */
   async list() {
-    return Class.findAll();
+    return Class.findAll({
+      include: [
+        {
+          association: 'course',
+          attributes: ['id', 'name', 'duration_semesters']
+        },
+        {
+          association: 'students',
+          attributes: ['id', 'name', 'email'],
+          through: { attributes: [] }
+        },
+        {
+          association: 'teachers',
+          attributes: ['id', 'name', 'email'],
+          through: { attributes: [] }
+        }
+      ]
+    });
   }
 
   /**
    * Busca um Turma pelo ID.
    * @param {number} id - O ID do Turma.
-   * @returns {Promise<Class>} O Turma encontrado.
+   * @returns {Promise<Class>} O Turma encontrado com curso, alunos e professores.
    */
   async getById(id) {
     return Class.findOne({
       where: { id },
+      include: [
+        {
+          association: 'course',
+          attributes: ['id', 'name', 'duration_semesters']
+        },
+        {
+          association: 'students',
+          attributes: ['id', 'name', 'email'],
+          through: { attributes: [] }
+        },
+        {
+          association: 'teachers',
+          attributes: ['id', 'name', 'email'],
+          through: { attributes: [] }
+        }
+      ]
     });
   }
 

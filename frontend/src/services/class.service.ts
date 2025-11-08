@@ -18,6 +18,32 @@ import type { IClass } from '@/types/class.types';
 import type { ApiResponse } from '@/types/api.types';
 
 /**
+ * Função auxiliar para mapear dados da API (snake_case) para o frontend (camelCase)
+ */
+function mapClassData(classData: any): IClass {
+  return {
+    id: classData.id,
+    courseId: classData.course_id || classData.courseId,
+    semester: classData.semester,
+    year: classData.year,
+    course: classData.course ? {
+      id: classData.course.id,
+      name: classData.course.name,
+      description: classData.course.description,
+      durationSemesters: classData.course.duration_semesters || classData.course.durationSemesters,
+      createdAt: classData.course.created_at || classData.course.createdAt,
+      updatedAt: classData.course.updated_at || classData.course.updatedAt,
+      deletedAt: classData.course.deleted_at || classData.course.deletedAt,
+    } : undefined,
+    students: classData.students,
+    teachers: classData.teachers,
+    createdAt: classData.created_at || classData.createdAt,
+    updatedAt: classData.updated_at || classData.updatedAt,
+    deletedAt: classData.deleted_at || classData.deletedAt,
+  };
+}
+
+/**
  * Interface para vinculação de professor-disciplina em turma
  */
 export interface ITeacherDisciplineAssignment {
@@ -98,7 +124,8 @@ export async function getAll(): Promise<IClass[]> {
       console.log('[ClassService] Turmas recuperadas:', response.data.data.length);
     }
 
-    return response.data.data;
+    // Mapear dados da API (snake_case) para camelCase
+    return response.data.data.map(mapClassData);
   } catch (error) {
     console.error('[ClassService] Erro ao buscar turmas:', error);
 
@@ -151,7 +178,8 @@ export async function getById(id: number): Promise<IClass> {
       console.log('[ClassService] Turma encontrada:', response.data.data.id);
     }
 
-    return response.data.data;
+    // Mapear dados da API (snake_case) para camelCase
+    return mapClassData(response.data.data);
   } catch (error) {
     console.error('[ClassService] Erro ao buscar turma:', error);
 
@@ -272,7 +300,8 @@ export async function create(data: ICreateClassData): Promise<IClass> {
       console.log('[ClassService] Turma criada com sucesso:', response.data.data.id);
     }
 
-    return response.data.data;
+    // Mapear dados da API (snake_case) para camelCase
+    return mapClassData(response.data.data);
   } catch (error) {
     console.error('[ClassService] Erro ao criar turma:', error);
 
@@ -393,7 +422,8 @@ export async function update(
       console.log('[ClassService] Turma atualizada com sucesso:', response.data.data.id);
     }
 
-    return response.data.data;
+    // Mapear dados da API (snake_case) para camelCase
+    return mapClassData(response.data.data);
   } catch (error) {
     console.error('[ClassService] Erro ao atualizar turma:', error);
 
