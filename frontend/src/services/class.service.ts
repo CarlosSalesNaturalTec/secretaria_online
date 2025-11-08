@@ -546,13 +546,100 @@ export async function addStudentToClass(
 }
 
 /**
+ * Remove um professor de uma turma
+ *
+ * @param {number} classId - ID da turma
+ * @param {number} teacherId - ID do professor
+ * @param {number} disciplineId - ID da disciplina
+ * @returns {Promise<void>}
+ * @throws {Error} Quando IDs são inválidos ou erro na API
+ */
+export async function removeTeacherFromClass(
+  classId: number,
+  teacherId: number,
+  disciplineId: number
+): Promise<void> {
+  try {
+    if (!classId || classId <= 0) {
+      throw new Error('ID da turma é obrigatório');
+    }
+    if (!teacherId || teacherId <= 0) {
+      throw new Error('ID do professor é obrigatório');
+    }
+    if (!disciplineId || disciplineId <= 0) {
+      throw new Error('ID da disciplina é obrigatório');
+    }
+
+    const response = await api.delete<ApiResponse<void>>(
+      `/classes/${classId}/teachers/${teacherId}/discipline/${disciplineId}`
+    );
+
+    const responseData = response.data as any;
+    if (responseData && !responseData.success) {
+      throw new Error(
+        responseData.error?.message || 'Erro ao remover professor'
+      );
+    }
+  } catch (error) {
+    console.error('[ClassService] Erro ao remover professor:', error);
+
+    if (error instanceof Error) {
+      throw error;
+    }
+
+    throw new Error('Falha ao remover professor. Tente novamente.');
+  }
+}
+
+/**
+ * Remove um aluno de uma turma
+ *
+ * @param {number} classId - ID da turma
+ * @param {number} studentId - ID do aluno
+ * @returns {Promise<void>}
+ * @throws {Error} Quando IDs são inválidos ou erro na API
+ */
+export async function removeStudentFromClass(
+  classId: number,
+  studentId: number
+): Promise<void> {
+  try {
+    if (!classId || classId <= 0) {
+      throw new Error('ID da turma é obrigatório');
+    }
+    if (!studentId || studentId <= 0) {
+      throw new Error('ID do aluno é obrigatório');
+    }
+
+    const response = await api.delete<ApiResponse<void>>(
+      `/classes/${classId}/students/${studentId}`
+    );
+
+    const responseData = response.data as any;
+    if (responseData && !responseData.success) {
+      throw new Error(
+        responseData.error?.message || 'Erro ao remover aluno'
+      );
+    }
+  } catch (error) {
+    console.error('[ClassService] Erro ao remover aluno:', error);
+
+    if (error instanceof Error) {
+      throw error;
+    }
+
+    throw new Error('Falha ao remover aluno. Tente novamente.');
+  }
+}
+
+/**
  * Exporta todas as funções do serviço como objeto
  *
  * Permite importação nomeada ou import do objeto completo
  *
  * @example
  * // Importação nomeada (recomendado)
- * import { getAll, getById, create, update, deleteClass, addTeacherToClass, addStudentToClass } from '@/services/class.service';
+ * import { getAll, getById, create, update, deleteClass, addTeacherToClass, addStudentToClass, removeTeacherFromClass, removeStudentFromClass } from '@/services/class.service';
  *
  * // Importação do objeto completo
  * import ClassService from '@/services/class.service';
@@ -566,6 +653,8 @@ const ClassService = {
   delete: deleteClass,
   addTeacherToClass,
   addStudentToClass,
+  removeTeacherFromClass,
+  removeStudentFromClass,
 };
 
 export default ClassService;
