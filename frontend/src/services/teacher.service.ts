@@ -280,14 +280,16 @@ export async function create(data: ICreateTeacherData): Promise<IUser> {
     }
 
     return response.data.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('[TeacherService] Erro ao criar professor:', error);
 
-    if (error instanceof Error) {
-      throw error;
-    }
+    // Extrai mensagem de erro mais específica (para status 409, 422, etc)
+    const errorMessage = error.response?.data?.error?.message
+      || error.response?.data?.message
+      || error.message
+      || 'Falha ao criar professor. Tente novamente.';
 
-    throw new Error('Falha ao criar professor. Tente novamente.');
+    throw new Error(errorMessage);
   }
 }
 
@@ -377,14 +379,16 @@ export async function update(
     }
 
     return response.data.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('[TeacherService] Erro ao atualizar professor:', error);
 
-    if (error instanceof Error) {
-      throw error;
-    }
+    // Extrai mensagem de erro mais específica (para status 409, 422, etc)
+    const errorMessage = error.response?.data?.error?.message
+      || error.response?.data?.message
+      || error.message
+      || 'Falha ao atualizar professor. Tente novamente.';
 
-    throw new Error('Falha ao atualizar professor. Tente novamente.');
+    throw new Error(errorMessage);
   }
 }
 
@@ -428,14 +432,16 @@ export async function deleteTeacher(id: number): Promise<void> {
     if (import.meta.env.DEV) {
       console.log('[TeacherService] Professor removido com sucesso');
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('[TeacherService] Erro ao remover professor:', error);
 
-    if (error instanceof Error) {
-      throw error;
-    }
+    // Extrai mensagem de erro mais específica (para status 409, 422, etc)
+    const errorMessage = error.response?.data?.error?.message
+      || error.response?.data?.message
+      || error.message
+      || 'Falha ao remover professor. Tente novamente.';
 
-    throw new Error('Falha ao remover professor. Tente novamente.');
+    throw new Error(errorMessage);
   }
 }
 
@@ -482,14 +488,16 @@ export async function resetPassword(id: number): Promise<void> {
     if (import.meta.env.DEV) {
       console.log('[TeacherService] Senha regenerada e enviada por email');
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('[TeacherService] Erro ao regenerar senha:', error);
 
-    if (error instanceof Error) {
-      throw error;
-    }
+    // Extrai mensagem de erro mais específica (para status 409, 422, etc)
+    const errorMessage = error.response?.data?.error?.message
+      || error.response?.data?.message
+      || error.message
+      || 'Falha ao regenerar senha. Tente novamente.';
 
-    throw new Error('Falha ao regenerar senha. Tente novamente.');
+    throw new Error(errorMessage);
   }
 }
 
