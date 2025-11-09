@@ -84,6 +84,7 @@ async function getAll(filters?: IEnrollmentFilters): Promise<IEnrollment[]> {
       console.log('[EnrollmentService] Resposta completa:', response.data);
       console.log('[EnrollmentService] response.data.success:', response.data.success);
       console.log('[EnrollmentService] response.data.data:', response.data.data);
+      console.log('[EnrollmentService] Tipo de response.data.data:', Array.isArray(response.data.data) ? 'Array' : 'Objeto');
     }
 
     if (!response.data.success || !response.data.data) {
@@ -92,10 +93,19 @@ async function getAll(filters?: IEnrollmentFilters): Promise<IEnrollment[]> {
       );
     }
 
-    // response.data.data é do tipo IEnrollmentListResponse
-    // que contém: success, data (array de IEnrollment), pagination
-    const listResponse = response.data.data;
-    const enrollments = (listResponse as IEnrollmentListResponse).data || [];
+    // A API pode retornar de duas formas:
+    // 1. Array direto: response.data.data = IEnrollment[]
+    // 2. Objeto com data: response.data.data = { data: IEnrollment[], ... }
+    let enrollments: IEnrollment[] = [];
+
+    if (Array.isArray(response.data.data)) {
+      // Caso 1: Array direto
+      enrollments = response.data.data as IEnrollment[];
+    } else {
+      // Caso 2: Objeto com propriedade data
+      const listResponse = response.data.data as IEnrollmentListResponse;
+      enrollments = listResponse.data || [];
+    }
 
     if (import.meta.env.DEV) {
       console.log('[EnrollmentService] Matrículas extraídas:', enrollments);
