@@ -93,7 +93,10 @@ async function getAll(filters?: IEnrollmentFilters): Promise<IEnrollment[]> {
       );
     }
 
-    return response.data.data.data || [];
+    // response.data.data é do tipo IEnrollmentListResponse
+    // que contém: success, data (array de IEnrollment), pagination
+    const listResponse = response.data.data;
+    return (listResponse as IEnrollmentListResponse).data || [];
   } catch (error) {
     console.error('[EnrollmentService] Erro ao buscar matrículas:', error);
     if (error instanceof Error) {
