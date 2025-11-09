@@ -18,3 +18,13 @@ export { useStudents, type IUseStudentsReturn } from './useStudents';
 export { useTeachers, type IUseTeachersReturn } from './useTeachers';
 export { useCourses, type IUseCoursesReturn } from './useCourses';
 export { useClasses, type IUseClassesReturn } from './useClasses';
+
+// Hooks de matrículas
+export {
+  useEnrollments,
+  useEnrollmentById,
+  useCreateEnrollment,
+  useUpdateEnrollment,
+  useUpdateEnrollmentStatus,
+  useDeleteEnrollment,
+} from './useEnrollments';
