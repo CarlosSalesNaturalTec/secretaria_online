@@ -250,11 +250,19 @@ async function create(data: ICreateEnrollmentData): Promise<IEnrollment> {
     }
 
     return transformEnrollmentData(response.data.data);
-  } catch (error) {
+  } catch (error: any) {
     console.error('[EnrollmentService] Erro ao criar matrícula:', error);
-    if (error instanceof Error) {
+
+    // Se for erro da API com mensagem clara, repassar
+    if (error instanceof Error && error.message) {
       throw error;
     }
+
+    // Se for erro Axios com resposta da API
+    if (error.response?.data?.error?.message) {
+      throw new Error(error.response.data.error.message);
+    }
+
     throw new Error('Falha ao criar matrícula. Tente novamente.');
   }
 }
@@ -305,11 +313,17 @@ async function update(
     }
 
     return transformEnrollmentData(response.data.data);
-  } catch (error) {
+  } catch (error: any) {
     console.error('[EnrollmentService] Erro ao atualizar matrícula:', error);
-    if (error instanceof Error) {
+
+    if (error instanceof Error && error.message) {
       throw error;
     }
+
+    if (error.response?.data?.error?.message) {
+      throw new Error(error.response.data.error.message);
+    }
+
     throw new Error('Falha ao atualizar matrícula. Tente novamente.');
   }
 }
@@ -350,11 +364,17 @@ async function updateStatus(
     }
 
     return transformEnrollmentData(response.data.data);
-  } catch (error) {
+  } catch (error: any) {
     console.error('[EnrollmentService] Erro ao atualizar status:', error);
-    if (error instanceof Error) {
+
+    if (error instanceof Error && error.message) {
       throw error;
     }
+
+    if (error.response?.data?.error?.message) {
+      throw new Error(error.response.data.error.message);
+    }
+
     throw new Error('Falha ao atualizar status. Tente novamente.');
   }
 }
@@ -387,11 +407,17 @@ async function deleteEnrollment(id: number): Promise<void> {
     if (import.meta.env.DEV) {
       console.log('[EnrollmentService] Matrícula deletada com sucesso');
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('[EnrollmentService] Erro ao deletar matrícula:', error);
-    if (error instanceof Error) {
+
+    if (error instanceof Error && error.message) {
       throw error;
     }
+
+    if (error.response?.data?.error?.message) {
+      throw new Error(error.response.data.error.message);
+    }
+
     throw new Error('Falha ao deletar matrícula. Tente novamente.');
   }
 }
