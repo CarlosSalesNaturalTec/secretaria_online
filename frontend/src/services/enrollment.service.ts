@@ -39,6 +39,27 @@ export interface IUpdateEnrollmentData {
 }
 
 /**
+ * Transforma dados da API (snake_case) para o formato esperado (camelCase)
+ *
+ * @param enrollment - Dados da matrícula da API
+ * @returns Matrícula transformada
+ */
+function transformEnrollmentData(enrollment: any): IEnrollment {
+  return {
+    id: enrollment.id,
+    studentId: enrollment.student_id ?? enrollment.studentId,
+    courseId: enrollment.course_id ?? enrollment.courseId,
+    status: enrollment.status,
+    enrollmentDate: enrollment.enrollment_date ?? enrollment.enrollmentDate,
+    createdAt: enrollment.created_at ?? enrollment.createdAt,
+    updatedAt: enrollment.updated_at ?? enrollment.updatedAt,
+    deletedAt: enrollment.deleted_at ?? enrollment.deletedAt,
+    student: enrollment.student,
+    course: enrollment.course,
+  };
+}
+
+/**
  * Busca todas as matrículas com filtros opcionais
  *
  * @param filters - Filtros de busca (opcional)
@@ -107,9 +128,15 @@ async function getAll(filters?: IEnrollmentFilters): Promise<IEnrollment[]> {
       enrollments = listResponse.data || [];
     }
 
+    // Transformar dados da API (snake_case) para o formato esperado (camelCase)
+    enrollments = enrollments.map(transformEnrollmentData);
+
     if (import.meta.env.DEV) {
       console.log('[EnrollmentService] Matrículas extraídas:', enrollments);
       console.log('[EnrollmentService] Total de matrículas:', enrollments.length);
+      if (enrollments.length > 0) {
+        console.log('[EnrollmentService] Primeira matrícula (transformada):', enrollments[0]);
+      }
     }
 
     return enrollments;
@@ -155,7 +182,14 @@ async function getById(id: number): Promise<IEnrollment> {
       );
     }
 
-    return response.data.data;
+    // Transformar dados da API (snake_case) para camelCase
+    const transformed = transformEnrollmentData(response.data.data);
+
+    if (import.meta.env.DEV) {
+      console.log('[EnrollmentService] Matrícula transformada:', transformed);
+    }
+
+    return transformed;
   } catch (error) {
     console.error('[EnrollmentService] Erro ao buscar matrícula:', error);
     if (error instanceof Error) {
@@ -215,7 +249,7 @@ async function create(data: ICreateEnrollmentData): Promise<IEnrollment> {
       );
     }
 
-    return response.data.data;
+    return transformEnrollmentData(response.data.data);
   } catch (error) {
     console.error('[EnrollmentService] Erro ao criar matrícula:', error);
     if (error instanceof Error) {
@@ -270,7 +304,7 @@ async function update(
       );
     }
 
-    return response.data.data;
+    return transformEnrollmentData(response.data.data);
   } catch (error) {
     console.error('[EnrollmentService] Erro ao atualizar matrícula:', error);
     if (error instanceof Error) {
@@ -315,7 +349,7 @@ async function updateStatus(
       console.log('[EnrollmentService] Status atualizado:', response.data.data);
     }
 
-    return response.data.data;
+    return transformEnrollmentData(response.data.data);
   } catch (error) {
     console.error('[EnrollmentService] Erro ao atualizar status:', error);
     if (error instanceof Error) {
