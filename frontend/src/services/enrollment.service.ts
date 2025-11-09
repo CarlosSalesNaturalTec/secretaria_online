@@ -171,9 +171,10 @@ async function create(data: ICreateEnrollmentData): Promise<IEnrollment> {
       throw new Error('Dados incompletos para criar matrícula');
     }
 
-    const payload: IEnrollmentCreateRequest = {
-      studentId: data.studentId,
-      courseId: data.courseId,
+    // Converter para snake_case conforme esperado pelo backend
+    const payload = {
+      student_id: data.studentId,
+      course_id: data.courseId,
       enrollmentDate: data.enrollmentDate,
     };
 
@@ -227,7 +228,10 @@ async function update(
       console.log('[EnrollmentService] Atualizando matrícula:', id, data);
     }
 
-    const payload: IEnrollmentUpdateRequest = { ...data };
+    // Converter para snake_case se necessário
+    const payload: Record<string, unknown> = {};
+    if (data.status) payload.status = data.status;
+    if (data.enrollmentDate) payload.enrollmentDate = data.enrollmentDate;
 
     const response = await api.put<ApiResponse<IEnrollment>>(
       `/enrollments/${id}`,
