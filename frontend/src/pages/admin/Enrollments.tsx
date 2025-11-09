@@ -18,7 +18,7 @@ import { Plus, Pencil, Trash2, AlertCircle, Filter } from 'lucide-react';
 import { Table, type Column } from '@/components/ui/Table';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
-import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 import Toast, { type ToastType } from '@/components/ui/Toast';
 import { EnrollmentForm, type EnrollmentFormData } from '@/components/forms/EnrollmentForm';
 import {
@@ -487,19 +487,21 @@ export default function AdminEnrollments() {
       </Modal>
 
       {/* Modal de confirmação de exclusão */}
-      <ConfirmModal
-        isOpen={activeModal === 'delete' && !!selectedEnrollment}
-        onClose={() => setActiveModal(null)}
-        onConfirm={handleConfirmDelete}
-        title="Deletar Matrícula"
-        message={`Tem certeza que deseja deletar a matrícula de "${
-          selectedEnrollment
-            ? students.find((s) => s.id === selectedEnrollment.studentId)?.name ||
-              'Desconhecido'
-            : 'Desconhecido'
-        }"? Esta ação não pode ser desfeita.`}
-        isLoading={isDeleting}
-      />
+      {activeModal === 'delete' && selectedEnrollment && (
+        <ConfirmModal
+          onCancel={() => setActiveModal(null)}
+          onConfirm={handleConfirmDelete}
+          title="Deletar Matrícula"
+          message={`Tem certeza que deseja deletar a matrícula de "${
+            students.find((s) => s.id === selectedEnrollment.studentId)?.name ||
+            'Desconhecido'
+          }"? Esta ação não pode ser desfeita.`}
+          isLoading={isDeleting}
+          type="danger"
+          confirmText="Deletar"
+          cancelText="Cancelar"
+        />
+      )}
     </div>
   );
 }
