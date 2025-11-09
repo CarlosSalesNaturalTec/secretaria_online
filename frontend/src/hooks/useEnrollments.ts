@@ -16,10 +16,7 @@ import EnrollmentService, {
   type ICreateEnrollmentData,
   type IUpdateEnrollmentData,
 } from '@/services/enrollment.service';
-import type {
-  IEnrollment,
-  IEnrollmentFilters,
-} from '@/types/enrollment.types';
+import type { IEnrollmentFilters } from '@/types/enrollment.types';
 
 /**
  * Query key para matrículas

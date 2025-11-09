@@ -266,11 +266,12 @@ export default function AdminEnrollments() {
    */
   const columns: Column<IEnrollment>[] = [
     {
+      key: 'id',
       header: 'ID',
       accessor: (row) => row.id,
-      width: '80px',
     },
     {
+      key: 'student',
       header: 'Aluno',
       accessor: (row) => {
         const student = students.find((s) => s.id === row.studentId);
@@ -278,6 +279,7 @@ export default function AdminEnrollments() {
       },
     },
     {
+      key: 'course',
       header: 'Curso',
       accessor: (row) => {
         const course = courses.find((c) => c.id === row.courseId);
@@ -285,19 +287,22 @@ export default function AdminEnrollments() {
       },
     },
     {
+      key: 'enrollmentDate',
       header: 'Data de Matrícula',
       accessor: (row) => formatDate(row.enrollmentDate),
     },
     {
+      key: 'status',
       header: 'Status',
       accessor: (row) => getStatusBadge(row.status),
     },
     {
+      key: 'createdAt',
       header: 'Criado em',
       accessor: (row) => formatDate(row.createdAt),
-      width: '120px',
     },
     {
+      key: 'actions',
       header: 'Ações',
       accessor: (row) => (
         <div className="flex gap-2">
@@ -321,7 +326,6 @@ export default function AdminEnrollments() {
           </Button>
         </div>
       ),
-      width: '120px',
     },
   ];
 
