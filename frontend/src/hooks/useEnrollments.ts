@@ -37,13 +37,37 @@ const QUERY_KEYS = {
  * const { data: enrollments, isLoading } = useEnrollments();
  */
 export function useEnrollments(filters?: IEnrollmentFilters) {
-  return useQuery({
+  if (import.meta.env.DEV) {
+    console.log('[useEnrollments] Hook chamado com filtros:', filters);
+  }
+
+  const query = useQuery({
     queryKey: QUERY_KEYS.list(filters),
-    queryFn: () => EnrollmentService.getAll(filters),
+    queryFn: async () => {
+      if (import.meta.env.DEV) {
+        console.log('[useEnrollments] Executando queryFn...');
+      }
+      const data = await EnrollmentService.getAll(filters);
+      if (import.meta.env.DEV) {
+        console.log('[useEnrollments] Dados retornados do service:', data);
+      }
+      return data;
+    },
     enabled: true,
     staleTime: 1000 * 60 * 5, // 5 minutos
     gcTime: 1000 * 60 * 10, // 10 minutos (antes: cacheTime)
   });
+
+  if (import.meta.env.DEV) {
+    console.log('[useEnrollments] Query state:', {
+      status: query.status,
+      isLoading: query.isLoading,
+      data: query.data,
+      error: query.error,
+    });
+  }
+
+  return query;
 }
 
 /**

@@ -80,23 +80,29 @@ async function getAll(filters?: IEnrollmentFilters): Promise<IEnrollment[]> {
       { params }
     );
 
+    if (import.meta.env.DEV) {
+      console.log('[EnrollmentService] Resposta completa:', response.data);
+      console.log('[EnrollmentService] response.data.success:', response.data.success);
+      console.log('[EnrollmentService] response.data.data:', response.data.data);
+    }
+
     if (!response.data.success || !response.data.data) {
       throw new Error(
         response.data.error?.message || 'Erro ao buscar matrículas'
       );
     }
 
-    if (import.meta.env.DEV) {
-      console.log(
-        '[EnrollmentService] Matrículas carregadas:',
-        response.data.data
-      );
-    }
-
     // response.data.data é do tipo IEnrollmentListResponse
     // que contém: success, data (array de IEnrollment), pagination
     const listResponse = response.data.data;
-    return (listResponse as IEnrollmentListResponse).data || [];
+    const enrollments = (listResponse as IEnrollmentListResponse).data || [];
+
+    if (import.meta.env.DEV) {
+      console.log('[EnrollmentService] Matrículas extraídas:', enrollments);
+      console.log('[EnrollmentService] Total de matrículas:', enrollments.length);
+    }
+
+    return enrollments;
   } catch (error) {
     console.error('[EnrollmentService] Erro ao buscar matrículas:', error);
     if (error instanceof Error) {
