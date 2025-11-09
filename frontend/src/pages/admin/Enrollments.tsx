@@ -111,8 +111,18 @@ export default function AdminEnrollments() {
   } | null>(null);
 
   // Queries e mutations
-  const { data: enrollments = [], isLoading: isLoadingEnrollments } =
+  const { data: enrollments = [], isLoading: isLoadingEnrollments, error: enrollmentsError } =
     useEnrollments();
+
+  // Log para debug
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      console.log('[EnrollmentsPage] Matrículas atualizadas:', enrollments);
+      console.log('[EnrollmentsPage] Loading:', isLoadingEnrollments);
+      console.log('[EnrollmentsPage] Error:', enrollmentsError);
+    }
+  }, [enrollments, isLoadingEnrollments, enrollmentsError]);
+
   const {
     mutate: createEnrollment,
     isPending: isCreating,
