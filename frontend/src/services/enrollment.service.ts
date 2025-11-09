@@ -253,14 +253,27 @@ async function create(data: ICreateEnrollmentData): Promise<IEnrollment> {
   } catch (error: any) {
     console.error('[EnrollmentService] Erro ao criar matrícula:', error);
 
-    // Se for erro da API com mensagem clara, repassar
-    if (error instanceof Error && error.message) {
-      throw error;
+    // Se for erro Axios com resposta da API, extrair mensagem da resposta
+    // Estrutura: error.response.data = { success: false, error: { code, message }, ... }
+    if (error.response?.data) {
+      const responseData = error.response.data;
+      if (import.meta.env.DEV) {
+        console.error('[EnrollmentService] Resposta da API:', responseData);
+      }
+
+      // Tentar extrair mensagem de erro da resposta
+      const errorMessage =
+        responseData.error?.message ||
+        responseData.message ||
+        responseData.error?.error ||
+        'Erro ao criar matrícula';
+
+      throw new Error(errorMessage);
     }
 
-    // Se for erro Axios com resposta da API
-    if (error.response?.data?.error?.message) {
-      throw new Error(error.response.data.error.message);
+    // Se for erro da API com mensagem clara (não Axios), repassar
+    if (error instanceof Error && error.message && !error.code) {
+      throw error;
     }
 
     throw new Error('Falha ao criar matrícula. Tente novamente.');
@@ -316,12 +329,26 @@ async function update(
   } catch (error: any) {
     console.error('[EnrollmentService] Erro ao atualizar matrícula:', error);
 
-    if (error instanceof Error && error.message) {
-      throw error;
+    // Se for erro Axios com resposta da API, extrair mensagem da resposta
+    if (error.response?.data) {
+      const responseData = error.response.data;
+      if (import.meta.env.DEV) {
+        console.error('[EnrollmentService] Resposta da API:', responseData);
+      }
+
+      // Tentar extrair mensagem de erro da resposta
+      const errorMessage =
+        responseData.error?.message ||
+        responseData.message ||
+        responseData.error?.error ||
+        'Erro ao atualizar matrícula';
+
+      throw new Error(errorMessage);
     }
 
-    if (error.response?.data?.error?.message) {
-      throw new Error(error.response.data.error.message);
+    // Se for erro da API com mensagem clara (não Axios), repassar
+    if (error instanceof Error && error.message && !error.code) {
+      throw error;
     }
 
     throw new Error('Falha ao atualizar matrícula. Tente novamente.');

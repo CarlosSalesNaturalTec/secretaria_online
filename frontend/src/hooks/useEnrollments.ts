@@ -118,6 +118,15 @@ export function useCreateEnrollment() {
         queryKey: QUERY_KEYS.all,
       });
     },
+    onError: (error: any) => {
+      // Log detalhado do erro para debugging
+      if (import.meta.env.DEV) {
+        console.error('[useCreateEnrollment] Erro capturado:', {
+          message: error?.message,
+          error,
+        });
+      }
+    },
   });
 }
 
@@ -153,6 +162,15 @@ export function useUpdateEnrollment() {
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.all,
       });
+    },
+    onError: (error: any) => {
+      // Log detalhado do erro para debugging
+      if (import.meta.env.DEV) {
+        console.error('[useUpdateEnrollment] Erro capturado:', {
+          message: error?.message,
+          error,
+        });
+      }
     },
   });
 }

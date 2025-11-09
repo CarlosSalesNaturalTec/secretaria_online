@@ -195,17 +195,13 @@ export default function AdminEnrollments() {
    */
   const handleCreateSubmit = async (data: EnrollmentFormData) => {
     try {
+      // A mutation automáticamente vai capturar o erro
+      // A exibição do erro é feita no componente EnrollmentForm via prop
       createEnrollment(data, {
         onSuccess: () => {
           showToast('Matrícula criada com sucesso!', 'success');
           setActiveModal(null);
           setSelectedEnrollment(null);
-        },
-        onError: (error) => {
-          showToast(
-            error instanceof Error ? error.message : 'Erro ao criar matrícula',
-            'error'
-          );
         },
       });
     } catch (error) {
@@ -220,6 +216,8 @@ export default function AdminEnrollments() {
     if (!selectedEnrollment) return;
 
     try {
+      // A mutation automáticamente vai capturar o erro
+      // A exibição do erro é feita no componente EnrollmentForm via prop
       updateEnrollment(
         { id: selectedEnrollment.id, data },
         {
@@ -227,14 +225,6 @@ export default function AdminEnrollments() {
             showToast('Matrícula atualizada com sucesso!', 'success');
             setActiveModal(null);
             setSelectedEnrollment(null);
-          },
-          onError: (error) => {
-            showToast(
-              error instanceof Error
-                ? error.message
-                : 'Erro ao atualizar matrícula',
-              'error'
-            );
           },
         }
       );
@@ -407,30 +397,6 @@ export default function AdminEnrollments() {
           <AlertCircle size={20} className="text-yellow-700 flex-shrink-0" />
           <p className="text-yellow-700 text-sm">
             Nenhum curso cadastrado. Crie cursos antes de criar matrículas.
-          </p>
-        </div>
-      )}
-
-      {createError && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3">
-          <AlertCircle size={20} className="text-red-700 flex-shrink-0" />
-          <p className="text-red-700 text-sm">
-            Erro ao criar matrícula:{' '}
-            {createError instanceof Error
-              ? createError.message
-              : 'Erro desconhecido'}
-          </p>
-        </div>
-      )}
-
-      {updateError && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3">
-          <AlertCircle size={20} className="text-red-700 flex-shrink-0" />
-          <p className="text-red-700 text-sm">
-            Erro ao atualizar matrícula:{' '}
-            {updateError instanceof Error
-              ? updateError.message
-              : 'Erro desconhecido'}
           </p>
         </div>
       )}
