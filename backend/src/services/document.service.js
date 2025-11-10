@@ -762,6 +762,66 @@ class DocumentService {
   }
 
   /**
+   * Obter estatísticas de documentos
+   *
+   * Responsabilidades:
+   * - Contar total de documentos no sistema
+   * - Contar documentos por status (pending, approved, rejected)
+   *
+   * @returns {Promise<Object>} Estatísticas { total, pending, approved, rejected }
+   * @throws {AppError} Erro ao buscar estatísticas
+   *
+   * @example
+   * const stats = await DocumentService.getStats();
+   * // { total: 45, pending: 12, approved: 28, rejected: 5 }
+   */
+  static async getStats() {
+    try {
+      const { Op } = require('sequelize');
+
+      // Contar total de documentos
+      const total = await Document.count();
+
+      // Contar por status
+      const pending = await Document.count({
+        where: { status: 'pending' },
+      });
+
+      const approved = await Document.count({
+        where: { status: 'approved' },
+      });
+
+      const rejected = await Document.count({
+        where: { status: 'rejected' },
+      });
+
+      logger.info('[DocumentService] Estatísticas de documentos obtidas', {
+        total,
+        pending,
+        approved,
+        rejected,
+      });
+
+      return {
+        total,
+        pending,
+        approved,
+        rejected,
+      };
+    } catch (error) {
+      logger.error('[DocumentService] Erro ao buscar estatísticas', {
+        error: error.message,
+      });
+
+      throw new AppError(
+        'Erro ao buscar estatísticas de documentos',
+        500,
+        'STATS_ERROR'
+      );
+    }
+  }
+
+  /**
    * Download de um documento
    *
    * Responsabilidades:

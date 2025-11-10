@@ -538,6 +538,53 @@ class DocumentController {
   }
 
   /**
+   * GET /api/v1/documents/stats
+   * Obter estatísticas de documentos (total, pendentes, aprovados, rejeitados)
+   *
+   * Requisitos:
+   * - Usuário autenticado com role 'admin'
+   *
+   * @param {Object} req - Request do Express
+   * @param {Object} res - Response do Express
+   * @param {Function} next - Próximo middleware/handler
+   *
+   * @returns {void} Resposta JSON com estatísticas de documentos
+   *
+   * @example
+   * // Request
+   * GET /api/v1/documents/stats
+   * Authorization: Bearer <admin_token>
+   *
+   * // Response (200 OK)
+   * {
+   *   "success": true,
+   *   "data": {
+   *     "total": 45,
+   *     "pending": 12,
+   *     "approved": 28,
+   *     "rejected": 5
+   *   }
+   * }
+   */
+  async getStats(req, res, next) {
+    try {
+      const stats = await DocumentService.getStats();
+
+      logger.info('[DocumentController] Estatísticas de documentos obtidas', {
+        requestedBy: req.user.id,
+        role: req.user.role,
+      });
+
+      res.json({
+        success: true,
+        data: stats,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * GET /api/v1/users/:userId/documents ou GET /api/v1/documents/user/:userId
    * Listar documentos de um usuário específico
    *

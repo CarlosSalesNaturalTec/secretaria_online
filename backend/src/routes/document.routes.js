@@ -82,6 +82,35 @@ router.post(
 router.get('/', authenticate, authorize('admin'), DocumentController.list);
 
 /**
+ * GET /api/v1/documents/stats
+ * Obter estatísticas de documentos (total, pendentes, aprovados, rejeitados)
+ *
+ * Autenticação: Requerida (admin only)
+ *
+ * Status de resposta:
+ * - 200 OK: Estatísticas retornadas
+ * - 401 Unauthorized: Não autenticado
+ * - 403 Forbidden: Sem permissão (não admin)
+ * - 500 Internal Server Error: Erro no servidor
+ *
+ * @example
+ * GET /api/v1/documents/stats
+ * Authorization: Bearer <token>
+ *
+ * Response:
+ * {
+ *   "success": true,
+ *   "data": {
+ *     "total": 45,
+ *     "pending": 12,
+ *     "approved": 28,
+ *     "rejected": 5
+ *   }
+ * }
+ */
+router.get('/stats', authenticate, authorize('admin'), DocumentController.getStats);
+
+/**
  * GET /api/v1/documents/:id
  * Buscar documento por ID
  *
