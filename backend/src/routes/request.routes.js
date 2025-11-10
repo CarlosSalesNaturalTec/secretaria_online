@@ -92,6 +92,32 @@ router.get(
 );
 
 /**
+ * @route   GET /api/requests/stats
+ * @desc    Obter estatísticas de solicitações (total, pendentes, aprovadas, rejeitadas)
+ * @access  Admin
+ *
+ * @example
+ * GET /api/requests/stats
+ *
+ * Response:
+ * {
+ *   "success": true,
+ *   "data": {
+ *     "total": 45,
+ *     "pending": 12,
+ *     "approved": 28,
+ *     "rejected": 5
+ *   }
+ * }
+ */
+router.get(
+  '/stats',
+  authenticate,
+  authorize('admin'),
+  RequestController.getStats
+);
+
+/**
  * @route   GET /api/requests/:id
  * @desc    Buscar solicitação por ID
  * @access  Aluno (própria), Admin (qualquer)

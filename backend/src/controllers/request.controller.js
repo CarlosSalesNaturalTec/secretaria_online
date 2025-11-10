@@ -533,6 +533,83 @@ class RequestController {
       });
     }
   }
+
+  /**
+   * Obter estatísticas de solicitações
+   *
+   * Retorna contagem total e por status de todas as solicitações.
+   * Apenas administradores podem acessar.
+   *
+   * @param {object} req - Objeto de requisição do Express
+   * @param {object} res - Objeto de resposta do Express
+   * @returns {Promise<object>} Estatísticas de solicitações
+   * @throws {Error} Se ocorrer erro ao buscar estatísticas
+   *
+   * @example
+   * GET /api/requests/stats
+   * Response: {
+   *   "success": true,
+   *   "data": {
+   *     "total": 45,
+   *     "pending": 12,
+   *     "approved": 28,
+   *     "rejected": 5
+   *   }
+   * }
+   */
+  async getStats(req, res) {
+    try {
+      // Contar total de solicitações
+      const total = await Request.count({
+        where: { deleted_at: null }
+      });
+
+      // Contar por status
+      const pending = await Request.count({
+        where: {
+          status: 'pending',
+          deleted_at: null
+        }
+      });
+
+      const approved = await Request.count({
+        where: {
+          status: 'approved',
+          deleted_at: null
+        }
+      });
+
+      const rejected = await Request.count({
+        where: {
+          status: 'rejected',
+          deleted_at: null
+        }
+      });
+
+      console.log(`[RequestController] Estatísticas obtidas por usuário ${req.user.id}`);
+
+      return res.json({
+        success: true,
+        data: {
+          total,
+          pending,
+          approved,
+          rejected
+        }
+      });
+    } catch (error) {
+      console.error('[RequestController] Erro ao buscar estatísticas:', error);
+
+      return res.status(500).json({
+        success: false,
+        error: {
+          code: 'INTERNAL_ERROR',
+          message: 'Erro ao buscar estatísticas de solicitações',
+          details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        }
+      });
+    }
+  }
 }
 
 module.exports = new RequestController();

@@ -108,7 +108,8 @@ export default function AdminRequests() {
         requestService.getStats(),
       ]);
 
-      setRequests(requestsResponse.data.requests);
+      // Backend retorna data diretamente como array de requests
+      setRequests(requestsResponse.data);
       setStats(statsData);
     } catch (err) {
       const errorMessage =
