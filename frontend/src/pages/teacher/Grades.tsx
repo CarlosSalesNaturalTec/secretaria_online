@@ -168,12 +168,26 @@ export default function TeacherGrades() {
         const selectedCls = classes.find((c) => c.id.toString() === classId);
         if (selectedCls) {
           setSelectedClass(selectedCls);
-          setStudents(selectedCls.students || []);
+          // Converte IUser[] para IClassStudent[]
+          const classStudents = (selectedCls.students || []).map((user, index) => ({
+            id: index,
+            classId: selectedCls.id,
+            studentId: user.id,
+            student: user,
+          }));
+          setStudents(classStudents);
         }
       } else if (classes.length > 0) {
         // Caso contrário, seleciona primeira turma
         setSelectedClass(classes[0]);
-        setStudents(classes[0].students || []);
+        // Converte IUser[] para IClassStudent[]
+        const classStudents = (classes[0].students || []).map((user, index) => ({
+          id: index,
+          classId: classes[0].id,
+          studentId: user.id,
+          student: user,
+        }));
+        setStudents(classStudents);
       }
 
       if (import.meta.env.DEV) {
@@ -194,7 +208,14 @@ export default function TeacherGrades() {
     if (!selectedClass) return;
 
     try {
-      setStudents(selectedClass.students || []);
+      // Converte IUser[] para IClassStudent[]
+      const classStudents = (selectedClass.students || []).map((user, index) => ({
+        id: index,
+        classId: selectedClass.id,
+        studentId: user.id,
+        student: user,
+      }));
+      setStudents(classStudents);
       if (import.meta.env.DEV) {
         console.log(
           '[TeacherGrades] Dados da turma carregados:',
@@ -257,7 +278,14 @@ export default function TeacherGrades() {
     setSelectedClass(classItem);
     setSelectedEvaluation(null);
     setGrades([]);
-    setStudents(classItem.students || []);
+    // Converte IUser[] para IClassStudent[]
+    const classStudents = (classItem.students || []).map((user, index) => ({
+      id: index,
+      classId: classItem.id,
+      studentId: user.id,
+      student: user,
+    }));
+    setStudents(classStudents);
     navigate(`/teacher/classes/${classItem.id}/grades`);
   };
 
@@ -272,7 +300,7 @@ export default function TeacherGrades() {
 
     try {
       // Encontra primeira disciplina da turma para usar como disciplineId
-      const discipline = selectedClass.teachers?.[0]?.discipline;
+      const discipline = selectedClass.disciplines?.[0];
       if (!discipline) {
         setError(
           'Turma não possui disciplinas atribuídas. Configure as disciplinas primeiro.'

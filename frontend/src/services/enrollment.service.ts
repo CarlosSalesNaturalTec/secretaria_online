@@ -15,8 +15,6 @@ import api from './api';
 import type { ApiResponse } from '@/types/api.types';
 import type {
   IEnrollment,
-  IEnrollmentCreateRequest,
-  IEnrollmentUpdateRequest,
   IEnrollmentListResponse,
   IEnrollmentFilters,
 } from '@/types/enrollment.types';
@@ -272,7 +270,7 @@ async function create(data: ICreateEnrollmentData): Promise<IEnrollment> {
     }
 
     // Se for erro da API com mensagem clara (não Axios), repassar
-    if (error instanceof Error && error.message && !error.code) {
+    if (error instanceof Error && error.message) {
       throw error;
     }
 
@@ -347,7 +345,7 @@ async function update(
     }
 
     // Se for erro da API com mensagem clara (não Axios), repassar
-    if (error instanceof Error && error.message && !error.code) {
+    if (error instanceof Error && error.message) {
       throw error;
     }
 

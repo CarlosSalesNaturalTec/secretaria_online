@@ -161,12 +161,12 @@ export default function TeacherClasses() {
    * @returns {string} String com nomes de disciplinas
    */
   const formatDisciplines = (classItem: IClass): string => {
-    if (!classItem.teachers || classItem.teachers.length === 0) {
+    if (!classItem.disciplines || classItem.disciplines.length === 0) {
       return 'Sem disciplinas atribuídas';
     }
 
-    return classItem.teachers
-      .map((ct) => ct.discipline?.name || 'Disciplina desconhecida')
+    return classItem.disciplines
+      .map((d) => d.name || 'Disciplina desconhecida')
       .join(', ');
   };
 

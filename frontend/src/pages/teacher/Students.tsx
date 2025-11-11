@@ -132,7 +132,14 @@ export default function TeacherStudents() {
       const classData = await getClassById(cls.id);
 
       setSelectedClass(classData);
-      setClassStudents(classData.students || []);
+      // Converte IUser[] para IClassStudent[]
+      const students = (classData.students || []).map((user, index) => ({
+        id: index,
+        classId: classData.id,
+        studentId: user.id,
+        student: user,
+      }));
+      setClassStudents(students);
 
       if (import.meta.env.DEV) {
         console.log('[TeacherStudents] Turma selecionada:', classData.id, 'Alunos:', classData.students?.length || 0);

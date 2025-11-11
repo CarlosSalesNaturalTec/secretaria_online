@@ -179,7 +179,7 @@ export function ClassForm({
         // Extrai as disciplinas do array de ICourseDiscipline
         const courseDisciplines = course.disciplines
           .map(cd => cd.discipline)
-          .filter(Boolean);
+          .filter((d): d is IDiscipline => Boolean(d));
 
         setDisciplines(courseDisciplines);
       } else {

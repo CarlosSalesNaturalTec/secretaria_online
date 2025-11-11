@@ -215,7 +215,7 @@ export default function DisciplinesPage() {
         </div>
       ),
       sortable: true,
-      width: '120px',
+      cellClassName: 'w-[120px]',
     },
     {
       key: 'name',
@@ -233,7 +233,7 @@ export default function DisciplinesPage() {
       ),
       align: 'center',
       sortable: true,
-      width: '120px',
+      cellClassName: 'w-[120px]',
     },
     {
       key: 'actions',
