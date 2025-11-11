@@ -1,0 +1,96 @@
+{
+  "projeto": {
+    "nome": "Secretaria Online",
+    "versao": "0.1.0",
+    "descricao": "Sistema de gestão acadêmica para instituição de ensino com ~200 alunos e ~10 professores",
+    "dataGeracao": "2025-10-23"
+  },
+  "grupo": {
+    "id": "grupo-17",
+    "nome": "Frontend - Autenticação e Contexto",
+    "descricao": "Context API, hooks de autenticação e serviços de API",
+    "prioridade": "alta",
+    "features": [
+      {
+        "id": "feat-075",
+        "titulo": "Configurar Axios e interceptors",
+        "descricao": "Criar services/api.ts com instância Axios configurada (baseURL, timeout), interceptors para adicionar token JWT no header e tratar erros 401",
+        "estimativa": "1h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-003"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
+        "tags": [
+          "api",
+          "config"
+        ],
+        "artefatos": [
+          "frontend/src/services/api.ts"
+        ]
+      },
+      {
+        "id": "feat-076",
+        "titulo": "Criar AuthContext e AuthProvider",
+        "descricao": "Implementar contexts/AuthContext.tsx com estado de user, token, loading. Métodos: login, logout, updateUser. Persistência em localStorage",
+        "estimativa": "2h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-003"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
+        "tags": [
+          "auth",
+          "context"
+        ],
+        "artefatos": [
+          "frontend/src/contexts/AuthContext.tsx"
+        ]
+      },
+      {
+        "id": "feat-077",
+        "titulo": "Criar hook useAuth",
+        "descricao": "Implementar hooks/useAuth.ts que consome AuthContext e expõe user, login, logout, isAuthenticated",
+        "estimativa": "30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-076"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
+        "tags": [
+          "auth",
+          "hook"
+        ],
+        "artefatos": [
+          "frontend/src/hooks/useAuth.ts"
+        ]
+      },
+      {
+        "id": "feat-078",
+        "titulo": "Criar auth.service.ts",
+        "descricao": "Implementar services/auth.service.ts com funções: login(credentials), logout(), changePassword(oldPassword, newPassword) que chamam API",
+        "estimativa": "1h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-075"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
+        "tags": [
+          "auth",
+          "service"
+        ],
+        "artefatos": [
+          "frontend/src/services/auth.service.ts"
+        ]
+      }
+    ]
+  }
+}

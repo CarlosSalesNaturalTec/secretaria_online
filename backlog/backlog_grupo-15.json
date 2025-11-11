@@ -1,0 +1,117 @@
+{
+  "projeto": {
+    "nome": "Secretaria Online",
+    "versao": "0.1.0",
+    "descricao": "Sistema de gestão acadêmica para instituição de ensino com ~200 alunos e ~10 professores",
+    "dataGeracao": "2025-10-23"
+  },
+  "grupo": {
+    "id": "grupo-15",
+    "nome": "Frontend - Componentes UI Base",
+    "descricao": "Componentes reutilizáveis (Button, Input, Modal, Table)",
+    "prioridade": "alta",
+    "features": [
+      {
+        "id": "feat-066",
+        "titulo": "Criar componente Button",
+        "descricao": "Implementar components/ui/Button.tsx com variantes (primary, secondary, danger), tamanhos (sm, md, lg), loading state",
+        "estimativa": "1h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-003"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
+        "tags": [
+          "ui",
+          "component"
+        ],
+        "artefatos": [
+          "frontend/src/components/ui/Button.tsx"
+        ]
+      },
+      {
+        "id": "feat-067",
+        "titulo": "Criar componente Input",
+        "descricao": "Implementar components/ui/Input.tsx com suporte a label, error message, tipos (text, email, password), máscaras (CPF, telefone)",
+        "estimativa": "1h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-003"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
+        "tags": [
+          "ui",
+          "component"
+        ],
+        "artefatos": [
+          "frontend/src/components/ui/Input.tsx"
+        ]
+      },
+      {
+        "id": "feat-068",
+        "titulo": "Criar componente Modal",
+        "descricao": "Implementar components/ui/Modal.tsx usando Headless UI Dialog com overlay, close button, variantes de tamanho",
+        "estimativa": "1h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-003"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
+        "tags": [
+          "ui",
+          "component"
+        ],
+        "artefatos": [
+          "frontend/src/components/ui/Modal.tsx"
+        ]
+      },
+      {
+        "id": "feat-069",
+        "titulo": "Criar componente Table",
+        "descricao": "Implementar components/ui/Table.tsx reutilizável com suporte a colunas customizáveis, sorting básico, loading state",
+        "estimativa": "2h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-003"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
+        "tags": [
+          "ui",
+          "component"
+        ],
+        "artefatos": [
+          "frontend/src/components/ui/Table.tsx"
+        ]
+      },
+      {
+        "id": "feat-070",
+        "titulo": "Criar componente FileUpload",
+        "descricao": "Implementar components/ui/FileUpload.tsx com drag-and-drop, preview, validação de tipo e tamanho, progress bar",
+        "estimativa": "2h30min",
+        "prioridade": "media",
+        "dependencias": [
+          "feat-003"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
+        "tags": [
+          "ui",
+          "component",
+          "upload"
+        ],
+        "artefatos": [
+          "frontend/src/components/ui/FileUpload.tsx"
+        ]
+      }
+    ]
+  }
+}

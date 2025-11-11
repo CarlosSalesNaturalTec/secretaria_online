@@ -1,0 +1,129 @@
+{
+  "projeto": {
+    "nome": "Secretaria Online",
+    "versao": "0.1.0",
+    "descricao": "Sistema de gestão acadêmica para instituição de ensino com ~200 alunos e ~10 professores",
+    "dataGeracao": "2025-10-23"
+  },
+  "grupo": {
+    "id": "grupo-6",
+    "nome": "Backend - API de Cursos e Turmas",
+    "descricao": "Gestão de cursos, disciplinas e turmas",
+    "prioridade": "alta",
+    "features": [
+      {
+        "id": "feat-033",
+        "titulo": "Criar CourseController e DisciplineController",
+        "descricao": "Implementar CRUD para cursos e disciplinas. Criar course.routes.js e discipline.routes.js (admin only)",
+        "estimativa": "3h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-008",
+          "feat-021"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-29",
+        "dataConclusao": "2025-10-29",
+        "tags": [
+          "course",
+          "discipline",
+          "controller",
+          "api"
+        ],
+        "artefatos": [
+          "backend/src/controllers/course.controller.js",
+          "backend/src/controllers/discipline.controller.js",
+          "backend/src/routes/course.routes.js",
+          "backend/src/routes/discipline.routes.js"
+        ]
+      },
+      {
+        "id": "feat-034",
+        "titulo": "Adicionar endpoint para vincular disciplinas a curso",
+        "descricao": "Implementar POST /courses/:id/disciplines para adicionar disciplinas ao curso com semestre. DELETE para remover",
+        "estimativa": "1h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-033",
+          "feat-009"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-29",
+        "dataConclusao": "2025-10-29",
+        "tags": [
+          "course",
+          "discipline",
+          "relationship"
+        ],
+        "artefatos": [
+          "métodos em course.controller.js"
+        ]
+      },
+      {
+        "id": "feat-035",
+        "titulo": "Criar ClassController e rotas",
+        "descricao": "Implementar CRUD de turmas (Class). GET /classes?course_id=x, POST /classes com validação de semestre/ano. Criar class.routes.js",
+        "estimativa": "2h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-010",
+          "feat-021"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-29",
+        "dataConclusao": "2025-10-29",
+        "tags": [
+          "class",
+          "controller",
+          "api"
+        ],
+        "artefatos": [
+          "backend/src/controllers/class.controller.js",
+          "backend/src/routes/class.routes.js"
+        ]
+      },
+      {
+        "id": "feat-036",
+        "titulo": "Adicionar endpoints para vincular professores e alunos à turma",
+        "descricao": "Implementar POST /classes/:id/teachers (vincular professor + disciplina), POST /classes/:id/students (vincular aluno). DELETE para desvincular",
+        "estimativa": "2h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-035"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-29",
+        "dataConclusao": "2025-10-30",
+        "tags": [
+          "class",
+          "relationship"
+        ],
+        "artefatos": [
+          "backend/src/controllers/class.controller.js",
+          "backend/src/services/class.service.js",
+          "backend/src/routes/class.routes.js"
+        ]
+      },
+      {
+        "id": "feat-037",
+        "titulo": "Adicionar endpoint para listar alunos e professores de turma",
+        "descricao": "Implementar GET /classes/:id/students e GET /classes/:id/teachers com eager loading (Sequelize include)",
+        "estimativa": "1h30min",
+        "prioridade": "media",
+        "dependencias": [
+          "feat-036"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-29",
+        "dataConclusao": "2025-10-30",
+        "tags": [
+          "class",
+          "api"
+        ],
+        "artefatos": [
+          "métodos getStudents e getTeachers em class.controller.js"
+        ]
+      }
+    ]
+  }
+}

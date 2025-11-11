@@ -1,0 +1,107 @@
+{
+  "projeto": {
+    "nome": "Secretaria Online",
+    "versao": "0.1.0",
+    "descricao": "Sistema de gestão acadêmica para instituição de ensino com ~200 alunos e ~10 professores",
+    "dataGeracao": "2025-10-23"
+  },
+  "grupo": {
+    "id": "grupo-5",
+    "nome": "Backend - API de Usuários e Estudantes",
+    "descricao": "CRUD de usuários, alunos e professores",
+    "prioridade": "alta",
+    "features": [
+      {
+        "id": "feat-029",
+        "titulo": "Criar UserController e rotas básicas",
+        "descricao": "Implementar UserController com métodos: list, getById, create, update, delete. Criar user.routes.js com validações (somente admin)",
+        "estimativa": "2h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-007",
+          "feat-021",
+          "feat-025"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-28",
+        "dataConclusao": "2025-10-28",
+        "observacoes": "Feature implementada e aprovada",
+        "tags": [
+          "user",
+          "controller",
+          "api"
+        ],
+        "artefatos": [
+          "backend/src/controllers/user.controller.js",
+          "backend/src/routes/user.routes.js"
+        ]
+      },
+      {
+        "id": "feat-030",
+        "titulo": "Criar StudentController e StudentService",
+        "descricao": "Implementar StudentService com lógica de criação de aluno (gerar senha provisória, hash). StudentController com CRUD completo. Criar student.routes.js",
+        "estimativa": "3h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-007",
+          "feat-017",
+          "feat-021"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-28",
+        "dataConclusao": "2025-10-28",
+        "tags": [
+          "student",
+          "controller",
+          "service",
+          "api"
+        ],
+        "artefatos": [
+          "backend/src/services/student.service.js",
+          "backend/src/controllers/student.controller.js",
+          "backend/src/routes/student.routes.js"
+        ]
+      },
+      {
+        "id": "feat-031",
+        "titulo": "Adicionar endpoint de reset de senha para aluno",
+        "descricao": "Implementar POST /students/:id/reset-password (admin only) que gera nova senha provisória e retorna (será enviada por email posteriormente)",
+        "estimativa": "1h",
+        "prioridade": "media",
+        "status": "Concluída",
+        "dataInicio": "2025-10-28",
+        "dataConclusao": "2025-10-28",
+        "tags": [
+          "student",
+          "auth"
+        ],
+        "artefatos": [
+          "método resetPassword em student.controller.js"
+        ]
+      },
+      {
+        "id": "feat-032",
+        "titulo": "Criar TeacherController, TeacherService e rotas",
+        "descricao": "Implementar TeacherController com CRUD (similar a StudentController e StudentService). Criar teacher.routes.js com validações e autorização admin",
+        "estimativa": "2h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-007",
+          "feat-021"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-28",
+        "dataConclusao": "2025-10-28",
+        "tags": [
+          "teacher",
+          "controller",
+          "api"
+        ],
+        "artefatos": [
+          "backend/src/controllers/teacher.controller.js",
+          "backend/src/routes/teacher.routes.js"
+        ]
+      }
+    ]
+  }
+}

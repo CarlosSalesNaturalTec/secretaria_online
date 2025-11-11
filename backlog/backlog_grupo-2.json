@@ -1,0 +1,300 @@
+{
+  "projeto": {
+    "nome": "Secretaria Online",
+    "versao": "0.1.0",
+    "descricao": "Sistema de gestão acadêmica para instituição de ensino com ~200 alunos e ~10 professores",
+    "dataGeracao": "2025-10-23"
+  },
+  "grupo": {
+    "id": "grupo-2",
+    "nome": "Banco de Dados e Modelos",
+    "descricao": "Configuração do MySQL, ORM Sequelize e criação de models",
+    "prioridade": "alta",
+    "features": [
+      {
+        "id": "feat-006",
+        "titulo": "Configurar Sequelize e conexão MySQL",
+        "descricao": "Instalar Sequelize e mysql2, criar config/database.js com configuração de conexão, configurar Sequelize CLI",
+        "estimativa": "1h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-002"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-25",
+        "dataConclusao": "2025-10-25",
+        "tags": [
+          "database",
+          "orm"
+        ],
+        "artefatos": [
+          "backend/src/config/database.js",
+          "backend/src/models/index.js",
+          "backend/src/config/test-connection.js",
+          "backend/database/migrations/",
+          "backend/database/seeders/",
+          "backend/.env.example (atualizado)",
+          "README.md (atualizado)",
+          "docs/testes/plano-testes-feat-006.md",
+          "docs/bugs/fix-feat-006-20251025-1445.md"
+        ],
+        "observacoes": "Feature implementada e aprovada. Configuração completa do Sequelize com validação de variáveis de ambiente, pool de conexões otimizado para shared hosting, suporte a múltiplos ambientes (development, test, production), e métodos auxiliares para teste de conexão. Script de teste criado para validação. README.md atualizado com instruções detalhadas de configuração e troubleshooting. Correção aplicada: removida opção 'collate' inválida de dialectOptions (MySQL2 warning). Teste de conexão executado com sucesso sem warnings."
+      },
+      {
+        "id": "feat-007",
+        "titulo": "Criar migration e model User",
+        "descricao": "Criar tabela users com campos: id, role (enum: admin|teacher|student), name, email, login, password_hash, cpf, rg, timestamps, deleted_at. Criar model User.js",
+        "estimativa": "1h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-006"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-25",
+        "dataConclusao": "2025-10-26",
+        "tags": [
+          "database",
+          "model"
+        ],
+        "artefatos": [
+          "backend/database/migrations/20251025211732-create-users.js",
+          "backend/src/models/User.js",
+          "docs/testes/plano-testes-feat-007.md",
+          "docs/bugs/fix-feat-007-20251025-2125.md",
+          "docs/bugs/fix-feat-007-20251025-2135.md",
+          "docs/bugs/fix-feat-007-20251025-2145.md",
+          "docs/bugs/fix-feat-007-20251026-1430.md"
+        ],
+        "observacoes": "Feature implementada e aprovada. Migration e Model implementados com todas as validações, índices otimizados e soft delete. Inclui validação de CPF, hash automático de senha com bcrypt, métodos auxiliares (validatePassword, isAdmin, isTeacher, isStudent) e scopes personalizados. BUG CORRIGIDO v2 (2025-10-25): Implementada solução definitiva usando setter customizado no campo virtual 'password' + hook beforeValidate para processar hash ANTES das validações. Plano de testes criado com 16 testes documentados. Reorganização de documentação (docs/ estruturados). Migration executada com sucesso."
+      },
+      {
+        "id": "feat-008",
+        "titulo": "Criar migrations para Course e Discipline",
+        "descricao": "Criar tabelas courses (id, name, description, duration_semesters) e disciplines (id, name, code, workload_hours). Criar models correspondentes",
+        "estimativa": "1h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-006"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-26",
+        "dataConclusao": "2025-10-26",
+        "tags": [
+          "database",
+          "model"
+        ],
+        "artefatos": [
+          "backend/database/migrations/20251026131903-create-courses.js",
+          "backend/database/migrations/20251026131953-create-disciplines.js",
+          "backend/src/models/Course.js",
+          "backend/src/models/Discipline.js",
+          "docs/testes/plano-testes-feat-008.md",
+          "docs/bugs/fix-feat-008-20251026-1430.md",
+          "docs/bugs/fix-feat-008-20251026-1448.md"
+        ],
+        "observacoes": "Feature implementada e aprovada. Migrations criadas para tabelas courses e disciplines com campos completos, índices otimizados e soft delete. Models implementados com validações rigorosas (name, code, workload_hours), scopes personalizados (active, recent) e métodos auxiliares. Hooks configurados para normalização de dados (trim, uppercase em code) e logs. Bugs corrigidos: remoção de validador CPF inválido do model Course, implementação correta de validadores customizados. README.md atualizado. Plano de testes criado com 16 testes documentados."
+      },
+      {
+        "id": "feat-009",
+        "titulo": "Criar migration course_disciplines (relação N:N)",
+        "descricao": "Criar tabela course_disciplines para relacionar cursos e disciplinas com campo semester. Configurar associações nos models",
+        "estimativa": "1h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-008"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-26",
+        "dataConclusao": "2025-10-26",
+        "tags": [
+          "database",
+          "relationship"
+        ],
+        "artefatos": [
+          "backend/database/migrations/20251026211804-create-course-disciplines.js",
+          "associações belongsToMany nos models Course e Discipline",
+          "docs/testes/plano-testes-feat-009.md"
+        ],
+        "observacoes": "Feature implementada e aprovada. Migration criada para tabela pivot course_disciplines com índice único composto (course_id, discipline_id, semester), foreign keys com RESTRICT para prevenir exclusão acidental, e índices otimizados. Associações belongsToMany configuradas em ambos os models (Course e Discipline) para relacionamento N:N bidirecional. Migration executada com sucesso. README.md atualizado. Plano de testes criado."
+      },
+      {
+        "id": "feat-010",
+        "titulo": "Criar migrations para Class e relacionamentos",
+        "descricao": "Criar tabela classes (id, course_id, semester, year). Criar class_teachers (turma-professor-disciplina) e class_students (turma-aluno). Criar models e associações",
+        "estimativa": "2h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-008"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-26",
+        "dataConclusao": "2025-10-26",
+        "tags": [
+          "database",
+          "model"
+        ],
+        "artefatos": [
+          "backend/database/migrations/20251026215729-create-classes.js",
+          "backend/database/migrations/20251026215825-create-class-teachers.js",
+          "backend/database/migrations/20251026215909-create-class-students.js",
+          "backend/src/models/Class.js",
+          "docs/testes/plano-testes-feat-010.md"
+        ],
+        "observacoes": "Feature implementada e aprovada. Migration create-classes criada com campos id, course_id, semester (1-12), year (2020-2100), timestamps e deleted_at. Índices otimizados: course_id, semester/year, índice único composto (course_id, semester, year) com filtro deleted_at IS NULL, e índice para turmas ativas. Migration create-class-teachers criada para relacionamento N:N entre turmas, professores e disciplinas com índice único composto (class_id, teacher_id, discipline_id). Migration create-class-students criada para relacionamento N:N entre turmas e alunos com índice único composto (class_id, student_id). Model Class.js implementado com validações rigorosas (semester 1-12, year 2020-2100), soft delete, scopes personalizados (active, currentYear, withRelations, recent) e métodos auxiliares (isActive, getPeriodLabel, isCurrentYear, findByCourse, countStudents, countTeachers). Associações configuradas: belongsTo com Course, belongsToMany com User (teachers e students através de tabelas pivot), belongsToMany com Discipline. Hooks implementados para normalização de dados e logs. Ajuste realizado: INTEGER.UNSIGNED para compatibilidade com tabela users. Migrations executadas com sucesso. README.md atualizado. Plano de testes criado."
+      },
+      {
+        "id": "feat-011",
+        "titulo": "Criar migration e model Enrollment",
+        "descricao": "Criar tabela enrollments (id, student_id, course_id, status enum: pending|active|cancelled, enrollment_date). Criar model com validações",
+        "estimativa": "1h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-007",
+          "feat-008"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-26",
+        "dataConclusao": "2025-10-27",
+        "tags": [
+          "database",
+          "model"
+        ],
+        "artefatos": [
+          "backend/database/migrations/20251026230800-create-enrollments.js",
+          "backend/src/models/Enrollment.js",
+          "docs/testes/plano-testes-feat-011.md"
+        ],
+        "observacoes": "Feature implementada, aguardando testes manuais. Migration create-enrollments criada com campos id, student_id (INT UNSIGNED - FK para users), course_id (INT - FK para courses), status (ENUM: pending|active|cancelled), enrollment_date (DATEONLY), timestamps e deleted_at. Índices otimizados: student_id, course_id, status, enrollment_date, índice único composto (student_id, status) com filtro para deleted_at NULL e status active/pending - garante apenas 1 matrícula ativa/pending por aluno. Model Enrollment.js implementado com validações rigorosas (student_id, course_id obrigatórios, status ENUM, enrollment_date não pode ser futura), soft delete, scopes personalizados (active, pending, cancelled, recent, withRelations) e métodos auxiliares (isActive, isPending, isCancelled, getStatusLabel, activate, cancel). Métodos estáticos implementados: findByStudent, findByCourse, findActiveByStudent, countActiveByCourse. Associações configuradas: Enrollment belongsTo User (as student) e Course. Associações reversas configuradas: User hasMany Enrollments, Course hasMany Enrollments. Ajuste realizado: student_id como INTEGER.UNSIGNED (compatibilidade com users.id), course_id como INTEGER (compatibilidade com courses.id). Migration executada com sucesso. README.md atualizado com documentação da tabela enrollments."
+      },
+      {
+        "id": "feat-012",
+        "titulo": "Criar migrations para Document e DocumentType",
+        "descricao": "Criar tabelas document_types (id, name, description) e documents (id, user_id, document_type_id, file_path, status enum, reviewed_by, reviewed_at, observations)",
+        "estimativa": "1h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-007"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-27",
+        "dataConclusao": "2025-10-27",
+        "tags": [
+          "database",
+          "model"
+        ],
+        "artefatos": [
+          "backend/database/migrations/20251027145519-create-document-types.js",
+          "backend/database/migrations/20251027145627-create-documents.js",
+          "backend/src/models/DocumentType.js",
+          "backend/src/models/Document.js",
+          "docs/testes/plano-testes-feat-012.md"
+        ],
+        "observacoes": "Feature implementada e aprovada. Migration create-document-types criada com campos id, name, description, user_type (ENUM: student|teacher|both), is_required, timestamps, deleted_at. Índices otimizados: name, user_type, is_required, deleted_at. Migration create-documents criada com campos id, user_id (INT UNSIGNED - FK para users), document_type_id (INT - FK para document_types), file_path, file_name, file_size, mime_type, status (ENUM: pending|approved|rejected), reviewed_by (INT UNSIGNED - FK para users), reviewed_at, observations, timestamps, deleted_at. Índices otimizados: user_id, document_type_id, status, reviewed_by, created_at, deleted_at, índices compostos (user_id, document_type_id) e (status, created_at). Model DocumentType.js implementado com validações (nome 3-100 caracteres, user_type ENUM), soft delete, scopes (active, required, forStudents, forTeachers), métodos de instância (isRequiredForStudents, isRequiredForTeachers, isApplicableFor, getUserTypeLabel) e métodos estáticos (findRequiredForUserType, findActive). Model Document.js implementado com validações rigorosas (user_id, document_type_id, file_path, file_name obrigatórios, file_size não negativo, status ENUM), soft delete, scopes (active, pending, approved, rejected, byStatus, recent, withRelations), métodos de instância (isPending, isApproved, isRejected, getStatusLabel, approve, reject, getFormattedFileSize) e métodos estáticos (findByUser, findByStatus, findPending, findByUserAndType, countPendingByUser, countApprovedByUser). Associações configuradas: DocumentType hasMany Document, Document belongsTo User (dupla associação: user e reviewer), Document belongsTo DocumentType. Associações reversas configuradas em User: hasMany documents e hasMany reviewedDocuments. README.md atualizado com documentação completa das tabelas document_types e documents."
+      },
+      {
+        "id": "feat-013",
+        "titulo": "Criar migrations para Contract e ContractTemplate",
+        "descricao": "Criar tabelas contract_templates (id, name, content) e contracts (id, user_id, template_id, file_path, accepted_at, semester, year)",
+        "estimativa": "1h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-007"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-27",
+        "dataConclusao": "2025-10-27",
+        "tags": [
+          "database",
+          "model"
+        ],
+        "artefatos": [
+          "backend/database/migrations/20251027174014-create-contract-templates.js",
+          "backend/database/migrations/20251027174643-create-contracts.js",
+          "backend/src/models/ContractTemplate.js",
+          "backend/src/models/Contract.js",
+          "docs/testes/plano-testes-feat-013.md"
+        ],
+        "observacoes": "Feature implementada, aguardando testes manuais. Migration create-contract-templates criada com campos id, name, content (LONGTEXT), is_active, timestamps, deleted_at. Índices otimizados: name, is_active, deleted_at, índice composto (is_active, deleted_at) para templates disponíveis. Migration create-contracts criada com campos id, user_id (INT UNSIGNED - FK para users), template_id (INT - FK para contract_templates), file_path, file_name, accepted_at, semester (1-12), year (2020-2100), timestamps, deleted_at. Índices otimizados: user_id, template_id, accepted_at, semester, year, índices compostos (user_id, semester, year) e (user_id, accepted_at). Model ContractTemplate.js implementado com validações (nome 3-100 caracteres, conteúdo com estrutura HTML básica), soft delete, scopes (active, available, ordered), métodos de instância (isActive, activate, deactivate, replacePlaceholders, getPlaceholders) e métodos estáticos (findActive, findAvailable, findActiveById, findByName). Model Contract.js implementado com validações rigorosas (user_id, template_id, file_path, file_name obrigatórios, semester 1-12, year 2020-2100), soft delete, scopes (active, pending, accepted, withRelations, recent), métodos de instância (isAccepted, isPending, accept, getStatusLabel, getPeriodLabel, isCurrent) e métodos estáticos (findByUser, findPending, findAccepted, findByUserAndPeriod, findPendingByUser, countPendingByUser, countAcceptedByUser). Associações configuradas: ContractTemplate hasMany Contract, Contract belongsTo User e ContractTemplate. Migrations executadas com sucesso no banco de dados. README.md atualizado com documentação completa das tabelas contract_templates e contracts."
+      },
+      {
+        "id": "feat-014",
+        "titulo": "Criar migrations para Evaluation e Grade",
+        "descricao": "Criar tabelas evaluations (id, class_id, teacher_id, discipline_id, name, date, type enum: grade|concept) e grades (id, evaluation_id, student_id, grade, concept)",
+        "estimativa": "2h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-010"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-27",
+        "dataConclusao": "2025-10-27",
+        "tags": [
+          "database",
+          "model"
+        ],
+        "artefatos": [
+          "backend/database/migrations/20251027181314-create-evaluations.js",
+          "backend/database/migrations/20251027181409-create-grades.js",
+          "backend/src/models/Evaluation.js",
+          "backend/src/models/Grade.js",
+          "docs/testes/plano-testes-feat-014.md"
+        ],
+        "observacoes": "Feature implementada, aguardando testes manuais. Migration create-evaluations criada com campos id, class_id (INT - FK para classes), teacher_id (INT UNSIGNED - FK para users), discipline_id (INT - FK para disciplines), name, date (DATEONLY), type (ENUM: grade|concept), timestamps, deleted_at. Índices otimizados: class_id, teacher_id, discipline_id, date, type, deleted_at, índices compostos (class_id, deleted_at), (class_id, discipline_id), (teacher_id, class_id). Migration create-grades criada com campos id, evaluation_id (INT - FK para evaluations), student_id (INT UNSIGNED - FK para users), grade (DECIMAL 4,2), concept (ENUM: satisfactory|unsatisfactory), timestamps, deleted_at. Índices otimizados: evaluation_id, student_id, deleted_at, created_at, índice único composto (evaluation_id, student_id) com filtro deleted_at NULL, índice composto (student_id, deleted_at). Constraints CHECK adicionados: grade entre 0.00 e 10.00, validação XOR (apenas grade OU concept preenchido). Model Evaluation.js implementado com validações rigorosas, soft delete, scopes personalizados (active, byType, upcoming, past, withRelations, recent) e métodos auxiliares (isActive, isGradeType, isConceptType, getTypeLabel, isPast, isFuture, getFormattedDate, findByClass, findByTeacher, findByDiscipline, findUpcomingByClass, countByClass, countByTeacher). Model Grade.js implementado com validações rigorosas (grade 0-10, concept ENUM, validação XOR customizada), soft delete, scopes personalizados (active, withGrades, withConcepts, passing, failing, withRelations, recent) e métodos auxiliares (isActive, isGrade, isConcept, getFormattedValue, isPassing, getStatus, findByEvaluation, findByStudent, findByEvaluationAndStudent, calculateAverageByStudent, countByStudent, countByEvaluation, findPendingByEvaluation). Associações configuradas: Evaluation belongsTo Class/User/Discipline, hasMany Grade; Grade belongsTo Evaluation/User. Associações reversas configuradas: User hasMany Evaluation/Grade, Class hasMany Evaluation, Discipline hasMany Evaluation. Migrations executadas com sucesso. README.md atualizado com documentação das tabelas evaluations e grades."
+      },
+      {
+        "id": "feat-015",
+        "titulo": "Criar migrations para Request e RequestType",
+        "descricao": "Criar tabelas request_types (id, name, description, response_deadline_days, is_active) e requests (id, student_id, request_type_id, description, status enum, reviewed_by, reviewed_at, observations)",
+        "estimativa": "1h30min",
+        "prioridade": "media",
+        "dependencias": [
+          "feat-007"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-27",
+        "dataConclusao": "2025-10-27",
+        "tags": [
+          "database",
+          "model"
+        ],
+        "artefatos": [
+          "backend/database/migrations/20251027192921-create-request-types.js",
+          "backend/database/migrations/20251027192954-create-requests.js",
+          "backend/src/models/RequestType.js",
+          "backend/src/models/Request.js",
+          "docs/testes/plano-testes-feat-015.md"
+        ],
+        "observacoes": "Feature implementada, aguardando testes manuais. Migration create-request-types criada com campos id, name, description, response_deadline_days (prazo em dias úteis, padrão 5), is_active, timestamps, deleted_at. Índices otimizados: name, is_active, deleted_at, índice composto (is_active, deleted_at) para tipos disponíveis. Migration create-requests criada com campos id, student_id (INT UNSIGNED - FK para users), request_type_id (INT - FK para request_types), description, status (ENUM: pending|approved|rejected), reviewed_by (INT UNSIGNED - FK para users), reviewed_at, observations, timestamps, deleted_at. Índices otimizados: student_id, request_type_id, status, reviewed_by, created_at, deleted_at, índices compostos (student_id, status), (status, created_at), (student_id, deleted_at). Model RequestType.js implementado com validações (nome 3-100 caracteres, prazo não negativo), soft delete, scopes (active, available, ordered), métodos de instância (isActive, activate, deactivate, getDeadlineLabel, getStatusLabel) e métodos estáticos (findActive, findAvailable, findActiveById, findByName, countActive, countAvailable). Model Request.js implementado com validações rigorosas (student_id, request_type_id obrigatórios, status ENUM), soft delete, scopes (active, pending, approved, rejected, byStatus, withRelations, recent), métodos de instância (isActive, isPending, isApproved, isRejected, getStatusLabel, approve, reject, getFormattedCreatedAt, getFormattedReviewedAt) e métodos estáticos (findByStudent, findByStatus, findPending, findByStudentAndStatus, countPendingByStudent, countByStatus, countPending, findByType, findByReviewer). Associações configuradas: RequestType hasMany Request, Request belongsTo User (student e reviewer) e RequestType. Associações reversas configuradas em User: hasMany Request (requests e reviewedRequests). Migrations executadas com sucesso. README.md atualizado com documentação completa das tabelas request_types e requests."
+      },
+      {
+        "id": "feat-016",
+        "titulo": "Criar seeders de dados iniciais",
+        "descricao": "Criar seeders para: usuário admin, tipos de documentos padrão, tipos de solicitações, curso e disciplinas de exemplo",
+        "estimativa": "1h30min",
+        "prioridade": "media",
+        "dependencias": [
+          "feat-007",
+          "feat-008",
+          "feat-012",
+          "feat-015"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-27",
+        "dataConclusao": "2025-10-27",
+        "tags": [
+          "database",
+          "seed"
+        ],
+        "artefatos": [
+          "backend/database/seeders/20251027211219-admin-user.js",
+          "backend/database/seeders/20251027211322-document-types.js",
+          "backend/database/seeders/20251027211442-request-types.js",
+          "backend/database/seeders/20251027211530-sample-courses-and-disciplines.js",
+          "README.md (atualizado)",
+          "docs/testes/plano-testes-feat-016.md"
+        ],
+        "observacoes": "Feature implementada, aguardando testes manuais. Seeders criados: (1) admin-user - usuário admin padrão (login: admin, senha: admin123), (2) document-types - 19 tipos de documentos (9 para alunos, 8 para professores, 1 para ambos), (3) request-types - 10 tipos de solicitações padrão com prazos de resposta configurados, (4) sample-courses-and-disciplines - 3 cursos (ADS, RH, Administração), 28 disciplinas e 40 associações curso-disciplina organizadas por semestre. Todos os seeders são idempotentes (verificam se dados já existem antes de inserir). README.md atualizado com documentação completa dos seeders. Plano de testes criado."
+      }
+    ]
+  }
+}

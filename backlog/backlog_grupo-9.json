@@ -1,0 +1,124 @@
+{
+  "projeto": {
+    "nome": "Secretaria Online",
+    "versao": "0.1.0",
+    "descricao": "Sistema de gestão acadêmica para instituição de ensino com ~200 alunos e ~10 professores",
+    "dataGeracao": "2025-10-23"
+  },
+  "grupo": {
+    "id": "grupo-9",
+    "nome": "Backend - Contratos e Geração de PDF",
+    "descricao": "Sistema de geração, aceite e gestão de contratos em PDF",
+    "prioridade": "alta",
+    "features": [
+      {
+        "id": "feat-046",
+        "titulo": "Instalar e configurar PDFKit ou Puppeteer",
+        "descricao": "Avaliar limitações do Hostgator, escolher entre PDFKit (leve) ou Puppeteer (flexível). Instalar e criar configuração inicial",
+        "estimativa": "1h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-002"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-01",
+        "dataConclusao": "2025-11-01",
+        "tags": [
+          "pdf",
+          "config"
+        ],
+        "artefatos": [
+          "biblioteca instalada no package.json"
+        ]
+      },
+      {
+        "id": "feat-047",
+        "titulo": "Criar PDFService para geração de contratos",
+        "descricao": "Implementar pdf.service.js com método generateContractPDF(contractData, template) que substitui placeholders e gera PDF em uploads/contracts/",
+        "estimativa": "3h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-046"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-01",
+        "dataConclusao": "2025-11-01",
+        "tags": [
+          "pdf",
+          "service"
+        ],
+        "artefatos": [
+          "backend/src/services/pdf.service.js",
+          "backend/uploads/contracts/"
+        ]
+      },
+      {
+        "id": "feat-048",
+        "titulo": "Criar ContractService com lógica de negócio",
+        "descricao": "Implementar ContractService: generateContract (busca template, gera PDF, salva registro), acceptContract (registra accepted_at)",
+        "estimativa": "2h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-013",
+          "feat-047"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-01",
+        "dataConclusao": "2025-11-01",
+        "tags": [
+          "contract",
+          "service",
+          "business-logic"
+        ],
+        "artefatos": [
+          "backend/src/services/contract.service.js"
+        ]
+      },
+      {
+        "id": "feat-049",
+        "titulo": "Criar ContractController e rotas",
+        "descricao": "Implementar GET /contracts (listar - admin/próprio usuário), POST /contracts (gerar - admin), POST /contracts/:id/accept (aluno aceita), GET /contracts/:id/pdf (download)",
+        "estimativa": "2h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-048",
+          "feat-021"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-01",
+        "dataConclusao": "2025-11-01",
+        "tags": [
+          "contract",
+          "controller",
+          "api"
+        ],
+        "artefatos": [
+          "backend/src/controllers/contract.controller.js",
+          "backend/src/routes/contract.routes.js"
+        ]
+      },
+      {
+        "id": "feat-050",
+        "titulo": "Criar template HTML de contrato padrão",
+        "descricao": "Criar template HTML com placeholders {{studentName}}, {{courseName}}, etc. Salvar como seeder em contract_templates",
+        "estimativa": "1h30min",
+        "prioridade": "media",
+        "dependencias": [
+          "feat-013"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-01",
+        "dataConclusao": "2025-11-01",
+        "tags": [
+          "contract",
+          "template",
+          "seeder"
+        ],
+        "artefatos": [
+          "backend/database/seeders/20251101120000-contract-template.js",
+          "README.md (documentação feat-050)"
+        ]
+      }
+    ]
+  }
+}

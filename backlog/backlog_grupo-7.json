@@ -1,0 +1,83 @@
+{
+  "projeto": {
+    "nome": "Secretaria Online",
+    "versao": "0.1.0",
+    "descricao": "Sistema de gestão acadêmica para instituição de ensino com ~200 alunos e ~10 professores",
+    "dataGeracao": "2025-10-23"
+  },
+  "grupo": {
+    "id": "grupo-7",
+    "nome": "Backend - API de Matrículas",
+    "descricao": "Sistema de matrículas de alunos em cursos",
+    "prioridade": "alta",
+    "features": [
+      {
+        "id": "feat-038",
+        "titulo": "Criar EnrollmentService com regras de negócio",
+        "descricao": "Implementar EnrollmentService com validações: aluno não pode ter matrícula ativa no mesmo curso, documentos obrigatórios aprovados antes de ativar",
+        "estimativa": "2h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-011"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-29",
+        "dataConclusao": "2025-10-29",
+        "tags": [
+          "enrollment",
+          "service",
+          "business-logic"
+        ],
+        "artefatos": [
+          "backend/src/services/enrollment.service.js"
+        ]
+      },
+      {
+        "id": "feat-039",
+        "titulo": "Criar EnrollmentController e rotas",
+        "descricao": "Implementar CRUD de matrículas. POST cria matrícula com status pending. PUT /enrollments/:id/status para alterar status (admin only)",
+        "estimativa": "2h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-038",
+          "feat-021"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-30",
+        "dataConclusao": "2025-10-30",
+        "tags": [
+          "enrollment",
+          "controller",
+          "api"
+        ],
+        "artefatos": [
+          "backend/src/controllers/enrollment.controller.js",
+          "backend/src/routes/enrollment.routes.js",
+          "docs/testes/plano-testes-feat-039.md"
+        ]
+      },
+      {
+        "id": "feat-040",
+        "titulo": "Adicionar endpoint para listar matrículas por aluno",
+        "descricao": "Implementar GET /students/:id/enrollments retornando todas as matrículas do aluno com dados do curso",
+        "estimativa": "1h",
+        "prioridade": "media",
+        "dependencias": [
+          "feat-039"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-30",
+        "dataConclusao": "2025-10-30",
+        "tags": [
+          "enrollment",
+          "api"
+        ],
+        "artefatos": [
+          "backend/src/routes/enrollment.routes.js",
+          "backend/src/controllers/enrollment.controller.js",
+          "docs/testes/plano-testes-feat-040.md"
+        ]
+      }
+    ]
+  }
+}

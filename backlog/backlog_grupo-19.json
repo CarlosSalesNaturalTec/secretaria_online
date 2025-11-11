@@ -1,0 +1,204 @@
+{
+  "projeto": {
+    "nome": "Secretaria Online",
+    "versao": "0.1.0",
+    "descricao": "Sistema de gestão acadêmica para instituição de ensino com ~200 alunos e ~10 professores",
+    "dataGeracao": "2025-10-23"
+  },
+  "grupo": {
+    "id": "grupo-19",
+    "nome": "Frontend - Dashboard Admin",
+    "descricao": "Dashboard e páginas de gestão para administradores",
+    "prioridade": "alta",
+    "features": [
+      {
+        "id": "feat-081",
+        "titulo": "Criar página Dashboard Admin",
+        "descricao": "Implementar pages/admin/Dashboard.tsx com cards de estatísticas (total alunos, professores, documentos pendentes, matrículas ativas)",
+        "estimativa": "2h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-073",
+          "feat-074"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
+        "tags": [
+          "admin",
+          "page",
+          "dashboard"
+        ],
+        "artefatos": [
+          "frontend/src/pages/admin/Dashboard.tsx"
+        ]
+      },
+      {
+        "id": "feat-082",
+        "titulo": "Criar student.service.ts",
+        "descricao": "Implementar services/student.service.ts com funções: getAll, getById, create, update, delete, resetPassword",
+        "estimativa": "1h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-075"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
+        "tags": [
+          "student",
+          "service"
+        ],
+        "artefatos": [
+          "frontend/src/services/student.service.ts"
+        ]
+      },
+      {
+        "id": "feat-083",
+        "titulo": "Criar página Students (listagem e CRUD)",
+        "descricao": "Implementar pages/admin/Students.tsx com tabela de alunos, botões adicionar/editar/remover, modal de formulário, integração com student.service",
+        "estimativa": "3h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-082",
+          "feat-069",
+          "feat-068"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
+        "tags": [
+          "admin",
+          "page",
+          "student"
+        ],
+        "artefatos": [
+          "frontend/src/pages/admin/Students.tsx",
+          "frontend/src/components/forms/StudentForm.tsx"
+        ]
+      },
+      {
+        "id": "feat-084",
+        "titulo": "Criar teacher.service.ts e página Teachers",
+        "descricao": "Implementar services/teacher.service.ts (similar a student) e pages/admin/Teachers.tsx com CRUD de professores",
+        "estimativa": "3h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-075",
+          "feat-069",
+          "feat-068"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
+        "tags": [
+          "admin",
+          "page",
+          "teacher"
+        ],
+        "artefatos": [
+          "frontend/src/services/teacher.service.ts",
+          "frontend/src/pages/admin/Teachers.tsx",
+          "frontend/src/components/forms/TeacherForm.tsx"
+        ]
+      },
+      {
+        "id": "feat-085",
+        "titulo": "Criar course.service.ts e página Courses",
+        "descricao": "Implementar services/course.service.ts e pages/admin/Courses.tsx com CRUD de cursos e gestão de disciplinas vinculadas",
+        "estimativa": "3h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-075",
+          "feat-069",
+          "feat-068"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
+        "tags": [
+          "admin",
+          "page",
+          "course"
+        ],
+        "artefatos": [
+          "frontend/src/services/course.service.ts",
+          "frontend/src/pages/admin/Courses.tsx",
+          "frontend/src/components/forms/CourseForm.tsx"
+        ]
+      },
+      {
+        "id": "feat-086",
+        "titulo": "Criar class.service.ts e página Classes",
+        "descricao": "Implementar services/class.service.ts e pages/admin/Classes.tsx com CRUD de turmas, vincular professores/alunos",
+        "estimativa": "4h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-075",
+          "feat-069",
+          "feat-068"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
+        "tags": [
+          "admin",
+          "page",
+          "class"
+        ],
+        "artefatos": [
+          "frontend/src/types/class.types.ts",
+          "frontend/src/services/class.service.ts",
+          "frontend/src/pages/admin/Classes.tsx",
+          "frontend/src/components/forms/ClassForm.tsx"
+        ]
+      },
+      {
+        "id": "feat-087",
+        "titulo": "Criar document.service.ts e página Documents Admin",
+        "descricao": "Implementar services/document.service.ts e pages/admin/Documents.tsx com listagem de documentos pendentes/aprovados/rejeitados, botões aprovar/rejeitar",
+        "estimativa": "3h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-075",
+          "feat-069"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
+        "tags": [
+          "admin",
+          "page",
+          "document"
+        ],
+        "artefatos": [
+          "frontend/src/services/document.service.ts",
+          "frontend/src/pages/admin/Documents.tsx"
+        ]
+      },
+      {
+        "id": "feat-088",
+        "titulo": "Criar request.service.ts e página Requests Admin",
+        "descricao": "Implementar services/request.service.ts e pages/admin/Requests.tsx com listagem de solicitações, filtro por status, aprovar/rejeitar",
+        "estimativa": "3h",
+        "prioridade": "media",
+        "dependencias": [
+          "feat-075",
+          "feat-069"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-04",
+        "dataConclusao": "2025-11-04",
+        "tags": [
+          "admin",
+          "page",
+          "request"
+        ],
+        "artefatos": [
+          "frontend/src/services/request.service.ts",
+          "frontend/src/pages/admin/Requests.tsx"
+        ]
+      }
+    ]
+  }
+}

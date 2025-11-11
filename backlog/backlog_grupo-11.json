@@ -1,0 +1,60 @@
+{
+  "projeto": {
+    "nome": "Secretaria Online",
+    "versao": "0.1.0",
+    "descricao": "Sistema de gestão acadêmica para instituição de ensino com ~200 alunos e ~10 professores",
+    "dataGeracao": "2025-10-23"
+  },
+  "grupo": {
+    "id": "grupo-11",
+    "nome": "Backend - Solicitações",
+    "descricao": "Sistema de solicitações de alunos (declarações, requerimentos)",
+    "prioridade": "media",
+    "features": [
+      {
+        "id": "feat-056",
+        "titulo": "Criar RequestController e rotas",
+        "descricao": "Implementar CRUD de solicitações. POST /requests (aluno cria), GET /requests (admin vê todas, aluno vê próprias), PUT /requests/:id/approve e reject (admin)",
+        "estimativa": "3h",
+        "prioridade": "media",
+        "dependencias": [
+          "feat-015",
+          "feat-021"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
+        "tags": [
+          "request",
+          "controller",
+          "api"
+        ],
+        "artefatos": [
+          "backend/src/controllers/request.controller.js",
+          "backend/src/routes/request.routes.js"
+        ]
+      },
+      {
+        "id": "feat-057",
+        "titulo": "Adicionar filtros e paginação para solicitações",
+        "descricao": "Adicionar query params para GET /requests: ?status=pending&page=1&limit=20&student_id=x",
+        "estimativa": "1h30min",
+        "prioridade": "baixa",
+        "dependencias": [
+          "feat-056"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-11-03",
+        "dataConclusao": "2025-11-03",
+        "tags": [
+          "request",
+          "api",
+          "optimization"
+        ],
+        "artefatos": [
+          "backend/src/controllers/request.controller.js"
+        ]
+      }
+    ]
+  }
+}

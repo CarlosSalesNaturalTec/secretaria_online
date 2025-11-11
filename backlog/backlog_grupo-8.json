@@ -1,0 +1,117 @@
+{
+  "projeto": {
+    "nome": "Secretaria Online",
+    "versao": "0.1.0",
+    "descricao": "Sistema de gestão acadêmica para instituição de ensino com ~200 alunos e ~10 professores",
+    "dataGeracao": "2025-10-23"
+  },
+  "grupo": {
+    "id": "grupo-8",
+    "nome": "Backend - Upload e Gestão de Documentos",
+    "descricao": "Sistema de upload, validação e aprovação de documentos",
+    "prioridade": "alta",
+    "features": [
+      {
+        "id": "feat-041",
+        "titulo": "Configurar Multer para upload de arquivos",
+        "descricao": "Instalar multer, criar config/upload.js com storage (uploads/documents/), limites de tamanho (10MB), filtro de tipos (PDF, JPG, PNG). Criar upload.middleware.js",
+        "estimativa": "1h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-002"
+        ],
+        "status": "Concluída",
+        "tags": [
+          "upload",
+          "config",
+          "middleware"
+        ],
+        "artefatos": [
+          "backend/src/config/upload.js",
+          "backend/src/middlewares/upload.middleware.js",
+          "backend/uploads/documents/"
+        ]
+      },
+      {
+        "id": "feat-042",
+        "titulo": "Criar DocumentService com validação",
+        "descricao": "Implementar DocumentService com métodos: upload (salvar registro no DB), approve, reject, delete. Validar se documento é obrigatório para o tipo de usuário",
+        "estimativa": "2h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-012"
+        ],
+        "status": "Concluída",
+        "tags": [
+          "document",
+          "service",
+          "business-logic"
+        ],
+        "artefatos": [
+          "backend/src/services/document.service.js"
+        ]
+      },
+      {
+        "id": "feat-043",
+        "titulo": "Criar DocumentController e rotas",
+        "descricao": "Implementar DocumentController: POST /documents (upload - aluno/professor), GET /documents (listar - admin filtro por status), PUT /documents/:id/approve e reject (admin)",
+        "estimativa": "3h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-041",
+          "feat-042",
+          "feat-021"
+        ],
+        "status": "Concluída",
+        "tags": [
+          "document",
+          "controller",
+          "api"
+        ],
+        "artefatos": [
+          "backend/src/controllers/document.controller.js",
+          "backend/src/routes/document.routes.js"
+        ]
+      },
+      {
+        "id": "feat-044",
+        "titulo": "Adicionar endpoint para download de documento",
+        "descricao": "Implementar GET /documents/:id/download que verifica permissões (próprio usuário ou admin) e retorna arquivo com res.download()",
+        "estimativa": "1h30min",
+        "prioridade": "media",
+        "dependencias": [
+          "feat-043"
+        ],
+        "status": "Concluída",
+        "tags": [
+          "document",
+          "api"
+        ],
+        "artefatos": [
+          "método download em document.controller.js"
+        ]
+      },
+      {
+        "id": "feat-045",
+        "titulo": "Adicionar endpoint para listar documentos por usuário",
+        "descricao": "Implementar GET /users/:id/documents ou GET /my-documents (estudante/professor vê próprios docs)",
+        "estimativa": "1h",
+        "prioridade": "media",
+        "dependencias": [
+          "feat-043"
+        ],
+        "status": "Concluída",
+        "tags": [
+          "document",
+          "api"
+        ],
+        "artefatos": [
+          "método getDocumentsByUser em document.service.js",
+          "método getUserDocuments em document.controller.js",
+          "método getMyDocuments em document.controller.js",
+          "rotas em document.routes.js"
+        ]
+      }
+    ]
+  }
+}

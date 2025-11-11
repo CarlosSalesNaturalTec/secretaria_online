@@ -1,0 +1,140 @@
+{
+  "projeto": {
+    "nome": "Secretaria Online",
+    "versao": "0.1.0",
+    "descricao": "Sistema de gestão acadêmica para instituição de ensino com ~200 alunos e ~10 professores",
+    "dataGeracao": "2025-10-23"
+  },
+  "grupo": {
+    "id": "grupo-3",
+    "nome": "Autenticação e Autorização",
+    "descricao": "Implementação de JWT, login, middleware de autenticação e RBAC",
+    "prioridade": "alta",
+    "features": [
+      {
+        "id": "feat-017",
+        "titulo": "Configurar JWT e bcrypt",
+        "descricao": "Instalar jsonwebtoken e bcryptjs, criar config/auth.js com secret e expiration. Criar utilitários para hash de senha e geração de tokens",
+        "estimativa": "1h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-002"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-27",
+        "dataConclusao": "2025-10-27",
+        "tags": [
+          "auth",
+          "security"
+        ],
+        "artefatos": [
+          "backend/src/config/auth.js",
+          "backend/src/utils/generators.js"
+        ],
+        "observacoes": "Feature implementada e aprovada"
+      },
+      {
+        "id": "feat-018",
+        "titulo": "Criar AuthService com lógica de autenticação",
+        "descricao": "Implementar AuthService com métodos: login (validar credenciais, gerar JWT), refreshToken, changePassword, validateToken",
+        "estimativa": "2h",
+        "prioridade": "alta",
+        "status": "Concluída",
+        "dataInicio": "2025-10-27",
+        "dataConclusao": "2025-10-27",
+        "tags": [
+          "auth",
+          "service"
+        ],
+        "artefatos": [
+          "backend/src/services/auth.service.js"
+        ],
+        "observacoes": "Feature implementada e aprovada"
+      },
+      {
+        "id": "feat-019",
+        "titulo": "Criar AuthController e rotas de autenticação",
+        "descricao": "Implementar AuthController com endpoints: POST /auth/login, POST /auth/logout, POST /auth/refresh-token, POST /auth/change-password. Criar auth.routes.js",
+        "estimativa": "2h",
+        "prioridade": "alta",
+        "status": "Concluída",
+        "dataInicio": "2025-10-27",
+        "dataConclusao": "2025-10-27",
+        "tags": [
+          "auth",
+          "controller",
+          "api"
+        ],
+        "artefatos": [
+          "backend/src/controllers/auth.controller.js",
+          "backend/src/routes/auth.routes.js"
+        ],
+        "observacoes": "Feature implementada e aprovada"
+      },
+      {
+        "id": "feat-020",
+        "titulo": "Criar middleware de autenticação JWT",
+        "descricao": "Implementar auth.middleware.js que verifica token JWT no header Authorization, decodifica e injeta user no req.user",
+        "estimativa": "1h30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-018"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-27",
+        "dataConclusao": "2025-10-27",
+        "tags": [
+          "auth",
+          "middleware"
+        ],
+        "artefatos": [
+          "backend/src/middlewares/auth.middleware.js"
+        ],
+        "observacoes": "Feature implementada e aprovada"
+      },
+      {
+        "id": "feat-021",
+        "titulo": "Criar middleware RBAC (autorização por role)",
+        "descricao": "Implementar rbac.middleware.js com função authorize(...allowedRoles) que verifica se user.role está nas roles permitidas",
+        "estimativa": "1h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-020"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-27",
+        "dataConclusao": "2025-10-27",
+        "tags": [
+          "auth",
+          "middleware",
+          "rbac"
+        ],
+        "artefatos": [
+          "backend/src/middlewares/rbac.middleware.js"
+        ],
+        "observacoes": "Feature implementada e aprovada"
+      },
+      {
+        "id": "feat-022",
+        "titulo": "Implementar rate limiting para login",
+        "descricao": "Instalar express-rate-limit, criar rateLimiter.middleware.js com limite de 5 tentativas de login por IP em 15 minutos",
+        "estimativa": "45min",
+        "prioridade": "media",
+        "dependencias": [
+          "feat-019"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-27",
+        "dataConclusao": "2025-10-28",
+        "tags": [
+          "security",
+          "middleware"
+        ],
+        "artefatos": [
+          "backend/src/middlewares/rateLimiter.middleware.js"
+        ],
+        "observacoes": "Feature implementada e aprovada"
+      }
+    ]
+  }
+}

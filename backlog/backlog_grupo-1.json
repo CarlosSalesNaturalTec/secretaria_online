@@ -1,0 +1,138 @@
+{
+  "projeto": {
+    "nome": "Secretaria Online",
+    "versao": "0.1.0",
+    "descricao": "Sistema de gestão acadêmica para instituição de ensino com ~200 alunos e ~10 professores",
+    "dataGeracao": "2025-10-23"
+  },
+  "grupo": {
+    "id": "grupo-1",
+    "nome": "Setup e Infraestrutura",
+    "descricao": "Configuração inicial do projeto e estrutura base",
+    "prioridade": "alta",
+    "features": [
+      {
+        "id": "feat-001",
+        "titulo": "Configuração inicial do monorepo",
+        "descricao": "Criar estrutura de pastas raiz com diretórios frontend/, backend/, docs/. Inicializar Git, criar .gitignore e README.md",
+        "estimativa": "30min",
+        "prioridade": "alta",
+        "dependencias": [],
+        "status": "Concluída",
+        "dataInicio": "2025-10-24",
+        "dataConclusao": "2025-10-24",
+        "tags": [
+          "setup",
+          "config"
+        ],
+        "artefatos": [
+          "README.md",
+          ".gitignore",
+          "estrutura de pastas raiz"
+        ],
+        "observacoes": "Feature implementada e commitada. Estrutura de pastas criada, .gitignore configurado com ignorações para node_modules, .env, uploads, logs. README.md criado com documentação completa de setup, instalação e execução."
+      },
+      {
+        "id": "feat-002",
+        "titulo": "Setup do backend Node.js",
+        "descricao": "Inicializar projeto Node.js no backend/, instalar Express, criar estrutura de pastas (src/config, src/controllers, src/models, etc), configurar package.json com scripts",
+        "estimativa": "1h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-001"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-24",
+        "dataConclusao": "2025-10-24",
+        "tags": [
+          "setup",
+          "backend"
+        ],
+        "artefatos": [
+          "backend/package.json",
+          "backend/src/server.js",
+          "estrutura de pastas backend"
+        ],
+        "observacoes": "Feature implementada e commitada. Projeto Node.js inicializado com Express, Sequelize e todas as dependências necessárias. Estrutura de pastas completa criada seguindo o contextDoc.md. Package.json configurado com scripts para dev, start, migrations e seeders. Arquivo server.js criado com configuração básica do Express, middlewares de segurança (Helmet, CORS) e rotas de health check. .sequelizerc configurado para localização correta dos arquivos do Sequelize."
+      },
+      {
+        "id": "feat-003",
+        "titulo": "Setup do frontend React com Vite",
+        "descricao": "Inicializar projeto React com Vite no frontend/, configurar TypeScript, instalar dependências base (React Router, Axios, Tailwind CSS), criar estrutura de pastas",
+        "estimativa": "1h",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-001"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-24",
+        "dataConclusao": "2025-10-24",
+        "tags": [
+          "setup",
+          "frontend"
+        ],
+        "artefatos": [
+          "frontend/package.json",
+          "frontend/vite.config.ts",
+          "frontend/tsconfig.json",
+          "frontend/tailwind.config.js",
+          "frontend/postcss.config.js",
+          "frontend/.env.example",
+          "frontend/.eslintrc.json",
+          "frontend/.prettierrc",
+          "estrutura de pastas frontend completa"
+        ],
+        "observacoes": "Feature implementada e aprovada. Projeto React inicializado com Vite e TypeScript. Todas as dependências principais instaladas: React Router DOM, Axios, TanStack Query, Tailwind CSS, React Hook Form, Zod, Headless UI, Lucide React, date-fns. Tailwind CSS configurado com PostCSS e Autoprefixer. Estrutura completa de pastas criada seguindo contextDoc.md (components/ui, components/layout, components/forms, pages/auth, pages/admin, pages/student, pages/teacher, services, hooks, contexts, utils, types). Path aliases configurados com @/ apontando para src/. Arquivos base criados: api.ts (cliente Axios com interceptors), constants.ts, types (api.types.ts, user.types.ts). Configurações ESLint e Prettier adicionadas. Arquivo .env.example criado. README.md do frontend criado com documentação completa."
+      },
+      {
+        "id": "feat-004",
+        "titulo": "Configurar variáveis de ambiente",
+        "descricao": "Criar .env.example para backend e frontend com todas as variáveis necessárias (DB, JWT, SMTP, etc). Documentar cada variável",
+        "estimativa": "30min",
+        "prioridade": "alta",
+        "dependencias": [
+          "feat-002",
+          "feat-003"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-24",
+        "dataConclusao": "2025-10-24",
+        "tags": [
+          "config",
+          "security"
+        ],
+        "artefatos": [
+          "backend/.env.example",
+          "frontend/.env.example"
+        ],
+        "observacoes": "Feature implementada e aprovada. Criados arquivos .env.example completos e documentados para backend (218 linhas, 60+ variáveis organizadas em 10 seções) e frontend (186 linhas, 30+ variáveis organizadas em 9 seções). README.md atualizado com instruções detalhadas de configuração para Windows/Linux/Mac, seção de troubleshooting e comandos úteis. Backlog atualizado para status Concluída."
+      },
+      {
+        "id": "feat-005",
+        "titulo": "Configurar ESLint e Prettier",
+        "descricao": "Instalar e configurar ESLint e Prettier para frontend e backend com regras consistentes, criar arquivos de configuração",
+        "estimativa": "45min",
+        "prioridade": "media",
+        "dependencias": [
+          "feat-002",
+          "feat-003"
+        ],
+        "status": "Concluída",
+        "dataInicio": "2025-10-25",
+        "dataConclusao": "2025-10-25",
+        "tags": [
+          "setup",
+          "code-quality"
+        ],
+        "artefatos": [
+          "backend/eslint.config.js",
+          "frontend/eslint.config.js",
+          ".prettierrc",
+          ".prettierignore",
+          "docs/testes/plano-testes-feat-005.md"
+        ],
+        "observacoes": "Feature implementada e aprovada. ESLint v9+ (Flat Config) configurado em backend e frontend com regras customizadas e integração Prettier. Backend: Node.js CommonJS com regras para código limpo (no-var, eqeqeq, prefer-const). Frontend: TypeScript/React com suporte a React Hooks, TypeScript ESLint e Prettier. Arquivo .prettierrc unificado na raiz. Scripts npm adicionados: lint, lint:fix, format, format:check. README.md atualizado com documentação completa. Problemas de lint corrigidos (4 erros Prettier + 1 warning TypeScript). Plano de testes criado com 16 testes documentados. Todos os arquivos formatados e validados."
+      }
+    ]
+  }
+}
