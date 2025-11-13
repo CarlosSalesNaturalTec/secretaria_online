@@ -67,13 +67,17 @@ app.use(
   cors({
     // Origem(ns) permitida(s) - pode ser string única ou array
     origin: (origin, callback) => {
-      // Permite requisições sem origin (ex: Postman, mobile apps, curl)
+      // Em desenvolvimento ou quando Nginx faz proxy reverso,
+      // requisições podem não ter origin header. Neste caso, permitir.
       if (!origin) return callback(null, true);
 
       // Verifica se a origem está na lista de permitidas
       if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
         callback(null, true);
       } else {
+        // Log para debug
+        logger.warn(`CORS: Origem rejeitada: ${origin}`);
+        logger.warn(`CORS: Origens permitidas: ${allowedOrigins.join(', ')}`);
         callback(new Error('Origem não permitida pela política de CORS'));
       }
     },
@@ -88,6 +92,8 @@ app.use(
       'X-Requested-With',
       'Accept',
       'Origin',
+      'X-Forwarded-For',
+      'X-Forwarded-Proto',
     ],
     // Headers expostos nas respostas (acessíveis pelo frontend)
     exposedHeaders: ['Content-Range', 'X-Content-Range', 'X-Total-Count'],
