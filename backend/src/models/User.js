@@ -358,24 +358,6 @@ module.exports = (sequelize, DataTypes) => {
          * password_hash esteja preenchido antes das validações de NOT NULL
          */
         beforeValidate: async (user) => {
-          // Validação condicional: alunos e professores precisam de campos extras
-          if (user.role === 'student' || user.role === 'teacher') {
-            const requiredFields = ['voter_title', 'reservist', 'mother_name', 'father_name', 'address'];
-            const missingFields = [];
-
-            requiredFields.forEach(field => {
-              if (!user[field] || (typeof user[field] === 'string' && !user[field].trim())) {
-                missingFields.push(field);
-              }
-            });
-
-            if (missingFields.length > 0) {
-              throw new Error(
-                `Os seguintes campos são obrigatórios para ${user.role === 'student' ? 'alunos' : 'professores'}: ${missingFields.join(', ')}`
-              );
-            }
-          }
-
           // Verificar se há senha marcada para hash pelo setter
           if (user._passwordNeedsHash) {
             const password = user._passwordNeedsHash;
