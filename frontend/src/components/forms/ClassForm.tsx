@@ -119,7 +119,7 @@ export function ClassForm({
    * Estado para listas de dados
    */
   const [courses, setCourses] = useState<ICourse[]>([]);
-  const [students, setStudents] = useState<IUser[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
   const [teachers, setTeachers] = useState<IUser[]>([]);
   const [disciplines, setDisciplines] = useState<IDiscipline[]>([]);
 

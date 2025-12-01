@@ -111,7 +111,47 @@ class StudentController {
     try {
       const { id } = req.params;
       const temporaryPassword = await StudentService.resetPassword(id);
-      return res.json({ success: true, data: { temporaryPassword } });
+      return res.json({
+        success: true,
+        data: { temporaryPassword },
+        message: 'Senha resetada com sucesso',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Cria um usuário para um estudante existente.
+   * @param {import('express').Request} req - A requisição.
+   * @param {import('express').Response} res - A resposta.
+   * @param {import('express').NextFunction} next - O próximo middleware.
+   */
+  async createUser(req, res, next) {
+    try {
+      const { id } = req.params;
+      const result = await StudentService.createUserForStudent(id, req.body);
+      return res.status(201).json({
+        success: true,
+        data: result,
+        message: 'Usuário criado com sucesso para o estudante',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Verifica se um estudante possui usuário cadastrado.
+   * @param {import('express').Request} req - A requisição.
+   * @param {import('express').Response} res - A resposta.
+   * @param {import('express').NextFunction} next - O próximo middleware.
+   */
+  async checkUser(req, res, next) {
+    try {
+      const { id } = req.params;
+      const result = await StudentService.checkUserExists(id);
+      return res.json({ success: true, data: result });
     } catch (error) {
       next(error);
     }

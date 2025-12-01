@@ -2,36 +2,160 @@
  * Arquivo: frontend/src/types/student.types.ts
  * Descrição: Tipos e interfaces específicas para alunos
  * Feature: feat-101 - Criar types TypeScript
+ * Feature: feat-064 - Separar tabela de estudantes
  * Criado em: 2025-11-04
+ * Atualizado em: 2025-12-01
  */
-
-import type { IUser } from './user.types';
 
 /**
- * Interface para Aluno (estende IUser)
+ * Interface para Estudante (tabela students)
  *
  * Responsabilidades:
- * - Representar dados específicos de alunos
- * - Rastrear matrículas do aluno
- * - Associar documentos e notas do aluno
+ * - Representar dados completos de estudantes da tabela students
+ * - Pode ter um usuário associado (opcional)
+ * - Armazena informações acadêmicas e pessoais
  *
  * @example
- * // Aluno com matrícula ativa
  * const student: IStudent = {
- *   ...userBaseData,
- *   role: 'student',
- *   enrollments: [
- *     {
- *       id: 1,
- *       studentId: 5,
- *       courseId: 1,
- *       status: 'active',
- *       enrollmentDate: '2025-01-15T00:00:00Z'
- *     }
- *   ]
+ *   id: 1,
+ *   nome: 'João Silva',
+ *   cpf: '12345678901',
+ *   email: 'joao@example.com',
+ *   data_nascimento: '2000-01-15',
+ *   sexo: 1,
+ *   celular: '11999999999',
+ *   user: {
+ *     id: 5,
+ *     login: 'joao.silva',
+ *     email: 'joao@example.com',
+ *     role: 'student'
+ *   }
  * };
  */
-export interface IStudent extends IUser {
+export interface IStudent {
+  /** ID do estudante */
+  id: number;
+
+  /** Nome completo do estudante */
+  nome: string | null;
+
+  /** CPF do estudante */
+  cpf: string | null;
+
+  /** Data de nascimento */
+  data_nascimento: string | null;
+
+  /** Telefone fixo */
+  telefone: string | null;
+
+  /** Email do estudante */
+  email: string | null;
+
+  /** Rua/Logradouro */
+  endereco_rua: string | null;
+
+  /** Número do endereço */
+  endereco_numero: string | null;
+
+  /** Complemento do endereço */
+  endereco_complemento: string | null;
+
+  /** Bairro */
+  endereco_bairro: string | null;
+
+  /** Cidade */
+  endereco_cidade: string | null;
+
+  /** UF (Estado) */
+  endereco_uf: string | null;
+
+  /** CEP */
+  cep: string | null;
+
+  /** Sexo: 1 = masculino, 2 = feminino */
+  sexo: 1 | 2 | null;
+
+  /** Celular */
+  celular: string | null;
+
+  /** Categoria do estudante */
+  categoria: number | null;
+
+  /** Sub-categoria do estudante */
+  sub_categoria: number | null;
+
+  /** Número de matrícula */
+  matricula: number | null;
+
+  /** Ano da matrícula */
+  ano_matricula: number | null;
+
+  /** Profissão do estudante */
+  profissao: string | null;
+
+  /** Responsável legal (se menor de idade) */
+  responsavel: string | null;
+
+  /** Referência ao contrato */
+  contrato: string | null;
+
+  /** Caminho da foto do estudante */
+  foto: string | null;
+
+  /** Nome da mãe */
+  mae: string | null;
+
+  /** Nome do pai */
+  pai: string | null;
+
+  /** Título de eleitor */
+  titulo_eleitor: string | null;
+
+  /** RG */
+  rg: string | null;
+
+  /** Data de emissão do RG */
+  rg_data: string | null;
+
+  /** Série/Período */
+  serie: string | null;
+
+  /** Curso */
+  curso: string | null;
+
+  /** Semestre atual */
+  semestre: string | null;
+
+  /** Contrato aceito: S/N */
+  contrato_aceito: string | null;
+
+  /** Dia de aceite do contrato */
+  contrato_dia: string | null;
+
+  /** Mês de aceite do contrato */
+  contrato_mes: string | null;
+
+  /** Ano de aceite do contrato */
+  contrato_ano: number | null;
+
+  /** Chave eletrônica de acesso */
+  chave_eletronica: string | null;
+
+  /** Data geral de cadastro */
+  data_geral: string | null;
+
+  /** Data de criação do registro */
+  created_at: string;
+
+  /** Data de atualização do registro */
+  updated_at: string;
+
+  /** Data de exclusão (soft delete) */
+  deleted_at: string | null;
+
+  /** Usuário associado (opcional) */
+  user?: IStudentUser | null;
+
   /** Matrículas do aluno */
   enrollments?: IEnrollmentBasic[];
 
@@ -40,6 +164,26 @@ export interface IStudent extends IUser {
 
   /** Notas do aluno */
   grades?: IStudentGrade[];
+}
+
+/**
+ * Dados básicos do usuário associado a um estudante
+ */
+export interface IStudentUser {
+  /** ID do usuário */
+  id: number;
+
+  /** Login de acesso */
+  login: string;
+
+  /** Email do usuário */
+  email: string;
+
+  /** Role do usuário */
+  role: 'student';
+
+  /** Data de criação do usuário */
+  created_at: string;
 }
 
 /**
@@ -106,82 +250,165 @@ export interface IStudentGrade {
 }
 
 /**
- * Dados para criar novo aluno
+ * Dados para criar novo estudante
  *
  * @example
  * const newStudent: IStudentCreateRequest = {
- *   name: 'João Silva',
+ *   nome: 'João Silva',
  *   email: 'joao@example.com',
- *   login: 'joao_aluno',
  *   cpf: '12345678901',
- *   rg: '123456789',
- *   motherName: 'Maria Silva',
- *   fatherName: 'Carlos Silva',
- *   address: 'Rua A, 123'
+ *   data_nascimento: '2000-01-15',
+ *   sexo: 1,
+ *   celular: '11999999999'
  * };
  */
 export interface IStudentCreateRequest {
   /** Nome completo */
-  name: string;
+  nome?: string;
 
   /** Email */
-  email: string;
-
-  /** Login único */
-  login: string;
+  email?: string;
 
   /** CPF com validação */
-  cpf: string;
+  cpf?: string;
 
-  /** RG */
-  rg: string;
+  /** Data de nascimento */
+  data_nascimento?: string;
+
+  /** Telefone fixo */
+  telefone?: string;
+
+  /** Rua/Logradouro */
+  endereco_rua?: string;
+
+  /** Número do endereço */
+  endereco_numero?: string;
+
+  /** Complemento do endereço */
+  endereco_complemento?: string;
+
+  /** Bairro */
+  endereco_bairro?: string;
+
+  /** Cidade */
+  endereco_cidade?: string;
+
+  /** UF (Estado) */
+  endereco_uf?: string;
+
+  /** CEP */
+  cep?: string;
+
+  /** Sexo: 1 = masculino, 2 = feminino */
+  sexo?: 1 | 2;
+
+  /** Celular */
+  celular?: string;
+
+  /** Categoria */
+  categoria?: number;
+
+  /** Sub-categoria */
+  sub_categoria?: number;
+
+  /** Número de matrícula */
+  matricula?: number;
+
+  /** Ano da matrícula */
+  ano_matricula?: number;
+
+  /** Profissão */
+  profissao?: string;
+
+  /** Responsável legal */
+  responsavel?: string;
+
+  /** Referência ao contrato */
+  contrato?: string;
 
   /** Nome da mãe */
-  motherName: string;
+  mae?: string;
 
   /** Nome do pai */
-  fatherName: string;
+  pai?: string;
 
-  /** Endereço */
-  address: string;
+  /** Título de eleitor */
+  titulo_eleitor?: string;
 
-  /** Título/cargo (opcional) */
-  title?: string;
+  /** RG */
+  rg?: string;
 
-  /** Se é reservista (opcional) */
-  reservist?: boolean;
+  /** Data de emissão do RG */
+  rg_data?: string;
+
+  /** Série/Período */
+  serie?: string;
+
+  /** Curso */
+  curso?: string;
+
+  /** Semestre */
+  semestre?: string;
 }
 
 /**
- * Dados para editar aluno
+ * Dados para editar estudante
  */
-export interface IStudentUpdateRequest {
-  /** Nome (opcional) */
-  name?: string;
+export interface IStudentUpdateRequest extends Partial<IStudentCreateRequest> {}
 
-  /** Email (opcional) */
-  email?: string;
+/**
+ * Dados para criar usuário para um estudante
+ */
+export interface ICreateUserForStudentRequest {
+  /** Login personalizado (opcional, padrão: CPF) */
+  login?: string;
+}
 
-  /** CPF (opcional) */
-  cpf?: string;
+/**
+ * Resposta ao criar usuário para estudante
+ */
+export interface ICreateUserForStudentResponse {
+  /** Indica sucesso da operação */
+  success: boolean;
 
-  /** RG (opcional) */
-  rg?: string;
+  /** Dados retornados */
+  data: {
+    /** Usuário criado */
+    user: IStudentUser & {
+      id: number;
+      name: string;
+      cpf: string;
+      rg: string | null;
+      voter_title: string | null;
+      mother_name: string | null;
+      father_name: string | null;
+      address: string | null;
+      student_id: number;
+    };
 
-  /** Nome da mãe (opcional) */
-  motherName?: string;
+    /** Senha provisória gerada */
+    temporaryPassword: string;
+  };
 
-  /** Nome do pai (opcional) */
-  fatherName?: string;
+  /** Mensagem de sucesso */
+  message: string;
+}
 
-  /** Endereço (opcional) */
-  address?: string;
+/**
+ * Resposta ao verificar se estudante possui usuário
+ */
+export interface ICheckUserResponse {
+  /** Indica sucesso da operação */
+  success: boolean;
 
-  /** Título/cargo (opcional) */
-  title?: string;
+  /** Dados retornados */
+  data: {
+    /** Se o estudante possui usuário */
+    hasUser: boolean;
 
-  /** Reservista (opcional) */
-  reservist?: boolean;
+    /** Dados do usuário (se existir) */
+    user: IStudentUser | null;
+  };
 }
 
 /**

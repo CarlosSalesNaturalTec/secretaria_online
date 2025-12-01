@@ -30,7 +30,7 @@ import {
 import StudentService from '@/services/student.service';
 import CourseService from '@/services/course.service';
 import type { IEnrollment } from '@/types/enrollment.types';
-import type { IUser } from '@/types/user.types';
+// import type { IUser } from '@/types/user.types';
 import type { ICourse } from '@/types/course.types';
 
 /**
@@ -96,7 +96,7 @@ function getStatusBadge(status: string) {
  */
 export default function AdminEnrollments() {
   // Estado dos dados
-  const [students, setStudents] = useState<IUser[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
   const [courses, setCourses] = useState<ICourse[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>('');
 

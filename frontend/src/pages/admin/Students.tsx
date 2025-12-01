@@ -1,90 +1,40 @@
 /**
  * Arquivo: frontend/src/pages/admin/Students.tsx
- * Descrição: Página de listagem e gerenciamento de alunos (CRUD completo)
+ * Descrição: Página de listagem e gerenciamento de estudantes
  * Feature: feat-083 - Criar página Students (listagem e CRUD)
+ * Feature: feat-064 - Separar tabela de estudantes
  * Criado em: 2025-11-04
- *
- * Responsabilidades:
- * - Exibir tabela de alunos cadastrados
- * - Permitir criação de novo aluno via modal
- * - Permitir edição de aluno existente via modal
- * - Permitir exclusão de aluno com confirmação
- * - Permitir reset de senha provisória
- * - Gerenciar estados de loading e erro
+ * Atualizado em: 2025-12-01
  */
 
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, KeyRound, AlertCircle } from 'lucide-react';
+import { Plus, Pencil, Trash2, KeyRound, AlertCircle, UserPlus, CheckCircle, XCircle } from 'lucide-react';
 import { Table, type Column } from '@/components/ui/Table';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import Toast, { type ToastType } from '@/components/ui/Toast';
 import { StudentForm } from '@/components/forms/StudentForm';
 import StudentService from '@/services/student.service';
-import type { IUser } from '@/types/user.types';
-import type { ICreateStudentData, IUpdateStudentData } from '@/services/student.service';
+import type { IStudent, IStudentCreateRequest, IStudentUpdateRequest } from '@/types/student.types';
 
-/**
- * Tipo de modal ativo
- */
-type ModalType = 'create' | 'edit' | 'delete' | 'resetPassword' | null;
+type ModalType = 'create' | 'edit' | 'delete' | 'resetPassword' | 'createUser' | null;
 
-/**
- * StudentsPage - Página de gerenciamento de alunos
- *
- * Responsabilidades:
- * - Carregar e exibir lista de alunos
- * - Gerenciar modais de criação, edição, exclusão e reset de senha
- * - Integrar com student.service para operações CRUD
- * - Exibir feedbacks de sucesso e erro
- *
- * @returns Página de gerenciamento de alunos
- */
 export default function StudentsPage() {
-  // Estado da lista de alunos
-  const [students, setStudents] = useState<IUser[]>([]);
+  const [students, setStudents] = useState<IStudent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Estado dos modais
   const [activeModal, setActiveModal] = useState<ModalType>(null);
-  const [selectedStudent, setSelectedStudent] = useState<IUser | null>(null);
-
-  // Estado de operações assíncronas
+  const [selectedStudent, setSelectedStudent] = useState<IStudent | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
-  // Estado de mensagens de feedback
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-  // Estado do toast de notificação
   const [toast, setToast] = useState<{
     message: string;
     type: ToastType;
   } | null>(null);
 
-  /**
-   * Carrega lista de alunos ao montar o componente
-   */
   useEffect(() => {
     loadStudents();
   }, []);
 
-  /**
-   * Remove mensagem de sucesso após 5 segundos
-   */
-  useEffect(() => {
-    if (successMessage) {
-      const timer = setTimeout(() => {
-        setSuccessMessage(null);
-      }, 5000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [successMessage]);
-
-  /**
-   * Carrega lista de alunos da API
-   */
   const loadStudents = async () => {
     try {
       setLoading(true);
@@ -95,111 +45,92 @@ export default function StudentsPage() {
       const errorMessage =
         err instanceof Error
           ? err.message
-          : 'Erro ao carregar lista de alunos';
+          : 'Erro ao carregar lista de estudantes';
       setError(errorMessage);
-      console.error('[StudentsPage] Erro ao carregar alunos:', err);
+      console.error('[StudentsPage] Erro ao carregar estudantes:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  /**
-   * Abre modal de criação
-   */
   const handleOpenCreateModal = () => {
     setSelectedStudent(null);
     setActiveModal('create');
   };
 
-  /**
-   * Abre modal de edição
-   */
-  const handleOpenEditModal = (student: IUser) => {
+  const handleOpenEditModal = (student: IStudent) => {
     setSelectedStudent(student);
     setActiveModal('edit');
   };
 
-  /**
-   * Abre modal de confirmação de exclusão
-   */
-  const handleOpenDeleteModal = (student: IUser) => {
+  const handleOpenDeleteModal = (student: IStudent) => {
     setSelectedStudent(student);
     setActiveModal('delete');
   };
 
-  /**
-   * Abre modal de confirmação de reset de senha
-   */
-  const handleOpenResetPasswordModal = (student: IUser) => {
+  const handleOpenResetPasswordModal = (student: IStudent) => {
     setSelectedStudent(student);
     setActiveModal('resetPassword');
   };
 
-  /**
-   * Fecha todos os modais
-   */
+  const handleOpenCreateUserModal = (student: IStudent) => {
+    setSelectedStudent(student);
+    setActiveModal('createUser');
+  };
+
   const handleCloseModal = () => {
     setActiveModal(null);
     setSelectedStudent(null);
   };
 
-  /**
-   * Handler de criação de aluno
-   */
-  const handleCreate = async (data: ICreateStudentData | IUpdateStudentData) => {
+  const handleCreate = async (data: IStudentCreateRequest | IStudentUpdateRequest) => {
     try {
       setIsSubmitting(true);
-      await StudentService.create(data as ICreateStudentData);
+      await StudentService.create(data as IStudentCreateRequest);
       setToast({
-        message: 'Aluno cadastrado com sucesso!',
+        message: 'Estudante cadastrado com sucesso!',
         type: 'success',
       });
       handleCloseModal();
       await loadStudents();
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : 'Erro ao cadastrar aluno';
+        err instanceof Error ? err.message : 'Erro ao cadastrar estudante';
       setToast({
         message: errorMessage,
         type: 'error',
       });
-      console.error('[StudentsPage] Erro ao criar aluno:', err);
+      console.error('[StudentsPage] Erro ao criar estudante:', err);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  /**
-   * Handler de atualização de aluno
-   */
-  const handleUpdate = async (data: ICreateStudentData | IUpdateStudentData) => {
+  const handleUpdate = async (data: IStudentCreateRequest | IStudentUpdateRequest) => {
     if (!selectedStudent) return;
 
     try {
       setIsSubmitting(true);
       await StudentService.update(selectedStudent.id, data);
       setToast({
-        message: 'Aluno atualizado com sucesso!',
+        message: 'Estudante atualizado com sucesso!',
         type: 'success',
       });
       handleCloseModal();
       await loadStudents();
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : 'Erro ao atualizar aluno';
+        err instanceof Error ? err.message : 'Erro ao atualizar estudante';
       setToast({
         message: errorMessage,
         type: 'error',
       });
-      console.error('[StudentsPage] Erro ao atualizar aluno:', err);
+      console.error('[StudentsPage] Erro ao atualizar estudante:', err);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  /**
-   * Handler de exclusão de aluno
-   */
   const handleDelete = async () => {
     if (!selectedStudent) return;
 
@@ -207,27 +138,24 @@ export default function StudentsPage() {
       setIsSubmitting(true);
       await StudentService.delete(selectedStudent.id);
       setToast({
-        message: 'Aluno removido com sucesso!',
+        message: 'Estudante removido com sucesso!',
         type: 'success',
       });
       handleCloseModal();
       await loadStudents();
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : 'Erro ao remover aluno';
+        err instanceof Error ? err.message : 'Erro ao remover estudante';
       setToast({
         message: errorMessage,
         type: 'error',
       });
-      console.error('[StudentsPage] Erro ao deletar aluno:', err);
+      console.error('[StudentsPage] Erro ao deletar estudante:', err);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  /**
-   * Handler de reset de senha
-   */
   const handleResetPassword = async () => {
     if (!selectedStudent) return;
 
@@ -235,7 +163,7 @@ export default function StudentsPage() {
       setIsSubmitting(true);
       await StudentService.resetPassword(selectedStudent.id);
       setToast({
-        message: 'Senha provisória regenerada e enviada para o email do aluno!',
+        message: 'Senha provisória regenerada e enviada para o email!',
         type: 'success',
       });
       handleCloseModal();
@@ -252,33 +180,47 @@ export default function StudentsPage() {
     }
   };
 
-  /**
-   * Formata CPF para exibição
-   */
-  const formatCPF = (cpf: string): string => {
+  const handleCreateUser = async () => {
+    if (!selectedStudent) return;
+
+    try {
+      setIsSubmitting(true);
+      const result = await StudentService.createUserForStudent(selectedStudent.id);
+      setToast({
+        message: `Usuário criado com sucesso! Senha provisória: ${result.temporaryPassword}`,
+        type: 'success',
+      });
+      handleCloseModal();
+      await loadStudents();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Erro ao criar usuário';
+      setToast({
+        message: errorMessage,
+        type: 'error',
+      });
+      console.error('[StudentsPage] Erro ao criar usuário:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const formatCPF = (cpf: string | null): string => {
+    if (!cpf) return '-';
     return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
 
-  /**
-   * Definição das colunas da tabela
-   */
-  const columns: Column<IUser>[] = [
+  const columns: Column<IStudent>[] = [
     {
-      key: 'name',
+      key: 'nome',
       header: 'Nome',
-      accessor: (student) => student.name,
+      accessor: (student) => student.nome || '-',
       sortable: true,
     },
     {
       key: 'email',
       header: 'Email',
-      accessor: (student) => student.email,
-      sortable: true,
-    },
-    {
-      key: 'login',
-      header: 'Login',
-      accessor: (student) => student.login,
+      accessor: (student) => student.email || '-',
       sortable: true,
     },
     {
@@ -288,46 +230,78 @@ export default function StudentsPage() {
       align: 'center',
     },
     {
+      key: 'user_status',
+      header: 'Usuário',
+      accessor: (student) => (
+        <div className="flex items-center justify-center gap-2">
+          {student.user ? (
+            <>
+              <CheckCircle size={16} className="text-green-600" />
+              <span className="text-sm text-green-600 font-medium">Criado</span>
+            </>
+          ) : (
+            <>
+              <XCircle size={16} className="text-gray-400" />
+              <span className="text-sm text-gray-500">Não criado</span>
+            </>
+          )}
+        </div>
+      ),
+      align: 'center',
+    },
+    {
       key: 'actions',
       header: 'Ações',
       accessor: (student) => (
         <div className="flex items-center justify-end gap-2">
+          {/* Botão Criar Usuário - só aparece se não tiver usuário */}
+          {!student.user && (
+            <Button
+              size="sm"
+              variant="primary"
+              onClick={() => handleOpenCreateUserModal(student)}
+              title="Criar usuário para este estudante"
+            >
+              <UserPlus size={16} />
+            </Button>
+          )}
+
+          {/* Botão Reset Senha - só aparece se tiver usuário */}
+          {student.user && (
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => handleOpenResetPasswordModal(student)}
+              title="Resetar senha"
+            >
+              <KeyRound size={16} />
+            </Button>
+          )}
+
           <Button
             size="sm"
             variant="secondary"
             onClick={() => handleOpenEditModal(student)}
-            title="Editar aluno"
+            title="Editar estudante"
           >
             <Pencil size={16} />
           </Button>
 
           <Button
             size="sm"
-            variant="secondary"
-            onClick={() => handleOpenResetPasswordModal(student)}
-            title="Resetar senha"
-          >
-            <KeyRound size={16} />
-          </Button>
-
-          <Button
-            size="sm"
             variant="danger"
             onClick={() => handleOpenDeleteModal(student)}
-            title="Remover aluno"
+            title="Remover estudante"
           >
             <Trash2 size={16} />
           </Button>
         </div>
       ),
       align: 'right',
-      cellClassName: 'w-48',
+      cellClassName: 'w-64',
     },
   ];
 
-  /**
-   * Renderiza estado de erro
-   */
   if (error && !loading) {
     return (
       <div className="p-6">
@@ -335,7 +309,7 @@ export default function StudentsPage() {
           <AlertCircle className="text-red-600 flex-shrink-0" size={24} />
           <div>
             <h3 className="text-red-900 font-semibold mb-1">
-              Erro ao carregar alunos
+              Erro ao carregar estudantes
             </h3>
             <p className="text-red-700 text-sm">{error}</p>
             <button
@@ -350,54 +324,29 @@ export default function StudentsPage() {
     );
   }
 
-  /**
-   * Renderiza página principal
-   */
   return (
     <div className="p-6">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Alunos</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Estudantes</h1>
           <p className="text-gray-600 mt-2">
-            Gerencie o cadastro de alunos do sistema
+            Gerencie o cadastro de estudantes do sistema
           </p>
         </div>
 
         <Button onClick={handleOpenCreateModal}>
           <Plus size={20} />
-          Novo aluno
+          Novo Estudante
         </Button>
       </div>
 
-      {/* Mensagem de sucesso */}
-      {successMessage && (
-        <div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
-          <div className="bg-green-100 rounded-full p-1">
-            <svg
-              className="w-5 h-5 text-green-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-          </div>
-          <p className="text-green-800 font-medium">{successMessage}</p>
-        </div>
-      )}
-
-      {/* Tabela de alunos */}
+      {/* Tabela de estudantes */}
       <Table
         data={students}
         columns={columns}
         loading={loading}
-        emptyMessage="Nenhum aluno cadastrado"
+        emptyMessage="Nenhum estudante cadastrado"
         getRowKey={(student) => student.id}
         hoverable
       />
@@ -406,8 +355,8 @@ export default function StudentsPage() {
       <Modal
         isOpen={activeModal === 'create'}
         onClose={handleCloseModal}
-        title="Cadastrar novo aluno"
-        description="Preencha os dados do aluno abaixo"
+        title="Cadastrar novo estudante"
+        description="Preencha os dados do estudante abaixo"
         size="lg"
       >
         <StudentForm
@@ -421,8 +370,8 @@ export default function StudentsPage() {
       <Modal
         isOpen={activeModal === 'edit'}
         onClose={handleCloseModal}
-        title="Editar aluno"
-        description="Atualize os dados do aluno abaixo"
+        title="Editar estudante"
+        description="Atualize os dados do estudante abaixo"
         size="lg"
       >
         <StudentForm
@@ -442,12 +391,11 @@ export default function StudentsPage() {
       >
         <div className="space-y-4">
           <p className="text-gray-700">
-            Tem certeza que deseja remover o aluno{' '}
-            <strong>{selectedStudent?.name}</strong>?
+            Tem certeza que deseja remover o estudante{' '}
+            <strong>{selectedStudent?.nome}</strong>?
           </p>
           <p className="text-sm text-gray-600">
-            Esta ação não poderá ser desfeita. O aluno será removido do sistema
-            e perderá acesso à plataforma.
+            Esta ação não poderá ser desfeita.
           </p>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
@@ -479,13 +427,12 @@ export default function StudentsPage() {
       >
         <div className="space-y-4">
           <p className="text-gray-700">
-            Deseja regenerar a senha provisória do aluno{' '}
-            <strong>{selectedStudent?.name}</strong>?
+            Deseja regenerar a senha provisória do estudante{' '}
+            <strong>{selectedStudent?.nome}</strong>?
           </p>
           <p className="text-sm text-gray-600">
             Uma nova senha provisória será gerada e enviada para o email{' '}
-            <strong>{selectedStudent?.email}</strong>. O aluno deverá alterá-la
-            no próximo acesso.
+            <strong>{selectedStudent?.email}</strong>.
           </p>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
@@ -502,6 +449,48 @@ export default function StudentsPage() {
               disabled={isSubmitting}
             >
               Confirmar reset
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Modal de confirmação de criação de usuário */}
+      <Modal
+        isOpen={activeModal === 'createUser'}
+        onClose={handleCloseModal}
+        title="Criar usuário"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <p className="text-gray-700">
+            Deseja criar um usuário de acesso para o estudante{' '}
+            <strong>{selectedStudent?.nome}</strong>?
+          </p>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <p className="text-sm text-blue-800">
+              <strong>Login:</strong> {selectedStudent?.cpf?.replace(/\D/g, '') || 'CPF'}<br />
+              <strong>Senha provisória:</strong> CPF do estudante<br />
+              <strong>Email:</strong> {selectedStudent?.email || '-'}
+            </p>
+          </div>
+          <p className="text-sm text-gray-600">
+            Um email será enviado para o estudante com as credenciais de acesso.
+          </p>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+            <Button
+              variant="secondary"
+              onClick={handleCloseModal}
+              disabled={isSubmitting}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleCreateUser}
+              loading={isSubmitting}
+              disabled={isSubmitting}
+            >
+              Criar Usuário
             </Button>
           </div>
         </div>

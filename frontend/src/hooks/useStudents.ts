@@ -22,30 +22,30 @@ import type {
 } from '@tanstack/react-query';
 import StudentService from '@/services/student.service';
 import type {
-  ICreateStudentData,
-  IUpdateStudentData,
-} from '@/services/student.service';
-import type { IUser } from '@/types/user.types';
+  IStudent,
+  IStudentCreateRequest,
+  IStudentUpdateRequest,
+} from '@/types/student.types';
 
 /**
  * Interface para o retorno do hook useStudents
  */
 export interface IUseStudentsReturn {
-  /** Query para listar todos os alunos */
-  listStudents: UseQueryResult<IUser[], Error>;
-  /** Query para buscar aluno específico por ID */
-  getStudent: (id: number) => UseQueryResult<IUser, Error>;
-  /** Mutation para criar novo aluno */
-  createStudent: UseMutationResult<IUser, Error, ICreateStudentData>;
-  /** Mutation para atualizar aluno */
+  /** Query para listar todos os estudantes */
+  listStudents: UseQueryResult<IStudent[], Error>;
+  /** Query para buscar estudante específico por ID */
+  getStudent: (id: number) => UseQueryResult<IStudent, Error>;
+  /** Mutation para criar novo estudante */
+  createStudent: UseMutationResult<IStudent, Error, IStudentCreateRequest>;
+  /** Mutation para atualizar estudante */
   updateStudent: UseMutationResult<
-    IUser,
+    IStudent,
     Error,
-    { id: number; data: IUpdateStudentData }
+    { id: number; data: IStudentUpdateRequest }
   >;
-  /** Mutation para deletar aluno */
+  /** Mutation para deletar estudante */
   deleteStudent: UseMutationResult<void, Error, number>;
-  /** Mutation para regenerar senha do aluno */
+  /** Mutation para regenerar senha do estudante */
   resetStudentPassword: UseMutationResult<void, Error, number>;
 }
 
@@ -86,14 +86,14 @@ export function useStudents(): IUseStudentsReturn {
   const queryClient = useQueryClient();
 
   /**
-   * Query para listar todos os alunos
+   * Query para listar todos os estudantes
    * Utiliza cache de 5 minutos (padrão definido em queryClient)
    */
-  const listStudents = useQuery<IUser[], Error>({
+  const listStudents = useQuery<IStudent[], Error>({
     queryKey: ['students'],
     queryFn: async () => {
       if (import.meta.env.DEV) {
-        console.log('[useStudents] Executando query para listar alunos...');
+        console.log('[useStudents] Executando query para listar estudantes...');
       }
       return StudentService.getAll();
     },
@@ -102,15 +102,15 @@ export function useStudents(): IUseStudentsReturn {
   });
 
   /**
-   * Factory function para criar queries individuais de alunos por ID
+   * Factory function para criar queries individuais de estudantes por ID
    * Útil para evitar queries desnecessárias
    */
-  const getStudent = (id: number): UseQueryResult<IUser, Error> => {
-    return useQuery<IUser, Error>({
+  const getStudent = (id: number): UseQueryResult<IStudent, Error> => {
+    return useQuery<IStudent, Error>({
       queryKey: ['students', id],
       queryFn: async () => {
         if (import.meta.env.DEV) {
-          console.log(`[useStudents] Executando query para buscar aluno ${id}...`);
+          console.log(`[useStudents] Executando query para buscar estudante ${id}...`);
         }
         return StudentService.getById(id);
       },
@@ -121,48 +121,48 @@ export function useStudents(): IUseStudentsReturn {
   };
 
   /**
-   * Mutation para criar novo aluno
+   * Mutation para criar novo estudante
    * Invalida a cache de listagem após sucesso para forçar refetch
    */
-  const createStudent = useMutation<IUser, Error, ICreateStudentData>({
+  const createStudent = useMutation<IStudent, Error, IStudentCreateRequest>({
     mutationFn: async (data) => {
       if (import.meta.env.DEV) {
-        console.log('[useStudents] Criando novo aluno:', data.name);
+        console.log('[useStudents] Criando novo estudante:', data.nome);
       }
       return StudentService.create(data);
     },
     onSuccess: (newStudent) => {
       if (import.meta.env.DEV) {
-        console.log('[useStudents] Aluno criado com sucesso:', newStudent.id);
+        console.log('[useStudents] Estudante criado com sucesso:', newStudent.id);
       }
       // Invalidar query de lista para forçar refetch
       queryClient.invalidateQueries({ queryKey: ['students'] });
-      // Adicionar novo aluno ao cache individual
+      // Adicionar novo estudante ao cache individual
       queryClient.setQueryData(['students', newStudent.id], newStudent);
     },
     onError: (error) => {
-      console.error('[useStudents] Erro ao criar aluno:', error.message);
+      console.error('[useStudents] Erro ao criar estudante:', error.message);
     },
   });
 
   /**
-   * Mutation para atualizar aluno existente
+   * Mutation para atualizar estudante existente
    * Atualiza cache imediatamente (optimistic update é feito no componente)
    */
   const updateStudent = useMutation<
-    IUser,
+    IStudent,
     Error,
-    { id: number; data: IUpdateStudentData }
+    { id: number; data: IStudentUpdateRequest }
   >({
     mutationFn: async ({ id, data }) => {
       if (import.meta.env.DEV) {
-        console.log('[useStudents] Atualizando aluno:', id);
+        console.log('[useStudents] Atualizando estudante:', id);
       }
       return StudentService.update(id, data);
     },
     onSuccess: (updatedStudent, { id }) => {
       if (import.meta.env.DEV) {
-        console.log('[useStudents] Aluno atualizado com sucesso:', id);
+        console.log('[useStudents] Estudante atualizado com sucesso:', id);
       }
       // Atualizar cache individual
       queryClient.setQueryData(['students', id], updatedStudent);
@@ -170,7 +170,7 @@ export function useStudents(): IUseStudentsReturn {
       queryClient.invalidateQueries({ queryKey: ['students'] });
     },
     onError: (error) => {
-      console.error('[useStudents] Erro ao atualizar aluno:', error.message);
+      console.error('[useStudents] Erro ao atualizar estudante:', error.message);
     },
   });
 

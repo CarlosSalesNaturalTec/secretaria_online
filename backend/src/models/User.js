@@ -310,6 +310,16 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
         comment: 'Endereço residencial - obrigatório para alunos e professores',
       },
+
+      student_id: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        allowNull: true,
+        unique: {
+          name: 'unique_student_id',
+          msg: 'Este estudante já possui um usuário cadastrado',
+        },
+        comment: 'ID do estudante na tabela students (chave estrangeira opcional)',
+      },
     },
     {
       // Opções do model
@@ -562,6 +572,14 @@ module.exports = (sequelize, DataTypes) => {
    * @param {Object} models - Objeto contendo todos os models
    */
   User.associate = function (models) {
+    // User pertence a um Student (1:1 opcional)
+    User.belongsTo(models.Student, {
+      foreignKey: 'student_id',
+      as: 'student',
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL',
+    });
+
     // User (aluno) tem muitas Matrículas (Enrollments)
     User.hasMany(models.Enrollment, {
       foreignKey: 'student_id',
