@@ -34,15 +34,16 @@ class StudentController {
   }
 
   /**
-   * Lista todos os estudantes.
+   * Lista todos os estudantes com paginação e busca.
    * @param {import('express').Request} req - A requisição.
    * @param {import('express').Response} res - A resposta.
    * @param {import('express').NextFunction} next - O próximo middleware.
    */
   async getAll(req, res, next) {
     try {
-      const students = await StudentService.getAll();
-      return res.json({ success: true, data: students });
+      const { page, limit, search } = req.query;
+      const result = await StudentService.getAll({ page, limit, search });
+      return res.json({ success: true, data: result });
     } catch (error) {
       next(error);
     }

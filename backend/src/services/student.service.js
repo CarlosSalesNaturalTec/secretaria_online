@@ -153,10 +153,28 @@ class StudentService {
 
   /**
    * Lista todos os estudantes com seus usuários associados (se houver).
-   * @returns {Promise<Student[]>} Uma lista de estudantes.
+   * Suporta paginação e busca por nome.
+   *
+   * @param {object} options - Opções de listagem.
+   * @param {number} options.page - Número da página (padrão: 1).
+   * @param {number} options.limit - Limite de registros por página (padrão: 10).
+   * @param {string} options.search - Termo de busca por nome (opcional).
+   * @returns {Promise<{students: Student[], total: number, totalPages: number, currentPage: number}>}
    */
-  async getAll() {
-    return Student.findAll({
+  async getAll(options = {}) {
+    const { page = 1, limit = 10, search = '' } = options;
+    const offset = (page - 1) * limit;
+
+    // Construir condição de busca
+    const whereCondition = {};
+    if (search && search.trim()) {
+      whereCondition.nome = {
+        [require('sequelize').Op.like]: `%${search.trim()}%`,
+      };
+    }
+
+    const { count, rows } = await Student.findAndCountAll({
+      where: whereCondition,
       include: [
         {
           model: User,
@@ -165,7 +183,16 @@ class StudentService {
         },
       ],
       order: [['nome', 'ASC']],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
     });
+
+    return {
+      students: rows,
+      total: count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: parseInt(page),
+    };
   }
 
   /**

@@ -20,7 +20,10 @@ import type {
   UseQueryResult,
   UseMutationResult,
 } from '@tanstack/react-query';
-import StudentService from '@/services/student.service';
+import StudentService, {
+  type IStudentsPaginatedResponse,
+  type IStudentsQueryOptions,
+} from '@/services/student.service';
 import type {
   IStudent,
   IStudentCreateRequest,
@@ -31,8 +34,10 @@ import type {
  * Interface para o retorno do hook useStudents
  */
 export interface IUseStudentsReturn {
-  /** Query para listar todos os estudantes */
-  listStudents: UseQueryResult<IStudent[], Error>;
+  /** Query para listar estudantes com paginação e busca */
+  listStudents: (
+    options?: IStudentsQueryOptions
+  ) => UseQueryResult<IStudentsPaginatedResponse, Error>;
   /** Query para buscar estudante específico por ID */
   getStudent: (id: number) => UseQueryResult<IStudent, Error>;
   /** Mutation para criar novo estudante */
@@ -86,20 +91,24 @@ export function useStudents(): IUseStudentsReturn {
   const queryClient = useQueryClient();
 
   /**
-   * Query para listar todos os estudantes
+   * Factory function para criar queries de listagem de estudantes com paginação e busca
    * Utiliza cache de 5 minutos (padrão definido em queryClient)
    */
-  const listStudents = useQuery<IStudent[], Error>({
-    queryKey: ['students'],
-    queryFn: async () => {
-      if (import.meta.env.DEV) {
-        console.log('[useStudents] Executando query para listar estudantes...');
-      }
-      return StudentService.getAll();
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutos
-    gcTime: 10 * 60 * 1000, // 10 minutos (antes: cacheTime)
-  });
+  const listStudents = (
+    options?: IStudentsQueryOptions
+  ): UseQueryResult<IStudentsPaginatedResponse, Error> => {
+    return useQuery<IStudentsPaginatedResponse, Error>({
+      queryKey: ['students', 'paginated', options],
+      queryFn: async () => {
+        if (import.meta.env.DEV) {
+          console.log('[useStudents] Executando query para listar estudantes...', options);
+        }
+        return StudentService.getAll(options);
+      },
+      staleTime: 5 * 60 * 1000, // 5 minutos
+      gcTime: 10 * 60 * 1000, // 10 minutos (antes: cacheTime)
+    });
+  };
 
   /**
    * Factory function para criar queries individuais de estudantes por ID
@@ -135,8 +144,8 @@ export function useStudents(): IUseStudentsReturn {
       if (import.meta.env.DEV) {
         console.log('[useStudents] Estudante criado com sucesso:', newStudent.id);
       }
-      // Invalidar query de lista para forçar refetch
-      queryClient.invalidateQueries({ queryKey: ['students'] });
+      // Invalidar queries de lista paginada para forçar refetch
+      queryClient.invalidateQueries({ queryKey: ['students', 'paginated'] });
       // Adicionar novo estudante ao cache individual
       queryClient.setQueryData(['students', newStudent.id], newStudent);
     },
@@ -166,8 +175,8 @@ export function useStudents(): IUseStudentsReturn {
       }
       // Atualizar cache individual
       queryClient.setQueryData(['students', id], updatedStudent);
-      // Invalidar lista para refetch (garante consistência)
-      queryClient.invalidateQueries({ queryKey: ['students'] });
+      // Invalidar lista paginada para refetch (garante consistência)
+      queryClient.invalidateQueries({ queryKey: ['students', 'paginated'] });
     },
     onError: (error) => {
       console.error('[useStudents] Erro ao atualizar estudante:', error.message);
@@ -191,8 +200,8 @@ export function useStudents(): IUseStudentsReturn {
       }
       // Remover do cache individual
       queryClient.removeQueries({ queryKey: ['students', id] });
-      // Invalidar lista para refetch
-      queryClient.invalidateQueries({ queryKey: ['students'] });
+      // Invalidar lista paginada para refetch
+      queryClient.invalidateQueries({ queryKey: ['students', 'paginated'] });
     },
     onError: (error) => {
       console.error('[useStudents] Erro ao remover aluno:', error.message);

@@ -19,11 +19,38 @@ import type {
 } from '@/types/student.types';
 
 /**
- * Busca todos os estudantes cadastrados
+ * Interface para resposta paginada de estudantes
  */
-export async function getAll(): Promise<IStudent[]> {
+export interface IStudentsPaginatedResponse {
+  students: IStudent[];
+  total: number;
+  totalPages: number;
+  currentPage: number;
+}
+
+/**
+ * Interface para opções de listagem de estudantes
+ */
+export interface IStudentsQueryOptions {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
+
+/**
+ * Busca todos os estudantes cadastrados com paginação e busca
+ */
+export async function getAll(options?: IStudentsQueryOptions): Promise<IStudentsPaginatedResponse> {
   try {
-    const response = await api.get<ApiResponse<IStudent[]>>('/students');
+    const params = new URLSearchParams();
+
+    if (options?.page) params.append('page', options.page.toString());
+    if (options?.limit) params.append('limit', options.limit.toString());
+    if (options?.search) params.append('search', options.search);
+
+    const response = await api.get<ApiResponse<IStudentsPaginatedResponse>>(
+      `/students?${params.toString()}`
+    );
 
     if (!response.data.success || !response.data.data) {
       throw new Error(response.data.error?.message || 'Erro ao buscar estudantes');

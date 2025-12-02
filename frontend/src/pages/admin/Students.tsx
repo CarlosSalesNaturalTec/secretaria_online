@@ -8,13 +8,14 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, KeyRound, AlertCircle, UserPlus, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Pencil, Trash2, KeyRound, AlertCircle, UserPlus, CheckCircle, XCircle, Search } from 'lucide-react';
 import { Table, type Column } from '@/components/ui/Table';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
+import { Pagination } from '@/components/ui/Pagination';
 import Toast, { type ToastType } from '@/components/ui/Toast';
 import { StudentForm } from '@/components/forms/StudentForm';
-import StudentService from '@/services/student.service';
+import StudentService, { type IStudentsPaginatedResponse } from '@/services/student.service';
 import type { IStudent, IStudentCreateRequest, IStudentUpdateRequest } from '@/types/student.types';
 
 type ModalType = 'create' | 'edit' | 'delete' | 'resetPassword' | 'createUser' | null;
@@ -31,16 +32,30 @@ export default function StudentsPage() {
     type: ToastType;
   } | null>(null);
 
+  // Paginação e busca
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchInput, setSearchInput] = useState<string>('');
+  const itemsPerPage = 10;
+
   useEffect(() => {
     loadStudents();
-  }, []);
+  }, [currentPage, searchTerm]);
 
   const loadStudents = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await StudentService.getAll();
-      setStudents(data);
+      const data: IStudentsPaginatedResponse = await StudentService.getAll({
+        page: currentPage,
+        limit: itemsPerPage,
+        search: searchTerm || undefined,
+      });
+      setStudents(data.students);
+      setTotalPages(data.totalPages);
+      setTotalItems(data.total);
     } catch (err) {
       const errorMessage =
         err instanceof Error
@@ -51,6 +66,22 @@ export default function StudentsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSearchTerm(searchInput);
+    setCurrentPage(1); // Reset para primeira página ao buscar
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput('');
+    setSearchTerm('');
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   const handleOpenCreateModal = () => {
@@ -341,14 +372,51 @@ export default function StudentsPage() {
         </Button>
       </div>
 
+      {/* Barra de busca */}
+      <div className="mb-4">
+        <form onSubmit={handleSearch} className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <input
+              type="text"
+              placeholder="Buscar por nome..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <Button type="submit" variant="primary">
+            Buscar
+          </Button>
+          {searchTerm && (
+            <Button type="button" variant="secondary" onClick={handleClearSearch}>
+              Limpar
+            </Button>
+          )}
+        </form>
+      </div>
+
       {/* Tabela de estudantes */}
       <Table
         data={students}
         columns={columns}
         loading={loading}
-        emptyMessage="Nenhum estudante cadastrado"
+        emptyMessage={
+          searchTerm
+            ? `Nenhum estudante encontrado com "${searchTerm}"`
+            : 'Nenhum estudante cadastrado'
+        }
         getRowKey={(student) => student.id}
         hoverable
+      />
+
+      {/* Paginação */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        itemsPerPage={itemsPerPage}
+        onPageChange={handlePageChange}
       />
 
       {/* Modal de criação */}
