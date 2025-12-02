@@ -150,7 +150,7 @@ export default function AdminEnrollments() {
         StudentService.getAll(),
         CourseService.getAll(),
       ]);
-      setStudents(studentsData);
+      setStudents(studentsData.students);
       setCourses(coursesData);
     } catch (error) {
       console.error('[EnrollmentsPage] Erro ao carregar dados:', error);

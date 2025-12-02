@@ -255,7 +255,7 @@ export function ClassForm({
       ]);
 
       setCourses(coursesData);
-      setStudents(studentsData);
+      setStudents(studentsData.students);
       setTeachers(teachersData);
     } catch (error) {
       console.error('[ClassForm] Erro ao carregar dados:', error);
