@@ -1,189 +1,421 @@
-# React + TypeScript + Vite
+# Frontend - Secretaria Online
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend da aplicação Secretaria Online, desenvolvido com React 19, TypeScript e Vite.
 
-Currently, two official plugins are available:
+## 📋 Índice
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- [Instalação](#instalação)
+- [Configuração](#configuração)
+- [Execução](#execução)
+- [Estrutura de Pastas](#estrutura-de-pastas)
+- [Módulos Implementados](#módulos-implementados)
+- [Testes](#testes)
+- [Build para Produção](#build-para-produção)
+- [Troubleshooting](#troubleshooting)
 
-## React Compiler
+## 🚀 Instalação
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 1. Pré-requisitos
 
-## Expanding the ESLint configuration
+- Node.js 20.x LTS (mínimo 18.x)
+- npm 10.x (mínimo 9.x)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 2. Instalar Dependências
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 3. Configurar Variáveis de Ambiente
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Copie o arquivo `.env.example` para `.env` e preencha com os valores reais:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cp .env.example .env
 ```
 
-## Testes (Jest + React Testing Library)
+Edite o arquivo `.env` com a URL da API backend:
 
-### Configuração
+```bash
+VITE_API_URL=http://localhost:3000/api/v1
+```
 
-O projeto está configurado com Jest e React Testing Library para testes de componentes React.
+## ⚙️ Configuração
 
-### Dependências de Teste
+### Estrutura de Configuração
 
-- **jest**: Framework de testes
-- **@testing-library/react**: Utilitários para testar componentes React
-- **@testing-library/jest-dom**: Matchers customizados do Jest para DOM
-- **ts-jest**: Preset do Jest para TypeScript
-- **jest-environment-jsdom**: Ambiente de teste para DOM
+- **src/config/queryClient.ts** - Configuração do TanStack Query
+- **src/services/api.ts** - Cliente Axios com interceptors
+- **src/router.tsx** - Configuração de rotas
+- **tailwind.config.js** - Configuração do Tailwind CSS
+- **vite.config.ts** - Configuração do Vite
 
-### Scripts Disponíveis
+## 🎬 Execução
+
+### Modo Development (com Hot Module Replacement)
+
+```bash
+npm run dev
+```
+
+Aplicação rodará em `http://localhost:5173`
+
+### Preview de Build de Produção
+
+```bash
+npm run preview
+```
+
+## 📁 Estrutura de Pastas
+
+```
+frontend/
+├── src/
+│   ├── assets/              # Imagens, fontes, ícones estáticos
+│   ├── components/          # Componentes reutilizáveis
+│   │   ├── ui/              # Componentes básicos (Button, Input, Modal)
+│   │   ├── forms/           # Formulários específicos
+│   │   └── layout/          # Layout components (Header, Sidebar)
+│   ├── pages/               # Páginas/Views
+│   │   ├── admin/           # Páginas administrativas
+│   │   ├── teacher/         # Páginas do professor
+│   │   └── student/         # Páginas do aluno
+│   ├── services/            # Comunicação com API (Axios)
+│   │   ├── api.ts           # Cliente base
+│   │   ├── student.service.ts  # Serviço de estudantes
+│   │   ├── user.service.ts     # Serviço de usuários
+│   │   └── ...
+│   ├── hooks/               # Custom React Hooks (TanStack Query)
+│   ├── contexts/            # React Context API (AuthContext)
+│   ├── types/               # TypeScript types/interfaces
+│   ├── utils/               # Funções utilitárias
+│   ├── styles/              # Estilos globais
+│   ├── App.tsx              # Componente raiz
+│   ├── main.tsx             # Entry point
+│   └── router.tsx           # Configuração de rotas
+├── public/                  # Assets estáticos
+├── .env.example             # Template de variáveis de ambiente
+├── package.json             # Dependências do projeto
+├── tsconfig.json            # Configuração TypeScript
+├── vite.config.ts           # Configuração Vite
+└── README.md               # Este arquivo
+```
+
+## 🔧 Módulos Implementados
+
+### ✅ Autenticação
+- Login com JWT
+- Proteção de rotas por role (admin, teacher, student)
+- Gerenciamento de sessão com AuthContext
+- Interceptor Axios para renovação de token
+
+### ✅ Dashboard Administrativo
+- Visão geral com estatísticas do sistema
+- Cards com total de alunos, professores, documentos e matrículas
+- Acesso rápido às principais funcionalidades
+
+### ✅ Gestão de Estudantes
+- **Estrutura de Dados**: Estudantes são gerenciados em duas tabelas separadas:
+  - `students`: Armazena dados completos (informações pessoais, acadêmicas, endereço)
+  - `users`: Gerencia autenticação (login, senha) com referência opcional para `students`
+- Listagem de estudantes
+- Cadastro de novos estudantes
+- Edição de dados de estudantes
+- Criação de usuário de login para estudante existente
+
+### ✅ Gestão de Professores
+- Listagem de professores
+- Cadastro de novos professores
+- Edição de dados de professores
+
+### ✅ Gestão de Cursos e Disciplinas
+- CRUD de cursos
+- CRUD de disciplinas
+- Associação curso-disciplina por semestre
+
+### ✅ Gestão de Turmas
+- Cadastro de turmas
+- Vinculação de professores
+- Vinculação de alunos
+
+### ✅ Upload e Validação de Documentos
+- Upload de documentos por alunos
+- Validação de tipos e tamanhos
+- Aprovação/rejeição por administradores
+
+## 🧪 Testes
+
+### Configuração de Testes
+
+O projeto está configurado com Jest e React Testing Library.
+
+### Scripts de Testes
 
 ```bash
 npm test              # Executa testes uma vez
 npm run test:watch   # Executa testes em modo watch
-npm run test:coverage # Executa testes e gera relatório de cobertura
+npm run test:coverage # Executa testes com relatório de cobertura
 ```
 
 ### Estrutura de Testes
 
-Os testes devem ser criados em uma das seguintes estruturas:
-
-```
-src/__tests__/       # Diretório de testes
-src/components/__tests__/
-src/hooks/__tests__/
-src/services/__tests__/
-```
+Os testes devem ser criados em:
+- `src/__tests__/`
+- `src/components/__tests__/`
+- `src/hooks/__tests__/`
+- `src/services/__tests__/`
 
 Ou com sufixo:
-- `*.test.ts`
-- `*.test.tsx`
-- `*.spec.ts`
-- `*.spec.tsx`
-
-### Configuração de Teste
-
-**Arquivo de configuração**: `jest.config.js`
-
-**Arquivo de setup**: `src/setupTests.ts`
-
-O arquivo de setup configura:
-- Matchers do jest-dom
-- Mocks de APIs do navegador (localStorage, sessionStorage, etc.)
-- Mocks de IntersectionObserver e ResizeObserver
-- Mock do Axios
+- `*.test.ts` / `*.test.tsx`
+- `*.spec.ts` / `*.spec.tsx`
 
 ### Exemplo de Teste
 
 ```typescript
-// src/components/__tests__/Button.test.tsx
 import { render, screen } from '@testing-library/react';
-import { Button } from '../Button';
+import { Button } from '@/components/ui/Button';
 
 describe('Button Component', () => {
   it('should render button with text', () => {
     render(<Button>Click me</Button>);
     expect(screen.getByRole('button', { name: /click me/i })).toBeInTheDocument();
   });
-
-  it('should call onClick when clicked', () => {
-    const onClick = jest.fn();
-    render(<Button onClick={onClick}>Click me</Button>);
-    screen.getByRole('button').click();
-    expect(onClick).toHaveBeenCalled();
-  });
 });
 ```
 
-### Matchers Disponíveis
+## 📦 Build para Produção
 
-Além dos matchers padrão do Jest, temos acesso aos matchers do jest-dom:
+### Gerar Build
 
-- `toBeInTheDocument()`
-- `toBeVisible()`
-- `toBeDisabled()`
-- `toBeEnabled()`
-- `toHaveValue()`
-- `toHaveTextContent()`
-- `toHaveClass()`
-- `toHaveStyle()`
-- E muitos outros...
-
-### Cobertura de Testes
-
-A configuração padrão tem threshold 0% para permitir crescimento gradual da cobertura.
-
-Para aumentar o threshold, edite `jest.config.js`:
-
-```javascript
-coverageThreshold: {
-  global: {
-    branches: 50,
-    functions: 50,
-    lines: 50,
-    statements: 50,
-  },
-}
+```bash
+npm run build
 ```
 
-### Troubleshooting
+Build será gerado na pasta `dist/`
 
-**Problema**: "Cannot find module '@testing-library/react'"
+### Verificar Build
 
-**Solução**: Instale as dependências: `npm install`
+```bash
+npm run preview
+```
 
-**Problema**: "jsdom is not available"
+### Deploy
 
-**Solução**: Instale jest-environment-jsdom: `npm install --save-dev jest-environment-jsdom`
+O build gerado pode ser deployado em:
+- Hostgator (upload via FTP/SFTP para `/public_html/`)
+- Vercel, Netlify, ou qualquer servidor de arquivos estáticos
+- Nginx, Apache
 
-Para mais informações sobre React Testing Library: https://testing-library.com/docs/react-testing-library/intro/
+## 🎨 Estilização
+
+### Tailwind CSS
+
+O projeto usa Tailwind CSS v4 para estilização:
+
+- Utility-first CSS framework
+- Design system consistente
+- Responsividade fácil
+- Classes customizadas em `tailwind.config.js`
+
+### Componentes UI
+
+Componentes base estão em `src/components/ui/`:
+- Button
+- Input
+- Modal
+- Table
+- FileUpload
+
+## 🔐 Autenticação e Autorização
+
+### AuthContext
+
+O contexto de autenticação (`src/contexts/AuthContext.tsx`) gerencia:
+- Estado de autenticação do usuário
+- Token JWT
+- Informações do usuário logado (name, role, etc.)
+- Funções de login/logout
+
+### PrivateRoute
+
+Componente que protege rotas baseado em role:
+
+```tsx
+<PrivateRoute requiredRole="admin">
+  <AdminDashboard />
+</PrivateRoute>
+```
+
+### Roles Disponíveis
+
+- `admin`: Acesso total ao sistema
+- `teacher`: Acesso a turmas, lançamento de notas
+- `student`: Acesso a notas, documentos, solicitações
+
+## 📡 Comunicação com API
+
+### Axios Client
+
+Cliente base configurado em `src/services/api.ts`:
+- Base URL da API
+- Interceptor para adicionar token JWT
+- Interceptor para tratar erros (401, 403, 500)
+- Renovação automática de token
+
+### Services
+
+Cada entidade tem seu próprio service:
+- `student.service.ts` - Operações com estudantes (tabela `students`)
+- `user.service.ts` - Operações com usuários (tabela `users`, autenticação)
+- `course.service.ts` - Operações com cursos
+- `enrollment.service.ts` - Operações com matrículas
+- `document.service.ts` - Operações com documentos
+
+**Importante**: A separação entre `student.service` e `user.service` reflete a estrutura do banco:
+- Use `student.service` para gerenciar dados do estudante (informações pessoais e acadêmicas)
+- Use `user.service` para criar/gerenciar acesso de login de um estudante
+
+### TanStack Query
+
+Gerenciamento de estado do servidor com custom hooks:
+
+```typescript
+// Exemplo de uso
+const { data: students, isLoading } = useStudents();
+const createMutation = useCreateStudent();
+
+// Criar estudante
+createMutation.mutate(newStudentData);
+```
+
+## 🐛 Troubleshooting
+
+### Erro: "Cannot find module"
+
+**Problema**: Path alias `@/` não está funcionando
+
+**Solução**: Verificar configurações em:
+- `tsconfig.json` (paths)
+- `vite.config.ts` (resolve.alias)
+
+### Erro de CORS
+
+**Problema**: API está bloqueando requisições do frontend
+
+**Solução**: Verificar configuração CORS no backend:
+```javascript
+// backend/src/server.js
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}));
+```
+
+### Erro: "401 Unauthorized"
+
+**Problema**: Token JWT expirado ou inválido
+
+**Solução**:
+- Fazer logout e login novamente
+- Verificar se token está sendo enviado no header `Authorization: Bearer <token>`
+- Verificar validade do `JWT_SECRET` no backend
+
+### Build falha com erro de TypeScript
+
+**Problema**: Erros de tipo impedem build
+
+**Solução**:
+```bash
+# Executar type check
+npx tsc --noEmit
+
+# Corrigir erros de tipo reportados
+```
+
+### Porta 5173 já em uso
+
+**Problema**: Outra aplicação está usando a porta 5173
+
+**Solução (Windows)**:
+```bash
+# Encontrar processo
+netstat -ano | findstr :5173
+
+# Matar processo
+taskkill /PID <PID> /F
+```
+
+**Solução (macOS/Linux)**:
+```bash
+# Encontrar processo
+lsof -i :5173
+
+# Matar processo
+kill -9 <PID>
+```
+
+## 📝 Código de Qualidade
+
+### ESLint
+
+```bash
+npm run lint         # Verificar erros
+npm run lint:fix     # Corrigir erros automaticamente
+```
+
+### Prettier
+
+```bash
+npm run format       # Formatar código
+npm run format:check # Verificar formatação
+```
+
+## 🚀 Deploy em Produção
+
+### Hostgator (Shared Hosting)
+
+1. **Build da aplicação:**
+```bash
+npm run build
+```
+
+2. **Upload via FTP/SFTP:**
+   - Fazer upload da pasta `dist/` para `/home/usuario/public_html/`
+
+3. **Configurar .htaccess** (para SPA routing):
+```apache
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
+```
+
+## 📚 Recursos Adicionais
+
+- [Documentação de Requisitos](../docs/requirements.md)
+- [Documentação de Contexto](../docs/contextDoc.md)
+- [React Documentation](https://react.dev)
+- [Vite Documentation](https://vitejs.dev)
+- [TanStack Query Documentation](https://tanstack.com/query)
+- [Tailwind CSS Documentation](https://tailwindcss.com)
+
+## 📄 Licença
+
+Proprietary - Sistema Secretaria Online
+
+## 👥 Contribuidores
+
+Desenvolvido seguindo as melhores práticas de:
+- Clean Code
+- Component-Driven Development
+- TypeScript Best Practices
+- Accessibility Standards (WCAG)
+
+---
+
+**Última atualização:** 2025-12-02
+**Versão:** 0.1.0

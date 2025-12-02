@@ -125,6 +125,9 @@ backend/
 │   ├── config/              # Configurações (database, auth, upload, pdf)
 │   ├── controllers/         # Controladores (lógica de rotas)
 │   ├── models/              # Modelos Sequelize
+│   │   ├── Student.js       # Model da tabela students (dados completos)
+│   │   ├── User.js          # Model da tabela users (autenticação)
+│   │   └── ...              # Outros models
 │   ├── routes/              # Definição de rotas da API
 │   ├── services/            # Serviços (lógica de negócio)
 │   ├── middlewares/         # Middlewares (auth, validation, error)
@@ -133,6 +136,9 @@ backend/
 │   └── server.js            # Entrada da aplicação
 ├── database/
 │   ├── migrations/          # Migrations Sequelize
+│   │   ├── *-create-students.js        # Cria tabela students
+│   │   ├── *-add-student-id-to-users.js # Adiciona FK student_id
+│   │   └── ...
 │   └── seeders/             # Seeders (dados iniciais)
 ├── uploads/
 │   ├── contracts/           # PDFs de contratos gerados
@@ -152,11 +158,12 @@ backend/
 - Geração de senhas provisórias
 - Validação de credenciais com bcryptjs
 
-### ✅ Gestão de Usuários (feat-004 a feat-015)
-- Cadastro de alunos
+### ✅ Gestão de Usuários (feat-004 a feat-015, feat-064)
+- Cadastro de alunos (tabela `students` separada)
 - Cadastro de professores
 - Cadastro de usuários administrativos
 - Reset de senhas
+- **Nova estrutura**: Tabela `students` armazena dados completos dos estudantes, tabela `users` gerencia autenticação. Relacionamento 1:1 opcional via `users.student_id`
 
 ### ✅ Cursos e Disciplinas (feat-016 a feat-020)
 - Cadastro e gerenciamento de cursos
@@ -255,17 +262,37 @@ DELETE /api/v1/users/:id
 ### Alunos
 
 ```http
-# Listar alunos
+# Listar alunos (da tabela students)
 GET /api/v1/students
 
-# Criar aluno
+# Criar aluno (cria registro na tabela students)
 POST /api/v1/students
+Content-Type: application/json
+
+{
+  "nome": "João Silva",
+  "cpf": "12345678901",
+  "email": "joao@example.com",
+  "data_nascimento": "2000-01-15",
+  "telefone": "31999999999",
+  ...
+}
 
 # Obter aluno
 GET /api/v1/students/:id
 
 # Atualizar aluno
 PUT /api/v1/students/:id
+
+# Nota: Para criar usuário de login para um estudante, use:
+POST /api/v1/users
+{
+  "role": "student",
+  "student_id": 123,  // ID do registro na tabela students
+  "login": "joao.silva",
+  "password": "senha_provisoria",
+  ...
+}
 ```
 
 ### Cursos

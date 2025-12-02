@@ -3,6 +3,7 @@
  * Descrição: Service para funcionalidades administrativas
  * Feature: feat-081 - Criar service de estatísticas do dashboard admin
  * Criado em: 2025-11-07
+ * Atualizado em: 2025-12-02 (feat-064 - Usar tabela students para contagem)
  *
  * Responsabilidades:
  * - Buscar estatísticas agregadas do sistema
@@ -10,7 +11,7 @@
  * - Aplicar lógica de negócio para dashboard
  */
 
-const { User, Enrollment, Document } = require('../models');
+const { Student, User, Enrollment, Document } = require('../models');
 const logger = require('../utils/logger');
 
 /**
@@ -21,8 +22,8 @@ class AdminService {
    * Busca estatísticas gerais do sistema
    *
    * Retorna contadores de:
-   * - Total de alunos (role = 'student')
-   * - Total de professores (role = 'teacher')
+   * - Total de alunos (da tabela students - dados completos)
+   * - Total de professores (role = 'teacher' na tabela users)
    * - Documentos pendentes de aprovação (status = 'pending')
    * - Matrículas ativas (status = 'active')
    *
@@ -45,12 +46,9 @@ class AdminService {
       // Buscar todas as estatísticas em paralelo para melhor performance
       const [totalStudents, totalTeachers, pendingDocuments, activeEnrollments] =
         await Promise.all([
-          // Total de estudantes (não deletados)
-          User.count({
-            where: {
-              role: 'student',
-            },
-          }),
+          // Total de estudantes (da tabela students, não deletados)
+          // ATUALIZAÇÃO feat-064: Agora conta da tabela students ao invés de users
+          Student.count(),
 
           // Total de professores (não deletados)
           User.count({

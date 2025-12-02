@@ -194,20 +194,37 @@ A escolha de uma arquitetura monolítica se justifica pelos seguintes fatores:
 
 - **Normalização**: Tabelas normalizadas até 3FN para evitar redundância
 - **Índices Estratégicos**: Em colunas frequentemente consultadas (ex: `cpf`, `email`, `user_id`)
-- **Soft Deletes**: Tabelas críticas (users, enrollments) usarão `deleted_at` para exclusão lógica
+- **Soft Deletes**: Tabelas críticas (users, enrollments, students) usarão `deleted_at` para exclusão lógica
 - **Timestamps**: Todas as tabelas terão `created_at` e `updated_at` para auditoria
 - **ENUMs para Status**: Campos como `enrollment_status`, `document_status`, `request_status` usarão ENUM para validação no banco
+- **Separação Students/Users**: A tabela `students` armazena dados completos dos estudantes (informações acadêmicas e pessoais). A tabela `users` gerencia apenas autenticação e autorização. Um usuário do tipo 'student' pode opcionalmente ter um `student_id` que referencia o registro na tabela `students`. Isso permite flexibilidade: estudantes podem existir sem usuário de login (apenas dados cadastrais) e usuários de login podem ser criados posteriormente vinculados a estudantes existentes.
 
 **Exemplo de Tabelas Principais:**
 
 ```sql
--- Usuários (polimórfico: admin, professor, aluno)
+-- Estudantes (tabela separada com dados completos)
+students (
+  id, nome, cpf, data_nascimento,
+  telefone, celular, email,
+  endereco_rua, endereco_numero, endereco_complemento,
+  endereco_bairro, endereco_cidade, endereco_uf, cep,
+  sexo, categoria, sub_categoria,
+  matricula, ano_matricula, profissao, responsavel,
+  mae, pai, rg, rg_data, titulo_eleitor,
+  serie, curso, semestre,
+  contrato, contrato_aceito, contrato_dia, contrato_mes, contrato_ano,
+  foto, chave_eletronica, data_geral,
+  created_at, updated_at, deleted_at
+)
+
+-- Usuários (admin, professor, aluno - com referência opcional para students)
 users (
   id, role (enum: admin|teacher|student),
   name, email, login, password_hash,
   cpf, rg, mother_name, father_name, address,
-  title, reservist,
-  first_access_at, created_at, updated_at, deleted_at
+  voter_title, reservist,
+  student_id (FK opcional para students),
+  created_at, updated_at, deleted_at
 )
 
 -- Cursos
