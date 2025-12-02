@@ -17,6 +17,10 @@ dotenv.config();
 
 const app = express();
 
+// Trust proxy - Necessário quando atrás de proxy reverso (Nginx)
+// Permite que express-rate-limit e outras libs identifiquem corretamente o IP do cliente
+app.set('trust proxy', 1);
+
 // Middlewares de segurança - Helmet.js com configuração completa
 app.use(
   helmet({
