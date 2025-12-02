@@ -1,14 +1,15 @@
 /**
  * Arquivo: frontend/src/components/forms/TeacherForm.tsx
  * Descrição: Formulário de cadastro e edição de professores
- * Feature: feat-084 - Criar teacher.service.ts e página Teachers
- * Criado em: 2025-11-04
+ * Feature: feat-110 - Criar tabela teachers e migrar dados de users
+ * Atualizado em: 2025-12-02
  *
  * Responsabilidades:
  * - Renderizar formulário completo de professor
  * - Validar dados com Zod schema
  * - Suportar modo criação e edição
  * - Integrar com React Hook Form
+ * - Trabalhar com a nova tabela teachers (separada de users)
  */
 
 import { useEffect } from 'react';
@@ -17,31 +18,31 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import type { IUser } from '@/types/user.types';
+import type { ITeacher } from '@/types/teacher.types';
 import type { ICreateTeacherData, IUpdateTeacherData } from '@/services/teacher.service';
 
 /**
  * Schema de validação Zod para formulário de professor
  *
  * Valida todos os campos obrigatórios e opcionais com suas respectivas regras
+ * Baseado na estrutura da tabela teachers (similar a students)
  */
 const teacherFormSchema = z.object({
-  name: z.string()
-    .min(3, 'Nome deve ter no mínimo 3 caracteres')
-    .max(100, 'Nome deve ter no máximo 100 caracteres')
-    .trim(),
+  // Dados pessoais básicos
+  nome: z.string()
+    .max(200, 'Nome deve ter no máximo 200 caracteres')
+    .trim()
+    .optional()
+    .or(z.literal('')),
 
   email: z.string()
-    .email('Email inválido')
     .trim()
-    .toLowerCase(),
-
-  login: z.string()
-    .min(3, 'Login deve ter no mínimo 3 caracteres')
-    .max(50, 'Login deve ter no máximo 50 caracteres')
-    .trim()
-    .toLowerCase()
-    .regex(/^[a-z0-9._-]+$/, 'Login deve conter apenas letras minúsculas, números e os caracteres . _ -'),
+    .optional()
+    .refine(
+      (val) => !val || z.string().email().safeParse(val).success,
+      'Email inválido'
+    )
+    .or(z.literal('')),
 
   cpf: z.string()
     .min(1, 'CPF é obrigatório')
@@ -55,25 +56,100 @@ const teacherFormSchema = z.object({
     .optional()
     .or(z.literal('')),
 
-  mother_name: z.string()
-    .min(3, 'Nome da mãe deve ter no mínimo 3 caracteres')
-    .max(255, 'Nome da mãe deve ter no máximo 255 caracteres'),
+  rg_data: z.string()
+    .max(10, 'Data do RG inválida')
+    .optional()
+    .or(z.literal('')),
 
-  father_name: z.string()
-    .min(3, 'Nome do pai deve ter no mínimo 3 caracteres')
-    .max(255, 'Nome do pai deve ter no máximo 255 caracteres'),
+  data_nascimento: z.string()
+    .optional()
+    .or(z.literal('')),
 
-  address: z.string()
-    .min(10, 'Endereço deve ter no mínimo 10 caracteres')
-    .max(200, 'Endereço deve ter no máximo 200 caracteres'),
+  sexo: z.union([
+    z.literal('M'),
+    z.literal('F'),
+    z.literal('1'),
+    z.literal('2'),
+  ], {
+    errorMap: () => ({ message: 'Selecione o sexo' }),
+  }).optional(),
 
-  voter_title: z.string()
-    .min(1, 'Título de eleitor é obrigatório para professores')
-    .max(20, 'Título de eleitor deve ter no máximo 20 caracteres'),
+  // Contato
+  telefone: z.string()
+    .max(20, 'Telefone deve ter no máximo 20 caracteres')
+    .optional()
+    .or(z.literal('')),
 
-  reservist: z.string()
-    .min(1, 'Número de reservista é obrigatório para professores')
-    .max(20, 'Número do reservista deve ter no máximo 20 caracteres'),
+  celular: z.string()
+    .max(20, 'Celular deve ter no máximo 20 caracteres')
+    .optional()
+    .or(z.literal('')),
+
+  // Endereço completo
+  endereco_rua: z.string()
+    .max(300, 'Rua deve ter no máximo 300 caracteres')
+    .optional()
+    .or(z.literal('')),
+
+  endereco_numero: z.string()
+    .max(10, 'Número deve ter no máximo 10 caracteres')
+    .optional()
+    .or(z.literal('')),
+
+  endereco_complemento: z.string()
+    .max(100, 'Complemento deve ter no máximo 100 caracteres')
+    .optional()
+    .or(z.literal('')),
+
+  endereco_bairro: z.string()
+    .max(200, 'Bairro deve ter no máximo 200 caracteres')
+    .optional()
+    .or(z.literal('')),
+
+  endereco_cidade: z.string()
+    .max(200, 'Cidade deve ter no máximo 200 caracteres')
+    .optional()
+    .or(z.literal('')),
+
+  endereco_uf: z.string()
+    .max(2, 'UF deve ter 2 caracteres')
+    .toUpperCase()
+    .optional()
+    .or(z.literal('')),
+
+  cep: z.string()
+    .max(20, 'CEP deve ter no máximo 20 caracteres')
+    .optional()
+    .or(z.literal('')),
+
+  // Filiação
+  mae: z.string()
+    .max(100, 'Nome da mãe deve ter no máximo 100 caracteres')
+    .optional()
+    .or(z.literal('')),
+
+  pai: z.string()
+    .max(100, 'Nome do pai deve ter no máximo 100 caracteres')
+    .optional()
+    .or(z.literal('')),
+
+  // Documentos adicionais
+  titulo_eleitor: z.string()
+    .max(25, 'Título de eleitor deve ter no máximo 25 caracteres')
+    .optional()
+    .or(z.literal('')),
+
+  // Dados profissionais
+  profissao: z.string()
+    .max(100, 'Profissão deve ter no máximo 100 caracteres')
+    .optional()
+    .or(z.literal('')),
+
+  // Dados acadêmicos/administrativos
+  matricula: z.string()
+    .max(50, 'Matrícula deve ter no máximo 50 caracteres')
+    .optional()
+    .or(z.literal('')),
 });
 
 /**
@@ -89,7 +165,7 @@ interface TeacherFormProps {
    * Dados iniciais do professor (modo edição)
    * Se não fornecido, formulário inicia vazio (modo criação)
    */
-  initialData?: IUser;
+  initialData?: ITeacher;
 
   /**
    * Callback executado ao submeter o formulário
@@ -148,16 +224,27 @@ export function TeacherForm({
   } = useForm<TeacherFormData>({
     resolver: zodResolver(teacherFormSchema),
     defaultValues: {
-      name: '',
+      nome: '',
       email: '',
-      login: '',
       cpf: '',
       rg: '',
-      mother_name: '',
-      father_name: '',
-      address: '',
-      voter_title: '',
-      reservist: '',
+      rg_data: '',
+      data_nascimento: '',
+      sexo: '',
+      telefone: '',
+      celular: '',
+      endereco_rua: '',
+      endereco_numero: '',
+      endereco_complemento: '',
+      endereco_bairro: '',
+      endereco_cidade: '',
+      endereco_uf: '',
+      cep: '',
+      mae: '',
+      pai: '',
+      titulo_eleitor: '',
+      profissao: '',
+      matricula: '',
     },
   });
 
@@ -167,16 +254,30 @@ export function TeacherForm({
   useEffect(() => {
     if (initialData) {
       reset({
-        name: initialData.name || '',
+        nome: initialData.nome || '',
         email: initialData.email || '',
-        login: initialData.login || '',
         cpf: initialData.cpf || '',
         rg: initialData.rg || '',
-        mother_name: initialData.mother_name || '',
-        father_name: initialData.father_name || '',
-        address: initialData.address || '',
-        voter_title: initialData.voter_title || '',
-        reservist: initialData.reservist || '',
+        rg_data: initialData.rg_data || '',
+        data_nascimento: initialData.data_nascimento || '',
+        // Converte de número (1 ou 2) para string ('M' ou 'F') no modo edição
+        sexo: initialData.sexo
+          ? ((initialData.sexo === 1 || initialData.sexo === '1') ? 'M' : 'F')
+          : '',
+        telefone: initialData.telefone || '',
+        celular: initialData.celular || '',
+        endereco_rua: initialData.endereco_rua || '',
+        endereco_numero: initialData.endereco_numero || '',
+        endereco_complemento: initialData.endereco_complemento || '',
+        endereco_bairro: initialData.endereco_bairro || '',
+        endereco_cidade: initialData.endereco_cidade || '',
+        endereco_uf: initialData.endereco_uf || '',
+        cep: initialData.cep || '',
+        mae: initialData.mae || '',
+        pai: initialData.pai || '',
+        titulo_eleitor: initialData.titulo_eleitor || '',
+        profissao: initialData.profissao || '',
+        matricula: initialData.matricula || '',
       });
     }
   }, [initialData, reset]);
@@ -187,26 +288,45 @@ export function TeacherForm({
    *
    * Campos que recebem limpeza:
    * - cpf: Remove máscara (###.###.###-##) → apenas números
-   * - rg: Remove qualquer caractere não numérico
-   * - voter_title: Remove qualquer caractere não numérico (título de eleitor)
-   * - reservist: Remove qualquer caractere não numérico (número de reservista)
+   * - cep: Remove máscara (#####-###) → apenas números
+   * - telefone: Remove máscaras
+   * - celular: Remove máscaras
    */
   const handleFormSubmit = async (data: TeacherFormData) => {
     try {
       const cleanedData = {
-        ...data,
-        // Remove máscara do CPF: ###.###.###-## → apenas números
+        // Remove máscaras de campos numéricos
         cpf: data.cpf.replace(/\D/g, ''),
-        // Remove máscaras e espaços dos campos opcionais
+
+        // Campos opcionais - só envia se preenchidos
+        nome: data.nome?.trim() || undefined,
+        email: data.email?.trim() || undefined,
+        cep: data.cep ? data.cep.replace(/\D/g, '').trim() || undefined : undefined,
         rg: data.rg ? data.rg.replace(/\D/g, '').trim() || undefined : undefined,
-        // Campos obrigatórios para professores
-        mother_name: data.mother_name?.trim(),
-        father_name: data.father_name?.trim(),
-        address: data.address?.trim(),
-        // Remove máscara do título de eleitor (se houver espaços ou caracteres especiais)
-        voter_title: data.voter_title ? data.voter_title.replace(/\D/g, '').trim() : undefined,
-        // Remove máscara do número de reservista (se houver espaços ou caracteres especiais)
-        reservist: data.reservist ? data.reservist.replace(/\D/g, '').trim() : undefined,
+        rg_data: data.rg_data?.trim() || undefined,
+        data_nascimento: data.data_nascimento?.trim() || undefined,
+        telefone: data.telefone ? data.telefone.replace(/\D/g, '').trim() || undefined : undefined,
+        celular: data.celular ? data.celular.replace(/\D/g, '').trim() || undefined : undefined,
+        titulo_eleitor: data.titulo_eleitor ? data.titulo_eleitor.replace(/\D/g, '').trim() || undefined : undefined,
+
+        // Converte sexo de string para número (backend espera 1 ou 2) - opcional
+        sexo: data.sexo ? (data.sexo === 'M' || data.sexo === '1' ? 1 : 2) : undefined,
+
+        // Endereço - todos opcionais
+        endereco_rua: data.endereco_rua?.trim() || undefined,
+        endereco_numero: data.endereco_numero?.trim() || undefined,
+        endereco_complemento: data.endereco_complemento?.trim() || undefined,
+        endereco_bairro: data.endereco_bairro?.trim() || undefined,
+        endereco_cidade: data.endereco_cidade?.trim() || undefined,
+        endereco_uf: data.endereco_uf ? data.endereco_uf.toUpperCase().trim() || undefined : undefined,
+
+        // Filiação - opcionais
+        mae: data.mae?.trim() || undefined,
+        pai: data.pai?.trim() || undefined,
+
+        // Profissionais - opcionais
+        profissao: data.profissao?.trim() || undefined,
+        matricula: data.matricula?.trim() || undefined,
       };
 
       await onSubmit(cleanedData);
@@ -221,58 +341,29 @@ export function TeacherForm({
   const isEditMode = !!initialData;
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-      {/* Seção: Dados Básicos */}
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+      {/* Seção: Dados Pessoais */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">Dados Básicos</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Dados Pessoais</h3>
 
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Nome completo */}
-          <Input
-            {...register('name')}
-            label="Nome completo"
-            placeholder="Digite o nome completo do professor"
-            error={errors.name?.message}
-            required
-            disabled={loading}
-          />
+          <div className="md:col-span-2">
+            <Input
+              {...register('nome')}
+              label="Nome completo"
+              placeholder="Digite o nome completo do professor"
+              error={errors.nome?.message}
+              disabled={loading}
+            />
+          </div>
 
-          {/* Email */}
-          <Input
-            {...register('email')}
-            type="email"
-            label="Email"
-            placeholder="email@exemplo.com"
-            error={errors.email?.message}
-            required
-            disabled={loading}
-          />
-
-          {/* Login */}
-          <Input
-            {...register('login')}
-            label="Login"
-            placeholder="nome.sobrenome"
-            helperText="Apenas letras minúsculas, números e os caracteres . _ -"
-            error={errors.login?.message}
-            required
-            disabled={loading}
-          />
-        </div>
-      </div>
-
-      {/* Seção: Documentos */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">Documentos</h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {/* CPF */}
           <Input
             {...register('cpf')}
             label="CPF"
-            placeholder="00000000000"
+            placeholder="000.000.000-00"
             mask="cpf"
-            helperText="Apenas números"
             error={errors.cpf?.message}
             required
             disabled={loading}
@@ -282,65 +373,221 @@ export function TeacherForm({
           <Input
             {...register('rg')}
             label="RG"
-            placeholder="000000000"
+            placeholder="00.000.000-0"
             error={errors.rg?.message}
             disabled={loading}
           />
 
-          {/* Título de eleitor */}
+          {/* Data emissão RG */}
           <Input
-            {...register('voter_title')}
-            label="Título de eleitor"
-            placeholder="0000 0000 0000"
-            error={errors.voter_title?.message}
-            required
+            {...register('rg_data')}
+            type="date"
+            label="Data de emissão do RG"
+            error={errors.rg_data?.message}
             disabled={loading}
           />
 
-          {/* Reservista */}
+          {/* Data de nascimento */}
           <Input
-            {...register('reservist')}
-            label="Certificado de reservista"
-            placeholder="000000000"
-            error={errors.reservist?.message}
-            required
+            {...register('data_nascimento')}
+            type="date"
+            label="Data de nascimento"
+            error={errors.data_nascimento?.message}
+            disabled={loading}
+          />
+
+          {/* Sexo */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Sexo
+            </label>
+            <select
+              {...register('sexo')}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              disabled={loading}
+            >
+              <option value="">Selecione</option>
+              <option value="M">Masculino</option>
+              <option value="F">Feminino</option>
+            </select>
+            {errors.sexo && (
+              <p className="mt-1 text-sm text-red-600">{errors.sexo.message}</p>
+            )}
+          </div>
+
+          {/* Título de eleitor */}
+          <Input
+            {...register('titulo_eleitor')}
+            label="Título de eleitor"
+            placeholder="0000 0000 0000"
+            error={errors.titulo_eleitor?.message}
+            disabled={loading}
+          />
+
+          {/* Email */}
+          <div className="md:col-span-2">
+            <Input
+              {...register('email')}
+              type="email"
+              label="Email"
+              placeholder="email@exemplo.com"
+              error={errors.email?.message}
+              disabled={loading}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Seção: Contato */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Contato</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Telefone */}
+          <Input
+            {...register('telefone')}
+            label="Telefone"
+            placeholder="(00) 0000-0000"
+            mask="phone"
+            error={errors.telefone?.message}
+            disabled={loading}
+          />
+
+          {/* Celular */}
+          <Input
+            {...register('celular')}
+            label="Celular"
+            placeholder="(00) 00000-0000"
+            mask="celular"
+            error={errors.celular?.message}
             disabled={loading}
           />
         </div>
       </div>
 
-      {/* Seção: Informações Adicionais */}
+      {/* Seção: Endereço */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">Informações Adicionais</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Endereço</h3>
 
-        <div className="space-y-3">
-          {/* Nome da mãe */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* CEP */}
           <Input
-            {...register('mother_name')}
-            label="Nome da mãe"
-            placeholder="Digite o nome da mãe"
-            error={errors.mother_name?.message}
-            required
+            {...register('cep')}
+            label="CEP"
+            placeholder="00000-000"
+            mask="cep"
+            error={errors.cep?.message}
             disabled={loading}
           />
+
+          {/* Rua */}
+          <div className="md:col-span-2">
+            <Input
+              {...register('endereco_rua')}
+              label="Rua"
+              placeholder="Nome da rua"
+              error={errors.endereco_rua?.message}
+              disabled={loading}
+            />
+          </div>
+
+          {/* Número */}
+          <Input
+            {...register('endereco_numero')}
+            label="Número"
+            placeholder="000"
+            error={errors.endereco_numero?.message}
+            disabled={loading}
+          />
+
+          {/* Complemento */}
+          <Input
+            {...register('endereco_complemento')}
+            label="Complemento"
+            placeholder="Apto, bloco, etc."
+            error={errors.endereco_complemento?.message}
+            disabled={loading}
+          />
+
+          {/* Bairro */}
+          <Input
+            {...register('endereco_bairro')}
+            label="Bairro"
+            placeholder="Nome do bairro"
+            error={errors.endereco_bairro?.message}
+            disabled={loading}
+          />
+
+          {/* Cidade */}
+          <Input
+            {...register('endereco_cidade')}
+            label="Cidade"
+            placeholder="Nome da cidade"
+            error={errors.endereco_cidade?.message}
+            disabled={loading}
+          />
+
+          {/* UF */}
+          <Input
+            {...register('endereco_uf')}
+            label="UF"
+            placeholder="MG"
+            maxLength={2}
+            error={errors.endereco_uf?.message}
+            disabled={loading}
+          />
+        </div>
+      </div>
+
+      {/* Seção: Filiação */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Filiação</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Nome da mãe */}
+          <div className="md:col-span-2">
+            <Input
+              {...register('mae')}
+              label="Nome da mãe"
+              placeholder="Digite o nome completo da mãe"
+              error={errors.mae?.message}
+              disabled={loading}
+            />
+          </div>
 
           {/* Nome do pai */}
+          <div className="md:col-span-2">
+            <Input
+              {...register('pai')}
+              label="Nome do pai"
+              placeholder="Digite o nome completo do pai"
+              error={errors.pai?.message}
+              disabled={loading}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Seção: Dados Profissionais */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Dados Profissionais</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Profissão */}
           <Input
-            {...register('father_name')}
-            label="Nome do pai"
-            placeholder="Digite o nome do pai"
-            error={errors.father_name?.message}
-            required
+            {...register('profissao')}
+            label="Profissão/Formação"
+            placeholder="Ex: Professor de Matemática, Pedagogo"
+            error={errors.profissao?.message}
             disabled={loading}
           />
 
-          {/* Endereço */}
+          {/* Matrícula */}
           <Input
-            {...register('address')}
-            label="Endereço completo"
-            placeholder="Rua, número, bairro, cidade, estado"
-            error={errors.address?.message}
-            required
+            {...register('matricula')}
+            label="Matrícula"
+            placeholder="Número de matrícula"
+            error={errors.matricula?.message}
             disabled={loading}
           />
         </div>

@@ -1,33 +1,34 @@
 /**
  * Arquivo: frontend/src/pages/admin/Teachers.tsx
  * Descrição: Página de listagem e gerenciamento de professores (CRUD completo)
- * Feature: feat-084 - Criar teacher.service.ts e página Teachers
- * Criado em: 2025-11-04
+ * Feature: feat-110 - Criar tabela teachers e migrar dados de users
+ * Atualizado em: 2025-12-02
  *
  * Responsabilidades:
- * - Exibir tabela de professores cadastrados
+ * - Exibir tabela de professores cadastrados (tabela teachers)
  * - Permitir criação de novo professor via modal
  * - Permitir edição de professor existente via modal
  * - Permitir exclusão de professor com confirmação
- * - Permitir reset de senha provisória
+ * - Permitir criação de usuário de login para professores
+ * - Permitir reset de senha provisória para professores que têm usuário
  * - Gerenciar estados de loading e erro
  */
 
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, KeyRound, AlertCircle } from 'lucide-react';
+import { Plus, Pencil, Trash2, KeyRound, UserPlus, AlertCircle } from 'lucide-react';
 import { Table, type Column } from '@/components/ui/Table';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import Toast, { type ToastType } from '@/components/ui/Toast';
 import { TeacherForm } from '@/components/forms/TeacherForm';
 import TeacherService from '@/services/teacher.service';
-import type { IUser } from '@/types/user.types';
+import type { ITeacher } from '@/types/teacher.types';
 import type { ICreateTeacherData, IUpdateTeacherData } from '@/services/teacher.service';
 
 /**
  * Tipo de modal ativo
  */
-type ModalType = 'create' | 'edit' | 'delete' | 'resetPassword' | null;
+type ModalType = 'create' | 'edit' | 'delete' | 'createUser' | 'resetPassword' | null;
 
 /**
  * TeachersPage - Página de gerenciamento de professores
@@ -42,13 +43,19 @@ type ModalType = 'create' | 'edit' | 'delete' | 'resetPassword' | null;
  */
 export default function TeachersPage() {
   // Estado da lista de professores
-  const [teachers, setTeachers] = useState<IUser[]>([]);
+  const [teachers, setTeachers] = useState<ITeacher[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   // Estado dos modais
   const [activeModal, setActiveModal] = useState<ModalType>(null);
-  const [selectedTeacher, setSelectedTeacher] = useState<IUser | null>(null);
+  const [selectedTeacher, setSelectedTeacher] = useState<ITeacher | null>(null);
+
+  // Estado do formulário de criar usuário
+  const [createUserForm, setCreateUserForm] = useState({
+    login: '',
+    password: '',
+  });
 
   // Estado de operações assíncronas
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -114,7 +121,7 @@ export default function TeachersPage() {
   /**
    * Abre modal de edição
    */
-  const handleOpenEditModal = (teacher: IUser) => {
+  const handleOpenEditModal = (teacher: ITeacher) => {
     setSelectedTeacher(teacher);
     setActiveModal('edit');
   };
@@ -122,15 +129,35 @@ export default function TeachersPage() {
   /**
    * Abre modal de confirmação de exclusão
    */
-  const handleOpenDeleteModal = (teacher: IUser) => {
+  const handleOpenDeleteModal = (teacher: ITeacher) => {
     setSelectedTeacher(teacher);
     setActiveModal('delete');
   };
 
   /**
+   * Abre modal de criar usuário
+   */
+  const handleOpenCreateUserModal = (teacher: ITeacher) => {
+    setSelectedTeacher(teacher);
+    // Preenche o login sugerido com base no nome
+    const suggestedLogin = (teacher.nome || 'professor')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+      .replace(/\s+/g, '.')
+      .replace(/[^a-z0-9._-]/g, '');
+
+    setCreateUserForm({
+      login: suggestedLogin,
+      password: '',
+    });
+    setActiveModal('createUser');
+  };
+
+  /**
    * Abre modal de confirmação de reset de senha
    */
-  const handleOpenResetPasswordModal = (teacher: IUser) => {
+  const handleOpenResetPasswordModal = (teacher: ITeacher) => {
     setSelectedTeacher(teacher);
     setActiveModal('resetPassword');
   };
@@ -226,14 +253,50 @@ export default function TeachersPage() {
   };
 
   /**
-   * Handler de reset de senha
+   * Handler de criação de usuário para professor
    */
-  const handleResetPassword = async () => {
+  const handleCreateUser = async () => {
     if (!selectedTeacher) return;
+
+    if (!createUserForm.login || !createUserForm.password) {
+      setToast({
+        message: 'Preencha login e senha',
+        type: 'error',
+      });
+      return;
+    }
 
     try {
       setIsSubmitting(true);
-      await TeacherService.resetPassword(selectedTeacher.id);
+      await TeacherService.createUser(selectedTeacher.id, createUserForm);
+      setToast({
+        message: 'Usuário criado com sucesso! Credenciais enviadas para o email do professor.',
+        type: 'success',
+      });
+      handleCloseModal();
+      await loadTeachers(); // Recarrega para atualizar user_id
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Erro ao criar usuário';
+      setToast({
+        message: errorMessage,
+        type: 'error',
+      });
+      console.error('[TeachersPage] Erro ao criar usuário:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  /**
+   * Handler de reset de senha
+   */
+  const handleResetPassword = async () => {
+    if (!selectedTeacher || !selectedTeacher.user_id) return;
+
+    try {
+      setIsSubmitting(true);
+      await TeacherService.resetPassword(selectedTeacher.user_id);
       setToast({
         message: 'Senha provisória regenerada e enviada para o email do professor!',
         type: 'success',
@@ -255,18 +318,19 @@ export default function TeachersPage() {
   /**
    * Formata CPF para exibição
    */
-  const formatCPF = (cpf: string): string => {
+  const formatCPF = (cpf: string | null): string => {
+    if (!cpf) return '-';
     return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
 
   /**
    * Definição das colunas da tabela
    */
-  const columns: Column<IUser>[] = [
+  const columns: Column<ITeacher>[] = [
     {
-      key: 'name',
+      key: 'nome',
       header: 'Nome',
-      accessor: (teacher) => teacher.name,
+      accessor: (teacher) => teacher.nome,
       sortable: true,
     },
     {
@@ -276,15 +340,25 @@ export default function TeachersPage() {
       sortable: true,
     },
     {
-      key: 'login',
-      header: 'Login',
-      accessor: (teacher) => teacher.login,
-      sortable: true,
-    },
-    {
       key: 'cpf',
       header: 'CPF',
       accessor: (teacher) => formatCPF(teacher.cpf),
+      align: 'center',
+    },
+    {
+      key: 'has_user',
+      header: 'Tem Login?',
+      accessor: (teacher) => (
+        <span
+          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+            teacher.user_id
+              ? 'bg-green-100 text-green-800'
+              : 'bg-gray-100 text-gray-800'
+          }`}
+        >
+          {teacher.user_id ? 'Sim' : 'Não'}
+        </span>
+      ),
       align: 'center',
     },
     {
@@ -301,14 +375,25 @@ export default function TeachersPage() {
             <Pencil size={16} />
           </Button>
 
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => handleOpenResetPasswordModal(teacher)}
-            title="Resetar senha"
-          >
-            <KeyRound size={16} />
-          </Button>
+          {!teacher.user_id ? (
+            <Button
+              size="sm"
+              variant="primary"
+              onClick={() => handleOpenCreateUserModal(teacher)}
+              title="Criar usuário de login"
+            >
+              <UserPlus size={16} />
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => handleOpenResetPasswordModal(teacher)}
+              title="Resetar senha"
+            >
+              <KeyRound size={16} />
+            </Button>
+          )}
 
           <Button
             size="sm"
@@ -321,7 +406,7 @@ export default function TeachersPage() {
         </div>
       ),
       align: 'right',
-      cellClassName: 'w-48',
+      cellClassName: 'w-56',
     },
   ];
 
@@ -443,11 +528,12 @@ export default function TeachersPage() {
         <div className="space-y-4">
           <p className="text-gray-700">
             Tem certeza que deseja remover o professor{' '}
-            <strong>{selectedTeacher?.name}</strong>?
+            <strong>{selectedTeacher?.nome}</strong>?
           </p>
           <p className="text-sm text-gray-600">
-            Esta ação não poderá ser desfeita. O professor será removido do sistema
-            e perderá acesso à plataforma.
+            Esta ação não poderá ser desfeita. O professor será removido do sistema.
+            {selectedTeacher?.user_id &&
+              ' O usuário de login associado também será removido.'}
           </p>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
@@ -470,6 +556,81 @@ export default function TeachersPage() {
         </div>
       </Modal>
 
+      {/* Modal de criar usuário */}
+      <Modal
+        isOpen={activeModal === 'createUser'}
+        onClose={handleCloseModal}
+        title="Criar usuário de login"
+        description={`Criar acesso ao sistema para ${selectedTeacher?.nome}`}
+        size="sm"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Login <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="login.usuario"
+              value={createUserForm.login}
+              onChange={(e) =>
+                setCreateUserForm({ ...createUserForm, login: e.target.value })
+              }
+              disabled={isSubmitting}
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Apenas letras minúsculas, números e os caracteres . _ -
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Senha provisória <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="password"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Digite a senha provisória"
+              value={createUserForm.password}
+              onChange={(e) =>
+                setCreateUserForm({ ...createUserForm, password: e.target.value })
+              }
+              disabled={isSubmitting}
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Mínimo de 6 caracteres
+            </p>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+            <p className="text-sm text-blue-800">
+              <strong>Email do professor:</strong> {selectedTeacher?.email}
+            </p>
+            <p className="text-xs text-blue-700 mt-1">
+              As credenciais serão enviadas para este email.
+            </p>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+            <Button
+              variant="secondary"
+              onClick={handleCloseModal}
+              disabled={isSubmitting}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleCreateUser}
+              loading={isSubmitting}
+              disabled={isSubmitting}
+            >
+              Criar usuário
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
       {/* Modal de confirmação de reset de senha */}
       <Modal
         isOpen={activeModal === 'resetPassword'}
@@ -480,7 +641,7 @@ export default function TeachersPage() {
         <div className="space-y-4">
           <p className="text-gray-700">
             Deseja regenerar a senha provisória do professor{' '}
-            <strong>{selectedTeacher?.name}</strong>?
+            <strong>{selectedTeacher?.nome}</strong>?
           </p>
           <p className="text-sm text-gray-600">
             Uma nova senha provisória será gerada e enviada para o email{' '}

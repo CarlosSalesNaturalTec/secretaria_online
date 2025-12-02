@@ -12,7 +12,7 @@ export type { UserRole, IUser, IAuthUser, ILoginCredentials, IChangePassword, IL
 export type { IStudent, IEnrollmentBasic, IStudentDocument, IStudentGrade, IStudentCreateRequest, IStudentUpdateRequest, IStudentListResponse, IStudentResponse, IStudentFilters, IStudentDashboard, IStudentStats } from './student.types';
 
 // Teacher types
-export type { ITeacher, ITeacherClass, ITeacherDocument, ITeacherEvaluation, ITeacherCreateRequest, ITeacherUpdateRequest, ITeacherListResponse, ITeacherResponse, ITeacherFilters, ITeacherDashboard, ITeacherClassSummary, IGradeSubmissionRequest, IGradeSubmissionResponse, ITeacherStats } from './teacher.types';
+export type { ITeacher, ITeacherCreateRequest, ITeacherUpdateRequest, ITeacherListResponse, ITeacherResponse, ITeacherFilters, ITeacherStats, ICreateUserForTeacherRequest, ICreateUserForTeacherResponse, ITeacherResetPasswordResponse } from './teacher.types';
 
 // Course types
 export type { IDiscipline, ICourseDiscipline, ICourse, IDisciplineCreateRequest, IDisciplineUpdateRequest, ICourseCreateRequest, ICourseUpdateRequest, IAssociateDisciplineRequest, ICourseListResponse, ICourseResponse, ICourseFilters } from './course.types';

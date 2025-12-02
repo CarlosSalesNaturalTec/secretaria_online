@@ -75,6 +75,20 @@ class TeacherController {
     }
   }
 
+  async createUser(req, res, next) {
+    try {
+      const { id } = req.params;
+      const result = await TeacherService.createUserForTeacher(parseInt(id), req.body);
+      return res.status(201).json({
+        success: true,
+        data: result,
+        message: 'Usuário criado com sucesso para o professor',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async resetPassword(req, res, next) {
     try {
       const { id } = req.params;

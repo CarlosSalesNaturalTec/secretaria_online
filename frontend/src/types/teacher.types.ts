@@ -2,219 +2,245 @@
  * Arquivo: frontend/src/types/teacher.types.ts
  * Descrição: Tipos e interfaces específicas para professores
  * Feature: feat-101 - Criar types TypeScript
+ * Feature: feat-110 - Separar tabela de professores
  * Criado em: 2025-11-04
+ * Atualizado em: 2025-12-02
  */
 
-import type { IUser } from './user.types';
-
 /**
- * Interface para Professor (estende IUser)
+ * Interface para Professor (tabela teachers)
  *
  * Responsabilidades:
- * - Representar dados específicos de professores
- * - Rastrear turmas e disciplinas do professor
- * - Associar avaliações e notas lançadas
+ * - Representar dados completos de professores da tabela teachers
+ * - Pode ter um usuário associado (opcional)
+ * - Armazena informações pessoais e acadêmicas
  *
  * @example
- * // Professor lecionando em uma turma
  * const teacher: ITeacher = {
- *   ...userBaseData,
- *   role: 'teacher',
- *   specialization: 'Engenharia',
- *   classes: [
- *     {
- *       id: 1,
- *       classId: 5,
- *       teacherId: 3,
- *       disciplineId: 2,
- *       disciplineName: 'Cálculo'
- *     }
- *   ]
+ *   id: 1,
+ *   nome: 'Maria Silva',
+ *   cpf: '12345678901',
+ *   email: 'maria@example.com',
+ *   data_nascimento: '1980-05-20',
+ *   sexo: 2,
+ *   celular: '11999999999',
+ *   user: {
+ *     id: 5,
+ *     login: 'maria.silva',
+ *     email: 'maria@example.com',
+ *     role: 'teacher'
+ *   }
  * };
  */
-export interface ITeacher extends IUser {
-  /** Especialização/área de atuação */
-  specialization?: string;
-
-  /** Turmas em que o professor leciona */
-  classes?: ITeacherClass[];
-
-  /** Documentos enviados pelo professor */
-  documents?: ITeacherDocument[];
-
-  /** Avaliações criadas */
-  evaluations?: ITeacherEvaluation[];
-}
-
-/**
- * Dados básicos de turma para contexto de professor
- */
-export interface ITeacherClass {
-  /** ID da relação professor-turma */
+export interface ITeacher {
+  /** ID do professor */
   id: number;
 
-  /** ID da turma */
-  classId: number;
+  /** Nome completo do professor */
+  nome: string | null;
 
-  /** ID do professor */
-  teacherId: number;
+  /** CPF do professor */
+  cpf: string | null;
 
-  /** ID da disciplina */
-  disciplineId: number;
+  /** Data de nascimento */
+  data_nascimento: string | null;
 
-  /** Nome da disciplina */
-  disciplineName?: string;
+  /** Telefone fixo */
+  telefone: string | null;
 
-  /** Semestre da turma */
-  semester?: number;
+  /** Celular */
+  celular: string | null;
 
-  /** Ano letivo */
-  year?: number;
+  /** Email do professor */
+  email: string | null;
 
-  /** Quantidade de alunos na turma */
-  studentCount?: number;
-}
+  /** Rua/Logradouro */
+  endereco_rua: string | null;
 
-/**
- * Documento enviado por professor
- */
-export interface ITeacherDocument {
-  /** ID do documento */
-  id: number;
+  /** Número do endereço */
+  endereco_numero: string | null;
 
-  /** ID do professor */
-  userId: number;
+  /** Complemento do endereço */
+  endereco_complemento: string | null;
 
-  /** Tipo de documento */
-  documentTypeId: number;
+  /** Bairro */
+  endereco_bairro: string | null;
 
-  /** Caminho do arquivo */
-  filePath: string;
+  /** Cidade */
+  endereco_cidade: string | null;
 
-  /** Status do documento */
-  status: 'pending' | 'approved' | 'rejected';
+  /** UF (Estado) */
+  endereco_uf: string | null;
 
-  /** Data de upload */
-  createdAt: string;
-}
+  /** CEP */
+  cep: string | null;
 
-/**
- * Avaliação criada por professor
- */
-export interface ITeacherEvaluation {
-  /** ID da avaliação */
-  id: number;
+  /** Sexo: 1 = masculino, 2 = feminino */
+  sexo: 1 | 2 | '1' | '2' | null;
 
-  /** ID da turma */
-  classId: number;
+  /** Nome da mãe */
+  mae: string | null;
 
-  /** ID do professor */
-  teacherId: number;
+  /** Nome do pai */
+  pai: string | null;
 
-  /** ID da disciplina */
-  disciplineId: number;
+  /** Título de eleitor */
+  titulo_eleitor: string | null;
 
-  /** Nome da avaliação */
-  name: string;
+  /** RG */
+  rg: string | null;
 
-  /** Data da avaliação */
-  date: string;
+  /** Data de expedição do RG */
+  rg_data: string | null;
 
-  /** Tipo de avaliação */
-  type: 'grade' | 'concept';
+  /** Profissão/Formação */
+  profissao: string | null;
 
-  /** Quantidade de notas lançadas */
-  gradesCount?: number;
+  /** Matrícula */
+  matricula: string | null;
+
+  /** Caminho da foto do professor */
+  foto: string | null;
+
+  /** ID do usuário associado (se existir) */
+  user_id: number | null;
 
   /** Data de criação */
-  createdAt: string;
+  created_at?: string;
+
+  /** Data de atualização */
+  updated_at?: string;
+
+  /** Data de exclusão (soft delete) */
+  deleted_at?: string | null;
+
+  /** Usuário associado (opcional) */
+  user?: {
+    id: number;
+    login: string;
+    email: string;
+    role: 'teacher';
+    created_at: string;
+  };
 }
 
 /**
  * Dados para criar novo professor
  *
+ * IMPORTANTE: Apenas CPF é obrigatório, todos os outros campos são opcionais
+ *
  * @example
  * const newTeacher: ITeacherCreateRequest = {
- *   name: 'Dr. José Silva',
- *   email: 'jose@example.com',
- *   login: 'jose_prof',
  *   cpf: '12345678901',
- *   rg: '123456789',
- *   motherName: 'Maria Silva',
- *   fatherName: 'Carlos Silva',
- *   address: 'Rua A, 123',
- *   title: 'Doutor em Engenharia',
- *   specialization: 'Engenharia Civil'
+ *   nome: 'Dr. José Silva',
+ *   email: 'jose@example.com',
  * };
  */
 export interface ITeacherCreateRequest {
-  /** Nome completo */
-  name: string;
-
-  /** Email */
-  email: string;
-
-  /** Login único */
-  login: string;
-
-  /** CPF com validação */
+  /** CPF (OBRIGATÓRIO) */
   cpf: string;
 
-  /** RG */
-  rg: string;
+  /** Nome completo (opcional) */
+  nome?: string;
 
-  /** Nome da mãe */
-  motherName: string;
+  /** Email (opcional) */
+  email?: string;
 
-  /** Nome do pai */
-  fatherName: string;
+  /** Data de nascimento (opcional) */
+  data_nascimento?: string;
 
-  /** Endereço */
-  address: string;
+  /** Telefone fixo (opcional) */
+  telefone?: string;
 
-  /** Título/qualificação */
-  title?: string;
+  /** Celular (opcional) */
+  celular?: string;
 
-  /** Especialização/área de atuação */
-  specialization?: string;
+  /** Rua/Logradouro (opcional) */
+  endereco_rua?: string;
 
-  /** Se é reservista (opcional) */
-  reservist?: boolean;
+  /** Número do endereço (opcional) */
+  endereco_numero?: string;
+
+  /** Complemento do endereço (opcional) */
+  endereco_complemento?: string;
+
+  /** Bairro (opcional) */
+  endereco_bairro?: string;
+
+  /** Cidade (opcional) */
+  endereco_cidade?: string;
+
+  /** UF (opcional) */
+  endereco_uf?: string;
+
+  /** CEP (opcional) */
+  cep?: string;
+
+  /** Sexo: 1 = masculino, 2 = feminino (opcional) */
+  sexo?: 1 | 2;
+
+  /** Nome da mãe (opcional) */
+  mae?: string;
+
+  /** Nome do pai (opcional) */
+  pai?: string;
+
+  /** Título de eleitor (opcional) */
+  titulo_eleitor?: string;
+
+  /** RG (opcional) */
+  rg?: string;
+
+  /** Data de expedição do RG (opcional) */
+  rg_data?: string;
+
+  /** Profissão/Formação (opcional) */
+  profissao?: string;
+
+  /** Matrícula (opcional) */
+  matricula?: string;
+
+  /** Foto (opcional) */
+  foto?: string;
 }
 
 /**
  * Dados para editar professor
  */
-export interface ITeacherUpdateRequest {
-  /** Nome (opcional) */
-  name?: string;
+export interface ITeacherUpdateRequest extends Partial<ITeacherCreateRequest> {}
 
-  /** Email (opcional) */
-  email?: string;
+/**
+ * Dados para criar usuário para um professor
+ */
+export interface ICreateUserForTeacherRequest {
+  /** Login personalizado (opcional, padrão: CPF) */
+  login?: string;
+}
 
-  /** CPF (opcional) */
-  cpf?: string;
+/**
+ * Resposta ao criar usuário para professor
+ */
+export interface ICreateUserForTeacherResponse {
+  /** Indica sucesso */
+  success: boolean;
 
-  /** RG (opcional) */
-  rg?: string;
+  /** Dados do resultado */
+  data: {
+    /** Usuário criado */
+    user: {
+      id: number;
+      login: string;
+      email: string;
+      role: 'teacher';
+      teacher_id: number;
+    };
 
-  /** Nome da mãe (opcional) */
-  motherName?: string;
+    /** Senha provisória gerada */
+    temporaryPassword: string;
+  };
 
-  /** Nome do pai (opcional) */
-  fatherName?: string;
-
-  /** Endereço (opcional) */
-  address?: string;
-
-  /** Título (opcional) */
-  title?: string;
-
-  /** Especialização (opcional) */
-  specialization?: string;
-
-  /** Reservista (opcional) */
-  reservist?: boolean;
+  /** Mensagem de sucesso */
+  message: string;
 }
 
 /**
@@ -227,7 +253,7 @@ export interface ITeacherListResponse {
   /** Array de professores */
   data: ITeacher[];
 
-  /** Informações de paginação */
+  /** Informações de paginação (opcional) */
   pagination?: {
     /** Total de registros */
     total: number;
@@ -258,20 +284,31 @@ export interface ITeacherResponse {
 }
 
 /**
+ * Resposta ao resetar senha
+ */
+export interface ITeacherResetPasswordResponse {
+  /** Indica sucesso */
+  success: boolean;
+
+  /** Dados do resultado */
+  data: {
+    /** Senha provisória gerada */
+    temporaryPassword: string;
+  };
+}
+
+/**
  * Filtros para busca de professores
  */
 export interface ITeacherFilters {
   /** Buscar por nome */
-  name?: string;
+  nome?: string;
 
   /** Buscar por email */
   email?: string;
 
   /** Buscar por CPF */
   cpf?: string;
-
-  /** Buscar por especialização */
-  specialization?: string;
 
   /** Página atual */
   page?: number;
@@ -280,104 +317,10 @@ export interface ITeacherFilters {
   limit?: number;
 
   /** Campo para ordenação */
-  sortBy?: 'name' | 'email' | 'createdAt';
+  sortBy?: 'nome' | 'email' | 'created_at';
 
   /** Ordem de classificação */
   sortOrder?: 'ASC' | 'DESC';
-}
-
-/**
- * Resumo do professor para dashboard
- */
-export interface ITeacherDashboard {
-  /** Dados do professor */
-  teacher: ITeacher;
-
-  /** Turmas do professor */
-  classes: ITeacherClass[];
-
-  /** Documentos pendentes de aprovação */
-  pendingDocuments: ITeacherDocument[];
-
-  /** Avaliações recentes */
-  recentEvaluations: ITeacherEvaluation[];
-
-  /** Data do primeiro acesso */
-  firstAccessAt: string | null;
-
-  /** Indica se precisa aceitar contrato */
-  needsContractAcceptance: boolean;
-
-  /** Total de alunos em todas as turmas */
-  totalStudents: number;
-
-  /** Total de avaliações no semestre */
-  totalEvaluations: number;
-}
-
-/**
- * Resumo de uma turma para professor
- */
-export interface ITeacherClassSummary {
-  /** Informações básicas da turma */
-  class: ITeacherClass;
-
-  /** Alunos da turma */
-  students: Array<{
-    id: number;
-    name: string;
-    email: string;
-    cpf: string;
-  }>;
-
-  /** Avaliações da turma */
-  evaluations: ITeacherEvaluation[];
-
-  /** Estatísticas */
-  stats: {
-    /** Total de alunos */
-    totalStudents: number;
-
-    /** Total de avaliações */
-    totalEvaluations: number;
-
-    /** Avaliações com todas as notas lançadas */
-    completedEvaluations: number;
-  };
-}
-
-/**
- * Dados para lançamento de nota (por professor)
- */
-export interface IGradeSubmissionRequest {
-  /** ID da avaliação */
-  evaluationId: number;
-
-  /** Array de notas para cada aluno */
-  grades: Array<{
-    /** ID do aluno */
-    studentId: number;
-
-    /** Nota (0-10) para avaliações de nota */
-    grade?: number;
-
-    /** Conceito para avaliações de conceito */
-    concept?: 'satisfactory' | 'unsatisfactory';
-  }>;
-}
-
-/**
- * Resposta ao lançar notas
- */
-export interface IGradeSubmissionResponse {
-  /** Indica sucesso */
-  success: boolean;
-
-  /** Quantidade de notas lançadas */
-  gradesCount: number;
-
-  /** Mensagem de sucesso */
-  message: string;
 }
 
 /**
@@ -387,12 +330,9 @@ export interface ITeacherStats {
   /** Total de professores cadastrados */
   totalTeachers: number;
 
-  /** Professores com turmas ativas */
+  /** Professores com usuários criados */
   activeTeachers: number;
 
-  /** Professores com documentos pendentes */
-  pendingDocuments: number;
-
-  /** Professores que ainda não fizeram primeiro acesso */
-  neverAccessed: number;
+  /** Professores sem usuários */
+  withoutUser: number;
 }

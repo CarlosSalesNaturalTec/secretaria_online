@@ -25,21 +25,21 @@ import type {
   ICreateTeacherData,
   IUpdateTeacherData,
 } from '@/services/teacher.service';
-import type { IUser } from '@/types/user.types';
+import type { ITeacher } from '@/types/teacher.types';
 
 /**
  * Interface para o retorno do hook useTeachers
  */
 export interface IUseTeachersReturn {
   /** Query para listar todos os professores */
-  listTeachers: UseQueryResult<IUser[], Error>;
+  listTeachers: UseQueryResult<ITeacher[], Error>;
   /** Query para buscar professor específico por ID */
-  getTeacher: (id: number) => UseQueryResult<IUser, Error>;
+  getTeacher: (id: number) => UseQueryResult<ITeacher, Error>;
   /** Mutation para criar novo professor */
-  createTeacher: UseMutationResult<IUser, Error, ICreateTeacherData>;
+  createTeacher: UseMutationResult<ITeacher, Error, ICreateTeacherData>;
   /** Mutation para atualizar professor */
   updateTeacher: UseMutationResult<
-    IUser,
+    ITeacher,
     Error,
     { id: number; data: IUpdateTeacherData }
   >;
@@ -75,7 +75,7 @@ export interface IUseTeachersReturn {
  *       <button onClick={() => handleCreate({...})}>Criar Professor</button>
  *       <ul>
  *         {listTeachers.data?.map(teacher => (
- *           <li key={teacher.id}>{teacher.name}</li>
+ *           <li key={teacher.id}>{teacher.nome}</li>
  *         ))}
  *       </ul>
  *     </div>
@@ -89,7 +89,7 @@ export function useTeachers(): IUseTeachersReturn {
    * Query para listar todos os professores
    * Utiliza cache de 5 minutos (padrão definido em queryClient)
    */
-  const listTeachers = useQuery<IUser[], Error>({
+  const listTeachers = useQuery<ITeacher[], Error>({
     queryKey: ['teachers'],
     queryFn: async () => {
       if (import.meta.env.DEV) {
@@ -105,8 +105,8 @@ export function useTeachers(): IUseTeachersReturn {
    * Factory function para criar queries individuais de professores por ID
    * Útil para evitar queries desnecessárias
    */
-  const getTeacher = (id: number): UseQueryResult<IUser, Error> => {
-    return useQuery<IUser, Error>({
+  const getTeacher = (id: number): UseQueryResult<ITeacher, Error> => {
+    return useQuery<ITeacher, Error>({
       queryKey: ['teachers', id],
       queryFn: async () => {
         if (import.meta.env.DEV) {
@@ -126,10 +126,10 @@ export function useTeachers(): IUseTeachersReturn {
    * Mutation para criar novo professor
    * Invalida a cache de listagem após sucesso para forçar refetch
    */
-  const createTeacher = useMutation<IUser, Error, ICreateTeacherData>({
+  const createTeacher = useMutation<ITeacher, Error, ICreateTeacherData>({
     mutationFn: async (data) => {
       if (import.meta.env.DEV) {
-        console.log('[useTeachers] Criando novo professor:', data.name);
+        console.log('[useTeachers] Criando novo professor:', data.nome);
       }
       return TeacherService.create(data);
     },
@@ -152,7 +152,7 @@ export function useTeachers(): IUseTeachersReturn {
    * Atualiza cache imediatamente
    */
   const updateTeacher = useMutation<
-    IUser,
+    ITeacher,
     Error,
     { id: number; data: IUpdateTeacherData }
   >({

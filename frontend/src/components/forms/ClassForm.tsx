@@ -21,7 +21,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import type { IClass } from '@/types/class.types';
 import type { ICourse } from '@/types/course.types';
-import type { IUser } from '@/types/user.types';
+import type { ITeacher } from '@/types/teacher.types';
 import type { IDiscipline } from '@/types/course.types';
 import type {
   ICreateClassData,
@@ -120,7 +120,7 @@ export function ClassForm({
    */
   const [courses, setCourses] = useState<ICourse[]>([]);
   const [students, setStudents] = useState<any[]>([]);
-  const [teachers, setTeachers] = useState<IUser[]>([]);
+  const [teachers, setTeachers] = useState<ITeacher[]>([]);
   const [disciplines, setDisciplines] = useState<IDiscipline[]>([]);
 
   /**
@@ -438,7 +438,7 @@ export function ClassForm({
                   <option value={0}>Selecione um professor</option>
                   {teachers.map((t) => (
                     <option key={t.id} value={t.id}>
-                      {t.name}
+                      {t.nome}
                     </option>
                   ))}
                 </select>

@@ -320,6 +320,16 @@ module.exports = (sequelize, DataTypes) => {
         },
         comment: 'ID do estudante na tabela students (chave estrangeira opcional)',
       },
+
+      teacher_id: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        allowNull: true,
+        unique: {
+          name: 'unique_teacher_id',
+          msg: 'Este professor já possui um usuário cadastrado',
+        },
+        comment: 'ID do professor na tabela teachers (chave estrangeira opcional)',
+      },
     },
     {
       // Opções do model
@@ -558,6 +568,14 @@ module.exports = (sequelize, DataTypes) => {
     User.belongsTo(models.Student, {
       foreignKey: 'student_id',
       as: 'student',
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL',
+    });
+
+    // User pertence a um Teacher (1:1 opcional)
+    User.belongsTo(models.Teacher, {
+      foreignKey: 'teacher_id',
+      as: 'teacher',
       onUpdate: 'CASCADE',
       onDelete: 'SET NULL',
     });

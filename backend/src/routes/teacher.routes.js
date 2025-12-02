@@ -19,17 +19,16 @@ const { validateCPF } = require('../utils/validators');
 router.use(authMiddleware);
 router.use(authorizeAdmin);
 
-// Criar novo professor com validações
+// Criar novo professor com validações (tabela teachers)
 router.post(
   '/',
   [
-    // Campos básicos (obrigatórios)
-    body('name')
+    body('nome')
       .trim()
       .notEmpty()
       .withMessage('O nome é obrigatório.')
-      .isLength({ min: 3, max: 255 })
-      .withMessage('O nome deve ter entre 3 e 255 caracteres.'),
+      .isLength({ min: 3, max: 200 })
+      .withMessage('O nome deve ter entre 3 e 200 caracteres.'),
     body('email')
       .trim()
       .isEmail()
@@ -40,52 +39,6 @@ router.post(
       .trim()
       .custom(validateCPF)
       .withMessage('CPF inválido.'),
-    body('rg')
-      .trim()
-      .notEmpty()
-      .withMessage('O RG é obrigatório.')
-      .isLength({ max: 20 })
-      .withMessage('O RG deve ter no máximo 20 caracteres.'),
-    body('login')
-      .trim()
-      .notEmpty()
-      .withMessage('O login é obrigatório.')
-      .isAlphanumeric()
-      .withMessage('O login deve conter apenas letras e números.')
-      .isLength({ min: 3, max: 100 })
-      .withMessage('O login deve ter entre 3 e 100 caracteres.'),
-
-    // Campos condicionais obrigatórios para professores
-    body('voter_title')
-      .trim()
-      .notEmpty()
-      .withMessage('O título de eleitor é obrigatório para professores.')
-      .isLength({ max: 20 })
-      .withMessage('O título de eleitor deve ter no máximo 20 caracteres.'),
-    body('reservist')
-      .trim()
-      .notEmpty()
-      .withMessage('O número de reservista é obrigatório para professores.')
-      .isLength({ max: 20 })
-      .withMessage('O número de reservista deve ter no máximo 20 caracteres.'),
-    body('mother_name')
-      .trim()
-      .notEmpty()
-      .withMessage('O nome da mãe é obrigatório para professores.')
-      .isLength({ min: 3, max: 255 })
-      .withMessage('O nome da mãe deve ter entre 3 e 255 caracteres.'),
-    body('father_name')
-      .trim()
-      .notEmpty()
-      .withMessage('O nome do pai é obrigatório para professores.')
-      .isLength({ min: 3, max: 255 })
-      .withMessage('O nome do pai deve ter entre 3 e 255 caracteres.'),
-    body('address')
-      .trim()
-      .notEmpty()
-      .withMessage('O endereço é obrigatório para professores.')
-      .isLength({ min: 10 })
-      .withMessage('O endereço deve ter no mínimo 10 caracteres.'),
   ],
   handleValidationErrors,
   TeacherController.create
@@ -121,6 +74,17 @@ router.delete(
   [param('id').isInt().withMessage('ID inválido.')],
   handleValidationErrors,
   TeacherController.delete
+);
+
+// Criar usuário para professor
+router.post(
+  '/:id/create-user',
+  [
+    param('id').isInt().withMessage('ID inválido.'),
+    body('login').optional().trim().isAlphanumeric().withMessage('Login deve conter apenas letras e números.'),
+  ],
+  handleValidationErrors,
+  TeacherController.createUser
 );
 
 // Resetar senha do professor

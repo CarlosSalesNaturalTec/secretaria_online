@@ -124,9 +124,14 @@ frontend/
 - Criação de usuário de login para estudante existente
 
 ### ✅ Gestão de Professores
+- **Estrutura de Dados**: Professores são gerenciados em duas tabelas separadas:
+  - `teachers`: Armazena dados completos (informações pessoais, profissionais, endereço)
+  - `users`: Gerencia autenticação (login, senha) com referência opcional para `teachers`
 - Listagem de professores
 - Cadastro de novos professores
 - Edição de dados de professores
+- Criação de usuário de login para professor existente
+- Reset de senha provisória para professores com usuário
 
 ### ✅ Gestão de Cursos e Disciplinas
 - CRUD de cursos
@@ -266,14 +271,16 @@ Cliente base configurado em `src/services/api.ts`:
 
 Cada entidade tem seu próprio service:
 - `student.service.ts` - Operações com estudantes (tabela `students`)
+- `teacher.service.ts` - Operações com professores (tabela `teachers`)
 - `user.service.ts` - Operações com usuários (tabela `users`, autenticação)
 - `course.service.ts` - Operações com cursos
 - `enrollment.service.ts` - Operações com matrículas
 - `document.service.ts` - Operações com documentos
 
-**Importante**: A separação entre `student.service` e `user.service` reflete a estrutura do banco:
+**Importante**: A separação entre `student.service`/`teacher.service` e `user.service` reflete a estrutura do banco:
 - Use `student.service` para gerenciar dados do estudante (informações pessoais e acadêmicas)
-- Use `user.service` para criar/gerenciar acesso de login de um estudante
+- Use `teacher.service` para gerenciar dados do professor (informações pessoais e profissionais)
+- Use `user.service` para criar/gerenciar acesso de login de estudantes ou professores
 
 ### TanStack Query
 

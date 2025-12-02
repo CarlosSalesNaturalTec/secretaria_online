@@ -16,7 +16,7 @@ type InputType = 'text' | 'email' | 'password' | 'tel' | 'number' | 'date';
 /**
  * Máscaras disponíveis para formatação automática
  */
-type InputMask = 'cpf' | 'phone' | 'none';
+type InputMask = 'cpf' | 'phone' | 'celular' | 'cep' | 'none';
 
 /**
  * Props do componente Input
@@ -103,6 +103,33 @@ const applyPhoneMask = (value: string): string => {
 };
 
 /**
+ * Aplica máscara de celular ((##) #####-####)
+ *
+ * @param value - Valor a ser formatado
+ * @returns Valor formatado como celular
+ */
+const applyCelularMask = (value: string): string => {
+  const numbers = value.replace(/\D/g, '');
+  return numbers
+    .replace(/(\d{2})(\d)/, '($1) $2')
+    .replace(/(\d{5})(\d)/, '$1-$2')
+    .replace(/(-\d{4})\d+?$/, '$1');
+};
+
+/**
+ * Aplica máscara de CEP (#####-###)
+ *
+ * @param value - Valor a ser formatado
+ * @returns Valor formatado como CEP
+ */
+const applyCEPMask = (value: string): string => {
+  const numbers = value.replace(/\D/g, '');
+  return numbers
+    .replace(/(\d{5})(\d)/, '$1-$2')
+    .replace(/(-\d{3})\d+?$/, '$1');
+};
+
+/**
  * Aplica máscara baseada no tipo selecionado
  *
  * @param value - Valor a ser formatado
@@ -112,6 +139,8 @@ const applyPhoneMask = (value: string): string => {
 const applyMask = (value: string, mask: InputMask): string => {
   if (mask === 'cpf') return applyCPFMask(value);
   if (mask === 'phone') return applyPhoneMask(value);
+  if (mask === 'celular') return applyCelularMask(value);
+  if (mask === 'cep') return applyCEPMask(value);
   return value;
 };
 
