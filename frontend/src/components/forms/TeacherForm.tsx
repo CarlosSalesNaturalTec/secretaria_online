@@ -45,11 +45,13 @@ const teacherFormSchema = z.object({
     .or(z.literal('')),
 
   cpf: z.string()
-    .min(1, 'CPF é obrigatório')
+    .trim()
+    .optional()
     .refine(
-      (cpf) => cpf.replace(/\D/g, '').length === 11,
+      (cpf) => !cpf || cpf.replace(/\D/g, '').length === 0 || cpf.replace(/\D/g, '').length === 11,
       'CPF deve ter 11 dígitos'
-    ),
+    )
+    .or(z.literal('')),
 
   rg: z.string()
     .max(20, 'RG deve ter no máximo 20 caracteres')
@@ -70,9 +72,8 @@ const teacherFormSchema = z.object({
     z.literal('F'),
     z.literal('1'),
     z.literal('2'),
-  ], {
-    errorMap: () => ({ message: 'Selecione o sexo' }),
-  }).optional(),
+    z.literal(''),
+  ]).optional(),
 
   // Contato
   telefone: z.string()
@@ -230,7 +231,7 @@ export function TeacherForm({
       rg: '',
       rg_data: '',
       data_nascimento: '',
-      sexo: '',
+      sexo: '' as '' | 'M' | 'F' | '1' | '2' | undefined,
       telefone: '',
       celular: '',
       endereco_rua: '',
@@ -262,8 +263,8 @@ export function TeacherForm({
         data_nascimento: initialData.data_nascimento || '',
         // Converte de número (1 ou 2) para string ('M' ou 'F') no modo edição
         sexo: initialData.sexo
-          ? ((initialData.sexo === 1 || initialData.sexo === '1') ? 'M' : 'F')
-          : '',
+          ? ((initialData.sexo === 1 || initialData.sexo === '1') ? 'M' as const : 'F' as const)
+          : ('' as const),
         telefone: initialData.telefone || '',
         celular: initialData.celular || '',
         endereco_rua: initialData.endereco_rua || '',
@@ -294,11 +295,17 @@ export function TeacherForm({
    */
   const handleFormSubmit = async (data: TeacherFormData) => {
     try {
-      const cleanedData = {
-        // Remove máscaras de campos numéricos
-        cpf: data.cpf.replace(/\D/g, ''),
+      // Converte sexo para número antes de montar o cleanedData
+      const sexoValue = data.sexo as string | undefined;
+      let sexoNumerico: 1 | 2 | undefined = undefined;
 
+      if (sexoValue && sexoValue !== '') {
+        sexoNumerico = (sexoValue === 'M' || sexoValue === '1') ? 1 : 2;
+      }
+
+      const cleanedData = {
         // Campos opcionais - só envia se preenchidos
+        cpf: data.cpf ? data.cpf.replace(/\D/g, '').trim() || undefined : undefined,
         nome: data.nome?.trim() || undefined,
         email: data.email?.trim() || undefined,
         cep: data.cep ? data.cep.replace(/\D/g, '').trim() || undefined : undefined,
@@ -309,8 +316,8 @@ export function TeacherForm({
         celular: data.celular ? data.celular.replace(/\D/g, '').trim() || undefined : undefined,
         titulo_eleitor: data.titulo_eleitor ? data.titulo_eleitor.replace(/\D/g, '').trim() || undefined : undefined,
 
-        // Converte sexo de string para número (backend espera 1 ou 2) - opcional
-        sexo: data.sexo ? (data.sexo === 'M' || data.sexo === '1' ? 1 : 2) : undefined,
+        // Sexo convertido para número (backend espera 1 ou 2) - opcional
+        sexo: sexoNumerico,
 
         // Endereço - todos opcionais
         endereco_rua: data.endereco_rua?.trim() || undefined,
@@ -365,7 +372,6 @@ export function TeacherForm({
             placeholder="000.000.000-00"
             mask="cpf"
             error={errors.cpf?.message}
-            required
             disabled={loading}
           />
 

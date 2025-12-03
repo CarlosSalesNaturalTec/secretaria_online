@@ -120,17 +120,17 @@ export async function getById(id: number): Promise<ITeacher> {
  */
 export async function create(data: ITeacherCreateRequest): Promise<ITeacher> {
   try {
-    // Validações básicas
-    if (!data.nome || data.nome.trim().length < 3) {
-      throw new Error('Nome é obrigatório e deve ter no mínimo 3 caracteres');
+    // Validações opcionais - apenas se os campos forem preenchidos
+    if (data.nome && data.nome.trim().length > 0 && data.nome.trim().length < 3) {
+      throw new Error('Nome deve ter no mínimo 3 caracteres');
     }
 
-    if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      throw new Error('Email é obrigatório e deve ser válido');
+    if (data.email && data.email.trim().length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      throw new Error('Email deve ser válido');
     }
 
-    if (!data.cpf || data.cpf.replace(/\D/g, '').length !== 11) {
-      throw new Error('CPF é obrigatório e deve ter 11 dígitos');
+    if (data.cpf && data.cpf.replace(/\D/g, '').length > 0 && data.cpf.replace(/\D/g, '').length !== 11) {
+      throw new Error('CPF deve ter 11 dígitos');
     }
 
     if (import.meta.env.DEV) {

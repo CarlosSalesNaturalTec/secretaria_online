@@ -24,18 +24,17 @@ router.post(
   '/',
   [
     body('nome')
+      .optional()
       .trim()
-      .notEmpty()
-      .withMessage('O nome é obrigatório.')
       .isLength({ min: 3, max: 200 })
       .withMessage('O nome deve ter entre 3 e 200 caracteres.'),
     body('email')
+      .optional()
       .trim()
       .isEmail()
-      .withMessage('Email inválido.')
-      .notEmpty()
-      .withMessage('O email é obrigatório.'),
+      .withMessage('Email inválido.'),
     body('cpf')
+      .optional()
       .trim()
       .custom(validateCPF)
       .withMessage('CPF inválido.'),

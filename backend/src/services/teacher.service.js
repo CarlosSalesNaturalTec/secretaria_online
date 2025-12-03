@@ -31,16 +31,24 @@ class TeacherService {
     const { email, cpf } = teacherData;
 
     // Validação de unicidade de email (na tabela teachers)
+    // Verifica apenas professores ATIVOS (não deletados)
     if (email) {
-      const existingEmail = await Teacher.findOne({ where: { email } });
+      const existingEmail = await Teacher.findOne({
+        where: { email },
+        paranoid: true // Busca apenas registros não deletados
+      });
       if (existingEmail) {
         throw new AppError('Email já cadastrado no sistema', 409, 'EMAIL_ALREADY_EXISTS');
       }
     }
 
     // Validação de unicidade de CPF (na tabela teachers)
+    // Verifica apenas professores ATIVOS (não deletados)
     if (cpf) {
-      const existingCpf = await Teacher.findOne({ where: { cpf } });
+      const existingCpf = await Teacher.findOne({
+        where: { cpf },
+        paranoid: true // Busca apenas registros não deletados
+      });
       if (existingCpf) {
         throw new AppError('CPF já cadastrado no sistema', 409, 'CPF_ALREADY_EXISTS');
       }
@@ -187,6 +195,32 @@ class TeacherService {
     const teacher = await this.getById(id);
     if (!teacher) {
       return null;
+    }
+
+    const { email, cpf } = teacherData;
+
+    // Validação de unicidade de email (exceto o próprio professor)
+    // Verifica apenas professores ATIVOS (não deletados)
+    if (email && email !== teacher.email) {
+      const existingEmail = await Teacher.findOne({
+        where: { email },
+        paranoid: true // Busca apenas registros não deletados
+      });
+      if (existingEmail && existingEmail.id !== teacher.id) {
+        throw new AppError('Email já cadastrado no sistema', 409, 'EMAIL_ALREADY_EXISTS');
+      }
+    }
+
+    // Validação de unicidade de CPF (exceto o próprio professor)
+    // Verifica apenas professores ATIVOS (não deletados)
+    if (cpf && cpf !== teacher.cpf) {
+      const existingCpf = await Teacher.findOne({
+        where: { cpf },
+        paranoid: true // Busca apenas registros não deletados
+      });
+      if (existingCpf && existingCpf.id !== teacher.id) {
+        throw new AppError('CPF já cadastrado no sistema', 409, 'CPF_ALREADY_EXISTS');
+      }
     }
 
     await teacher.update(teacherData);

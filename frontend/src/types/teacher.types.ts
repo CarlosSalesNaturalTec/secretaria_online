@@ -127,7 +127,7 @@ export interface ITeacher {
 /**
  * Dados para criar novo professor
  *
- * IMPORTANTE: Apenas CPF é obrigatório, todos os outros campos são opcionais
+ * IMPORTANTE: Todos os campos são opcionais
  *
  * @example
  * const newTeacher: ITeacherCreateRequest = {
@@ -137,8 +137,8 @@ export interface ITeacher {
  * };
  */
 export interface ITeacherCreateRequest {
-  /** CPF (OBRIGATÓRIO) */
-  cpf: string;
+  /** CPF (opcional) */
+  cpf?: string;
 
   /** Nome completo (opcional) */
   nome?: string;

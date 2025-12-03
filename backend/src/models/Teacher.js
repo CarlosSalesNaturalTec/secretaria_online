@@ -198,9 +198,8 @@ module.exports = (sequelize, DataTypes) => {
       cpf: {
         type: DataTypes.STRING(20),
         allowNull: true,
-        unique: {
-          msg: 'Este CPF já está cadastrado',
-        },
+        // Unique constraint removida - validação de unicidade agora é feita no service
+        // considerando soft-delete (paranoid)
         validate: {
           isValidCPF(value) {
             if (value && !isValidCPF(value)) {
