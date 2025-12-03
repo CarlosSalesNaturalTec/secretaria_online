@@ -316,14 +316,6 @@ export default function TeachersPage() {
   };
 
   /**
-   * Formata CPF para exibição
-   */
-  const formatCPF = (cpf: string | null): string => {
-    if (!cpf) return '-';
-    return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-  };
-
-  /**
    * Definição das colunas da tabela
    */
   const columns: Column<ITeacher>[] = [
@@ -340,25 +332,9 @@ export default function TeachersPage() {
       sortable: true,
     },
     {
-      key: 'cpf',
-      header: 'CPF',
-      accessor: (teacher) => formatCPF(teacher.cpf),
-      align: 'center',
-    },
-    {
-      key: 'has_user',
-      header: 'Tem Login?',
-      accessor: (teacher) => (
-        <span
-          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-            teacher.user_id
-              ? 'bg-green-100 text-green-800'
-              : 'bg-gray-100 text-gray-800'
-          }`}
-        >
-          {teacher.user_id ? 'Sim' : 'Não'}
-        </span>
-      ),
+      key: 'login',
+      header: 'Login',
+      accessor: (teacher) => teacher.user?.login || '-',
       align: 'center',
     },
     {

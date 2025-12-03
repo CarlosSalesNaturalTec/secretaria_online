@@ -172,11 +172,18 @@ class TeacherService {
   }
 
   /**
-   * Lista todos os professores.
-   * @returns {Promise<Teacher[]>} Uma lista de professores.
+   * Lista todos os professores com seus usuários associados.
+   * @returns {Promise<Teacher[]>} Uma lista de professores com login do usuário (se existir).
    */
   async list() {
     return Teacher.findAll({
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'login', 'email', 'role', 'created_at'],
+        },
+      ],
       order: [['nome', 'ASC']],
     });
   }
