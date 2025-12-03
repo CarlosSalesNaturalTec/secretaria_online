@@ -136,7 +136,7 @@ module.exports = (sequelize, DataTypes) => {
 
       email: {
         type: DataTypes.STRING(255),
-        allowNull: false,
+        allowNull: true,
         unique: {
           name: 'unique_email',
           msg: 'Este email já está cadastrado',
@@ -144,9 +144,6 @@ module.exports = (sequelize, DataTypes) => {
         validate: {
           isEmail: {
             msg: 'Email inválido',
-          },
-          notEmpty: {
-            msg: 'Email é obrigatório',
           },
         },
         comment: 'Email único para contato',
@@ -167,8 +164,9 @@ module.exports = (sequelize, DataTypes) => {
             args: [3, 100],
             msg: 'Login deve ter entre 3 e 100 caracteres',
           },
-          isAlphanumeric: {
-            msg: 'Login deve conter apenas letras e números (sem espaços ou caracteres especiais)',
+          is: {
+            args: /^[a-zA-Z0-9._-]+$/,
+            msg: 'Login deve conter apenas letras, números, pontos, underscores e hífens',
           },
         },
         comment: 'Login único para autenticação',
@@ -220,15 +218,12 @@ module.exports = (sequelize, DataTypes) => {
 
       cpf: {
         type: DataTypes.STRING(11),
-        allowNull: false,
+        allowNull: true,
         unique: {
           name: 'unique_cpf',
           msg: 'Este CPF já está cadastrado',
         },
         validate: {
-          notEmpty: {
-            msg: 'CPF é obrigatório',
-          },
           len: {
             args: [11, 11],
             msg: 'CPF deve ter exatamente 11 dígitos (apenas números)',
@@ -237,7 +232,7 @@ module.exports = (sequelize, DataTypes) => {
             msg: 'CPF deve conter apenas números',
           },
           isValidCPF(value) {
-            if (!isValidCPF(value)) {
+            if (value && !isValidCPF(value)) {
               throw new Error('CPF inválido');
             }
           },

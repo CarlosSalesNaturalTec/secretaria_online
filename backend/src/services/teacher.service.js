@@ -71,9 +71,10 @@ class TeacherService {
    * Verifica se o professor já possui um usuário antes de criar.
    *
    * @param {number} teacherId - ID do professor.
-   * @param {object} userData - Dados adicionais do usuário (opcional).
-   * @param {string} userData.login - Login personalizado (opcional, padrão: usar CPF).
-   * @returns {Promise<{user: User, temporaryPassword: string}>} O usuário criado e a senha provisória.
+   * @param {object} userData - Dados adicionais do usuário.
+   * @param {string} userData.login - Login do usuário (obrigatório).
+   * @param {string} userData.password - Senha do usuário (obrigatório).
+   * @returns {Promise<{user: User, temporaryPassword: string}>} O usuário criado e a senha.
    * @throws {AppError} Se o professor não for encontrado ou já possuir usuário.
    */
   async createUserForTeacher(teacherId, userData = {}) {
@@ -89,17 +90,25 @@ class TeacherService {
       throw new AppError('Este professor já possui um usuário cadastrado.', 409, 'USER_ALREADY_EXISTS');
     }
 
-    // Validar dados obrigatórios do professor
-    if (!teacher.nome || !teacher.cpf || !teacher.email) {
+    // Validar dados obrigatórios (apenas nome do professor)
+    if (!teacher.nome) {
       throw new AppError(
-        'Professor deve ter nome, CPF e email cadastrados antes de criar usuário.',
+        'Professor deve ter nome cadastrado antes de criar usuário.',
         400,
         'INCOMPLETE_TEACHER_DATA'
       );
     }
 
-    // Gerar login se não fornecido (usar CPF como padrão)
-    const login = userData.login || teacher.cpf.replace(/[^\d]/g, '');
+    // Validar que login e password foram fornecidos
+    if (!userData.login || !userData.password) {
+      throw new AppError(
+        'Login e senha são obrigatórios para criar usuário.',
+        400,
+        'MISSING_CREDENTIALS'
+      );
+    }
+
+    const { login, password } = userData;
 
     // Validar unicidade do login
     const existingLogin = await User.findOne({ where: { login } });
@@ -107,17 +116,14 @@ class TeacherService {
       throw new AppError('Login já cadastrado no sistema', 409, 'LOGIN_ALREADY_EXISTS');
     }
 
-    // Gerar senha provisória = CPF do professor
-    const temporaryPassword = teacher.cpf.replace(/[^\d]/g, '');
-
     // Criar usuário vinculado ao professor
     const user = await User.create({
       role: 'teacher',
       name: teacher.nome,
-      email: teacher.email,
+      email: teacher.email || null,
       login,
-      password: temporaryPassword,
-      cpf: teacher.cpf,
+      password,
+      cpf: teacher.cpf || null,
       rg: teacher.rg || null,
       voter_title: teacher.titulo_eleitor || null,
       reservist: null, // Campo opcional para teachers role
@@ -134,28 +140,35 @@ class TeacherService {
       login: user.login,
     });
 
-    // Enviar email com senha provisória
-    try {
-      await EmailService.sendPasswordEmail(teacher.email, temporaryPassword, {
-        name: teacher.nome,
-        login,
-      });
+    // Enviar email com senha SOMENTE se o professor tiver email cadastrado
+    if (teacher.email) {
+      try {
+        await EmailService.sendPasswordEmail(teacher.email, password, {
+          name: teacher.nome,
+          login,
+        });
 
-      logger.info('[TEACHER_SERVICE] Email de senha provisória enviado com sucesso', {
+        logger.info('[TEACHER_SERVICE] Email de senha provisória enviado com sucesso', {
+          teacherId: teacher.id,
+          userId: user.id,
+          email: teacher.email,
+        });
+      } catch (emailError) {
+        logger.error('[TEACHER_SERVICE] Erro ao enviar email de senha provisória', {
+          teacherId: teacher.id,
+          userId: user.id,
+          email: teacher.email,
+          error: emailError.message,
+        });
+      }
+    } else {
+      logger.info('[TEACHER_SERVICE] Email não enviado: professor sem email cadastrado', {
         teacherId: teacher.id,
         userId: user.id,
-        email: teacher.email,
-      });
-    } catch (emailError) {
-      logger.error('[TEACHER_SERVICE] Erro ao enviar email de senha provisória', {
-        teacherId: teacher.id,
-        userId: user.id,
-        email: teacher.email,
-        error: emailError.message,
       });
     }
 
-    return { user, temporaryPassword };
+    return { user, temporaryPassword: password };
   }
 
   /**

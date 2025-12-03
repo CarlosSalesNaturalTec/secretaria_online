@@ -116,7 +116,20 @@ router.post(
   '/:id/create-user',
   [
     param('id').isInt().withMessage('ID inválido.'),
-    body('login').optional().trim().isAlphanumeric().withMessage('Login deve conter apenas letras e números.'),
+    body('login')
+      .notEmpty()
+      .withMessage('Login é obrigatório.')
+      .trim()
+      .isLength({ min: 3, max: 50 })
+      .withMessage('Login deve ter entre 3 e 50 caracteres.')
+      .matches(/^[a-zA-Z0-9._-]+$/)
+      .withMessage('Login deve conter apenas letras, números, pontos, underscores e hífens.'),
+    body('password')
+      .notEmpty()
+      .withMessage('Senha é obrigatória.')
+      .trim()
+      .isLength({ min: 6 })
+      .withMessage('Senha deve ter no mínimo 6 caracteres.'),
   ],
   handleValidationErrors,
   TeacherController.createUser
