@@ -137,71 +137,71 @@ export interface ITeacher {
  * };
  */
 export interface ITeacherCreateRequest {
-  /** CPF (opcional) */
-  cpf?: string;
+  /** CPF (opcional, pode ser null para limpar) */
+  cpf?: string | null;
 
-  /** Nome completo (opcional) */
-  nome?: string;
+  /** Nome completo (opcional, pode ser null para limpar) */
+  nome?: string | null;
 
-  /** Email (opcional) */
-  email?: string;
+  /** Email (opcional, pode ser null para limpar) */
+  email?: string | null;
 
-  /** Data de nascimento (opcional) */
-  data_nascimento?: string;
+  /** Data de nascimento (opcional, pode ser null para limpar) */
+  data_nascimento?: string | null;
 
-  /** Telefone fixo (opcional) */
-  telefone?: string;
+  /** Telefone fixo (opcional, pode ser null para limpar) */
+  telefone?: string | null;
 
-  /** Celular (opcional) */
-  celular?: string;
+  /** Celular (opcional, pode ser null para limpar) */
+  celular?: string | null;
 
-  /** Rua/Logradouro (opcional) */
-  endereco_rua?: string;
+  /** Rua/Logradouro (opcional, pode ser null para limpar) */
+  endereco_rua?: string | null;
 
-  /** Número do endereço (opcional) */
-  endereco_numero?: string;
+  /** Número do endereço (opcional, pode ser null para limpar) */
+  endereco_numero?: string | null;
 
-  /** Complemento do endereço (opcional) */
-  endereco_complemento?: string;
+  /** Complemento do endereço (opcional, pode ser null para limpar) */
+  endereco_complemento?: string | null;
 
-  /** Bairro (opcional) */
-  endereco_bairro?: string;
+  /** Bairro (opcional, pode ser null para limpar) */
+  endereco_bairro?: string | null;
 
-  /** Cidade (opcional) */
-  endereco_cidade?: string;
+  /** Cidade (opcional, pode ser null para limpar) */
+  endereco_cidade?: string | null;
 
-  /** UF (opcional) */
-  endereco_uf?: string;
+  /** UF (opcional, pode ser null para limpar) */
+  endereco_uf?: string | null;
 
-  /** CEP (opcional) */
-  cep?: string;
+  /** CEP (opcional, pode ser null para limpar) */
+  cep?: string | null;
 
-  /** Sexo: 1 = masculino, 2 = feminino (opcional) */
-  sexo?: 1 | 2;
+  /** Sexo: 1 = masculino, 2 = feminino (opcional, pode ser null para limpar) */
+  sexo?: 1 | 2 | null;
 
-  /** Nome da mãe (opcional) */
-  mae?: string;
+  /** Nome da mãe (opcional, pode ser null para limpar) */
+  mae?: string | null;
 
-  /** Nome do pai (opcional) */
-  pai?: string;
+  /** Nome do pai (opcional, pode ser null para limpar) */
+  pai?: string | null;
 
-  /** Título de eleitor (opcional) */
-  titulo_eleitor?: string;
+  /** Título de eleitor (opcional, pode ser null para limpar) */
+  titulo_eleitor?: string | null;
 
-  /** RG (opcional) */
-  rg?: string;
+  /** RG (opcional, pode ser null para limpar) */
+  rg?: string | null;
 
-  /** Data de expedição do RG (opcional) */
-  rg_data?: string;
+  /** Data de expedição do RG (opcional, pode ser null para limpar) */
+  rg_data?: string | null;
 
-  /** Profissão/Formação (opcional) */
-  profissao?: string;
+  /** Profissão/Formação (opcional, pode ser null para limpar) */
+  profissao?: string | null;
 
-  /** Matrícula (opcional) */
-  matricula?: string;
+  /** Matrícula (opcional, pode ser null para limpar) */
+  matricula?: string | null;
 
-  /** Foto (opcional) */
-  foto?: string;
+  /** Foto (opcional, pode ser null para limpar) */
+  foto?: string | null;
 }
 
 /**

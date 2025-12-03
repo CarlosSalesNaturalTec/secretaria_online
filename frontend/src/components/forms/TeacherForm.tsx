@@ -139,18 +139,6 @@ const teacherFormSchema = z.object({
     .max(25, 'Título de eleitor deve ter no máximo 25 caracteres')
     .optional()
     .or(z.literal('')),
-
-  // Dados profissionais
-  profissao: z.string()
-    .max(100, 'Profissão deve ter no máximo 100 caracteres')
-    .optional()
-    .or(z.literal('')),
-
-  // Dados acadêmicos/administrativos
-  matricula: z.string()
-    .max(50, 'Matrícula deve ter no máximo 50 caracteres')
-    .optional()
-    .or(z.literal('')),
 });
 
 /**
@@ -244,8 +232,6 @@ export function TeacherForm({
       mae: '',
       pai: '',
       titulo_eleitor: '',
-      profissao: '',
-      matricula: '',
     },
   });
 
@@ -277,8 +263,6 @@ export function TeacherForm({
         mae: initialData.mae || '',
         pai: initialData.pai || '',
         titulo_eleitor: initialData.titulo_eleitor || '',
-        profissao: initialData.profissao || '',
-        matricula: initialData.matricula || '',
       });
     }
   }, [initialData, reset]);
@@ -304,36 +288,32 @@ export function TeacherForm({
       }
 
       const cleanedData = {
-        // Campos opcionais - só envia se preenchidos
-        cpf: data.cpf ? data.cpf.replace(/\D/g, '').trim() || undefined : undefined,
-        nome: data.nome?.trim() || undefined,
-        email: data.email?.trim() || undefined,
-        cep: data.cep ? data.cep.replace(/\D/g, '').trim() || undefined : undefined,
-        rg: data.rg ? data.rg.replace(/\D/g, '').trim() || undefined : undefined,
-        rg_data: data.rg_data?.trim() || undefined,
-        data_nascimento: data.data_nascimento?.trim() || undefined,
-        telefone: data.telefone ? data.telefone.replace(/\D/g, '').trim() || undefined : undefined,
-        celular: data.celular ? data.celular.replace(/\D/g, '').trim() || undefined : undefined,
-        titulo_eleitor: data.titulo_eleitor ? data.titulo_eleitor.replace(/\D/g, '').trim() || undefined : undefined,
+        // Campos opcionais - envia null quando vazio para permitir limpar o campo
+        cpf: data.cpf ? (data.cpf.replace(/\D/g, '').trim() || null) : null,
+        nome: data.nome?.trim() || null,
+        email: data.email?.trim() || null,
+        cep: data.cep ? (data.cep.replace(/\D/g, '').trim() || null) : null,
+        rg: data.rg ? (data.rg.replace(/\D/g, '').trim() || null) : null,
+        rg_data: data.rg_data?.trim() || null,
+        data_nascimento: data.data_nascimento?.trim() || null,
+        telefone: data.telefone ? (data.telefone.replace(/\D/g, '').trim() || null) : null,
+        celular: data.celular ? (data.celular.replace(/\D/g, '').trim() || null) : null,
+        titulo_eleitor: data.titulo_eleitor ? (data.titulo_eleitor.replace(/\D/g, '').trim() || null) : null,
 
-        // Sexo convertido para número (backend espera 1 ou 2) - opcional
-        sexo: sexoNumerico,
+        // Sexo convertido para número (backend espera 1 ou 2) - envia null quando vazio
+        sexo: sexoNumerico || null,
 
-        // Endereço - todos opcionais
-        endereco_rua: data.endereco_rua?.trim() || undefined,
-        endereco_numero: data.endereco_numero?.trim() || undefined,
-        endereco_complemento: data.endereco_complemento?.trim() || undefined,
-        endereco_bairro: data.endereco_bairro?.trim() || undefined,
-        endereco_cidade: data.endereco_cidade?.trim() || undefined,
-        endereco_uf: data.endereco_uf ? data.endereco_uf.toUpperCase().trim() || undefined : undefined,
+        // Endereço - todos opcionais - envia null quando vazio
+        endereco_rua: data.endereco_rua?.trim() || null,
+        endereco_numero: data.endereco_numero?.trim() || null,
+        endereco_complemento: data.endereco_complemento?.trim() || null,
+        endereco_bairro: data.endereco_bairro?.trim() || null,
+        endereco_cidade: data.endereco_cidade?.trim() || null,
+        endereco_uf: data.endereco_uf ? (data.endereco_uf.toUpperCase().trim() || null) : null,
 
-        // Filiação - opcionais
-        mae: data.mae?.trim() || undefined,
-        pai: data.pai?.trim() || undefined,
-
-        // Profissionais - opcionais
-        profissao: data.profissao?.trim() || undefined,
-        matricula: data.matricula?.trim() || undefined,
+        // Filiação - opcionais - envia null quando vazio
+        mae: data.mae?.trim() || null,
+        pai: data.pai?.trim() || null,
       };
 
       await onSubmit(cleanedData);
@@ -571,31 +551,6 @@ export function TeacherForm({
               disabled={loading}
             />
           </div>
-        </div>
-      </div>
-
-      {/* Seção: Dados Profissionais */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Dados Profissionais</h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Profissão */}
-          <Input
-            {...register('profissao')}
-            label="Profissão/Formação"
-            placeholder="Ex: Professor de Matemática, Pedagogo"
-            error={errors.profissao?.message}
-            disabled={loading}
-          />
-
-          {/* Matrícula */}
-          <Input
-            {...register('matricula')}
-            label="Matrícula"
-            placeholder="Número de matrícula"
-            error={errors.matricula?.message}
-            disabled={loading}
-          />
         </div>
       </div>
 

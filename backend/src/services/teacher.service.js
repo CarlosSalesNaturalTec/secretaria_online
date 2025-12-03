@@ -201,6 +201,7 @@ class TeacherService {
 
     // Validação de unicidade de email (exceto o próprio professor)
     // Verifica apenas professores ATIVOS (não deletados)
+    // Se email for null/undefined, não valida (está limpando o campo)
     if (email && email !== teacher.email) {
       const existingEmail = await Teacher.findOne({
         where: { email },
@@ -213,6 +214,7 @@ class TeacherService {
 
     // Validação de unicidade de CPF (exceto o próprio professor)
     // Verifica apenas professores ATIVOS (não deletados)
+    // Se cpf for null/undefined, não valida (está limpando o campo)
     if (cpf && cpf !== teacher.cpf) {
       const existingCpf = await Teacher.findOne({
         where: { cpf },

@@ -24,19 +24,31 @@ router.post(
   '/',
   [
     body('nome')
-      .optional()
-      .trim()
-      .isLength({ min: 3, max: 200 })
-      .withMessage('O nome deve ter entre 3 e 200 caracteres.'),
+      .optional({ nullable: true })
+      .custom((value) => {
+        // Aceita null ou undefined (campo vazio)
+        if (value === null || value === undefined) return true;
+        // Se tiver valor, apenas valida o tamanho máximo
+        return value.trim().length <= 200;
+      })
+      .withMessage('O nome deve ter no máximo 200 caracteres.'),
     body('email')
-      .optional()
-      .trim()
-      .isEmail()
+      .optional({ nullable: true })
+      .custom((value) => {
+        // Aceita null ou undefined (campo vazio)
+        if (value === null || value === undefined) return true;
+        // Se tiver valor, valida o formato
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+      })
       .withMessage('Email inválido.'),
     body('cpf')
-      .optional()
-      .trim()
-      .custom(validateCPF)
+      .optional({ nullable: true })
+      .custom((value) => {
+        // Aceita null ou undefined (campo vazio)
+        if (value === null || value === undefined) return true;
+        // Se tiver valor, valida com validateCPF
+        return validateCPF(value);
+      })
       .withMessage('CPF inválido.'),
   ],
   handleValidationErrors,
@@ -59,9 +71,33 @@ router.put(
   '/:id',
   [
     param('id').isInt().withMessage('ID inválido.'),
-    body('name').optional().notEmpty().withMessage('O nome é obrigatório.'),
-    body('email').optional().isEmail().withMessage('Email inválido.'),
-    body('cpf').optional().custom(validateCPF).withMessage('CPF inválido.'),
+    body('nome')
+      .optional({ nullable: true })
+      .custom((value) => {
+        // Aceita null ou undefined (para limpar o campo)
+        if (value === null || value === undefined) return true;
+        // Se tiver valor, valida apenas o tamanho máximo
+        return value.trim().length <= 200;
+      })
+      .withMessage('O nome deve ter no máximo 200 caracteres.'),
+    body('email')
+      .optional({ nullable: true })
+      .custom((value) => {
+        // Aceita null ou undefined (para limpar o campo)
+        if (value === null || value === undefined) return true;
+        // Se tiver valor, valida o formato
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+      })
+      .withMessage('Email inválido.'),
+    body('cpf')
+      .optional({ nullable: true })
+      .custom((value) => {
+        // Aceita null ou undefined (para limpar o campo)
+        if (value === null || value === undefined) return true;
+        // Se tiver valor, valida com validateCPF
+        return validateCPF(value);
+      })
+      .withMessage('CPF inválido.'),
   ],
   handleValidationErrors,
   TeacherController.update
