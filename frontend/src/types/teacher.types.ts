@@ -73,7 +73,7 @@ export interface ITeacher {
   endereco_uf: string | null;
 
   /** CEP */
-  cep: string | null;
+  endereco_cep: string | null;
 
   /** Sexo: 1 = masculino, 2 = feminino */
   sexo: 1 | 2 | '1' | '2' | null;
@@ -91,7 +91,7 @@ export interface ITeacher {
   rg: string | null;
 
   /** Data de expedição do RG */
-  rg_data: string | null;
+  rg_expedicao: string | null;
 
   /** Profissão/Formação */
   profissao: string | null;
@@ -174,7 +174,7 @@ export interface ITeacherCreateRequest {
   endereco_uf?: string | null;
 
   /** CEP (opcional, pode ser null para limpar) */
-  cep?: string | null;
+  endereco_cep?: string | null;
 
   /** Sexo: 1 = masculino, 2 = feminino (opcional, pode ser null para limpar) */
   sexo?: 1 | 2 | null;
@@ -192,7 +192,7 @@ export interface ITeacherCreateRequest {
   rg?: string | null;
 
   /** Data de expedição do RG (opcional, pode ser null para limpar) */
-  rg_data?: string | null;
+  rg_expedicao?: string | null;
 
   /** Profissão/Formação (opcional, pode ser null para limpar) */
   profissao?: string | null;

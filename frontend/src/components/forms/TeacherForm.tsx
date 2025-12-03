@@ -58,8 +58,8 @@ const teacherFormSchema = z.object({
     .optional()
     .or(z.literal('')),
 
-  rg_data: z.string()
-    .max(10, 'Data do RG inválida')
+  rg_expedicao: z.string()
+    .max(15, 'Data de expedição do RG inválida')
     .optional()
     .or(z.literal('')),
 
@@ -118,7 +118,7 @@ const teacherFormSchema = z.object({
     .optional()
     .or(z.literal('')),
 
-  cep: z.string()
+  endereco_cep: z.string()
     .max(20, 'CEP deve ter no máximo 20 caracteres')
     .optional()
     .or(z.literal('')),
@@ -217,7 +217,7 @@ export function TeacherForm({
       email: '',
       cpf: '',
       rg: '',
-      rg_data: '',
+      rg_expedicao: '',
       data_nascimento: '',
       sexo: '' as '' | 'M' | 'F' | '1' | '2' | undefined,
       telefone: '',
@@ -228,7 +228,7 @@ export function TeacherForm({
       endereco_bairro: '',
       endereco_cidade: '',
       endereco_uf: '',
-      cep: '',
+      endereco_cep: '',
       mae: '',
       pai: '',
       titulo_eleitor: '',
@@ -245,7 +245,7 @@ export function TeacherForm({
         email: initialData.email || '',
         cpf: initialData.cpf || '',
         rg: initialData.rg || '',
-        rg_data: initialData.rg_data || '',
+        rg_expedicao: initialData.rg_expedicao || '',
         data_nascimento: initialData.data_nascimento || '',
         // Converte de número (1 ou 2) para string ('M' ou 'F') no modo edição
         sexo: initialData.sexo
@@ -259,7 +259,7 @@ export function TeacherForm({
         endereco_bairro: initialData.endereco_bairro || '',
         endereco_cidade: initialData.endereco_cidade || '',
         endereco_uf: initialData.endereco_uf || '',
-        cep: initialData.cep || '',
+        endereco_cep: initialData.endereco_cep || '',
         mae: initialData.mae || '',
         pai: initialData.pai || '',
         titulo_eleitor: initialData.titulo_eleitor || '',
@@ -292,9 +292,9 @@ export function TeacherForm({
         cpf: data.cpf ? (data.cpf.replace(/\D/g, '').trim() || null) : null,
         nome: data.nome?.trim() || null,
         email: data.email?.trim() || null,
-        cep: data.cep ? (data.cep.replace(/\D/g, '').trim() || null) : null,
+        endereco_cep: data.endereco_cep ? (data.endereco_cep.replace(/\D/g, '').trim() || null) : null,
         rg: data.rg ? (data.rg.replace(/\D/g, '').trim() || null) : null,
-        rg_data: data.rg_data?.trim() || null,
+        rg_expedicao: data.rg_expedicao?.trim() || null,
         data_nascimento: data.data_nascimento?.trim() || null,
         telefone: data.telefone ? (data.telefone.replace(/\D/g, '').trim() || null) : null,
         celular: data.celular ? (data.celular.replace(/\D/g, '').trim() || null) : null,
@@ -366,10 +366,10 @@ export function TeacherForm({
 
           {/* Data emissão RG */}
           <Input
-            {...register('rg_data')}
+            {...register('rg_expedicao')}
             type="date"
             label="Data de emissão do RG"
-            error={errors.rg_data?.message}
+            error={errors.rg_expedicao?.message}
             disabled={loading}
           />
 
@@ -458,11 +458,11 @@ export function TeacherForm({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* CEP */}
           <Input
-            {...register('cep')}
+            {...register('endereco_cep')}
             label="CEP"
             placeholder="00000-000"
             mask="cep"
-            error={errors.cep?.message}
+            error={errors.endereco_cep?.message}
             disabled={loading}
           />
 
