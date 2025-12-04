@@ -9,6 +9,7 @@ import { type ReactNode, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
+import { ChangePasswordModal } from '@/components/ui/ChangePasswordModal';
 import { useAuth } from '@/hooks/useAuth';
 import { type UserRole } from '@/types/user.types';
 
@@ -50,6 +51,7 @@ interface DashboardLayoutProps {
  */
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -73,8 +75,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
    * Handlers para o Header
    */
   const handleChangePassword = () => {
-    // Será implementado posteriormente na feat de mudança de senha
-    console.log('[DashboardLayout] Trocar senha');
+    console.log('[DashboardLayout] Abrindo modal de trocar senha');
+    setShowChangePasswordModal(true);
   };
 
   const handleLogout = () => {
@@ -124,6 +126,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </main>
         </div>
       </div>
+
+      {/* Modal de Trocar Senha */}
+      <ChangePasswordModal
+        isOpen={showChangePasswordModal}
+        onClose={() => setShowChangePasswordModal(false)}
+      />
     </div>
   );
 }

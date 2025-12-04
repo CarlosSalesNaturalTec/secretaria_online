@@ -9,6 +9,7 @@
 const express = require('express');
 const AuthController = require('../controllers/auth.controller');
 const { loginRateLimiter, passwordChangeRateLimiter } = require('../middlewares/rateLimiter.middleware');
+const authenticate = require('../middlewares/auth.middleware');
 
 const router = express.Router();
 
@@ -49,11 +50,13 @@ router.post('/refresh-token', AuthController.refreshToken);
  *
  * Endpoint de mudança de senha.
  * Protegido por rate limiting: máximo 3 tentativas por IP em 60 minutos.
+ * Requer autenticação via JWT.
  *
  * @route POST /auth/change-password
  * @access Private
+ * @middleware authenticate - Validação do token JWT
  * @middleware passwordChangeRateLimiter - Proteção contra tentativas excessivas
  */
-router.post('/change-password', passwordChangeRateLimiter, AuthController.changePassword);
+router.post('/change-password', authenticate, passwordChangeRateLimiter, AuthController.changePassword);
 
 module.exports = router;

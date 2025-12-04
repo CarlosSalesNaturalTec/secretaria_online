@@ -60,18 +60,51 @@ class AuthController {
 
   /**
    * Altera a senha de um usuário.
+   * Requer autenticação via JWT (userId extraído do token).
    * @param {import('express').Request} req - A requisição.
    * @param {import('express').Response} res - A resposta.
    * @returns {Promise<import('express').Response>} A resposta da requisição.
    */
   async changePassword(req, res) {
     try {
-      const { userId, oldPassword, newPassword } = req.body;
+      // userId vem do token JWT decodificado (middleware authenticate)
+      const userId = req.user?.id;
+      const { oldPassword, newPassword } = req.body;
+
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          error: {
+            code: 'UNAUTHORIZED',
+            message: 'Usuário não autenticado.',
+          },
+        });
+      }
+
+      if (!oldPassword || !newPassword) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Senha atual e nova senha são obrigatórias.',
+          },
+        });
+      }
+
       await AuthService.changePassword(userId, oldPassword, newPassword);
-      return res.status(200).json({ message: 'Senha alterada com sucesso.' });
+      return res.status(200).json({
+        success: true,
+        message: 'Senha alterada com sucesso.',
+      });
     } catch (error) {
       console.error('[AuthController] Erro ao alterar senha:', error);
-      return res.status(400).json({ error: error.message });
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'PASSWORD_CHANGE_ERROR',
+          message: error.message,
+        },
+      });
     }
   }
 }
