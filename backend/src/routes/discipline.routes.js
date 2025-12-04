@@ -10,14 +10,15 @@ const router = express.Router();
 const DisciplineController = require('../controllers/discipline.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 const { authorizeAdmin } = require('../middlewares/rbac.middleware');
+const { disciplineValidationRules, handleValidationErrors } = require('../middlewares/validation.middleware');
 
 router.use(authMiddleware);
 router.use(authorizeAdmin);
 
-router.post('/', DisciplineController.create);
+router.post('/', disciplineValidationRules(), handleValidationErrors, DisciplineController.create);
 router.get('/', DisciplineController.list);
 router.get('/:id', DisciplineController.getById);
-router.put('/:id', DisciplineController.update);
+router.put('/:id', disciplineValidationRules(), handleValidationErrors, DisciplineController.update);
 router.delete('/:id', DisciplineController.delete);
 
 module.exports = router;

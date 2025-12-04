@@ -94,6 +94,7 @@ module.exports = (sequelize, DataTypes) => {
      * @returns {Promise<Discipline|null>} Disciplina encontrada ou null
      */
     static async findByCode(code) {
+      if (!code) return null;
       return await this.findOne({
         where: { code: code.toUpperCase() }
       });
@@ -112,9 +113,10 @@ module.exports = (sequelize, DataTypes) => {
      * Retorna a carga horária em créditos (1 crédito = 15 horas)
      * Padrão comum em instituições de ensino
      *
-     * @returns {number} Carga horária em créditos (arredondado)
+     * @returns {number|null} Carga horária em créditos (arredondado) ou null se não informado
      */
     getCredits() {
+      if (!this.workload_hours) return null;
       return Math.round(this.workload_hours / 15);
     }
 
@@ -124,6 +126,7 @@ module.exports = (sequelize, DataTypes) => {
      * @returns {boolean} True se carga horária >= 80h
      */
     isHighWorkload() {
+      if (!this.workload_hours) return false;
       return this.workload_hours >= 80;
     }
 
@@ -133,7 +136,9 @@ module.exports = (sequelize, DataTypes) => {
      * @returns {string} Código e nome da disciplina
      */
     toString() {
-      return `${this.code} - ${this.name} (${this.workload_hours}h)`;
+      const code = this.code || 'SEM CÓDIGO';
+      const hours = this.workload_hours ? `${this.workload_hours}h` : 'CH não definida';
+      return `${code} - ${this.name} (${hours})`;
     }
 
     /**
@@ -188,17 +193,11 @@ module.exports = (sequelize, DataTypes) => {
       },
       code: {
         type: DataTypes.STRING(50),
-        allowNull: false,
+        allowNull: true,
         unique: {
           msg: 'Já existe uma disciplina com este código'
         },
         validate: {
-          notNull: {
-            msg: 'Código da disciplina é obrigatório'
-          },
-          notEmpty: {
-            msg: 'Código da disciplina não pode ser vazio'
-          },
           len: {
             args: [2, 50],
             msg: 'Código deve ter entre 2 e 50 caracteres'
@@ -208,15 +207,12 @@ module.exports = (sequelize, DataTypes) => {
             msg: 'Código deve conter apenas letras, números, hífen ou underscore'
           }
         },
-        comment: 'Código identificador da disciplina (ex: MAT101, ANA201)'
+        comment: 'Código identificador da disciplina (ex: MAT101, ANA201) - Opcional'
       },
       workload_hours: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         validate: {
-          notNull: {
-            msg: 'Carga horária é obrigatória'
-          },
           isInt: {
             msg: 'Carga horária deve ser um número inteiro'
           },
@@ -229,7 +225,7 @@ module.exports = (sequelize, DataTypes) => {
             msg: 'Carga horária máxima é de 500 horas'
           }
         },
-        comment: 'Carga horária da disciplina em horas (ex: 60, 80, 120)'
+        comment: 'Carga horária da disciplina em horas (ex: 60, 80, 120) - Opcional'
       }
     },
     {
@@ -344,6 +340,10 @@ module.exports = (sequelize, DataTypes) => {
           if (discipline.code) {
             // Converte código para maiúsculas e remove espaços
             discipline.code = discipline.code.trim().toUpperCase();
+            // Se o código for vazio após trim, define como null
+            if (discipline.code === '') {
+              discipline.code = null;
+            }
           }
         },
 

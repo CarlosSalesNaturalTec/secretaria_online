@@ -22,11 +22,46 @@ class DisciplineService {
   }
 
   /**
-   * Lista todos os Disciplinas.
-   * @returns {Promise<Discipline[]>} Uma lista de Disciplinas.
+   * Lista todos os Disciplinas com paginação e busca.
+   * @param {object} options - Opções de paginação e filtros
+   * @param {number} options.page - Número da página (padrão: 1)
+   * @param {number} options.limit - Itens por página (padrão: 10)
+   * @param {string} options.search - Termo de busca no nome da disciplina (opcional)
+   * @returns {Promise<{data: Discipline[], total: number, page: number, limit: number, totalPages: number}>}
    */
-  async list() {
-    return Discipline.findAll();
+  async list(options = {}) {
+    const { page = 1, limit = 10, search = '' } = options;
+
+    // Calcula offset para paginação
+    const offset = (page - 1) * limit;
+
+    // Monta condições de busca
+    const where = {};
+    if (search && search.trim()) {
+      const { Op } = require('sequelize');
+      where.name = {
+        [Op.like]: `%${search.trim()}%`
+      };
+    }
+
+    // Busca com paginação
+    const { count, rows } = await Discipline.findAndCountAll({
+      where,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [['name', 'ASC']],
+    });
+
+    // Calcula total de páginas
+    const totalPages = Math.ceil(count / limit);
+
+    return {
+      data: rows,
+      total: count,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages,
+    };
   }
 
   /**

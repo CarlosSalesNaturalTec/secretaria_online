@@ -19,8 +19,9 @@ class DisciplineController {
 
   async list(req, res, next) {
     try {
-      const disciplines = await DisciplineService.list();
-      res.status(200).json({ success: true, data: disciplines });
+      const { page, limit, search } = req.query;
+      const result = await DisciplineService.list({ page, limit, search });
+      res.status(200).json({ success: true, ...result });
     } catch (error) {
       next(error);
     }

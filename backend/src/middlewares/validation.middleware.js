@@ -255,16 +255,14 @@ const disciplineValidationRules = () => {
       .withMessage('Nome da disciplina deve ter entre 3 e 255 caracteres'),
 
     body('code')
+      .optional({ nullable: true, checkFalsy: true })
       .trim()
-      .notEmpty()
-      .withMessage('Código da disciplina é obrigatório')
       .toUpperCase()
-      .custom(validateCourseCode)
-      .withMessage('Código da disciplina inválido (formato esperado: AAA999)'),
+      .isLength({ min: 2, max: 50 })
+      .withMessage('Código deve ter entre 2 e 50 caracteres'),
 
     body('workload_hours')
-      .notEmpty()
-      .withMessage('Carga horária é obrigatória')
+      .optional({ nullable: true, checkFalsy: true })
       .isInt({ min: 1, max: 500 })
       .withMessage('Carga horária deve ser entre 1 e 500 horas'),
 

@@ -19,15 +19,15 @@ import type { ApiResponse } from '@/types/api.types';
 /**
  * Interface para dados de criação de disciplina
  *
- * Contém todos os campos obrigatórios para cadastro de disciplina
+ * Contém campos para cadastro de disciplina (apenas nome é obrigatório)
  */
 export interface ICreateDisciplineData {
   /** Nome da disciplina */
   name: string;
-  /** Código identificador da disciplina */
-  code: string;
-  /** Carga horária em horas */
-  workloadHours: number;
+  /** Código identificador da disciplina (opcional) */
+  code?: string;
+  /** Carga horária em horas (opcional) */
+  workloadHours?: number | null;
 }
 
 /**
@@ -41,42 +41,63 @@ export interface IUpdateDisciplineData {
   /** Código identificador da disciplina */
   code?: string;
   /** Carga horária em horas */
-  workloadHours?: number;
+  workloadHours?: number | null;
 }
 
 /**
- * Busca todas as disciplinas cadastradas no sistema
+ * Interface para resposta paginada
+ */
+export interface IPaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+/**
+ * Interface para parâmetros de busca
+ */
+export interface IGetAllParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
+
+/**
+ * Busca todas as disciplinas cadastradas no sistema com paginação e busca
  *
- * Retorna lista completa de disciplinas com seus dados.
+ * Retorna lista paginada de disciplinas com seus dados.
  * Apenas usuários administrativos têm permissão para esta operação.
  *
- * @returns {Promise<IDiscipline[]>} Lista de disciplinas cadastradas
+ * @param {IGetAllParams} params - Parâmetros de paginação e busca
+ * @returns {Promise<IPaginatedResponse<IDiscipline>>} Lista paginada de disciplinas
  * @throws {Error} Quando ocorre erro na comunicação com API ou falta de permissão
  *
  * @example
  * try {
- *   const disciplines = await getAll();
- *   console.log('Total de disciplinas:', disciplines.length);
+ *   const result = await getAll({ page: 1, limit: 10, search: 'Matemática' });
+ *   console.log('Total de disciplinas:', result.total);
  * } catch (error) {
  *   console.error('Erro ao buscar disciplinas:', error);
  * }
  */
-export async function getAll(): Promise<IDiscipline[]> {
+export async function getAll(params: IGetAllParams = {}): Promise<IPaginatedResponse<IDiscipline>> {
   try {
     if (import.meta.env.DEV) {
-      console.log('[DisciplineService] Buscando todas as disciplinas...');
+      console.log('[DisciplineService] Buscando disciplinas...', params);
     }
 
-    const response = await api.get<ApiResponse<any[]>>('/disciplines');
+    const response = await api.get<ApiResponse<any[]>>('/disciplines', { params });
 
-    if (!response.data.success || !response.data.data) {
+    if (!response.data.success) {
       throw new Error(
         response.data.error?.message || 'Erro ao buscar disciplinas'
       );
     }
 
     // Converte snake_case do backend para camelCase
-    const disciplines: IDiscipline[] = response.data.data.map(
+    const disciplines: IDiscipline[] = (response.data.data || []).map(
       (discipline: any) => ({
         id: discipline.id,
         name: discipline.name,
@@ -88,11 +109,19 @@ export async function getAll(): Promise<IDiscipline[]> {
       })
     );
 
+    const result = {
+      data: disciplines,
+      total: (response.data as any).total || disciplines.length,
+      page: (response.data as any).page || 1,
+      limit: (response.data as any).limit || 10,
+      totalPages: (response.data as any).totalPages || 1,
+    };
+
     if (import.meta.env.DEV) {
-      console.log('[DisciplineService] Disciplinas recuperadas:', disciplines.length);
+      console.log('[DisciplineService] Disciplinas recuperadas:', result.total);
     }
 
-    return disciplines;
+    return result;
   } catch (error) {
     console.error('[DisciplineService] Erro ao buscar disciplinas:', error);
 
@@ -197,16 +226,19 @@ export async function create(data: ICreateDisciplineData): Promise<IDiscipline> 
       throw new Error('Nome é obrigatório e deve ter no mínimo 3 caracteres');
     }
 
-    if (!data.code || data.code.trim().length < 2) {
-      throw new Error('Código é obrigatório e deve ter no mínimo 2 caracteres');
+    // Código é opcional, mas se fornecido deve ter no mínimo 2 caracteres
+    if (data.code && data.code.trim().length > 0 && data.code.trim().length < 2) {
+      throw new Error('Código deve ter no mínimo 2 caracteres');
     }
 
-    if (!data.workloadHours || data.workloadHours <= 0) {
-      throw new Error('Carga horária é obrigatória e deve ser maior que zero');
-    }
-
-    if (data.workloadHours > 500) {
-      throw new Error('Carga horária não pode exceder 500 horas');
+    // Carga horária é opcional, mas se fornecida deve ser válida
+    if (data.workloadHours !== null && data.workloadHours !== undefined) {
+      if (data.workloadHours <= 0) {
+        throw new Error('Carga horária deve ser maior que zero');
+      }
+      if (data.workloadHours > 500) {
+        throw new Error('Carga horária não pode exceder 500 horas');
+      }
     }
 
     if (import.meta.env.DEV) {
@@ -218,11 +250,19 @@ export async function create(data: ICreateDisciplineData): Promise<IDiscipline> 
     }
 
     // Preparar dados para envio (remover espaços em branco e converter para snake_case)
-    const payload = {
+    const payload: any = {
       name: data.name.trim(),
-      code: data.code.trim().toUpperCase(),
-      workload_hours: data.workloadHours,
     };
+
+    // Adiciona code apenas se fornecido (e não vazio)
+    if (data.code && data.code.trim().length > 0) {
+      payload.code = data.code.trim().toUpperCase();
+    }
+
+    // Adiciona workload_hours apenas se fornecido
+    if (data.workloadHours !== null && data.workloadHours !== undefined) {
+      payload.workload_hours = data.workloadHours;
+    }
 
     const response = await api.post<ApiResponse<any>>('/disciplines', payload);
 
@@ -296,11 +336,13 @@ export async function update(
       throw new Error('Nome deve ter no mínimo 3 caracteres');
     }
 
-    if (data.code !== undefined && data.code.trim().length < 2) {
+    // Código é opcional, mas se fornecido e não vazio deve ter no mínimo 2 caracteres
+    if (data.code !== undefined && data.code.trim().length > 0 && data.code.trim().length < 2) {
       throw new Error('Código deve ter no mínimo 2 caracteres');
     }
 
-    if (data.workloadHours !== undefined) {
+    // Carga horária é opcional, mas se fornecida (e não null) deve ser válida
+    if (data.workloadHours !== undefined && data.workloadHours !== null) {
       if (data.workloadHours <= 0) {
         throw new Error('Carga horária deve ser maior que zero');
       }

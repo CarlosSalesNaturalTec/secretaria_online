@@ -13,10 +13,12 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, AlertCircle, BookMarked } from 'lucide-react';
+import { Plus, Pencil, Trash2, AlertCircle, BookMarked, Search } from 'lucide-react';
 import { Table, type Column } from '@/components/ui/Table';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
+import { Pagination } from '@/components/ui/Pagination';
+import { Input } from '@/components/ui/Input';
 import { DisciplineForm } from '@/components/forms/DisciplineForm';
 import DisciplineService from '@/services/discipline.service';
 import type { IDiscipline } from '@/types/course.types';
@@ -44,6 +46,16 @@ export default function DisciplinesPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Estado de paginação
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [itemsPerPage] = useState<number>(10);
+
+  // Estado de busca
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [debouncedSearch, setDebouncedSearch] = useState<string>('');
+
   // Estado dos modais
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [selectedDiscipline, setSelectedDiscipline] = useState<IDiscipline | null>(null);
@@ -55,11 +67,22 @@ export default function DisciplinesPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   /**
-   * Carrega lista de disciplinas ao montar o componente
+   * Debounce para busca (espera 500ms após usuário parar de digitar)
+   */
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  /**
+   * Carrega lista de disciplinas ao montar o componente ou quando mudar página/busca
    */
   useEffect(() => {
     loadDisciplines();
-  }, []);
+  }, [currentPage, debouncedSearch]);
 
   /**
    * Remove mensagem de sucesso após 5 segundos
@@ -75,14 +98,20 @@ export default function DisciplinesPage() {
   }, [successMessage]);
 
   /**
-   * Carrega lista de disciplinas da API
+   * Carrega lista de disciplinas da API com paginação e busca
    */
   const loadDisciplines = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await DisciplineService.getAll();
-      setDisciplines(data);
+      const result = await DisciplineService.getAll({
+        page: currentPage,
+        limit: itemsPerPage,
+        search: debouncedSearch,
+      });
+      setDisciplines(result.data);
+      setTotalPages(result.totalPages);
+      setTotalItems(result.total);
     } catch (err) {
       const errorMessage =
         err instanceof Error
@@ -93,6 +122,21 @@ export default function DisciplinesPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  /**
+   * Handler de mudança de página
+   */
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  /**
+   * Handler de mudança no campo de busca
+   */
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1); // Volta para primeira página ao buscar
   };
 
   /**
@@ -331,15 +375,48 @@ export default function DisciplinesPage() {
         </div>
       )}
 
+      {/* Barra de busca */}
+      <div className="mb-4">
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <Search className="h-5 w-5 text-gray-400" />
+          </div>
+          <Input
+            type="text"
+            placeholder="Buscar disciplina por nome..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="pl-10"
+          />
+        </div>
+      </div>
+
       {/* Tabela de disciplinas */}
-      <Table
-        data={disciplines}
-        columns={columns}
-        loading={loading}
-        emptyMessage="Nenhuma disciplina cadastrada"
-        getRowKey={(discipline) => discipline.id}
-        hoverable
-      />
+      <div className="bg-white shadow-md rounded-lg overflow-hidden">
+        <Table
+          data={disciplines}
+          columns={columns}
+          loading={loading}
+          emptyMessage={
+            debouncedSearch
+              ? `Nenhuma disciplina encontrada com "${debouncedSearch}"`
+              : 'Nenhuma disciplina cadastrada'
+          }
+          getRowKey={(discipline) => discipline.id}
+          hoverable
+        />
+
+        {/* Paginação */}
+        {!loading && disciplines.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
+            onPageChange={handlePageChange}
+          />
+        )}
+      </div>
 
       {/* Modal de criação */}
       <Modal

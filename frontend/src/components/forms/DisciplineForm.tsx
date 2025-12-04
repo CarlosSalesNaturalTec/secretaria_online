@@ -23,7 +23,7 @@ import type { ICreateDisciplineData, IUpdateDisciplineData } from '@/services/di
 /**
  * Schema de validação Zod para formulário de disciplina
  *
- * Valida todos os campos obrigatórios com suas respectivas regras
+ * Valida campos obrigatórios e opcionais com suas respectivas regras
  */
 const disciplineFormSchema = z.object({
   name: z.string()
@@ -32,15 +32,30 @@ const disciplineFormSchema = z.object({
     .trim(),
 
   code: z.string()
-    .min(2, 'Código deve ter no mínimo 2 caracteres')
-    .max(20, 'Código deve ter no máximo 20 caracteres')
     .trim()
-    .toUpperCase(),
+    .transform((val) => {
+      // Converte string vazia em undefined
+      const trimmed = val.toUpperCase();
+      return trimmed === '' ? undefined : trimmed;
+    })
+    .optional()
+    .refine(
+      (val) => !val || val.length >= 2,
+      { message: 'Código deve ter no mínimo 2 caracteres' }
+    )
+    .refine(
+      (val) => !val || val.length <= 20,
+      { message: 'Código deve ter no máximo 20 caracteres' }
+    ),
 
-  workloadHours: z.number()
-    .int('Carga horária deve ser um número inteiro')
-    .min(1, 'Carga horária mínima é 1 hora')
-    .max(500, 'Carga horária máxima é 500 horas'),
+  workloadHours: z.union([
+    z.number()
+      .int('Carga horária deve ser um número inteiro')
+      .min(1, 'Carga horária mínima é 1 hora')
+      .max(500, 'Carga horária máxima é 500 horas'),
+    z.null(),
+    z.undefined(),
+  ]).optional(),
 });
 
 /**
@@ -117,7 +132,7 @@ export function DisciplineForm({
     defaultValues: {
       name: '',
       code: '',
-      workloadHours: 40,
+      workloadHours: undefined,
     },
   });
 
@@ -129,7 +144,7 @@ export function DisciplineForm({
       reset({
         name: initialData.name || '',
         code: initialData.code || '',
-        workloadHours: initialData.workloadHours || 40,
+        workloadHours: initialData.workloadHours || undefined,
       });
     }
   }, [initialData, reset]);
@@ -172,22 +187,29 @@ export function DisciplineForm({
             {...register('code')}
             label="Código"
             placeholder="Digite o código (ex: PROG001)"
-            helperText="Identificador único da disciplina (será convertido para maiúsculas)"
+            helperText="Identificador único da disciplina (será convertido para maiúsculas) - Opcional"
             error={errors.code?.message}
-            required
             disabled={loading}
             maxLength={20}
           />
 
           {/* Carga horária */}
           <Input
-            {...register('workloadHours', { valueAsNumber: true })}
+            {...register('workloadHours', {
+              setValueAs: (value) => {
+                // Se vazio ou inválido, retorna null
+                if (value === '' || value === null || value === undefined) {
+                  return null;
+                }
+                const num = Number(value);
+                return isNaN(num) ? null : num;
+              }
+            })}
             type="number"
             label="Carga Horária"
             placeholder="40"
-            helperText="Total de horas-aula da disciplina"
+            helperText="Total de horas-aula da disciplina - Opcional"
             error={errors.workloadHours?.message}
-            required
             disabled={loading}
             min={1}
             max={500}
