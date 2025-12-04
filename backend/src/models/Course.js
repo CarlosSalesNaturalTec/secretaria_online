@@ -16,7 +16,8 @@
  * const course = await Course.create({
  *   name: 'Administração',
  *   description: 'Curso de Bacharelado em Administração de Empresas',
- *   duration_semesters: 8
+ *   duration: 8,
+ *   duration_type: 'Semestres'
  * });
  *
  * // Buscar cursos ativos
@@ -95,21 +96,12 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     /**
-     * Retorna a duração do curso em anos
-     *
-     * @returns {number} Duração em anos (arredondado para cima)
-     */
-    getDurationInYears() {
-      return Math.ceil(this.duration_semesters / 2);
-    }
-
-    /**
      * Retorna representação em string do curso
      *
      * @returns {string} Nome e duração do curso
      */
     toString() {
-      return `${this.name} (${this.duration_semesters} semestres)`;
+      return `${this.name} (${this.duration} ${this.duration_type})`;
     }
 
     /**
@@ -173,7 +165,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         comment: 'Descrição detalhada do curso, objetivos, área de atuação'
       },
-      duration_semesters: {
+      duration: {
         type: DataTypes.INTEGER,
         allowNull: false,
         validate: {
@@ -185,14 +177,49 @@ module.exports = (sequelize, DataTypes) => {
           },
           min: {
             args: [1],
-            msg: 'Duração mínima é de 1 semestre'
+            msg: 'Duração mínima é 1'
           },
           max: {
-            args: [20],
-            msg: 'Duração máxima é de 20 semestres'
+            args: [1000],
+            msg: 'Duração máxima é 1000'
           }
         },
-        comment: 'Duração do curso em semestres (ex: 6, 8, 10)'
+        comment: 'Duração do curso (valor numérico)'
+      },
+      duration_type: {
+        type: DataTypes.STRING(50),
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: 'Tipo de duração é obrigatório'
+          },
+          notEmpty: {
+            msg: 'Tipo de duração não pode ser vazio'
+          },
+          isIn: {
+            args: [['Semestres', 'Dias', 'Horas', 'Meses', 'Anos']],
+            msg: 'Tipo de duração deve ser: Semestres, Dias, Horas, Meses ou Anos'
+          }
+        },
+        comment: 'Tipo de duração (Semestres, Dias, Horas, Meses, Anos)'
+      },
+      course_type: {
+        type: DataTypes.STRING(50),
+        allowNull: false,
+        defaultValue: 'Superior',
+        validate: {
+          notNull: {
+            msg: 'Tipo de curso é obrigatório'
+          },
+          notEmpty: {
+            msg: 'Tipo de curso não pode ser vazio'
+          },
+          isIn: {
+            args: [['Mestrado/Doutorado', 'Cursos de Verão', 'Pós graduação', 'Superior', 'Supletivo/EJA', 'Técnicos']],
+            msg: 'Tipo de curso deve ser: Mestrado/Doutorado, Cursos de Verão, Pós graduação, Superior, Supletivo/EJA ou Técnicos'
+          }
+        },
+        comment: 'Tipo de curso (Mestrado/Doutorado, Cursos de Verão, Pós graduação, Superior, Supletivo/EJA, Técnicos)'
       }
     },
     {
@@ -228,29 +255,6 @@ module.exports = (sequelize, DataTypes) => {
           }
         },
 
-        /**
-         * Scope: shortDuration
-         * Retorna cursos com duração <= 4 semestres (cursos rápidos/técnicos)
-         */
-        shortDuration: {
-          where: {
-            duration_semesters: {
-              [sequelize.Sequelize.Op.lte]: 4
-            }
-          }
-        },
-
-        /**
-         * Scope: longDuration
-         * Retorna cursos com duração >= 8 semestres (bacharelados)
-         */
-        longDuration: {
-          where: {
-            duration_semesters: {
-              [sequelize.Sequelize.Op.gte]: 8
-            }
-          }
-        },
 
         /**
          * Scope: withDescription

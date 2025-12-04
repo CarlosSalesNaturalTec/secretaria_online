@@ -195,9 +195,8 @@ export default function CoursesPage() {
   /**
    * Formata duração para exibição
    */
-  const formatDuration = (semesters: number): string => {
-    if (semesters === 1) return '1 semestre';
-    return `${semesters} semestres`;
+  const formatDuration = (duration: number, durationType: string): string => {
+    return `${duration} ${durationType}`;
   };
 
   /**
@@ -225,10 +224,16 @@ export default function CoursesPage() {
       accessor: (course) => (
         <div className="flex items-center gap-2">
           <BookOpen size={16} className="text-gray-500" />
-          <span>{formatDuration(course.durationSemesters)}</span>
+          <span>{formatDuration(course.duration, course.durationType)}</span>
         </div>
       ),
       align: 'center',
+      sortable: true,
+    },
+    {
+      key: 'courseType',
+      header: 'Tipo',
+      accessor: (course) => course.courseType,
       sortable: true,
     },
     {
@@ -384,11 +389,11 @@ export default function CoursesPage() {
             Esta ação não poderá ser desfeita. O curso será removido do sistema.
           </p>
 
-          {selectedCourse?.durationSemesters && (
+          {selectedCourse?.duration && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
               <p className="text-sm text-yellow-800">
                 <strong>Atenção:</strong> Este curso tem duração de{' '}
-                {formatDuration(selectedCourse.durationSemesters)}. Certifique-se de que
+                {formatDuration(selectedCourse.duration, selectedCourse.durationType)}. Certifique-se de que
                 não há alunos matriculados antes de removê-lo.
               </p>
             </div>

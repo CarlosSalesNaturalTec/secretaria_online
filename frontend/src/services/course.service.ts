@@ -27,8 +27,12 @@ export interface ICreateCourseData {
   name: string;
   /** Descrição do curso */
   description: string;
-  /** Duração em semestres */
-  durationSemesters: number;
+  /** Duração (valor numérico) */
+  duration: number;
+  /** Tipo de duração (Semestres, Dias, Horas, Meses, Anos) */
+  durationType: string;
+  /** Tipo de curso (Mestrado/Doutorado, Cursos de Verão, Pós graduação, Superior, Supletivo/EJA, Técnicos) */
+  courseType: string;
   /** IDs das disciplinas vinculadas (opcional) */
   disciplineIds?: number[];
 }
@@ -43,8 +47,12 @@ export interface IUpdateCourseData {
   name?: string;
   /** Descrição do curso */
   description?: string;
-  /** Duração em semestres */
-  durationSemesters?: number;
+  /** Duração (valor numérico) */
+  duration?: number;
+  /** Tipo de duração (Semestres, Dias, Horas, Meses, Anos) */
+  durationType?: string;
+  /** Tipo de curso (Mestrado/Doutorado, Cursos de Verão, Pós graduação, Superior, Supletivo/EJA, Técnicos) */
+  courseType?: string;
   /** IDs das disciplinas vinculadas (opcional) */
   disciplineIds?: number[];
 }
@@ -85,7 +93,9 @@ export async function getAll(): Promise<ICourse[]> {
       id: course.id,
       name: course.name,
       description: course.description,
-      durationSemesters: course.duration_semesters || course.durationSemesters,
+      duration: course.duration,
+      durationType: course.duration_type || course.durationType,
+      courseType: course.course_type || course.courseType,
       disciplines: course.disciplines ? course.disciplines.map((cd: any) => {
         // Extrai a disciplina - pode estar em cd.discipline ou ser o próprio cd
         const disciplineData = cd.discipline || cd;
@@ -172,7 +182,9 @@ export async function getById(id: number): Promise<ICourse> {
       id: courseData.id,
       name: courseData.name,
       description: courseData.description,
-      durationSemesters: courseData.duration_semesters || courseData.durationSemesters,
+      duration: courseData.duration,
+      durationType: courseData.duration_type || courseData.durationType,
+      courseType: courseData.course_type || courseData.courseType,
       disciplines: courseData.disciplines ? courseData.disciplines.map((cd: any) => {
         // Extrai a disciplina - pode estar em cd.discipline ou ser o próprio cd
         const disciplineData = cd.discipline || cd;
@@ -249,18 +261,28 @@ export async function create(data: ICreateCourseData): Promise<ICourse> {
       throw new Error('Descrição é obrigatória e deve ter no mínimo 10 caracteres');
     }
 
-    if (!data.durationSemesters || data.durationSemesters <= 0) {
-      throw new Error('Duração em semestres é obrigatória e deve ser maior que zero');
+    if (!data.duration || data.duration <= 0) {
+      throw new Error('Duração é obrigatória e deve ser maior que zero');
     }
 
-    if (data.durationSemesters > 20) {
-      throw new Error('Duração em semestres não pode exceder 20');
+    if (data.duration > 1000) {
+      throw new Error('Duração não pode exceder 1000');
+    }
+
+    if (!data.durationType || data.durationType.trim().length === 0) {
+      throw new Error('Tipo de duração é obrigatório');
+    }
+
+    if (!data.courseType || data.courseType.trim().length === 0) {
+      throw new Error('Tipo de curso é obrigatório');
     }
 
     if (import.meta.env.DEV) {
       console.log('[CourseService] Criando novo curso:', {
         name: data.name,
-        durationSemesters: data.durationSemesters,
+        duration: data.duration,
+        durationType: data.durationType,
+        courseType: data.courseType,
       });
     }
 
@@ -268,7 +290,9 @@ export async function create(data: ICreateCourseData): Promise<ICourse> {
     const payload = {
       name: data.name.trim(),
       description: data.description.trim(),
-      duration_semesters: data.durationSemesters,
+      duration: data.duration,
+      duration_type: data.durationType.trim(),
+      course_type: data.courseType.trim(),
     };
 
     const response = await api.post<ApiResponse<any>>('/courses', payload);
@@ -285,7 +309,9 @@ export async function create(data: ICreateCourseData): Promise<ICourse> {
       id: courseData.id,
       name: courseData.name,
       description: courseData.description,
-      durationSemesters: courseData.duration_semesters || courseData.durationSemesters,
+      duration: courseData.duration,
+      durationType: courseData.duration_type || courseData.durationType,
+      courseType: courseData.course_type || courseData.courseType,
       disciplines: courseData.disciplines ? courseData.disciplines.map((cd: any) => {
         // Extrai a disciplina - pode estar em cd.discipline ou ser o próprio cd
         const disciplineData = cd.discipline || cd;
@@ -370,13 +396,21 @@ export async function update(
       throw new Error('Descrição deve ter no mínimo 10 caracteres');
     }
 
-    if (data.durationSemesters !== undefined) {
-      if (data.durationSemesters <= 0) {
-        throw new Error('Duração em semestres deve ser maior que zero');
+    if (data.duration !== undefined) {
+      if (data.duration <= 0) {
+        throw new Error('Duração deve ser maior que zero');
       }
-      if (data.durationSemesters > 20) {
-        throw new Error('Duração em semestres não pode exceder 20');
+      if (data.duration > 1000) {
+        throw new Error('Duração não pode exceder 1000');
       }
+    }
+
+    if (data.durationType !== undefined && data.durationType.trim().length === 0) {
+      throw new Error('Tipo de duração não pode ser vazio');
+    }
+
+    if (data.courseType !== undefined && data.courseType.trim().length === 0) {
+      throw new Error('Tipo de curso não pode ser vazio');
     }
 
     if (import.meta.env.DEV) {
@@ -388,7 +422,9 @@ export async function update(
 
     if (data.name !== undefined) payload.name = data.name.trim();
     if (data.description !== undefined) payload.description = data.description.trim();
-    if (data.durationSemesters !== undefined) payload.duration_semesters = data.durationSemesters;
+    if (data.duration !== undefined) payload.duration = data.duration;
+    if (data.durationType !== undefined) payload.duration_type = data.durationType.trim();
+    if (data.courseType !== undefined) payload.course_type = data.courseType.trim();
     if (data.disciplineIds !== undefined) payload.disciplineIds = data.disciplineIds;
 
     const response = await api.put<ApiResponse<any>>(
@@ -408,7 +444,9 @@ export async function update(
       id: courseData.id,
       name: courseData.name,
       description: courseData.description,
-      durationSemesters: courseData.duration_semesters || courseData.durationSemesters,
+      duration: courseData.duration,
+      durationType: courseData.duration_type || courseData.durationType,
+      courseType: courseData.course_type || courseData.courseType,
       disciplines: courseData.disciplines ? courseData.disciplines.map((cd: any) => {
         // Extrai a disciplina - pode estar em cd.discipline ou ser o próprio cd
         const disciplineData = cd.discipline || cd;

@@ -37,10 +37,18 @@ const courseFormSchema = z.object({
     .max(500, 'Descrição deve ter no máximo 500 caracteres')
     .trim(),
 
-  durationSemesters: z.number()
+  duration: z.number()
     .int('Duração deve ser um número inteiro')
-    .min(1, 'Duração mínima é 1 semestre')
-    .max(20, 'Duração máxima é 20 semestres'),
+    .min(1, 'Duração mínima é 1')
+    .max(1000, 'Duração máxima é 1000'),
+
+  durationType: z.string()
+    .min(1, 'Tipo de duração é obrigatório')
+    .trim(),
+
+  courseType: z.string()
+    .min(1, 'Tipo de curso é obrigatório')
+    .trim(),
 });
 
 /**
@@ -117,7 +125,9 @@ export function CourseForm({
     defaultValues: {
       name: '',
       description: '',
-      durationSemesters: 1,
+      duration: 1,
+      durationType: 'Semestres',
+      courseType: 'Superior',
     },
   });
 
@@ -129,7 +139,9 @@ export function CourseForm({
       reset({
         name: initialData.name || '',
         description: initialData.description || '',
-        durationSemesters: initialData.durationSemesters || 1,
+        duration: initialData.duration || 1,
+        durationType: initialData.durationType || 'Semestres',
+        courseType: initialData.courseType || 'Superior',
       });
     }
   }, [initialData, reset]);
@@ -188,30 +200,70 @@ export function CourseForm({
             )}
           </div>
 
-          {/* Duração em semestres */}
-          <Input
-            {...register('durationSemesters', { valueAsNumber: true })}
-            type="number"
-            label="Duração (semestres)"
-            placeholder="8"
-            helperText="Número de semestres necessários para conclusão do curso"
-            error={errors.durationSemesters?.message}
-            required
-            disabled={loading}
-            min={1}
-            max={20}
-          />
-        </div>
-      </div>
+          {/* Duração */}
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              {...register('duration', { valueAsNumber: true })}
+              type="number"
+              label="Duração"
+              placeholder="8"
+              error={errors.duration?.message}
+              required
+              disabled={loading}
+              min={1}
+              max={1000}
+            />
 
-      {/* Seção: Disciplinas (placeholder para expansão futura) */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">Disciplinas</h3>
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm text-blue-800">
-            A gestão de disciplinas vinculadas ao curso será implementada em versão futura.
-            Por enquanto, as disciplinas podem ser gerenciadas separadamente.
-          </p>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Tipo <span className="text-red-500">*</span>
+              </label>
+              <select
+                {...register('durationType')}
+                disabled={loading}
+                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  errors.durationType
+                    ? 'border-red-300 text-red-900'
+                    : 'border-gray-300'
+                } ${loading ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+              >
+                <option value="Semestres">Semestres</option>
+                <option value="Dias">Dias</option>
+                <option value="Horas">Horas</option>
+                <option value="Meses">Meses</option>
+                <option value="Anos">Anos</option>
+              </select>
+              {errors.durationType && (
+                <p className="mt-1 text-sm text-red-600">{errors.durationType.message}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Tipo de curso */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Tipo de curso <span className="text-red-500">*</span>
+            </label>
+            <select
+              {...register('courseType')}
+              disabled={loading}
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.courseType
+                  ? 'border-red-300 text-red-900'
+                  : 'border-gray-300'
+              } ${loading ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+            >
+              <option value="Superior">Superior</option>
+              <option value="Pós graduação">Pós graduação</option>
+              <option value="Mestrado/Doutorado">Mestrado/Doutorado</option>
+              <option value="Técnicos">Técnicos</option>
+              <option value="Supletivo/EJA">Supletivo/EJA</option>
+              <option value="Cursos de Verão">Cursos de Verão</option>
+            </select>
+            {errors.courseType && (
+              <p className="mt-1 text-sm text-red-600">{errors.courseType.message}</p>
+            )}
+          </div>
         </div>
       </div>
 

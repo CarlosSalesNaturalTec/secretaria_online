@@ -369,8 +369,8 @@ export default function TeacherClasses() {
                         {classItem.course?.name || 'Curso desconhecido'}
                       </p>
                       <p className="text-sm text-gray-600">
-                        {classItem.course?.durationSemesters}{' '}
-                        semestre{classItem.course?.durationSemesters !== 1 ? 's' : ''}
+                        {classItem.course?.duration}{' '}
+                        {classItem.course?.durationType}
                       </p>
                     </td>
 

@@ -113,9 +113,19 @@ export interface ICourse {
   description: string;
 
   /**
-   * Duração total do curso em semestres
+   * Duração do curso (valor numérico)
    */
-  durationSemesters: number;
+  duration: number;
+
+  /**
+   * Tipo de duração (Semestres, Dias, Horas, Meses, Anos)
+   */
+  durationType: string;
+
+  /**
+   * Tipo de curso (Mestrado/Doutorado, Cursos de Verão, Pós graduação, Superior, Supletivo/EJA, Técnicos)
+   */
+  courseType: string;
 
   /**
    * Disciplinas associadas ao curso
@@ -193,9 +203,19 @@ export interface ICourseCreateRequest {
   description: string;
 
   /**
-   * Duração em semestres
+   * Duração do curso (valor numérico)
    */
-  durationSemesters: number;
+  duration: number;
+
+  /**
+   * Tipo de duração (Semestres, Dias, Horas, Meses, Anos)
+   */
+  durationType: string;
+
+  /**
+   * Tipo de curso (Mestrado/Doutorado, Cursos de Verão, Pós graduação, Superior, Supletivo/EJA, Técnicos)
+   */
+  courseType: string;
 
   /**
    * Disciplinas a associar (opcional)
@@ -221,9 +241,19 @@ export interface ICourseUpdateRequest {
   description?: string;
 
   /**
-   * Duração em semestres (opcional)
+   * Duração do curso (valor numérico, opcional)
    */
-  durationSemesters?: number;
+  duration?: number;
+
+  /**
+   * Tipo de duração (Semestres, Dias, Horas, Meses, Anos, opcional)
+   */
+  durationType?: string;
+
+  /**
+   * Tipo de curso (Mestrado/Doutorado, Cursos de Verão, Pós graduação, Superior, Supletivo/EJA, Técnicos, opcional)
+   */
+  courseType?: string;
 }
 
 /**
@@ -308,7 +338,7 @@ export interface ICourseFilters {
   /**
    * Campo para ordenação
    */
-  sortBy?: 'name' | 'createdAt' | 'durationSemesters';
+  sortBy?: 'name' | 'createdAt' | 'duration';
 
   /**
    * Ordem de classificação
