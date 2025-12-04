@@ -100,8 +100,8 @@ class StudentService {
       );
     }
 
-    // Gerar login se não fornecido (usar matrícula como padrão)
-    const login = userData.login || student.matricula;
+    // Gerar login se não fornecido (usar matrícula como padrão - converter para string)
+    const login = userData.login || String(student.matricula);
 
     // Validar unicidade do login
     const existingLogin = await User.findOne({ where: { login } });
@@ -109,8 +109,8 @@ class StudentService {
       throw new AppError('Login já cadastrado no sistema', 409, 'LOGIN_ALREADY_EXISTS');
     }
 
-    // Gerar senha provisória = matrícula do estudante
-    const temporaryPassword = student.matricula;
+    // Gerar senha provisória = matrícula do estudante (converter para string)
+    const temporaryPassword = String(student.matricula);
 
     // Criar usuário vinculado ao estudante
     const user = await User.create({

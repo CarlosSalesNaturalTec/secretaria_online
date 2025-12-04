@@ -18,7 +18,6 @@ import { PrivateRoute } from './components';
  * Carregadas normalmente pois são públicas e pequenas
  */
 import Login from './pages/auth/Login';
-// import FirstAccess from './pages/auth/FirstAccess';
 
 /**
  * Layouts
@@ -82,11 +81,6 @@ const publicRoutes: RouteObject[] = [
     path: '/login',
     element: <Login />,
     errorElement: <div>Erro ao carregar página de login</div>,
-  },
-  {
-    path: '/first-access',
-    element: <div>First Access Page (to be implemented)</div>, // TODO: Implementar FirstAccess
-    errorElement: <div>Erro ao carregar página de primeiro acesso</div>,
   },
 ];
 

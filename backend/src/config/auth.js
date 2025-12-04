@@ -118,11 +118,6 @@ const securityConfig = {
    * Tempo de bloqueio após exceder tentativas (em minutos)
    */
   lockoutDurationMinutes: 15,
-
-  /**
-   * Forçar alteração de senha no primeiro acesso
-   */
-  forcePasswordChangeOnFirstAccess: true,
 };
 
 module.exports = {

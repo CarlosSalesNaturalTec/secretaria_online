@@ -216,9 +216,9 @@ export default function StudentsPage() {
 
     try {
       setIsSubmitting(true);
-      const result = await StudentService.createUserForStudent(selectedStudent.id);
+      await StudentService.createUserForStudent(selectedStudent.id);
       setToast({
-        message: `Usuário criado com sucesso! Senha provisória: ${result.temporaryPassword}`,
+        message: 'Usuário criado com sucesso! As credenciais foram enviadas por email.',
         type: 'success',
       });
       handleCloseModal();
@@ -536,8 +536,8 @@ export default function StudentsPage() {
           </p>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
             <p className="text-sm text-blue-800">
-              <strong>Login:</strong> {selectedStudent?.cpf?.replace(/\D/g, '') || 'CPF'}<br />
-              <strong>Senha provisória:</strong> CPF do estudante<br />
+              <strong>Login:</strong> {selectedStudent?.matricula || 'Matrícula'}<br />
+              <strong>Senha provisória:</strong> Matrícula do estudante<br />
               <strong>Email:</strong> {selectedStudent?.email || '-'}
             </p>
           </div>
