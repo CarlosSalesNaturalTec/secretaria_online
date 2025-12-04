@@ -82,16 +82,15 @@ class StudentService {
       throw new AppError('Este estudante já possui um usuário cadastrado.', 409, 'USER_ALREADY_EXISTS');
     }
 
-    // Validar dados obrigatórios do estudante
-    if (!student.nome || !student.cpf || !student.email) {
+    // Validar dados obrigatórios do estudante (apenas nome e matrícula)
+    if (!student.nome) {
       throw new AppError(
-        'Estudante deve ter nome, CPF e email cadastrados antes de criar usuário.',
+        'Estudante deve ter nome cadastrado antes de criar usuário.',
         400,
-        'INCOMPLETE_STUDENT_DATA'
+        'STUDENT_NAME_REQUIRED'
       );
     }
 
-    // Validar presença de matrícula
     if (!student.matricula) {
       throw new AppError(
         'Estudante deve ter matrícula cadastrada antes de criar usuário.',
@@ -116,7 +115,7 @@ class StudentService {
     const user = await User.create({
       role: 'student',
       name: student.nome,
-      email: student.email,
+      email: student.email || null, // Email é opcional
       login,
       password: temporaryPassword,
       student_id: studentId,
@@ -129,24 +128,31 @@ class StudentService {
       login: user.login,
     });
 
-    // Enviar email com senha provisória
-    try {
-      await EmailService.sendPasswordEmail(student.email, temporaryPassword, {
-        name: student.nome,
-        login,
-      });
+    // Enviar email com senha provisória (apenas se email estiver cadastrado)
+    if (student.email) {
+      try {
+        await EmailService.sendPasswordEmail(student.email, temporaryPassword, {
+          name: student.nome,
+          login,
+        });
 
-      logger.info('[STUDENT_SERVICE] Email de senha provisória enviado com sucesso', {
+        logger.info('[STUDENT_SERVICE] Email de senha provisória enviado com sucesso', {
+          studentId: student.id,
+          userId: user.id,
+          email: student.email,
+        });
+      } catch (emailError) {
+        logger.error('[STUDENT_SERVICE] Erro ao enviar email de senha provisória', {
+          studentId: student.id,
+          userId: user.id,
+          email: student.email,
+          error: emailError.message,
+        });
+      }
+    } else {
+      logger.info('[STUDENT_SERVICE] Email não enviado - estudante sem email cadastrado', {
         studentId: student.id,
         userId: user.id,
-        email: student.email,
-      });
-    } catch (emailError) {
-      logger.error('[STUDENT_SERVICE] Erro ao enviar email de senha provisória', {
-        studentId: student.id,
-        userId: user.id,
-        email: student.email,
-        error: emailError.message,
       });
     }
 
