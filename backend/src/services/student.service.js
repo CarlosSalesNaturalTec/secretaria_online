@@ -65,7 +65,7 @@ class StudentService {
    *
    * @param {number} studentId - ID do estudante.
    * @param {object} userData - Dados adicionais do usuário (opcional).
-   * @param {string} userData.login - Login personalizado (opcional, padrão: usar CPF).
+   * @param {string} userData.login - Login personalizado (opcional, padrão: usar matrícula).
    * @returns {Promise<{user: User, temporaryPassword: string}>} O usuário criado e a senha provisória.
    * @throws {AppError} Se o estudante não for encontrado ou já possuir usuário.
    */
@@ -91,8 +91,17 @@ class StudentService {
       );
     }
 
-    // Gerar login se não fornecido (usar CPF como padrão)
-    const login = userData.login || student.cpf.replace(/[^\d]/g, '');
+    // Validar presença de matrícula
+    if (!student.matricula) {
+      throw new AppError(
+        'Estudante deve ter matrícula cadastrada antes de criar usuário.',
+        400,
+        'MATRICULA_REQUIRED'
+      );
+    }
+
+    // Gerar login se não fornecido (usar matrícula como padrão)
+    const login = userData.login || student.matricula;
 
     // Validar unicidade do login
     const existingLogin = await User.findOne({ where: { login } });
@@ -100,8 +109,8 @@ class StudentService {
       throw new AppError('Login já cadastrado no sistema', 409, 'LOGIN_ALREADY_EXISTS');
     }
 
-    // Gerar senha provisória = CPF do estudante
-    const temporaryPassword = student.cpf.replace(/[^\d]/g, '');
+    // Gerar senha provisória = matrícula do estudante
+    const temporaryPassword = student.matricula;
 
     // Criar usuário vinculado ao estudante
     const user = await User.create({
