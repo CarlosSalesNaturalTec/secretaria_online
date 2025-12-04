@@ -12,7 +12,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, Edit, Trash2, UserPlus, X } from 'lucide-react';
 import UserService, { type IUserFilters } from '@/services/user.service';
 import type { IUser, ICreateUser, IUpdateUser } from '@/types/user.types';
-import { maskCPF, formatCPF } from '@/utils/formatters';
 import Toast, { type ToastType } from '@/components/ui/Toast';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 
@@ -30,31 +29,11 @@ function CreateUserModal({ onClose, onSubmit, isLoading }: CreateUserModalProps)
     login: '',
     password: '',
     role: 'admin',
-    cpf: '',
-    rg: '',
   });
-
-  // Atualiza senha automaticamente quando CPF muda
-  const handleCpfChange = (value: string) => {
-    // Aplica máscara de CPF
-    const maskedCpf = maskCPF(value);
-    const cpfOnlyNumbers = maskedCpf.replace(/\D/g, '');
-
-    // Gera senha no formato: @Cpf + números do CPF
-    // Exemplo: @Cpf61254037500 (atende requisitos: maiúscula, minúscula, número, especial)
-    const password = cpfOnlyNumbers ? `@Cpf${cpfOnlyNumbers}` : '';
-    setFormData({ ...formData, cpf: maskedCpf, password });
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Remove formatação do CPF e RG antes de enviar
-    const dataToSubmit = {
-      ...formData,
-      cpf: formData.cpf.replace(/\D/g, ''),
-      rg: formData.rg?.replace(/\D/g, '') || '',
-    };
-    onSubmit(dataToSubmit);
+    onSubmit(formData);
   };
 
   return (
@@ -117,39 +96,23 @@ function CreateUserModal({ onClose, onSubmit, isLoading }: CreateUserModalProps)
             </div>
           </div>
 
-          {/* CPF e RG */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                CPF *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.cpf}
-                onChange={(e) => handleCpfChange(e.target.value)}
-                placeholder="000.000.000-00"
-                maxLength={14}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                disabled={isLoading}
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                A senha será gerada automaticamente: @Cpf{formData.cpf.replace(/\D/g, '')}
-              </p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                RG
-              </label>
-              <input
-                type="text"
-                value={formData.rg}
-                maxLength={20}
-                onChange={(e) => setFormData({ ...formData, rg: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                disabled={isLoading}
-              />
-            </div>
+          {/* Senha */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Senha *
+            </label>
+            <input
+              type="password"
+              required
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={isLoading}
+              minLength={6}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Mínimo de 6 caracteres
+            </p>
           </div>
 
           {/* Botões */}
@@ -190,25 +153,11 @@ function EditUserModal({ user, onClose, onSubmit, isLoading }: EditUserModalProp
     email: user.email,
     login: user.login,
     role: user.role,
-    cpf: maskCPF(user.cpf), // Aplica máscara ao carregar
-    rg: user.rg || '',
   });
-
-  // Atualiza CPF com máscara
-  const handleCpfChange = (value: string) => {
-    const maskedCpf = maskCPF(value);
-    setFormData({ ...formData, cpf: maskedCpf });
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Remove formatação do CPF e RG antes de enviar
-    const dataToSubmit = {
-      ...formData,
-      cpf: formData.cpf?.replace(/\D/g, ''),
-      rg: formData.rg?.replace(/\D/g, ''),
-    };
-    onSubmit(dataToSubmit);
+    onSubmit(formData);
   };
 
   return (
@@ -265,38 +214,6 @@ function EditUserModal({ user, onClose, onSubmit, isLoading }: EditUserModalProp
                 required
                 value={formData.login}
                 onChange={(e) => setFormData({ ...formData, login: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                disabled={isLoading}
-              />
-            </div>
-          </div>
-
-          {/* CPF e RG */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                CPF *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.cpf}
-                onChange={(e) => handleCpfChange(e.target.value)}
-                placeholder="000.000.000-00"
-                maxLength={14}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                disabled={isLoading}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                RG
-              </label>
-              <input
-                type="text"
-                value={formData.rg}
-                maxLength={20}
-                onChange={(e) => setFormData({ ...formData, rg: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 disabled={isLoading}
               />
@@ -519,9 +436,6 @@ export default function AdminUsers() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Role
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    CPF
-                  </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Ações
                   </th>
@@ -553,9 +467,6 @@ export default function AdminUsers() {
                       >
                         {user.role}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{formatCPF(user.cpf)}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button

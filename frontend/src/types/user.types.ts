@@ -38,30 +38,6 @@ export interface IUser {
   /** Login para autenticação */
   login: string;
 
-  /** CPF do usuário (11 dígitos) */
-  cpf: string;
-
-  /** RG do usuário */
-  rg?: string;
-
-  /** Título de eleitor */
-  title?: string;
-  voter_title?: string;
-
-  /** Número de reservista */
-  reservist?: string;
-
-  /** Nome da mãe */
-  motherName?: string;
-  mother_name?: string;
-
-  /** Nome do pai */
-  fatherName?: string;
-  father_name?: string;
-
-  /** Endereço completo */
-  address?: string;
-
   /** Data do primeiro acesso (null se nunca acessou) */
   firstAccessAt?: string;
   first_access_at?: string;
@@ -174,26 +150,11 @@ export interface IUserCreateRequest {
   /** Login único */
   login: string;
 
-  /** CPF com validação */
-  cpf: string;
+  /** Senha */
+  password: string;
 
-  /** RG */
-  rg?: string;
-
-  /** Nome da mãe */
-  motherName?: string;
-
-  /** Nome do pai */
-  fatherName?: string;
-
-  /** Endereço */
-  address?: string;
-
-  /** Título/cargo (opcional) */
-  title?: string;
-
-  /** Se é reservista (opcional) */
-  reservist?: boolean;
+  /** Role do usuário */
+  role: UserRole;
 }
 
 /**
@@ -205,11 +166,6 @@ export interface ICreateUser {
   login: string;
   password: string;
   role: UserRole;
-  cpf: string;
-  rg?: string;
-  motherName?: string;
-  fatherName?: string;
-  address?: string;
 }
 
 /**
@@ -221,11 +177,6 @@ export interface IUpdateUser {
   login?: string;
   password?: string;
   role?: UserRole;
-  cpf?: string;
-  rg?: string;
-  motherName?: string;
-  fatherName?: string;
-  address?: string;
 }
 
 /**
@@ -238,24 +189,12 @@ export interface IUserUpdateRequest {
   /** Email (opcional) */
   email?: string;
 
-  /** CPF (opcional) */
-  cpf?: string;
+  /** Login (opcional) */
+  login?: string;
 
-  /** RG (opcional) */
-  rg?: string;
+  /** Senha (opcional) */
+  password?: string;
 
-  /** Nome da mãe (opcional) */
-  motherName?: string;
-
-  /** Nome do pai (opcional) */
-  fatherName?: string;
-
-  /** Endereço (opcional) */
-  address?: string;
-
-  /** Título/cargo (opcional) */
-  title?: string;
-
-  /** Reservista (opcional) */
-  reservist?: boolean;
+  /** Role (opcional) */
+  role?: UserRole;
 }

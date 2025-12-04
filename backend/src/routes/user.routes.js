@@ -17,15 +17,14 @@ const UserController = require('../controllers/user.controller');
 const authenticate = require('../middlewares/auth.middleware');
 const { authorizeAdmin } = require('../middlewares/rbac.middleware');
 const { handleValidationErrors } = require('../middlewares/validation.middleware');
-const { validateCPF, validateStrongPassword } = require('../utils/validators');
+const { validateStrongPassword } = require('../utils/validators');
 
 /**
  * Regras de validação para criação de usuário ADMIN
  *
  * IMPORTANTE: Este é apenas para criar usuários admin.
- * Campos extras (voter_title, reservist, mother_name, father_name, address)
- * NÃO são obrigatórios para admins.
- * Use /students ou /teachers endpoints para criar alunos e professores.
+ * A tabela users armazena apenas dados de autenticação.
+ * Use /students ou /teachers endpoints para criar alunos e professores com dados completos.
  */
 const createUserValidationRules = () => [
   body('name')
@@ -49,58 +48,14 @@ const createUserValidationRules = () => [
     .withMessage('Login é obrigatório')
     .isLength({ min: 3, max: 100 })
     .withMessage('Login deve ter entre 3 e 100 caracteres')
-    .isAlphanumeric()
-    .withMessage('Login deve conter apenas letras e números'),
+    .matches(/^[a-zA-Z0-9._-]+$/)
+    .withMessage('Login deve conter apenas letras, números, pontos, underscores e hífens'),
 
   body('password')
     .notEmpty()
     .withMessage('Senha é obrigatória')
     .isLength({ min: 6, max: 100 })
     .withMessage('Senha deve ter entre 6 e 100 caracteres'),
-
-  body('cpf')
-    .trim()
-    .notEmpty()
-    .withMessage('CPF é obrigatório')
-    .custom(validateCPF)
-    .withMessage('CPF inválido'),
-
-  body('rg')
-    .optional()
-    .trim()
-    .isLength({ max: 20 })
-    .withMessage('RG deve ter no máximo 20 caracteres'),
-
-  // Campos extras NÃO são obrigatórios para admin
-  body('voter_title')
-    .optional()
-    .trim()
-    .isLength({ max: 20 })
-    .withMessage('Título de eleitor deve ter no máximo 20 caracteres'),
-
-  body('reservist')
-    .optional()
-    .trim()
-    .isLength({ max: 20 })
-    .withMessage('Número de reservista deve ter no máximo 20 caracteres'),
-
-  body('mother_name')
-    .optional()
-    .trim()
-    .isLength({ max: 255 })
-    .withMessage('Nome da mãe deve ter no máximo 255 caracteres'),
-
-  body('father_name')
-    .optional()
-    .trim()
-    .isLength({ max: 255 })
-    .withMessage('Nome do pai deve ter no máximo 255 caracteres'),
-
-  body('address')
-    .optional()
-    .trim()
-    .isLength({ max: 500 })
-    .withMessage('Endereço deve ter no máximo 500 caracteres'),
 ];
 
 /**
@@ -141,48 +96,6 @@ const updateUserValidationRules = () => [
     .optional()
     .isIn(['admin', 'teacher', 'student'])
     .withMessage('Role deve ser: admin, teacher ou student'),
-
-  body('cpf')
-    .optional()
-    .trim()
-    .custom(validateCPF)
-    .withMessage('CPF inválido'),
-
-  body('rg')
-    .optional()
-    .trim()
-    .isLength({ min: 5, max: 20 })
-    .withMessage('RG deve ter entre 5 e 20 caracteres'),
-
-  body('motherName')
-    .optional()
-    .trim()
-    .isLength({ min: 3, max: 255 })
-    .withMessage('Nome da mãe deve ter entre 3 e 255 caracteres'),
-
-  body('fatherName')
-    .optional()
-    .trim()
-    .isLength({ min: 3, max: 255 })
-    .withMessage('Nome do pai deve ter entre 3 e 255 caracteres'),
-
-  body('address')
-    .optional()
-    .trim()
-    .isLength({ max: 500 })
-    .withMessage('Endereço deve ter no máximo 500 caracteres'),
-
-  body('title')
-    .optional()
-    .trim()
-    .isLength({ max: 100 })
-    .withMessage('Título deve ter no máximo 100 caracteres'),
-
-  body('reservist')
-    .optional()
-    .trim()
-    .isLength({ max: 50 })
-    .withMessage('Reservista deve ter no máximo 50 caracteres'),
 ];
 
 /**

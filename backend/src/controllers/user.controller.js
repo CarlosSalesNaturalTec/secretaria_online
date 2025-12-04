@@ -159,7 +159,7 @@ class UserController {
   }
 
   /**
-   * Cria um novo usuário administrativo (sem campos extras obrigatórios)
+   * Cria um novo usuário administrativo
    *
    * NOTA: Este método é especificamente para criar usuários admin.
    * Para criar alunos ou professores, use StudentService ou TeacherService.
@@ -171,12 +171,10 @@ class UserController {
    * @param {string} req.body.login - Login único (obrigatório)
    * @param {string} req.body.password - Senha (será hasheada, obrigatório)
    * @param {string} req.body.role - Role (deve ser 'admin' para este endpoint, obrigatório)
-   * @param {string} req.body.cpf - CPF (obrigatório)
-   * @param {string} req.body.rg - RG (opcional)
    * @param {Object} res - Response object
    * @param {Function} next - Next middleware
    * @returns {Promise<Object>} Usuário criado
-   * @throws {Error} Se CPF, email ou login já existirem ou dados obrigatórios faltarem
+   * @throws {Error} Se email ou login já existirem ou dados obrigatórios faltarem
    */
   async create(req, res, next) {
     try {
@@ -186,8 +184,6 @@ class UserController {
         login,
         password,
         role = 'admin',
-        cpf,
-        rg,
       } = req.body;
 
       // Validação: role deve ser 'admin' para este endpoint
@@ -202,23 +198,6 @@ class UserController {
           error: {
             code: 'INVALID_ROLE',
             message: 'Este endpoint é apenas para criar usuários admin. Use /students ou /teachers para criar alunos ou professores.',
-          },
-        });
-      }
-
-      // Verificar se CPF já existe
-      const existingCPF = await User.findOne({ where: { cpf } });
-      if (existingCPF) {
-        logger.warn('[UserController] Tentativa de criar usuário com CPF duplicado', {
-          cpf,
-          requestedBy: req.user.id,
-        });
-
-        return res.status(409).json({
-          success: false,
-          error: {
-            code: 'CPF_ALREADY_EXISTS',
-            message: 'CPF já cadastrado no sistema',
           },
         });
       }
@@ -264,9 +243,6 @@ class UserController {
         login,
         password, // Campo virtual - O hook beforeValidate irá hashear e definir password_hash
         role: 'admin',
-        cpf,
-        rg,
-        // Campos extras NOT necessários para admin (não incluídos)
       });
 
       // Remover password_hash da resposta (já é excluído pelo defaultScope, mas garantir)
@@ -315,13 +291,6 @@ class UserController {
         login,
         password,
         role,
-        cpf,
-        rg,
-        motherName,
-        fatherName,
-        address,
-        title,
-        reservist,
       } = req.body;
 
       // Buscar usuário
@@ -340,20 +309,6 @@ class UserController {
             message: 'Usuário não encontrado',
           },
         });
-      }
-
-      // Verificar duplicação de CPF (se alterado)
-      if (cpf && cpf !== user.cpf) {
-        const existingCPF = await User.findOne({ where: { cpf } });
-        if (existingCPF) {
-          return res.status(409).json({
-            success: false,
-            error: {
-              code: 'CPF_ALREADY_EXISTS',
-              message: 'CPF já cadastrado no sistema',
-            },
-          });
-        }
       }
 
       // Verificar duplicação de email (se alterado)
@@ -390,13 +345,6 @@ class UserController {
         ...(email && { email }),
         ...(login && { login }),
         ...(role && { role }),
-        ...(cpf && { cpf }),
-        ...(rg && { rg }),
-        ...(motherName && { motherName }),
-        ...(fatherName && { fatherName }),
-        ...(address && { address }),
-        ...(title && { title }),
-        ...(reservist && { reservist }),
       };
 
       // Se senha foi informada, usar campo virtual (hook irá hashear)
