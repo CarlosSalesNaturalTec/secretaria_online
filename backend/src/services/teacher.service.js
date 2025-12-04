@@ -123,13 +123,6 @@ class TeacherService {
       email: teacher.email || null,
       login,
       password,
-      cpf: teacher.cpf || null,
-      rg: teacher.rg || null,
-      voter_title: teacher.titulo_eleitor || null,
-      reservist: null, // Campo opcional para teachers role
-      mother_name: teacher.mae || null,
-      father_name: teacher.pai || null,
-      address: teacher.getFullAddress() || null,
       teacher_id: teacherId,
     });
 

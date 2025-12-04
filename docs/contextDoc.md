@@ -217,13 +217,12 @@ students (
   created_at, updated_at, deleted_at
 )
 
--- Usuários (admin, professor, aluno - com referência opcional para students)
+-- Usuários (admin, professor, aluno - com referência opcional para students/teachers)
 users (
   id, role (enum: admin|teacher|student),
   name, email, login, password_hash,
-  cpf, rg, mother_name, father_name, address,
-  voter_title, reservist,
   student_id (FK opcional para students),
+  teacher_id (FK opcional para teachers),
   created_at, updated_at, deleted_at
 )
 

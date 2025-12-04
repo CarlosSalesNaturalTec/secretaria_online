@@ -167,8 +167,9 @@ backend/
 - Cadastro de usuários administrativos
 - Reset de senhas
 - **Nova estrutura**:
-  - Tabela `students` armazena dados completos dos estudantes, tabela `users` gerencia autenticação. Relacionamento 1:1 opcional via `users.student_id`
-  - Tabela `teachers` armazena dados completos dos professores, tabela `users` gerencia autenticação. Relacionamento 1:1 opcional via `users.teacher_id`
+  - Tabela `students` armazena dados completos dos estudantes (CPF, RG, endereço, informações pessoais e acadêmicas)
+  - Tabela `teachers` armazena dados completos dos professores (CPF, RG, endereço, informações pessoais e profissionais)
+  - Tabela `users` gerencia apenas autenticação (login, senha, role) com relacionamento 1:1 opcional para `students` e `teachers`
 
 ### ✅ Cursos e Disciplinas (feat-016 a feat-020)
 - Cadastro e gerenciamento de cursos

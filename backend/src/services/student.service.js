@@ -119,13 +119,6 @@ class StudentService {
       email: student.email,
       login,
       password: temporaryPassword,
-      cpf: student.cpf,
-      rg: student.rg || null,
-      voter_title: student.titulo_eleitor || null,
-      reservist: null, // Campo obrigatório para students role, deixar null por enquanto
-      mother_name: student.mae || null,
-      father_name: student.pai || null,
-      address: student.getFullAddress() || null,
       student_id: studentId,
     });
 

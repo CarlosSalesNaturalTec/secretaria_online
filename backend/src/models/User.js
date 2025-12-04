@@ -40,47 +40,6 @@ const bcrypt = require('bcryptjs');
  */
 const BCRYPT_SALT_ROUNDS = 10; // Nível de segurança do hash (10 é padrão recomendado)
 
-/**
- * Validador personalizado de CPF
- * Valida formato e dígitos verificadores do CPF brasileiro
- *
- * @param {string} cpf - CPF a ser validado (apenas números)
- * @returns {boolean} True se CPF válido, false caso contrário
- */
-function isValidCPF(cpf) {
-  // CPF deve ter exatamente 11 dígitos
-  if (!cpf || cpf.length !== 11) {
-    return false;
-  }
-
-  // Verificar se todos os dígitos são iguais (CPF inválido: 111.111.111-11)
-  if (/^(\d)\1{10}$/.test(cpf)) {
-    return false;
-  }
-
-  // Validação dos dígitos verificadores
-  let sum = 0;
-  let remainder;
-
-  // Validar primeiro dígito verificador
-  for (let i = 1; i <= 9; i++) {
-    sum += parseInt(cpf.substring(i - 1, i)) * (11 - i);
-  }
-  remainder = (sum * 10) % 11;
-  if (remainder === 10 || remainder === 11) remainder = 0;
-  if (remainder !== parseInt(cpf.substring(9, 10))) return false;
-
-  // Validar segundo dígito verificador
-  sum = 0;
-  for (let i = 1; i <= 10; i++) {
-    sum += parseInt(cpf.substring(i - 1, i)) * (12 - i);
-  }
-  remainder = (sum * 10) % 11;
-  if (remainder === 10 || remainder === 11) remainder = 0;
-  if (remainder !== parseInt(cpf.substring(10, 11))) return false;
-
-  return true;
-}
 
 /**
  * Factory function do Model User
@@ -214,96 +173,6 @@ module.exports = (sequelize, DataTypes) => {
           }
         },
         comment: 'Campo virtual para receber senha (nunca armazenado no DB)',
-      },
-
-      cpf: {
-        type: DataTypes.STRING(11),
-        allowNull: true,
-        unique: {
-          name: 'unique_cpf',
-          msg: 'Este CPF já está cadastrado',
-        },
-        validate: {
-          len: {
-            args: [11, 11],
-            msg: 'CPF deve ter exatamente 11 dígitos (apenas números)',
-          },
-          isNumeric: {
-            msg: 'CPF deve conter apenas números',
-          },
-          isValidCPF(value) {
-            if (value && !isValidCPF(value)) {
-              throw new Error('CPF inválido');
-            }
-          },
-        },
-        comment: 'CPF do usuário (apenas números)',
-      },
-
-      rg: {
-        type: DataTypes.STRING(20),
-        allowNull: true,
-        validate: {
-          len: {
-            args: [0, 20],
-            msg: 'RG deve ter no máximo 20 caracteres',
-          },
-        },
-        comment: 'RG do usuário',
-      },
-
-      voter_title: {
-        type: DataTypes.STRING(20),
-        allowNull: true,
-        validate: {
-          len: {
-            args: [0, 20],
-            msg: 'Título de eleitor deve ter no máximo 20 caracteres',
-          },
-        },
-        comment: 'Título de eleitor - obrigatório para alunos e professores',
-      },
-
-      reservist: {
-        type: DataTypes.STRING(20),
-        allowNull: true,
-        validate: {
-          len: {
-            args: [0, 20],
-            msg: 'Número de reservista deve ter no máximo 20 caracteres',
-          },
-        },
-        comment: 'Número de reservista - obrigatório para alunos e professores',
-      },
-
-      mother_name: {
-        type: DataTypes.STRING(255),
-        allowNull: true,
-        validate: {
-          len: {
-            args: [0, 255],
-            msg: 'Nome da mãe deve ter no máximo 255 caracteres',
-          },
-        },
-        comment: 'Nome da mãe - obrigatório para alunos e professores',
-      },
-
-      father_name: {
-        type: DataTypes.STRING(255),
-        allowNull: true,
-        validate: {
-          len: {
-            args: [0, 255],
-            msg: 'Nome do pai deve ter no máximo 255 caracteres',
-          },
-        },
-        comment: 'Nome do pai - obrigatório para alunos e professores',
-      },
-
-      address: {
-        type: DataTypes.TEXT,
-        allowNull: true,
-        comment: 'Endereço residencial - obrigatório para alunos e professores',
       },
 
       student_id: {
@@ -451,28 +320,15 @@ module.exports = (sequelize, DataTypes) => {
    * res.json(user.getPublicData());
    */
   User.prototype.getPublicData = function () {
-    const publicData = {
+    return {
       id: this.id,
       role: this.role,
       name: this.name,
       email: this.email,
       login: this.login,
-      cpf: this.cpf,
-      rg: this.rg,
       created_at: this.created_at,
       updated_at: this.updated_at,
     };
-
-    // Adicionar campos condicionais se existirem (para alunos e professores)
-    if (this.role === 'student' || this.role === 'teacher') {
-      publicData.voter_title = this.voter_title;
-      publicData.reservist = this.reservist;
-      publicData.mother_name = this.mother_name;
-      publicData.father_name = this.father_name;
-      publicData.address = this.address;
-    }
-
-    return publicData;
   };
 
   /**
@@ -537,20 +393,6 @@ module.exports = (sequelize, DataTypes) => {
     });
   };
 
-  /**
-   * Busca usuário por CPF
-   *
-   * @param {string} cpf - CPF do usuário (apenas números)
-   * @returns {Promise<User|null>} Usuário encontrado ou null
-   *
-   * @example
-   * const user = await User.findByCPF('12345678901');
-   */
-  User.findByCPF = async function (cpf) {
-    return this.findOne({
-      where: { cpf },
-    });
-  };
 
   /**
    * Associações (relationships)
