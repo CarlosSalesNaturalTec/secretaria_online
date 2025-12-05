@@ -261,23 +261,9 @@ export default function StudentsPage() {
       align: 'center',
     },
     {
-      key: 'user_status',
-      header: 'Usuário',
-      accessor: (student) => (
-        <div className="flex items-center justify-center gap-2">
-          {student.user ? (
-            <>
-              <CheckCircle size={16} className="text-green-600" />
-              <span className="text-sm text-green-600 font-medium">Criado</span>
-            </>
-          ) : (
-            <>
-              <XCircle size={16} className="text-gray-400" />
-              <span className="text-sm text-gray-500">Não criado</span>
-            </>
-          )}
-        </div>
-      ),
+      key: 'matricula',
+      header: 'Matrícula',
+      accessor: (student) => student.matricula || '-',
       align: 'center',
     },
     {
