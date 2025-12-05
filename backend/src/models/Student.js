@@ -251,7 +251,7 @@ module.exports = (sequelize, DataTypes) => {
         comment: 'N�mero do endere�o',
       },
       endereco_complemento: {
-        type: DataTypes.STRING(2000),
+        type: DataTypes.STRING(200),
         allowNull: true,
         comment: 'Complemento do endere�o',
       },
