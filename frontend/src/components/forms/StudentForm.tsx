@@ -126,21 +126,6 @@ const studentFormSchema = z.object({
     .optional()
     .or(z.literal('')),
 
-  serie: z.string()
-    .max(35, 'Série deve ter no máximo 35 caracteres')
-    .optional()
-    .or(z.literal('')),
-
-  curso: z.string()
-    .max(100, 'Curso deve ter no máximo 100 caracteres')
-    .optional()
-    .or(z.literal('')),
-
-  semestre: z.string()
-    .max(10, 'Semestre deve ter no máximo 10 caracteres')
-    .optional()
-    .or(z.literal('')),
-
   matricula: z.string()
     .optional()
     .or(z.literal('')),
@@ -193,9 +178,6 @@ export function StudentForm({
       rg_data: '',
       profissao: '',
       responsavel: '',
-      serie: '',
-      curso: '',
-      semestre: '',
       matricula: '',
       ano_matricula: '',
     },
@@ -225,9 +207,6 @@ export function StudentForm({
         rg_data: initialData.rg_data || '',
         profissao: initialData.profissao || '',
         responsavel: initialData.responsavel || '',
-        serie: initialData.serie || '',
-        curso: initialData.curso || '',
-        semestre: initialData.semestre || '',
         matricula: initialData.matricula ? String(initialData.matricula) : '',
         ano_matricula: initialData.ano_matricula ? String(initialData.ano_matricula) : '',
       });
@@ -486,30 +465,6 @@ export function StudentForm({
             label="Ano da Matrícula"
             placeholder="2025"
             error={errors.ano_matricula?.message}
-            disabled={loading}
-          />
-
-          <Input
-            {...register('curso')}
-            label="Curso"
-            placeholder="Nome do curso"
-            error={errors.curso?.message}
-            disabled={loading}
-          />
-
-          <Input
-            {...register('serie')}
-            label="Série/Período"
-            placeholder="1º Período"
-            error={errors.serie?.message}
-            disabled={loading}
-          />
-
-          <Input
-            {...register('semestre')}
-            label="Semestre"
-            placeholder="2025/1"
-            error={errors.semestre?.message}
             disabled={loading}
           />
 

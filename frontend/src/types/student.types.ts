@@ -117,15 +117,6 @@ export interface IStudent {
   /** Data de emissão do RG */
   rg_data: string | null;
 
-  /** Série/Período */
-  serie: string | null;
-
-  /** Curso */
-  curso: string | null;
-
-  /** Semestre atual */
-  semestre: string | null;
-
   /** Contrato aceito: S/N */
   contrato_aceito: string | null;
 
@@ -340,15 +331,6 @@ export interface IStudentCreateRequest {
 
   /** Data de emissão do RG */
   rg_data?: string;
-
-  /** Série/Período */
-  serie?: string;
-
-  /** Curso */
-  curso?: string;
-
-  /** Semestre */
-  semestre?: string;
 }
 
 /**

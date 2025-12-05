@@ -368,21 +368,6 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
         comment: 'Data de emiss�o do RG',
       },
-      serie: {
-        type: DataTypes.STRING(35),
-        allowNull: true,
-        comment: 'S�rie/Per�odo',
-      },
-      curso: {
-        type: DataTypes.STRING(100),
-        allowNull: true,
-        comment: 'Curso',
-      },
-      semestre: {
-        type: DataTypes.STRING(10),
-        allowNull: true,
-        comment: 'Semestre atual',
-      },
       contrato_aceito: {
         type: DataTypes.STRING(1),
         allowNull: true,
