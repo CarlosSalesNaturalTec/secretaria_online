@@ -1,27 +1,27 @@
 /**
  * Arquivo: src/models/Student.js
- * Descrição: Model Sequelize para a tabela students (estudantes)
+ * Descriï¿½ï¿½o: Model Sequelize para a tabela students (estudantes)
  * Feature: feat-064 - Separar tabela de estudantes
  * Criado em: 2025-12-01
  *
  * Responsabilidades:
- * - Definir estrutura e validações para a entidade Student
- * - Implementar métodos de instância e estáticos
+ * - Definir estrutura e validaï¿½ï¿½es para a entidade Student
+ * - Implementar mï¿½todos de instï¿½ncia e estï¿½ticos
  * - Validar dados antes de salvar no banco (CPF, email, etc)
- * - Soft delete (paranoid) para exclusão lógica
- * - Associação com User (opcional, via student_id)
+ * - Soft delete (paranoid) para exclusï¿½o lï¿½gica
+ * - Associaï¿½ï¿½o com User (opcional, via student_id)
  *
  * @example
  * // Criar novo estudante
  * const student = await Student.create({
- *   nome: 'João Silva',
+ *   nome: 'Joï¿½o Silva',
  *   email: 'joao@exemplo.com',
  *   cpf: '12345678901',
  *   data_nascimento: '2000-01-15',
  *   sexo: 1
  * });
  *
- * // Buscar estudante com usuário associado
+ * // Buscar estudante com usuï¿½rio associado
  * const student = await Student.findByPk(1, {
  *   include: ['user']
  * });
@@ -33,32 +33,32 @@ const { Model } = require('sequelize');
 
 /**
  * Validador personalizado de CPF
- * Valida formato e dígitos verificadores do CPF brasileiro
+ * Valida formato e dï¿½gitos verificadores do CPF brasileiro
  *
- * @param {string} cpf - CPF a ser validado (apenas números)
- * @returns {boolean} True se CPF válido, false caso contrário
+ * @param {string} cpf - CPF a ser validado (apenas nï¿½meros)
+ * @returns {boolean} True se CPF vï¿½lido, false caso contrï¿½rio
  */
 function isValidCPF(cpf) {
-  if (!cpf) return true; // CPF é opcional na tabela students
+  if (!cpf) return true; // CPF ï¿½ opcional na tabela students
 
-  // Remove caracteres não numéricos
+  // Remove caracteres nï¿½o numï¿½ricos
   cpf = cpf.replace(/[^\d]/g, '');
 
-  // CPF deve ter exatamente 11 dígitos
+  // CPF deve ter exatamente 11 dï¿½gitos
   if (cpf.length !== 11) {
     return false;
   }
 
-  // Verificar se todos os dígitos são iguais (CPF inválido: 111.111.111-11)
+  // Verificar se todos os dï¿½gitos sï¿½o iguais (CPF invï¿½lido: 111.111.111-11)
   if (/^(\d)\1{10}$/.test(cpf)) {
     return false;
   }
 
-  // Validação dos dígitos verificadores
+  // Validaï¿½ï¿½o dos dï¿½gitos verificadores
   let sum = 0;
   let remainder;
 
-  // Validar primeiro dígito verificador
+  // Validar primeiro dï¿½gito verificador
   for (let i = 1; i <= 9; i++) {
     sum += parseInt(cpf.substring(i - 1, i)) * (11 - i);
   }
@@ -66,7 +66,7 @@ function isValidCPF(cpf) {
   if (remainder === 10 || remainder === 11) remainder = 0;
   if (remainder !== parseInt(cpf.substring(9, 10))) return false;
 
-  // Validar segundo dígito verificador
+  // Validar segundo dï¿½gito verificador
   sum = 0;
   for (let i = 1; i <= 10; i++) {
     sum += parseInt(cpf.substring(i - 1, i)) * (12 - i);
@@ -81,12 +81,12 @@ function isValidCPF(cpf) {
 module.exports = (sequelize, DataTypes) => {
   /**
    * Model Student
-   * Representa um estudante da instituição
+   * Representa um estudante da instituiï¿½ï¿½o
    */
   class Student extends Model {
     /**
-     * Define associações entre models
-     * Será configurada automaticamente pelo Sequelize
+     * Define associaï¿½ï¿½es entre models
+     * Serï¿½ configurada automaticamente pelo Sequelize
      *
      * @param {Object} models - Objeto contendo todos os models
      */
@@ -99,13 +99,20 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'SET NULL',
       });
 
-      // Associações futuras com outras entidades
-      // Student.hasMany(models.Enrollment, { ... });
+      // Student pode ter mÃºltiplas matrÃ­culas (1:N)
+      Student.hasMany(models.Enrollment, {
+        foreignKey: 'student_id',
+        as: 'enrollments',
+        onUpdate: 'RESTRICT',
+        onDelete: 'RESTRICT',
+      });
+
+      // AssociaÃ§Ãµes futuras com outras entidades
       // Student.hasMany(models.Grade, { ... });
     }
 
     /**
-     * Verifica se o estudante está ativo (não foi soft deleted)
+     * Verifica se o estudante estï¿½ ativo (nï¿½o foi soft deleted)
      *
      * @returns {boolean} True se ativo, false se deletado
      */
@@ -114,9 +121,9 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     /**
-     * Verifica se o estudante tem um usuário criado
+     * Verifica se o estudante tem um usuï¿½rio criado
      *
-     * @returns {Promise<boolean>} True se tem usuário, false caso contrário
+     * @returns {Promise<boolean>} True se tem usuï¿½rio, false caso contrï¿½rio
      */
     async hasUser() {
       if (!this.user && this.id) {
@@ -137,9 +144,9 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     /**
-     * Retorna endereço completo formatado
+     * Retorna endereï¿½o completo formatado
      *
-     * @returns {string} Endereço completo
+     * @returns {string} Endereï¿½o completo
      */
     getFullAddress() {
       const parts = [];
@@ -151,19 +158,19 @@ module.exports = (sequelize, DataTypes) => {
       if (this.endereco_uf) parts.push(this.endereco_uf);
       if (this.cep) parts.push(`CEP: ${this.cep}`);
 
-      return parts.join(', ') || 'Endereço não informado';
+      return parts.join(', ') || 'Endereï¿½o nï¿½o informado';
     }
 
     /**
-     * Customiza serialização JSON
-     * Remove campos sensíveis ou desnecessários
+     * Customiza serializaï¿½ï¿½o JSON
+     * Remove campos sensï¿½veis ou desnecessï¿½rios
      *
      * @returns {Object} Objeto JSON customizado
      */
     toJSON() {
       const values = { ...this.get() };
 
-      // Remove deleted_at se for null (não adiciona poluição visual)
+      // Remove deleted_at se for null (nï¿½o adiciona poluiï¿½ï¿½o visual)
       if (values.deleted_at === null) {
         delete values.deleted_at;
       }
@@ -176,7 +183,7 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   /**
-   * Inicializa o model com seus campos e configurações
+   * Inicializa o model com seus campos e configuraï¿½ï¿½es
    */
   Student.init(
     {
@@ -185,7 +192,7 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true,
         autoIncrement: true,
         allowNull: false,
-        comment: 'Identificador único do estudante',
+        comment: 'Identificador ï¿½nico do estudante',
       },
       nome: {
         type: DataTypes.STRING(200),
@@ -193,7 +200,7 @@ module.exports = (sequelize, DataTypes) => {
         validate: {
           len: {
             args: [0, 200],
-            msg: 'Nome deve ter no máximo 200 caracteres',
+            msg: 'Nome deve ter no mï¿½ximo 200 caracteres',
           },
         },
         comment: 'Nome completo do estudante',
@@ -202,12 +209,12 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(20),
         allowNull: true,
         unique: {
-          msg: 'Este CPF já está cadastrado',
+          msg: 'Este CPF jï¿½ estï¿½ cadastrado',
         },
         validate: {
           isValidCPF(value) {
             if (value && !isValidCPF(value)) {
-              throw new Error('CPF inválido');
+              throw new Error('CPF invï¿½lido');
             }
           },
         },
@@ -228,7 +235,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
         validate: {
           isEmail: {
-            msg: 'Email inválido',
+            msg: 'Email invï¿½lido',
           },
         },
         comment: 'Email do estudante',
@@ -241,12 +248,12 @@ module.exports = (sequelize, DataTypes) => {
       endereco_numero: {
         type: DataTypes.STRING(20),
         allowNull: true,
-        comment: 'Número do endereço',
+        comment: 'Nï¿½mero do endereï¿½o',
       },
       endereco_complemento: {
         type: DataTypes.STRING(2000),
         allowNull: true,
-        comment: 'Complemento do endereço',
+        comment: 'Complemento do endereï¿½o',
       },
       endereco_bairro: {
         type: DataTypes.STRING(200),
@@ -304,27 +311,27 @@ module.exports = (sequelize, DataTypes) => {
       matricula: {
         type: DataTypes.BIGINT,
         allowNull: true,
-        comment: 'Número de matrícula',
+        comment: 'Nï¿½mero de matrï¿½cula',
       },
       ano_matricula: {
         type: DataTypes.BIGINT,
         allowNull: true,
-        comment: 'Ano da matrícula',
+        comment: 'Ano da matrï¿½cula',
       },
       profissao: {
         type: DataTypes.STRING(200),
         allowNull: true,
-        comment: 'Profissão do estudante',
+        comment: 'Profissï¿½o do estudante',
       },
       responsavel: {
         type: DataTypes.STRING(200),
         allowNull: true,
-        comment: 'Responsável legal (se menor de idade)',
+        comment: 'Responsï¿½vel legal (se menor de idade)',
       },
       contrato: {
         type: DataTypes.STRING(200),
         allowNull: true,
-        comment: 'Referência ao contrato',
+        comment: 'Referï¿½ncia ao contrato',
       },
       foto: {
         type: DataTypes.STRING(100),
@@ -339,7 +346,7 @@ module.exports = (sequelize, DataTypes) => {
       mae: {
         type: DataTypes.STRING(100),
         allowNull: true,
-        comment: 'Nome da mãe',
+        comment: 'Nome da mï¿½e',
       },
       pai: {
         type: DataTypes.STRING(100),
@@ -349,7 +356,7 @@ module.exports = (sequelize, DataTypes) => {
       titulo_eleitor: {
         type: DataTypes.STRING(25),
         allowNull: true,
-        comment: 'Título de eleitor',
+        comment: 'Tï¿½tulo de eleitor',
       },
       rg: {
         type: DataTypes.STRING(15),
@@ -359,12 +366,12 @@ module.exports = (sequelize, DataTypes) => {
       rg_data: {
         type: DataTypes.STRING(15),
         allowNull: true,
-        comment: 'Data de emissão do RG',
+        comment: 'Data de emissï¿½o do RG',
       },
       serie: {
         type: DataTypes.STRING(35),
         allowNull: true,
-        comment: 'Série/Período',
+        comment: 'Sï¿½rie/Perï¿½odo',
       },
       curso: {
         type: DataTypes.STRING(100),
@@ -389,7 +396,7 @@ module.exports = (sequelize, DataTypes) => {
       contrato_mes: {
         type: DataTypes.STRING(5),
         allowNull: true,
-        comment: 'Mês de aceite do contrato',
+        comment: 'Mï¿½s de aceite do contrato',
       },
       contrato_ano: {
         type: DataTypes.BIGINT,
@@ -399,7 +406,7 @@ module.exports = (sequelize, DataTypes) => {
       chave_eletronica: {
         type: DataTypes.STRING(255),
         allowNull: true,
-        comment: 'Chave eletrônica de acesso',
+        comment: 'Chave eletrï¿½nica de acesso',
       },
       data_geral: {
         type: DataTypes.STRING(20),
@@ -425,12 +432,12 @@ module.exports = (sequelize, DataTypes) => {
         beforeValidate: (student) => {
           if (student.nome) student.nome = student.nome.trim();
           if (student.email) student.email = student.email.trim().toLowerCase();
-          if (student.cpf) student.cpf = student.cpf.replace(/[^\d]/g, ''); // Remove caracteres não numéricos
+          if (student.cpf) student.cpf = student.cpf.replace(/[^\d]/g, ''); // Remove caracteres nï¿½o numï¿½ricos
         },
 
         /**
          * Hook: afterCreate
-         * Executado após criar um novo estudante
+         * Executado apï¿½s criar um novo estudante
          */
         afterCreate: (student) => {
           console.log(`[Student] Estudante criado: ${student.nome} (ID: ${student.id})`);
@@ -438,7 +445,7 @@ module.exports = (sequelize, DataTypes) => {
 
         /**
          * Hook: afterUpdate
-         * Executado após atualizar um estudante
+         * Executado apï¿½s atualizar um estudante
          */
         afterUpdate: (student) => {
           console.log(`[Student] Estudante atualizado: ${student.nome} (ID: ${student.id})`);
@@ -456,7 +463,7 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   /**
-   * Métodos estáticos (class methods)
+   * Mï¿½todos estï¿½ticos (class methods)
    */
 
   /**
@@ -466,7 +473,7 @@ module.exports = (sequelize, DataTypes) => {
    * @returns {Promise<Student|null>} Estudante encontrado ou null
    */
   Student.findByCPF = async function (cpf) {
-    // Remove caracteres não numéricos
+    // Remove caracteres nï¿½o numï¿½ricos
     cpf = cpf.replace(/[^\d]/g, '');
     return this.findOne({ where: { cpf } });
   };
@@ -482,9 +489,9 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   /**
-   * Busca estudante por matrícula
+   * Busca estudante por matrï¿½cula
    *
-   * @param {number} matricula - Número de matrícula
+   * @param {number} matricula - Nï¿½mero de matrï¿½cula
    * @returns {Promise<Student|null>} Estudante encontrado ou null
    */
   Student.findByMatricula = async function (matricula) {

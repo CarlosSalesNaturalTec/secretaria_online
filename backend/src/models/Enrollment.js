@@ -288,8 +288,8 @@ module.exports = (sequelize, DataTypes) => {
    * @param {Object} models - Objeto contendo todos os models
    */
   Enrollment.associate = function (models) {
-    // Enrollment pertence a um User (aluno)
-    Enrollment.belongsTo(models.User, {
+    // Enrollment pertence a um Student (aluno)
+    Enrollment.belongsTo(models.Student, {
       foreignKey: 'student_id',
       as: 'student',
       onUpdate: 'RESTRICT',
