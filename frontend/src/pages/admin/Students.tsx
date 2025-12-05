@@ -8,7 +8,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, KeyRound, AlertCircle, UserPlus, CheckCircle, XCircle, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, KeyRound, AlertCircle, UserPlus, Search } from 'lucide-react';
 import { Table, type Column } from '@/components/ui/Table';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
