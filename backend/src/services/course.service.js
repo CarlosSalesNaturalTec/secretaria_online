@@ -22,13 +22,47 @@ class CourseService {
   }
 
   /**
-   * Lista todos os Cursos.
-   * @returns {Promise<Course[]>} Uma lista de Cursos.
+   * Lista todos os Cursos com paginação.
+   * @param {Object} options - Opções de paginação e busca
+   * @param {number} options.page - Número da página (padrão: 1)
+   * @param {number} options.limit - Limite de registros por página (padrão: 10)
+   * @param {string} options.search - Termo de busca (opcional)
+   * @returns {Promise<Object>} Objeto com dados paginados e metadados
    */
-  async list() {
-    return Course.findAll({
+  async list(options = {}) {
+    const {
+      page = 1,
+      limit = 10,
+      search = '',
+    } = options;
+
+    const offset = (page - 1) * limit;
+
+    // Construir condições de busca
+    const where = {};
+    if (search) {
+      where.name = {
+        [require('sequelize').Op.like]: `%${search}%`,
+      };
+    }
+
+    // Buscar cursos com paginação
+    const { count, rows } = await Course.findAndCountAll({
+      where,
       include: [{ model: Discipline, as: 'disciplines' }],
+      limit: parseInt(limit, 10),
+      offset: parseInt(offset, 10),
+      order: [['name', 'ASC']],
+      distinct: true, // Para contar corretamente com includes
     });
+
+    return {
+      data: rows,
+      total: count,
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
+      totalPages: Math.ceil(count / limit),
+    };
   }
 
   /**

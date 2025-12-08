@@ -58,38 +58,59 @@ export interface IUpdateCourseData {
 }
 
 /**
- * Busca todos os cursos cadastrados no sistema
+ * Interface para parâmetros de paginação
+ */
+export interface IGetAllCoursesParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
+
+/**
+ * Interface para resposta paginada
+ */
+export interface IPaginatedCoursesResponse {
+  data: ICourse[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+/**
+ * Busca todos os cursos cadastrados no sistema com paginação
  *
- * Retorna lista completa de cursos com seus dados.
+ * Retorna lista paginada de cursos com seus dados.
  * Apenas usuários administrativos têm permissão para esta operação.
  *
- * @returns {Promise<ICourse[]>} Lista de cursos cadastrados
+ * @param {IGetAllCoursesParams} params - Parâmetros de paginação e busca
+ * @returns {Promise<IPaginatedCoursesResponse>} Resposta paginada com lista de cursos
  * @throws {Error} Quando ocorre erro na comunicação com API ou falta de permissão
  *
  * @example
  * try {
- *   const courses = await getAll();
- *   console.log('Total de cursos:', courses.length);
+ *   const result = await getAll({ page: 1, limit: 10 });
+ *   console.log('Total de cursos:', result.total);
  * } catch (error) {
  *   console.error('Erro ao buscar cursos:', error);
  * }
  */
-export async function getAll(): Promise<ICourse[]> {
+export async function getAll(params: IGetAllCoursesParams = {}): Promise<IPaginatedCoursesResponse> {
   try {
     if (import.meta.env.DEV) {
-      console.log('[CourseService] Buscando todos os cursos...');
+      console.log('[CourseService] Buscando cursos com paginação...', params);
     }
 
-    const response = await api.get<ApiResponse<any[]>>('/courses');
+    const response = await api.get<ApiResponse<any>>('/courses', { params });
 
-    if (!response.data.success || !response.data.data) {
+    if (!response.data.success) {
       throw new Error(
         response.data.error?.message || 'Erro ao buscar cursos'
       );
     }
 
     // Converte snake_case do backend para camelCase
-    const courses: ICourse[] = response.data.data.map((course: any) => ({
+    const courses: ICourse[] = (response.data.data || []).map((course: any) => ({
       id: course.id,
       name: course.name,
       description: course.description,
@@ -123,11 +144,19 @@ export async function getAll(): Promise<ICourse[]> {
       deletedAt: course.deleted_at || course.deletedAt,
     }));
 
+    const paginatedResponse: IPaginatedCoursesResponse = {
+      data: courses,
+      total: response.data.total || 0,
+      page: response.data.page || 1,
+      limit: response.data.limit || 10,
+      totalPages: response.data.totalPages || 1,
+    };
+
     if (import.meta.env.DEV) {
-      console.log('[CourseService] Cursos recuperados:', courses);
+      console.log('[CourseService] Cursos recuperados:', paginatedResponse);
     }
 
-    return courses;
+    return paginatedResponse;
   } catch (error) {
     console.error('[CourseService] Erro ao buscar cursos:', error);
 

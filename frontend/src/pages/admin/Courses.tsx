@@ -14,7 +14,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, AlertCircle, BookOpen, List } from 'lucide-react';
+import { Plus, Pencil, Trash2, AlertCircle, BookOpen, List, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Table, type Column } from '@/components/ui/Table';
 import { Button } from '@/components/ui/Button';
@@ -48,6 +48,16 @@ export default function CoursesPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Estado de paginação
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [totalCourses, setTotalCourses] = useState<number>(0);
+  const [pageSize] = useState<number>(10);
+
+  // Estado de busca
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [activeSearch, setActiveSearch] = useState<string>('');
+
   // Estado dos modais
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [selectedCourse, setSelectedCourse] = useState<ICourse | null>(null);
@@ -59,11 +69,11 @@ export default function CoursesPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   /**
-   * Carrega lista de cursos ao montar o componente
+   * Carrega lista de cursos ao montar o componente, mudar de página ou filtrar
    */
   useEffect(() => {
     loadCourses();
-  }, []);
+  }, [currentPage, activeSearch]);
 
   /**
    * Remove mensagem de sucesso após 5 segundos
@@ -79,14 +89,20 @@ export default function CoursesPage() {
   }, [successMessage]);
 
   /**
-   * Carrega lista de cursos da API
+   * Carrega lista de cursos da API com paginação e filtro
    */
   const loadCourses = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await CourseService.getAll();
-      setCourses(data);
+      const result = await CourseService.getAll({
+        page: currentPage,
+        limit: pageSize,
+        search: activeSearch,
+      });
+      setCourses(result.data);
+      setTotalPages(result.totalPages);
+      setTotalCourses(result.total);
     } catch (err) {
       const errorMessage =
         err instanceof Error
@@ -140,6 +156,7 @@ export default function CoursesPage() {
       await CourseService.create(data as ICreateCourseData);
       setSuccessMessage('Curso cadastrado com sucesso!');
       handleCloseModal();
+      setCurrentPage(1); // Voltar para primeira página
       await loadCourses();
     } catch (err) {
       const errorMessage =
@@ -200,6 +217,59 @@ export default function CoursesPage() {
    */
   const handleManageDisciplines = (course: ICourse) => {
     navigate(`/admin/courses/${course.id}/disciplines`);
+  };
+
+  /**
+   * Navega para a página anterior
+   */
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  /**
+   * Navega para a próxima página
+   */
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  /**
+   * Navega para uma página específica
+   */
+  const handleGoToPage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  /**
+   * Executa a busca
+   */
+  const handleSearch = () => {
+    setActiveSearch(searchTerm);
+    setCurrentPage(1); // Resetar para primeira página ao buscar
+  };
+
+  /**
+   * Limpa o filtro de busca
+   */
+  const handleClearSearch = () => {
+    setSearchTerm('');
+    setActiveSearch('');
+    setCurrentPage(1);
+  };
+
+  /**
+   * Permite buscar ao pressionar Enter
+   */
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
   };
 
   /**
@@ -329,6 +399,64 @@ export default function CoursesPage() {
         </Button>
       </div>
 
+      {/* Barra de busca */}
+      <div className="mb-6 flex items-center gap-3">
+        <div className="flex-1 relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-5 w-5 text-gray-400" />
+          </div>
+          <input
+            type="text"
+            placeholder="Buscar curso por nome..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyPress={handleKeyPress}
+            className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+            >
+              <X className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+            </button>
+          )}
+        </div>
+        <Button onClick={handleSearch}>
+          <Search size={18} />
+          Buscar
+        </Button>
+        {activeSearch && (
+          <Button variant="secondary" onClick={handleClearSearch}>
+            <X size={18} />
+            Limpar filtro
+          </Button>
+        )}
+      </div>
+
+      {/* Indicador de filtro ativo */}
+      {activeSearch && (
+        <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Search className="h-5 w-5 text-blue-600" />
+            <p className="text-sm text-blue-800">
+              Buscando por: <strong>{activeSearch}</strong>
+              {totalCourses > 0 && (
+                <span className="ml-2">
+                  ({totalCourses} {totalCourses === 1 ? 'curso encontrado' : 'cursos encontrados'})
+                </span>
+              )}
+            </p>
+          </div>
+          <button
+            onClick={handleClearSearch}
+            className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+          >
+            Limpar
+          </button>
+        </div>
+      )}
+
       {/* Mensagem de sucesso */}
       {successMessage && (
         <div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
@@ -360,6 +488,79 @@ export default function CoursesPage() {
         getRowKey={(course) => course.id}
         hoverable
       />
+
+      {/* Controles de paginação */}
+      {totalPages > 1 && (
+        <div className="mt-6 flex items-center justify-between border-t border-gray-200 pt-4">
+          <div className="text-sm text-gray-700">
+            Mostrando <span className="font-medium">{(currentPage - 1) * pageSize + 1}</span> a{' '}
+            <span className="font-medium">
+              {Math.min(currentPage * pageSize, totalCourses)}
+            </span>{' '}
+            de <span className="font-medium">{totalCourses}</span> cursos
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+            >
+              Anterior
+            </Button>
+
+            {/* Números de página */}
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                // Mostrar primeira página, última página e páginas próximas à atual
+                const showPage =
+                  page === 1 ||
+                  page === totalPages ||
+                  (page >= currentPage - 1 && page <= currentPage + 1);
+
+                if (!showPage) {
+                  // Mostrar "..." entre páginas
+                  if (page === currentPage - 2 || page === currentPage + 2) {
+                    return (
+                      <span key={page} className="px-2 text-gray-500">
+                        ...
+                      </span>
+                    );
+                  }
+                  return null;
+                }
+
+                return (
+                  <button
+                    key={page}
+                    onClick={() => handleGoToPage(page)}
+                    className={`
+                      px-3 py-1 rounded-md text-sm font-medium transition-colors
+                      ${
+                        page === currentPage
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }
+                    `}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+            </div>
+
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+            >
+              Próxima
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Modal de criação */}
       <Modal
