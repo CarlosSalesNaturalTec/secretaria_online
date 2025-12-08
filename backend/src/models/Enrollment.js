@@ -415,7 +415,7 @@ module.exports = (sequelize, DataTypes) => {
         ? [
             {
               association: 'course',
-              attributes: ['id', 'name', 'duration', 'duration_type', 'description', 'courseType'],
+              attributes: ['id', 'name', 'duration', 'duration_type', 'description', 'course_type'],
             },
           ]
         : [],

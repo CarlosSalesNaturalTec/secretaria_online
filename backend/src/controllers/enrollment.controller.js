@@ -139,7 +139,7 @@ class EnrollmentController {
           },
           {
             association: 'course',
-            attributes: ['id', 'name', 'duration', 'duration_type', 'description', 'courseType'],
+            attributes: ['id', 'name', 'duration', 'duration_type', 'description', 'course_type'],
           },
         ],
         order: [['enrollment_date', 'DESC']],
