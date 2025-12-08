@@ -546,6 +546,203 @@ export async function deleteCourse(id: number): Promise<void> {
 }
 
 /**
+ * Busca todas as disciplinas de um curso
+ *
+ * Retorna lista de disciplinas vinculadas a um curso específico.
+ * Apenas usuários administrativos têm permissão para esta operação.
+ *
+ * @param {number} courseId - ID do curso
+ * @returns {Promise<any[]>} Lista de disciplinas com informações do semestre
+ * @throws {Error} Quando ID é inválido, curso não encontrado ou erro na API
+ *
+ * @example
+ * try {
+ *   const disciplines = await getCourseDisciplines(123);
+ *   console.log('Total de disciplinas:', disciplines.length);
+ * } catch (error) {
+ *   console.error('Erro ao buscar disciplinas do curso:', error);
+ * }
+ */
+export async function getCourseDisciplines(courseId: number): Promise<any[]> {
+  try {
+    // Validação do ID
+    if (!courseId || courseId <= 0) {
+      throw new Error('ID do curso é obrigatório e deve ser maior que zero');
+    }
+
+    if (import.meta.env.DEV) {
+      console.log('[CourseService] Buscando disciplinas do curso:', courseId);
+    }
+
+    const response = await api.get<ApiResponse<any[]>>(`/courses/${courseId}/disciplines`);
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(
+        response.data.error?.message || 'Erro ao buscar disciplinas do curso'
+      );
+    }
+
+    if (import.meta.env.DEV) {
+      console.log('[CourseService] Disciplinas encontradas:', response.data.data);
+    }
+
+    return response.data.data;
+  } catch (error) {
+    console.error('[CourseService] Erro ao buscar disciplinas do curso:', error);
+
+    if (error instanceof Error) {
+      throw error;
+    }
+
+    throw new Error('Falha ao buscar disciplinas do curso. Tente novamente.');
+  }
+}
+
+/**
+ * Adiciona uma disciplina a um curso
+ *
+ * Vincula uma disciplina específica a um curso em um semestre.
+ * Apenas usuários administrativos têm permissão para esta operação.
+ *
+ * @param {number} courseId - ID do curso
+ * @param {number} disciplineId - ID da disciplina
+ * @param {number} semester - Semestre em que a disciplina é oferecida
+ * @returns {Promise<any>} Dados da associação criada
+ * @throws {Error} Quando IDs são inválidos ou erro na API
+ *
+ * @example
+ * try {
+ *   await addDisciplineToCourse(123, 456, 1);
+ *   console.log('Disciplina vinculada com sucesso');
+ * } catch (error) {
+ *   console.error('Erro ao vincular disciplina:', error);
+ * }
+ */
+export async function addDisciplineToCourse(
+  courseId: number,
+  disciplineId: number,
+  semester: number
+): Promise<any> {
+  try {
+    // Validação dos IDs
+    if (!courseId || courseId <= 0) {
+      throw new Error('ID do curso é obrigatório e deve ser maior que zero');
+    }
+
+    if (!disciplineId || disciplineId <= 0) {
+      throw new Error('ID da disciplina é obrigatório e deve ser maior que zero');
+    }
+
+    if (!semester || semester <= 0) {
+      throw new Error('Semestre é obrigatório e deve ser maior que zero');
+    }
+
+    if (import.meta.env.DEV) {
+      console.log('[CourseService] Adicionando disciplina ao curso:', {
+        courseId,
+        disciplineId,
+        semester,
+      });
+    }
+
+    const response = await api.post<ApiResponse<any>>(
+      `/courses/${courseId}/disciplines`,
+      {
+        disciplineId,
+        semester,
+      }
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(
+        response.data.error?.message || 'Erro ao vincular disciplina ao curso'
+      );
+    }
+
+    if (import.meta.env.DEV) {
+      console.log('[CourseService] Disciplina vinculada com sucesso');
+    }
+
+    return response.data.data;
+  } catch (error) {
+    console.error('[CourseService] Erro ao vincular disciplina:', error);
+
+    if (error instanceof Error) {
+      throw error;
+    }
+
+    throw new Error('Falha ao vincular disciplina. Tente novamente.');
+  }
+}
+
+/**
+ * Remove uma disciplina de um curso
+ *
+ * Desvincula uma disciplina específica de um curso.
+ * Apenas usuários administrativos têm permissão para esta operação.
+ *
+ * @param {number} courseId - ID do curso
+ * @param {number} disciplineId - ID da disciplina
+ * @returns {Promise<void>}
+ * @throws {Error} Quando IDs são inválidos ou erro na API
+ *
+ * @example
+ * try {
+ *   await removeDisciplineFromCourse(123, 456);
+ *   console.log('Disciplina desvinculada com sucesso');
+ * } catch (error) {
+ *   console.error('Erro ao desvincular disciplina:', error);
+ * }
+ */
+export async function removeDisciplineFromCourse(
+  courseId: number,
+  disciplineId: number
+): Promise<void> {
+  try {
+    // Validação dos IDs
+    if (!courseId || courseId <= 0) {
+      throw new Error('ID do curso é obrigatório e deve ser maior que zero');
+    }
+
+    if (!disciplineId || disciplineId <= 0) {
+      throw new Error('ID da disciplina é obrigatório e deve ser maior que zero');
+    }
+
+    if (import.meta.env.DEV) {
+      console.log('[CourseService] Removendo disciplina do curso:', {
+        courseId,
+        disciplineId,
+      });
+    }
+
+    const response = await api.delete<ApiResponse<void>>(
+      `/courses/${courseId}/disciplines/${disciplineId}`
+    );
+
+    // Handle 204 No Content (successful deletion with no body)
+    const responseData = response.data as any;
+
+    if (responseData && !responseData.success) {
+      throw new Error(
+        responseData.error?.message || 'Erro ao remover disciplina do curso'
+      );
+    }
+
+    if (import.meta.env.DEV) {
+      console.log('[CourseService] Disciplina removida com sucesso');
+    }
+  } catch (error) {
+    console.error('[CourseService] Erro ao remover disciplina:', error);
+
+    if (error instanceof Error) {
+      throw error;
+    }
+
+    throw new Error('Falha ao remover disciplina. Tente novamente.');
+  }
+}
+
+/**
  * Exporta todas as funções do serviço como objeto
  *
  * Permite importação nomeada ou import do objeto completo
@@ -564,6 +761,9 @@ const CourseService = {
   create,
   update,
   delete: deleteCourse,
+  getCourseDisciplines,
+  addDisciplineToCourse,
+  removeDisciplineFromCourse,
 };
 
 export default CourseService;

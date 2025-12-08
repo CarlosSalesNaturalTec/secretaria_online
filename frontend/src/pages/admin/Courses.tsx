@@ -14,7 +14,8 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, AlertCircle, BookOpen } from 'lucide-react';
+import { Plus, Pencil, Trash2, AlertCircle, BookOpen, List } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Table, type Column } from '@/components/ui/Table';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
@@ -40,6 +41,8 @@ type ModalType = 'create' | 'edit' | 'delete' | null;
  * @returns Página de gerenciamento de cursos
  */
 export default function CoursesPage() {
+  const navigate = useNavigate();
+
   // Estado da lista de cursos
   const [courses, setCourses] = useState<ICourse[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -193,6 +196,13 @@ export default function CoursesPage() {
   };
 
   /**
+   * Navega para página de gerenciamento de disciplinas do curso
+   */
+  const handleManageDisciplines = (course: ICourse) => {
+    navigate(`/admin/courses/${course.id}/disciplines`);
+  };
+
+  /**
    * Formata duração para exibição
    */
   const formatDuration = (duration: number, durationType: string): string => {
@@ -243,6 +253,15 @@ export default function CoursesPage() {
         <div className="flex items-center justify-end gap-2">
           <Button
             size="sm"
+            variant="primary"
+            onClick={() => handleManageDisciplines(course)}
+            title="Gerenciar disciplinas"
+          >
+            <List size={16} />
+          </Button>
+
+          <Button
+            size="sm"
             variant="secondary"
             onClick={() => handleOpenEditModal(course)}
             title="Editar curso"
@@ -261,7 +280,7 @@ export default function CoursesPage() {
         </div>
       ),
       align: 'right',
-      cellClassName: 'w-32',
+      cellClassName: 'w-40',
     },
   ];
 

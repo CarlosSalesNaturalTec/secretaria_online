@@ -34,6 +34,7 @@ const AdminStudents = lazy(() => import('./pages/admin/Students'));
 const AdminStudentCourses = lazy(() => import('./pages/admin/StudentCourses'));
 const AdminTeachers = lazy(() => import('./pages/admin/Teachers'));
 const AdminCourses = lazy(() => import('./pages/admin/Courses'));
+const AdminCourseDisciplines = lazy(() => import('./pages/admin/CourseDisciplines'));
 const AdminDisciplines = lazy(() => import('./pages/admin/Disciplines'));
 const AdminClasses = lazy(() => import('./pages/admin/Classes'));
 const AdminEnrollments = lazy(() => import('./pages/admin/Enrollments'));
@@ -144,6 +145,14 @@ const privateRoutes: RouteObject[] = [
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <AdminCourses />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'courses/:courseId/disciplines',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AdminCourseDisciplines />
           </Suspense>
         ),
       },

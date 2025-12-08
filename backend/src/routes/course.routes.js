@@ -21,6 +21,7 @@ router.put('/:id', CourseController.update);
 router.delete('/:id', CourseController.delete);
 
 // Rotas para vincular/desvincular disciplinas
+router.get('/:id/disciplines', CourseController.getCourseDisciplines);
 router.post('/:id/disciplines', CourseController.addDisciplineToCourse);
 router.delete('/:id/disciplines/:disciplineId', CourseController.removeDisciplineFromCourse);
 

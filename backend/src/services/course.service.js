@@ -115,6 +115,29 @@ class CourseService {
 
     return result > 0;
   }
+
+  /**
+   * Lista todas as disciplinas de um curso.
+   * @param {number} courseId - O ID do curso.
+   * @returns {Promise<Discipline[]>} Lista de disciplinas com informações do semestre.
+   */
+  async getCourseDisciplines(courseId) {
+    const course = await Course.findByPk(courseId, {
+      include: [{
+        model: Discipline,
+        as: 'disciplines',
+        through: {
+          attributes: ['semester']
+        }
+      }]
+    });
+
+    if (!course) {
+      throw new Error('Curso não encontrado');
+    }
+
+    return course.disciplines;
+  }
 }
 
 module.exports = new CourseService();
