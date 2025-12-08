@@ -36,7 +36,8 @@ module.exports = {
       {
         name: 'Análise e Desenvolvimento de Sistemas',
         description: 'Curso tecnológico focado no desenvolvimento de software, análise de sistemas e gestão de projetos de TI',
-        duration_semesters: 6,
+        duration: 6,
+        duration_type: 'Semestres',
         created_at: new Date(),
         updated_at: new Date(),
         deleted_at: null,
@@ -44,7 +45,8 @@ module.exports = {
       {
         name: 'Gestão de Recursos Humanos',
         description: 'Curso voltado para a formação de profissionais capacitados para gerenciar pessoas e processos organizacionais',
-        duration_semesters: 4,
+        duration: 4,
+        duration_type: 'Semestres',
         created_at: new Date(),
         updated_at: new Date(),
         deleted_at: null,
@@ -52,7 +54,8 @@ module.exports = {
       {
         name: 'Administração',
         description: 'Curso de bacharelado em Administração com foco em gestão empresarial, finanças e estratégia',
-        duration_semesters: 8,
+        duration: 8,
+        duration_type: 'Semestres',
         created_at: new Date(),
         updated_at: new Date(),
         deleted_at: null,

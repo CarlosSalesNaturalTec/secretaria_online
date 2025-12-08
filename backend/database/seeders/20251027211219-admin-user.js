@@ -37,8 +37,6 @@ module.exports = {
         email: 'admin@secretariaonline.com',
         login: 'admin',
         password_hash: passwordHash,
-        cpf: '00000000000', // CPF fictício para admin
-        rg: '0000000',
         created_at: new Date(),
         updated_at: new Date(),
       },
