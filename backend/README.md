@@ -240,6 +240,44 @@ backend/
   }
   ```
 
+### ✅ Gestão de Disciplinas do Curso
+- **Rotas**:
+  - `GET /api/v1/courses/:courseId/disciplines` - Listar disciplinas do curso
+  - `POST /api/v1/courses/:courseId/disciplines` - Adicionar disciplina ao curso
+  - `DELETE /api/v1/courses/:courseId/disciplines/:disciplineId` - Remover disciplina do curso
+- **Funcionalidades**:
+  - Listar todas as disciplinas vinculadas a um curso específico
+  - Retorna dados da disciplina com informações do semestre
+  - Adicionar disciplina à grade curricular do curso com semestre definido
+  - Remover disciplina da grade curricular do curso
+  - Associações através da tabela `course_disciplines`
+- **Estrutura de Resposta (GET)**:
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "id": 5,
+        "name": "Matemática Aplicada",
+        "code": "MAT101",
+        "workload_hours": 80,
+        "course_disciplines": {
+          "semester": 1
+        },
+        "created_at": "2025-12-08T10:00:00Z",
+        "updated_at": "2025-12-08T10:00:00Z"
+      }
+    ]
+  }
+  ```
+- **Estrutura de Requisição (POST)**:
+  ```json
+  {
+    "disciplineId": 5,
+    "semester": 1
+  }
+  ```
+
 ## 📡 API Endpoints
 
 ### Autenticação
@@ -388,6 +426,23 @@ POST /api/v1/courses
 
 # Obter curso
 GET /api/v1/courses/:id
+
+# Gerenciamento de Disciplinas do Curso
+
+# Listar disciplinas de um curso
+GET /api/v1/courses/:id/disciplines
+
+# Adicionar disciplina ao curso
+POST /api/v1/courses/:id/disciplines
+Content-Type: application/json
+
+{
+  "disciplineId": 5,
+  "semester": 1
+}
+
+# Remover disciplina do curso
+DELETE /api/v1/courses/:id/disciplines/:disciplineId
 ```
 
 ### Matrículas

@@ -161,6 +161,22 @@ frontend/
   - Botão rápido na lista de estudantes para acessar esta página
 - **Rota**: Acessível via botão 📖 na coluna de ações da página de estudantes
 
+### ✅ Gestão de Disciplinas do Curso
+- **Página dedicada**: `/admin/courses/:courseId/disciplines`
+- **Funcionalidades**:
+  - Visualização de todas as disciplinas vinculadas ao curso
+  - Tabela organizada com colunas: Código, Nome, Carga Horária, Semestre, Ações
+  - Modal para adicionar disciplinas da lista geral à grade do curso
+  - Select dropdown com disciplinas disponíveis (exclui disciplinas já vinculadas)
+  - Campo de input para especificar o semestre em que a disciplina é oferecida
+  - Botão para remover disciplinas da grade com confirmação
+  - Filtro automático de disciplinas disponíveis (remove as já vinculadas)
+  - Mensagens de sucesso/erro para feedback visual
+  - Botão "Voltar para cursos" para navegação
+  - Carregamento otimizado de todas as disciplinas (limit: 1000)
+- **Rota**: Acessível via botão 📋 (List) na coluna de ações da página de cursos
+- **Dados persistidos**: Tabela `course_disciplines` com `course_id`, `discipline_id` e `semester`
+
 ## 🧪 Testes
 
 ### Configuração de Testes

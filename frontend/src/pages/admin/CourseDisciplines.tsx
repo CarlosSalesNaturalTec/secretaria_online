@@ -127,14 +127,20 @@ export default function CourseDisciplinesPage() {
       const [courseData, courseDisciplinesData, allDisciplinesResponse] = await Promise.all([
         CourseService.getById(courseIdNumber),
         CourseService.getCourseDisciplines(courseIdNumber),
-        DisciplineService.getAll(),
+        DisciplineService.getAll({ limit: 1000 }), // Buscar todas as disciplinas sem limite de paginação
       ]);
 
       setCourse(courseData);
       // Normaliza os dados das disciplinas do curso
       setCourseDisciplines(courseDisciplinesData.map(normalizeDiscipline));
       // Extrai o array de disciplinas do objeto paginado
-      setAllDisciplines(allDisciplinesResponse.data || []);
+      const allDisciplinesArray = allDisciplinesResponse.data || [];
+      setAllDisciplines(allDisciplinesArray);
+
+      if (import.meta.env.DEV) {
+        console.log('[CourseDisciplinesPage] Total de disciplinas no sistema:', allDisciplinesArray.length);
+        console.log('[CourseDisciplinesPage] Total de disciplinas no curso:', courseDisciplinesData.length);
+      }
     } catch (err) {
       const errorMessage =
         err instanceof Error
@@ -233,7 +239,15 @@ export default function CourseDisciplinesPage() {
       courseDisciplines.map((cd) => cd.id)
     );
 
-    return allDisciplines.filter((d) => !courseDisciplineIds.has(d.id));
+    const available = allDisciplines.filter((d) => !courseDisciplineIds.has(d.id));
+
+    if (import.meta.env.DEV) {
+      console.log('[CourseDisciplinesPage] IDs de disciplinas já no curso:', Array.from(courseDisciplineIds));
+      console.log('[CourseDisciplinesPage] Total de disciplinas disponíveis para adicionar:', available.length);
+      console.log('[CourseDisciplinesPage] Disciplinas disponíveis:', available.map(d => ({ id: d.id, name: d.name })));
+    }
+
+    return available;
   };
 
   /**
