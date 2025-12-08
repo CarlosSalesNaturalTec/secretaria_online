@@ -10,7 +10,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, AlertCircle, Loader } from 'lucide-react';
 import Toast, { type ToastType } from '@/components/ui/Toast';
 import StudentService from '@/services/student.service';
-import CourseService from '@/services/course.service';
 import apiClient from '@/services/api';
 import type { IStudent } from '@/types/student.types';
 import type { IEnrollment } from '@/types/enrollment.types';
@@ -22,7 +21,9 @@ export default function StudentCoursesPage() {
 
   const [student, setStudent] = useState<IStudent | null>(null);
   const [enrollments, setEnrollments] = useState<IEnrollment[]>([]);
-  const [courses, setCourses] = useState<ICourse[]>([]);
+  const [enrollmentCoursesMap, setEnrollmentCoursesMap] = useState<
+    Map<number, ICourse>
+  >(new Map());
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,29 +52,71 @@ export default function StudentCoursesPage() {
       setStudent(studentData);
 
       // Carregar matrículas do estudante usando a rota correta: /students/:studentId/enrollments
-      console.log(`[StudentCoursesPage] Buscando matrículas para student ID: ${studentId}`);
+      console.log(
+        `[StudentCoursesPage] Buscando matrículas para student ID: ${studentId}`
+      );
       const enrollmentsResponse = await apiClient.get(
         `/students/${studentId}/enrollments`
       );
-      console.log(`[StudentCoursesPage] Resposta de matrículas:`, enrollmentsResponse);
+      console.log(
+        `[StudentCoursesPage] Resposta de matrículas:`,
+        enrollmentsResponse
+      );
 
       const enrollmentsData = Array.isArray(enrollmentsResponse.data)
         ? enrollmentsResponse.data
         : enrollmentsResponse.data?.data || [];
 
-      console.log(`[StudentCoursesPage] Matrículas processadas:`, enrollmentsData);
+      console.log(
+        `[StudentCoursesPage] Matrículas processadas:`,
+        enrollmentsData
+      );
       setEnrollments(enrollmentsData);
 
-      // Carregar todos os cursos
-      const coursesData = await CourseService.getAll();
-      setCourses(Array.isArray(coursesData) ? coursesData : []);
+      // Criar mapa dos cursos das matrículas (apenas os cursos em que o aluno está matriculado)
+      const coursesMap = new Map<number, ICourse>();
+
+      // Extrair dados do curso das matrículas (que vêm com curso carregado)
+      if (enrollmentsData && Array.isArray(enrollmentsData)) {
+        enrollmentsData.forEach((enrollment: any) => {
+          if (enrollment.course && enrollment.course.id) {
+            // Normalizar os dados do curso (converter snake_case da API para camelCase)
+            const courseData: ICourse = {
+              id: enrollment.course.id,
+              name: enrollment.course.name,
+              description: enrollment.course.description || '',
+              duration: enrollment.course.duration,
+              // API retorna em snake_case, converter para camelCase
+              durationType: enrollment.course.duration_type || enrollment.course.durationType || '',
+              courseType: enrollment.course.course_type || enrollment.course.courseType || '',
+            };
+
+            console.log(`[StudentCoursesPage] Adicionando curso ao mapa:`, {
+              id: courseData.id,
+              name: courseData.name,
+              courseType: courseData.courseType,
+              durationType: courseData.durationType
+            });
+
+            coursesMap.set(enrollment.course.id, courseData);
+          } else {
+            console.warn(`[StudentCoursesPage] Matrícula ${enrollment.id} não tem dados do curso`);
+          }
+        });
+      }
+
+      console.log('[StudentCoursesPage] Mapa final de cursos:', Array.from(coursesMap.entries()));
+      setEnrollmentCoursesMap(coursesMap);
 
       // Definir curso ativo como padrão
-      const activeCourse = enrollmentsData.find((e: IEnrollment) => e.status === 'active');
+      // IMPORTANTE: API retorna course_id (snake_case), não courseId
+      const activeCourse = enrollmentsData.find(
+        (e: any) => e.status === 'active'
+      );
       if (activeCourse) {
-        setSelectedCourseId(activeCourse.courseId);
+        setSelectedCourseId(activeCourse.course_id);
       } else if (enrollmentsData.length > 0) {
-        setSelectedCourseId(enrollmentsData[0].courseId);
+        setSelectedCourseId(enrollmentsData[0].course_id);
       }
     } catch (err) {
       const errorMessage =
@@ -86,14 +129,15 @@ export default function StudentCoursesPage() {
   };
 
   const getEnrollmentStatus = (courseId: number) => {
-    const enrollment = enrollments.find((e) => e.courseId === courseId);
+    const enrollment = enrollments.find((e: any) => e.course_id === courseId);
     return enrollment?.status || null;
   };
 
   const getEnrollmentDate = (courseId: number) => {
-    const enrollment = enrollments.find((e) => e.courseId === courseId);
+    const enrollment = enrollments.find((e: any) => e.course_id === courseId);
     if (!enrollment) return null;
-    return new Date(enrollment.enrollmentDate).toLocaleDateString('pt-BR');
+    // API retorna enrollment_date em snake_case
+    return new Date(enrollment.enrollment_date).toLocaleDateString('pt-BR');
   };
 
   const getStatusBadgeColor = (status: string | null) => {
@@ -225,34 +269,41 @@ export default function StudentCoursesPage() {
 
       {/* Seção de seleção de curso */}
       <div className="mb-8 bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-        <label className="block mb-4">
-          <p className="text-sm font-semibold text-gray-700 mb-2">
-            Selecione um curso para visualizar detalhes
+        {enrollments.length === 0 ? (
+          <p className="text-gray-600 text-center py-8">
+            Este estudante não possui matrículas em cursos.
           </p>
-          <select
-            value={selectedCourseId || ''}
-            onChange={(e) => setSelectedCourseId(Number(e.target.value))}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 cursor-pointer"
-          >
-            <option value="">-- Selecione um curso --</option>
-            {courses.map((course) => {
-              const status = getEnrollmentStatus(course.id);
-              const isActive = status === 'active';
-              return (
-                <option key={course.id} value={course.id}>
-                  {course.name}
-                  {isActive ? ' (Ativo)' : ''}
-                </option>
-              );
-            })}
-          </select>
-        </label>
+        ) : (
+          <label className="block mb-4">
+            <p className="text-sm font-semibold text-gray-700 mb-2">
+              Selecione um curso para visualizar detalhes
+            </p>
+            <select
+              value={selectedCourseId || ''}
+              onChange={(e) => setSelectedCourseId(Number(e.target.value))}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 cursor-pointer"
+            >
+              <option value="">-- Selecione um curso --</option>
+              {enrollments.map((enrollment: any) => {
+                // API retorna course_id em snake_case
+                const course = enrollmentCoursesMap.get(enrollment.course_id);
+                const isActive = enrollment.status === 'active';
+                return (
+                  <option key={enrollment.id} value={enrollment.course_id}>
+                    {course?.name || `Curso ${enrollment.course_id}`}
+                    {isActive ? ' (Ativo)' : ''}
+                  </option>
+                );
+              })}
+            </select>
+          </label>
+        )}
 
         {/* Informações detalhadas do curso selecionado */}
-        {selectedCourseId && (
+        {enrollments.length > 0 && selectedCourseId && (
           <div className="mt-8 pt-8 border-t border-gray-200">
             {(() => {
-              const selectedCourse = courses.find((c) => c.id === selectedCourseId);
+              const selectedCourse = enrollmentCoursesMap.get(selectedCourseId);
               const status = getEnrollmentStatus(selectedCourseId);
               const enrollmentDate = getEnrollmentDate(selectedCourseId);
 
@@ -341,64 +392,6 @@ export default function StudentCoursesPage() {
         )}
       </div>
 
-      {/* Lista de cursos do estudante */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Cursos do Estudante</h2>
-
-        {enrollments.length === 0 ? (
-          <p className="text-gray-600 text-center py-8">
-            Este estudante não possui matrículas em cursos.
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
-                    Curso
-                  </th>
-                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-900">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-900">
-                    Data de Matrícula
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {enrollments.map((enrollment) => {
-                  const course = courses.find((c) => c.id === enrollment.courseId);
-                  return (
-                    <tr
-                      key={enrollment.id}
-                      className="border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
-                      onClick={() => setSelectedCourseId(enrollment.courseId)}
-                    >
-                      <td className="px-4 py-4 text-gray-900">
-                        {course?.name || `Curso ${enrollment.courseId}`}
-                      </td>
-                      <td className="px-4 py-4 text-center">
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadgeColor(
-                            enrollment.status
-                          )}`}
-                        >
-                          {getStatusLabel(enrollment.status)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 text-center text-gray-700">
-                        {new Date(enrollment.enrollmentDate).toLocaleDateString(
-                          'pt-BR'
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
 
       {/* Toast de notificação */}
       {toast && (
