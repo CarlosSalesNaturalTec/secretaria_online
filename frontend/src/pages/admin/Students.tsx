@@ -8,7 +8,8 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, KeyRound, AlertCircle, UserPlus, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, KeyRound, AlertCircle, UserPlus, Search, BookOpen } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Table, type Column } from '@/components/ui/Table';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
@@ -21,6 +22,7 @@ import type { IStudent, IStudentCreateRequest, IStudentUpdateRequest } from '@/t
 type ModalType = 'create' | 'edit' | 'delete' | 'resetPassword' | 'createUser' | null;
 
 export default function StudentsPage() {
+  const navigate = useNavigate();
   const [students, setStudents] = useState<IStudent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -271,6 +273,16 @@ export default function StudentsPage() {
       header: 'Ações',
       accessor: (student) => (
         <div className="flex items-center justify-end gap-2">
+          {/* Botão Gerenciar Cursos */}
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => navigate(`/admin/students/${student.id}/courses`)}
+            title="Gerenciar cursos do estudante"
+          >
+            <BookOpen size={16} />
+          </Button>
+
           {/* Botão Criar Usuário - só aparece se não tiver usuário */}
           {!student.user && (
             <Button
@@ -315,7 +327,7 @@ export default function StudentsPage() {
         </div>
       ),
       align: 'right',
-      cellClassName: 'w-64',
+      cellClassName: 'w-80',
     },
   ];
 

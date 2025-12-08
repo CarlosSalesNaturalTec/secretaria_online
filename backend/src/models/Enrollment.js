@@ -270,7 +270,7 @@ module.exports = (sequelize, DataTypes) => {
             },
             {
               association: 'course',
-              attributes: ['id', 'name', 'duration_semesters'],
+              attributes: ['id', 'name', 'duration', 'duration_type', 'description', 'courseType'],
             },
           ],
         },
@@ -415,7 +415,7 @@ module.exports = (sequelize, DataTypes) => {
         ? [
             {
               association: 'course',
-              attributes: ['id', 'name', 'duration_semesters'],
+              attributes: ['id', 'name', 'duration', 'duration_type', 'description', 'courseType'],
             },
           ]
         : [],

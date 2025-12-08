@@ -442,7 +442,7 @@ class EnrollmentService {
           },
           {
             association: 'course',
-            attributes: ['id', 'name', 'duration_semesters'],
+            attributes: ['id', 'name', 'duration', 'duration_type', 'description', 'courseType'],
           },
         ],
       });

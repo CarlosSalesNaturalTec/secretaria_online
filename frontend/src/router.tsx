@@ -31,6 +31,7 @@ import DashboardLayout from './components/layout/DashboardLayout';
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
 const AdminUsers = lazy(() => import('./pages/admin/Users'));
 const AdminStudents = lazy(() => import('./pages/admin/Students'));
+const AdminStudentCourses = lazy(() => import('./pages/admin/StudentCourses'));
 const AdminTeachers = lazy(() => import('./pages/admin/Teachers'));
 const AdminCourses = lazy(() => import('./pages/admin/Courses'));
 const AdminDisciplines = lazy(() => import('./pages/admin/Disciplines'));
@@ -119,6 +120,14 @@ const privateRoutes: RouteObject[] = [
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <AdminStudents />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'students/:studentId/courses',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AdminStudentCourses />
           </Suspense>
         ),
       },
