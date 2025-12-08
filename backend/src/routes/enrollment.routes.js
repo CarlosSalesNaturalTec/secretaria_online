@@ -104,43 +104,6 @@ router.get(
 );
 
 /**
- * GET /students/:studentId/enrollments
- * Listar matrículas de um aluno específico
- *
- * Params:
- * - studentId: ID do aluno (inteiro)
- *
- * Response 200:
- * {
- *   "success": true,
- *   "data": [
- *     {
- *       "id": 1,
- *       "student_id": 1,
- *       "course_id": 2,
- *       "status": "pending",
- *       "enrollment_date": "2025-10-30",
- *       "course": {
- *         "id": 2,
- *         "name": "Engenharia de Software",
- *         "duration_semesters": 4
- *       }
- *     }
- *   ]
- * }
- */
-router.get(
-  '/students/:studentId/enrollments',
-  [
-    param('studentId')
-      .isInt({ min: 1 })
-      .withMessage('studentId deve ser um inteiro positivo'),
-  ],
-  handleValidationErrors,
-  EnrollmentController.getByStudent
-);
-
-/**
  * GET /enrollments/:id
  * Buscar uma matrícula por ID
  *

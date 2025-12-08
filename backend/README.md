@@ -206,6 +206,40 @@ backend/
 - Configuração de diretórios
 - Utilitários para geração de PDFs
 
+### ✅ Gestão de Cursos do Estudante
+- **Rota**: `GET /api/v1/students/:studentId/enrollments`
+- **Funcionalidades**:
+  - Listar todas as matrículas de um estudante específico
+  - Retorna dados do curso associado (nome, duração, tipo, descrição)
+  - Filtra automaticamente registros deletados (soft delete)
+  - Ordenação por data de matrícula (decrescente)
+  - Associações com dados do curso carregados
+- **Estrutura de Resposta**:
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "id": 1,
+        "student_id": 146,
+        "course_id": 2,
+        "status": "active",
+        "enrollment_date": "2025-12-01",
+        "created_at": "2025-12-01T10:00:00Z",
+        "updated_at": "2025-12-01T10:00:00Z",
+        "course": {
+          "id": 2,
+          "name": "Engenharia de Software",
+          "duration": 6,
+          "duration_type": "Semestres",
+          "description": "Curso de engenharia...",
+          "courseType": "Superior"
+        }
+      }
+    ]
+  }
+  ```
+
 ## 📡 API Endpoints
 
 ### Autenticação
@@ -359,8 +393,11 @@ GET /api/v1/courses/:id
 ### Matrículas
 
 ```http
-# Listar matrículas
+# Listar todas as matrículas (admin only)
 GET /api/v1/enrollments
+
+# Listar matrículas de um estudante específico
+GET /api/v1/students/:studentId/enrollments
 
 # Criar matrícula
 POST /api/v1/enrollments
@@ -400,6 +437,14 @@ PUT /api/v1/grades/:id
 ```
 
 Para documentação completa da API, veja `docs/api-documentation.md`
+
+### 📌 Observações Importantes sobre Matrículas
+
+- A rota `GET /api/v1/students/:studentId/enrollments` está disponível em `student.routes.js`
+- Esta rota retorna todas as matrículas de um estudante com dados do curso carregados
+- Usuários autenticados podem acessar esta rota (validação de acesso é feita no frontend)
+- A resposta inclui o status da matrícula (pending, active, cancelled)
+- Cursos deletados são filtrados automaticamente (soft delete)
 
 ## 🧪 Testes
 
@@ -585,5 +630,5 @@ Desenvolvido seguindo as melhores práticas de:
 
 ---
 
-**Última atualização:** 2025-11-01
-**Versão:** 0.1.0
+**Última atualização:** 2025-12-08
+**Versão:** 0.2.0

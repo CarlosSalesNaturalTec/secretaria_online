@@ -148,6 +148,19 @@ frontend/
 - Validação de tipos e tamanhos
 - Aprovação/rejeição por administradores
 
+### ✅ Gestão de Cursos do Estudante
+- **Página dedicada**: `/admin/students/:studentId/courses`
+- **Funcionalidades**:
+  - Visualização de todos os cursos em que o aluno está/foi inscrito
+  - Select dropdown com todos os cursos disponíveis
+  - Curso com status 'active' selecionado por padrão
+  - Exibição de informações detalhadas do curso selecionado (nome, descrição, duração, tipo)
+  - Status da matrícula com badges coloridas (Ativo/Pendente/Cancelado)
+  - Tabela de matrículas com data formatada
+  - Mensagens contextuais baseadas no status da matrícula
+  - Botão rápido na lista de estudantes para acessar esta página
+- **Rota**: Acessível via botão 📖 na coluna de ações da página de estudantes
+
 ## 🧪 Testes
 
 ### Configuração de Testes
@@ -424,5 +437,5 @@ Desenvolvido seguindo as melhores práticas de:
 
 ---
 
-**Última atualização:** 2025-12-02
-**Versão:** 0.1.0
+**Última atualização:** 2025-12-08
+**Versão:** 0.2.0

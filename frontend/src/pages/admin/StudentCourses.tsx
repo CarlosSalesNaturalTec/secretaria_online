@@ -11,6 +11,7 @@ import { ArrowLeft, AlertCircle, Loader } from 'lucide-react';
 import Toast, { type ToastType } from '@/components/ui/Toast';
 import StudentService from '@/services/student.service';
 import CourseService from '@/services/course.service';
+import apiClient from '@/services/api';
 import type { IStudent } from '@/types/student.types';
 import type { IEnrollment } from '@/types/enrollment.types';
 import type { ICourse } from '@/types/course.types';
@@ -50,34 +51,29 @@ export default function StudentCoursesPage() {
       setStudent(studentData);
 
       // Carregar matrículas do estudante usando a rota correta: /students/:studentId/enrollments
-      const enrollmentsData = await fetch(
-        `/api/v1/students/${studentId}/enrollments`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-          },
-        }
-      ).then(async (res) => {
-        if (!res.ok) {
-          throw new Error('Erro ao carregar matrículas');
-        }
-        return res.json();
-      });
+      console.log(`[StudentCoursesPage] Buscando matrículas para student ID: ${studentId}`);
+      const enrollmentsResponse = await apiClient.get(
+        `/students/${studentId}/enrollments`
+      );
+      console.log(`[StudentCoursesPage] Resposta de matrículas:`, enrollmentsResponse);
 
-      setEnrollments(Array.isArray(enrollmentsData.data) ? enrollmentsData.data : []);
+      const enrollmentsData = Array.isArray(enrollmentsResponse.data)
+        ? enrollmentsResponse.data
+        : enrollmentsResponse.data?.data || [];
+
+      console.log(`[StudentCoursesPage] Matrículas processadas:`, enrollmentsData);
+      setEnrollments(enrollmentsData);
 
       // Carregar todos os cursos
       const coursesData = await CourseService.getAll();
       setCourses(Array.isArray(coursesData) ? coursesData : []);
 
       // Definir curso ativo como padrão
-      const activeCourse = enrollmentsData.data?.find((e: any) => e.status === 'active');
+      const activeCourse = enrollmentsData.find((e: IEnrollment) => e.status === 'active');
       if (activeCourse) {
         setSelectedCourseId(activeCourse.courseId);
-      } else if (enrollmentsData.data && enrollmentsData.data.length > 0) {
-        setSelectedCourseId(enrollmentsData.data[0].courseId);
+      } else if (enrollmentsData.length > 0) {
+        setSelectedCourseId(enrollmentsData[0].courseId);
       }
     } catch (err) {
       const errorMessage =
