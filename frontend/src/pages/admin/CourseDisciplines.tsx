@@ -18,20 +18,8 @@ import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import CourseService from '@/services/course.service';
 import DisciplineService from '@/services/discipline.service';
-import type { ICourse } from '@/types/course.types';
+import type { ICourse, ICourseDiscipline } from '@/types/course.types';
 import type { IDiscipline } from '@/types/discipline.types';
-
-/**
- * Interface para disciplinas do curso com informações do semestre
- */
-interface ICourseDiscipline extends IDiscipline {
-  CourseDiscipline?: {
-    semester: number;
-  };
-  course_disciplines?: {
-    semester: number;
-  };
-}
 
 /**
  * CourseDisciplinesPage - Página de gerenciamento de disciplinas do curso
@@ -88,17 +76,32 @@ export default function CourseDisciplinesPage() {
 
   /**
    * Normaliza os dados da disciplina vindos do backend
+   *
+   * Backend retorna: { id, name, code, workload_hours, CourseDiscipline: { semester } }
+   * Frontend espera: { id, courseId, disciplineId, semester, discipline: { id, name, code, workloadHours } }
    */
   const normalizeDiscipline = (discipline: any): ICourseDiscipline => {
     if (import.meta.env.DEV) {
-      console.log('[CourseDisciplinesPage] Disciplina original:', discipline);
+      console.log('[CourseDisciplinesPage] Disciplina original do backend:', discipline);
     }
 
-    const normalized = {
-      ...discipline,
-      workloadHours: discipline.workload_hours || discipline.workloadHours,
-      CourseDiscipline: discipline.CourseDiscipline || {
-        semester: discipline.course_disciplines?.semester || 0,
+    // Extrai dados da tabela pivot (relacionamento many-to-many)
+    const pivotData = discipline.CourseDiscipline || discipline.course_disciplines || {};
+
+    // Converte a estrutura do backend para o tipo ICourseDiscipline esperado
+    const normalized: ICourseDiscipline = {
+      id: pivotData.id || 0, // ID da relação curso-disciplina (se disponível)
+      courseId: Number(courseId) || 0,
+      disciplineId: discipline.id,
+      semester: pivotData.semester || 0,
+      discipline: {
+        id: discipline.id,
+        name: discipline.name,
+        code: discipline.code,
+        workloadHours: discipline.workload_hours || discipline.workloadHours || 0,
+        createdAt: discipline.created_at || discipline.createdAt,
+        updatedAt: discipline.updated_at || discipline.updatedAt,
+        deletedAt: discipline.deleted_at || discipline.deletedAt,
       },
     };
 
@@ -236,7 +239,7 @@ export default function CourseDisciplinesPage() {
    */
   const getAvailableDisciplines = (): IDiscipline[] => {
     const courseDisciplineIds = new Set(
-      courseDisciplines.map((cd) => cd.id)
+      courseDisciplines.map((cd) => cd.disciplineId)
     );
 
     const available = allDisciplines.filter((d) => !courseDisciplineIds.has(d.id));
@@ -257,22 +260,22 @@ export default function CourseDisciplinesPage() {
     {
       key: 'code',
       header: 'Código',
-      accessor: (discipline) => discipline.code || 'N/A',
+      accessor: (courseDiscipline) => courseDiscipline.discipline?.code || 'N/A',
       sortable: true,
     },
     {
       key: 'name',
       header: 'Nome da Disciplina',
-      accessor: (discipline) => discipline.name,
+      accessor: (courseDiscipline) => courseDiscipline.discipline?.name || 'N/A',
       sortable: true,
     },
     {
       key: 'workloadHours',
       header: 'Carga Horária',
-      accessor: (discipline) => (
+      accessor: (courseDiscipline) => (
         <div className="flex items-center gap-2">
           <BookOpen size={16} className="text-gray-500" />
-          <span>{discipline.workloadHours ? `${discipline.workloadHours}h` : 'N/A'}</span>
+          <span>{courseDiscipline.discipline?.workloadHours ? `${courseDiscipline.discipline.workloadHours}h` : 'N/A'}</span>
         </div>
       ),
       align: 'center',
@@ -281,9 +284,9 @@ export default function CourseDisciplinesPage() {
     {
       key: 'semester',
       header: 'Semestre',
-      accessor: (discipline) => (
+      accessor: (courseDiscipline) => (
         <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-md font-medium">
-          {discipline.CourseDiscipline?.semester || 'N/A'}
+          {courseDiscipline.semester || 'N/A'}
         </span>
       ),
       align: 'center',
@@ -292,12 +295,12 @@ export default function CourseDisciplinesPage() {
     {
       key: 'actions',
       header: 'Ações',
-      accessor: (discipline) => (
+      accessor: (courseDiscipline) => (
         <div className="flex items-center justify-end gap-2">
           <Button
             size="sm"
             variant="danger"
-            onClick={() => handleRemoveDiscipline(discipline.id)}
+            onClick={() => handleRemoveDiscipline(courseDiscipline.disciplineId)}
             title="Remover disciplina do curso"
           >
             <Trash2 size={16} />
@@ -398,7 +401,7 @@ export default function CourseDisciplinesPage() {
         columns={columns}
         loading={loading}
         emptyMessage="Nenhuma disciplina cadastrada neste curso"
-        getRowKey={(discipline) => discipline.id}
+        getRowKey={(courseDiscipline) => courseDiscipline.id}
         hoverable
       />
 

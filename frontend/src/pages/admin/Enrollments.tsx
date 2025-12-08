@@ -151,7 +151,8 @@ export default function AdminEnrollments() {
         CourseService.getAll(),
       ]);
       setStudents(studentsData.students);
-      setCourses(coursesData);
+      // coursesData agora é IPaginatedCoursesResponse, então acessa .data
+      setCourses(coursesData.data);
     } catch (error) {
       console.error('[EnrollmentsPage] Erro ao carregar dados:', error);
       showToast('Erro ao carregar alunos e cursos', 'error');

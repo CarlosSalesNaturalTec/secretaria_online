@@ -101,16 +101,19 @@ export async function getAll(params: IGetAllCoursesParams = {}): Promise<IPagina
       console.log('[CourseService] Buscando cursos com paginação...', params);
     }
 
-    const response = await api.get<ApiResponse<any>>('/courses', { params });
+    const response = await api.get<any>('/courses', { params });
 
-    if (!response.data.success) {
+    // Backend retorna paginação no nível raiz junto com success e data
+    const responseData = response.data;
+
+    if (!responseData.success) {
       throw new Error(
-        response.data.error?.message || 'Erro ao buscar cursos'
+        responseData.error?.message || 'Erro ao buscar cursos'
       );
     }
 
     // Converte snake_case do backend para camelCase
-    const courses: ICourse[] = (response.data.data || []).map((course: any) => ({
+    const courses: ICourse[] = (responseData.data || []).map((course: any) => ({
       id: course.id,
       name: course.name,
       description: course.description,
@@ -146,10 +149,10 @@ export async function getAll(params: IGetAllCoursesParams = {}): Promise<IPagina
 
     const paginatedResponse: IPaginatedCoursesResponse = {
       data: courses,
-      total: response.data.total || 0,
-      page: response.data.page || 1,
-      limit: response.data.limit || 10,
-      totalPages: response.data.totalPages || 1,
+      total: responseData.total || 0,
+      page: responseData.page || 1,
+      limit: responseData.limit || 10,
+      totalPages: responseData.totalPages || 1,
     };
 
     if (import.meta.env.DEV) {

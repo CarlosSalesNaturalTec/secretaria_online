@@ -254,7 +254,8 @@ export function ClassForm({
         TeacherService.getAll(),
       ]);
 
-      setCourses(coursesData);
+      // coursesData agora é IPaginatedCoursesResponse, então acessa .data
+      setCourses(coursesData.data);
       setStudents(studentsData.students);
       setTeachers(teachersData);
     } catch (error) {

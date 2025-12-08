@@ -24,6 +24,7 @@ import CourseService from '@/services/course.service';
 import type {
   ICreateCourseData,
   IUpdateCourseData,
+  IPaginatedCoursesResponse,
 } from '@/services/course.service';
 import type { ICourse } from '@/types/course.types';
 
@@ -31,8 +32,8 @@ import type { ICourse } from '@/types/course.types';
  * Interface para o retorno do hook useCourses
  */
 export interface IUseCoursesReturn {
-  /** Query para listar todos os cursos */
-  listCourses: UseQueryResult<ICourse[], Error>;
+  /** Query para listar todos os cursos com paginação */
+  listCourses: UseQueryResult<IPaginatedCoursesResponse, Error>;
   /** Query para buscar curso específico por ID */
   getCourse: (id: number) => UseQueryResult<ICourse, Error>;
   /** Mutation para criar novo curso */
@@ -84,10 +85,10 @@ export function useCourses(): IUseCoursesReturn {
   const queryClient = useQueryClient();
 
   /**
-   * Query para listar todos os cursos
+   * Query para listar todos os cursos com paginação
    * Utiliza cache de 5 minutos (padrão definido em queryClient)
    */
-  const listCourses = useQuery<ICourse[], Error>({
+  const listCourses = useQuery<IPaginatedCoursesResponse, Error>({
     queryKey: ['courses'],
     queryFn: async () => {
       if (import.meta.env.DEV) {

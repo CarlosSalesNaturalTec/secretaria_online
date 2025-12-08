@@ -63,9 +63,17 @@ export default function StudentCoursesPage() {
         enrollmentsResponse
       );
 
-      const enrollmentsData = Array.isArray(enrollmentsResponse.data)
+      const rawEnrollments = Array.isArray(enrollmentsResponse.data)
         ? enrollmentsResponse.data
         : enrollmentsResponse.data?.data || [];
+
+      // Converter snake_case para camelCase
+      const enrollmentsData = rawEnrollments.map((enrollment: any) => ({
+        ...enrollment,
+        courseId: enrollment.course_id || enrollment.courseId,
+        studentId: enrollment.student_id || enrollment.studentId,
+        enrollmentDate: enrollment.enrollment_date || enrollment.enrollmentDate,
+      }));
 
       console.log(
         `[StudentCoursesPage] Matrículas processadas:`,
@@ -109,14 +117,13 @@ export default function StudentCoursesPage() {
       setEnrollmentCoursesMap(coursesMap);
 
       // Definir curso ativo como padrão
-      // IMPORTANTE: API retorna course_id (snake_case), não courseId
       const activeCourse = enrollmentsData.find(
         (e: any) => e.status === 'active'
       );
       if (activeCourse) {
-        setSelectedCourseId(activeCourse.course_id);
+        setSelectedCourseId(activeCourse.courseId);
       } else if (enrollmentsData.length > 0) {
-        setSelectedCourseId(enrollmentsData[0].course_id);
+        setSelectedCourseId(enrollmentsData[0].courseId);
       }
     } catch (err) {
       const errorMessage =
@@ -129,15 +136,14 @@ export default function StudentCoursesPage() {
   };
 
   const getEnrollmentStatus = (courseId: number) => {
-    const enrollment = enrollments.find((e: any) => e.course_id === courseId);
+    const enrollment = enrollments.find((e: any) => e.courseId === courseId);
     return enrollment?.status || null;
   };
 
   const getEnrollmentDate = (courseId: number) => {
-    const enrollment = enrollments.find((e: any) => e.course_id === courseId);
+    const enrollment = enrollments.find((e: any) => e.courseId === courseId);
     if (!enrollment) return null;
-    // API retorna enrollment_date em snake_case
-    return new Date(enrollment.enrollment_date).toLocaleDateString('pt-BR');
+    return new Date(enrollment.enrollmentDate).toLocaleDateString('pt-BR');
   };
 
   const getStatusBadgeColor = (status: string | null) => {
