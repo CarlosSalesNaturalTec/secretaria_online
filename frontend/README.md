@@ -159,7 +159,20 @@ frontend/
   - Tabela de matrículas com data formatada
   - Mensagens contextuais baseadas no status da matrícula
   - Botão rápido na lista de estudantes para acessar esta página
+  - **NOVO**: Botão "Cadastrar em Novo Curso" para matricular estudante em curso adicional
+  - **NOVO**: Modal de seleção de curso com dropdown de cursos disponíveis
+  - **NOVO**: Campo de data de matrícula (pré-preenchido com data atual)
+  - **NOVO**: Dropdown para alterar status da matrícula (Ativo/Pendente/Cancelado)
+  - **NOVO**: Persistência de alterações de status no banco de dados
+  - **NOVO**: Filtro automático de cursos já matriculados no modal de cadastro
+  - **NOVO**: Feedback visual com toasts de sucesso/erro
+  - **NOVO**: Recarga automática dos dados após cadastro ou alteração de status
 - **Rota**: Acessível via botão 📖 na coluna de ações da página de estudantes
+- **Operações disponíveis**:
+  - ✅ Visualizar cursos do estudante
+  - ✅ Cadastrar estudante em novo curso (cria matrícula com status "pending")
+  - ✅ Alterar status da matrícula (pending ↔ active ↔ cancelled)
+  - ✅ Validação para evitar cadastro duplicado no mesmo curso
 
 ### ✅ Gestão de Disciplinas do Curso
 - **Página dedicada**: `/admin/courses/:courseId/disciplines`
@@ -453,5 +466,17 @@ Desenvolvido seguindo as melhores práticas de:
 
 ---
 
-**Última atualização:** 2025-12-08
-**Versão:** 0.2.0
+**Última atualização:** 2025-12-09
+**Versão:** 0.2.1
+
+## 📝 Changelog
+
+### Versão 0.2.1 (2025-12-09)
+- ✅ Adicionado botão "Cadastrar em Novo Curso" na página de Cursos do Estudante
+- ✅ Adicionado modal para selecionar curso e data de matrícula
+- ✅ Adicionado dropdown para alterar status da matrícula (Ativo/Pendente/Cancelado)
+- ✅ Implementada integração com `EnrollmentService` para criar e atualizar matrículas
+- ✅ Adicionado filtro automático de cursos já matriculados no modal
+- ✅ Adicionado feedback visual com toasts de sucesso/erro
+- ✅ Implementada recarga automática de dados após operações
+- ✅ Atualizado README com novas funcionalidades

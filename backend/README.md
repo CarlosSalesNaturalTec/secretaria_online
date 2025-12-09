@@ -207,14 +207,20 @@ backend/
 - Utilitários para geração de PDFs
 
 ### ✅ Gestão de Cursos do Estudante
-- **Rota**: `GET /api/v1/students/:studentId/enrollments`
+- **Rotas**:
+  - `GET /api/v1/students/:studentId/enrollments` - Listar matrículas do estudante
+  - `POST /api/v1/enrollments` - Criar nova matrícula (cadastrar estudante em curso)
+  - `PUT /api/v1/enrollments/:id/status` - Alterar status da matrícula
 - **Funcionalidades**:
   - Listar todas as matrículas de um estudante específico
+  - Cadastrar estudante em novo curso (cria matrícula com status "pending")
+  - Alterar status da matrícula (pending, active, cancelled)
   - Retorna dados do curso associado (nome, duração, tipo, descrição)
   - Filtra automaticamente registros deletados (soft delete)
   - Ordenação por data de matrícula (decrescente)
   - Associações com dados do curso carregados
-- **Estrutura de Resposta**:
+  - Validação para evitar matrículas duplicadas
+- **Estrutura de Resposta (GET)**:
   ```json
   {
     "success": true,
@@ -239,6 +245,25 @@ backend/
     ]
   }
   ```
+- **Estrutura de Requisição (POST - Criar Matrícula)**:
+  ```json
+  {
+    "student_id": 146,
+    "course_id": 2,
+    "enrollment_date": "2025-12-09"
+  }
+  ```
+- **Estrutura de Requisição (PUT - Alterar Status)**:
+  ```json
+  {
+    "status": "active"
+  }
+  ```
+- **Regras de Negócio**:
+  - Matrícula criada com status "pending" por padrão
+  - Status válidos: "pending", "active", "cancelled"
+  - Administrador pode ativar matrícula manualmente (validação de documentos desabilitada)
+  - Permite alterar status de qualquer matrícula (pending → active, cancelled → active, etc.)
 
 ### ✅ Gestão de Disciplinas do Curso
 - **Rotas**:
@@ -454,11 +479,53 @@ GET /api/v1/enrollments
 # Listar matrículas de um estudante específico
 GET /api/v1/students/:studentId/enrollments
 
-# Criar matrícula
+# Criar matrícula (cadastrar estudante em curso)
 POST /api/v1/enrollments
+Content-Type: application/json
+
+{
+  "student_id": 146,
+  "course_id": 2,
+  "enrollment_date": "2025-12-09"
+}
+
+# Resposta:
+{
+  "success": true,
+  "message": "Matrícula criada com sucesso com status \"pending\"",
+  "data": {
+    "id": 5,
+    "student_id": 146,
+    "course_id": 2,
+    "status": "pending",
+    "enrollment_date": "2025-12-09",
+    "created_at": "2025-12-09T10:00:00Z",
+    "updated_at": "2025-12-09T10:00:00Z"
+  }
+}
 
 # Atualizar status de matrícula
 PUT /api/v1/enrollments/:id/status
+Content-Type: application/json
+
+{
+  "status": "active"
+}
+
+# Resposta:
+{
+  "success": true,
+  "message": "Status da matrícula alterado para 'active'",
+  "data": {
+    "id": 5,
+    "student_id": 146,
+    "course_id": 2,
+    "status": "active",
+    "enrollment_date": "2025-12-09",
+    "created_at": "2025-12-09T10:00:00Z",
+    "updated_at": "2025-12-09T10:30:00Z"
+  }
+}
 ```
 
 ### Documentos
@@ -685,5 +752,15 @@ Desenvolvido seguindo as melhores práticas de:
 
 ---
 
-**Última atualização:** 2025-12-08
-**Versão:** 0.2.0
+**Última atualização:** 2025-12-09
+**Versão:** 0.2.1
+
+## 📝 Changelog
+
+### Versão 0.2.1 (2025-12-09)
+- ✅ Adicionada funcionalidade de cadastrar estudante em novo curso
+- ✅ Adicionada funcionalidade de alterar status da matrícula
+- ✅ Corrigido `EnrollmentService` para buscar estudantes na tabela `students`
+- ✅ Removida restrição de status ao ativar matrícula (agora permite ativar de qualquer status)
+- ✅ Desabilitada validação de documentos obrigatórios para ativação manual pelo admin
+- ✅ Atualizado README com novas funcionalidades e exemplos de uso
