@@ -7,9 +7,11 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, AlertCircle, Loader } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Loader, Plus, X } from 'lucide-react';
 import Toast, { type ToastType } from '@/components/ui/Toast';
 import StudentService from '@/services/student.service';
+import EnrollmentService from '@/services/enrollment.service';
+import { getAll as getAllCourses } from '@/services/course.service';
 import apiClient from '@/services/api';
 import type { IStudent } from '@/types/student.types';
 import type { IEnrollment } from '@/types/enrollment.types';
@@ -31,6 +33,15 @@ export default function StudentCoursesPage() {
     message: string;
     type: ToastType;
   } | null>(null);
+
+  // Estados para o modal de adicionar curso
+  const [showAddCourseModal, setShowAddCourseModal] = useState<boolean>(false);
+  const [allCourses, setAllCourses] = useState<ICourse[]>([]);
+  const [selectedNewCourseId, setSelectedNewCourseId] = useState<number | null>(null);
+  const [enrollmentDate, setEnrollmentDate] = useState<string>(
+    new Date().toISOString().split('T')[0]
+  );
+  const [submitting, setSubmitting] = useState<boolean>(false);
 
   useEffect(() => {
     loadData();
@@ -172,6 +183,70 @@ export default function StudentCoursesPage() {
     }
   };
 
+  const loadAllCourses = async () => {
+    try {
+      const response = await getAllCourses({ limit: 1000 });
+      setAllCourses(response.data);
+    } catch (err) {
+      console.error('[StudentCoursesPage] Erro ao carregar cursos:', err);
+      setToast({
+        message: 'Erro ao carregar lista de cursos',
+        type: 'error',
+      });
+    }
+  };
+
+  const handleOpenAddCourseModal = async () => {
+    await loadAllCourses();
+    setShowAddCourseModal(true);
+  };
+
+  const handleCloseAddCourseModal = () => {
+    setShowAddCourseModal(false);
+    setSelectedNewCourseId(null);
+    setEnrollmentDate(new Date().toISOString().split('T')[0]);
+  };
+
+  const handleAddCourse = async () => {
+    if (!selectedNewCourseId || !studentId) {
+      setToast({
+        message: 'Selecione um curso para cadastrar',
+        type: 'error',
+      });
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      // Criar matrícula usando o serviço
+      await EnrollmentService.create({
+        studentId: Number(studentId),
+        courseId: selectedNewCourseId,
+        enrollmentDate: enrollmentDate,
+      });
+
+      setToast({
+        message: 'Estudante cadastrado no curso com sucesso!',
+        type: 'success',
+      });
+
+      // Fechar modal e recarregar dados
+      handleCloseAddCourseModal();
+      await loadData();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Erro ao cadastrar estudante no curso';
+      setToast({
+        message: errorMessage,
+        type: 'error',
+      });
+      console.error('[StudentCoursesPage] Erro ao adicionar curso:', err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-6">
@@ -270,6 +345,17 @@ export default function StudentCoursesPage() {
             <p className="text-sm text-gray-600 mb-1">Email</p>
             <p className="text-lg font-semibold text-gray-900">{student.email || '-'}</p>
           </div>
+        </div>
+
+        {/* Botão para adicionar novo curso */}
+        <div className="mt-6 pt-6 border-t border-gray-200">
+          <button
+            onClick={handleOpenAddCourseModal}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Plus size={20} />
+            Cadastrar em Novo Curso
+          </button>
         </div>
       </div>
 
@@ -398,6 +484,92 @@ export default function StudentCoursesPage() {
         )}
       </div>
 
+
+      {/* Modal de adicionar curso */}
+      {showAddCourseModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900">
+                Cadastrar em Novo Curso
+              </h2>
+              <button
+                onClick={handleCloseAddCourseModal}
+                className="text-gray-500 hover:text-gray-700"
+                disabled={submitting}
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Curso
+                </label>
+                <select
+                  value={selectedNewCourseId || ''}
+                  onChange={(e) => setSelectedNewCourseId(Number(e.target.value))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  disabled={submitting}
+                >
+                  <option value="">-- Selecione um curso --</option>
+                  {allCourses
+                    .filter((course) => {
+                      // Filtrar cursos em que o aluno já está matriculado
+                      const alreadyEnrolled = enrollments.some(
+                        (enrollment) => enrollment.courseId === course.id
+                      );
+                      return !alreadyEnrolled;
+                    })
+                    .map((course) => (
+                      <option key={course.id} value={course.id}>
+                        {course.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Data de Matrícula
+                </label>
+                <input
+                  type="date"
+                  value={enrollmentDate}
+                  onChange={(e) => setEnrollmentDate(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  disabled={submitting}
+                />
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={handleAddCourse}
+                  disabled={submitting || !selectedNewCourseId}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader className="animate-spin" size={18} />
+                      Cadastrando...
+                    </>
+                  ) : (
+                    'Cadastrar'
+                  )}
+                </button>
+                <button
+                  onClick={handleCloseAddCourseModal}
+                  disabled={submitting}
+                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Toast de notificação */}
       {toast && (

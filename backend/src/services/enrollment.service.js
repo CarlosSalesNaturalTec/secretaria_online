@@ -34,7 +34,7 @@
 
 'use strict';
 
-const { Enrollment, User, Course, Document, DocumentType } = require('../models');
+const { Enrollment, User, Student, Course, Document, DocumentType } = require('../models');
 const { AppError } = require('../middlewares/error.middleware');
 const logger = require('../utils/logger');
 
@@ -60,13 +60,13 @@ class EnrollmentService {
     );
 
     try {
-      // 1. Validar que aluno existe
-      const student = await User.findByPk(studentId);
-      if (!student || student.role !== 'student') {
+      // 1. Validar que aluno existe (na tabela students)
+      const student = await Student.findByPk(studentId);
+      if (!student) {
         logger.warn(
           `[EnrollmentService] Tentativa de matrícula com aluno inválido - ID: ${studentId}`
         );
-        throw new AppError('Aluno não encontrado ou usuário não é um aluno', 404);
+        throw new AppError('Aluno não encontrado', 404);
       }
 
       // 2. Validar que curso existe
@@ -136,9 +136,9 @@ class EnrollmentService {
         `[EnrollmentService] Verificando se aluno ${studentId} pode se matricular`
       );
 
-      // 1. Verificar se aluno existe
-      const student = await User.findByPk(studentId);
-      if (!student || student.role !== 'student') {
+      // 1. Verificar se aluno existe (na tabela students)
+      const student = await Student.findByPk(studentId);
+      if (!student) {
         return false;
       }
 
@@ -181,8 +181,8 @@ class EnrollmentService {
     );
 
     try {
-      // 1. Verificar que aluno existe
-      const student = await User.findByPk(studentId);
+      // 1. Verificar que aluno existe (na tabela students)
+      const student = await Student.findByPk(studentId);
       if (!student) {
         throw new AppError('Aluno não encontrado', 404);
       }
@@ -250,8 +250,8 @@ class EnrollmentService {
     );
 
     try {
-      // Verificar que aluno existe
-      const student = await User.findByPk(studentId);
+      // Verificar que aluno existe (na tabela students)
+      const student = await Student.findByPk(studentId);
       if (!student) {
         throw new AppError('Aluno não encontrado', 404);
       }
