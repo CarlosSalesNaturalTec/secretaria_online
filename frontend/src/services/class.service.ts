@@ -37,8 +37,21 @@ function mapClassData(classData: any): IClass {
       updatedAt: classData.course.updated_at || classData.course.updatedAt,
       deletedAt: classData.course.deleted_at || classData.course.deletedAt,
     } : undefined,
-    students: classData.students,
-    teachers: classData.teachers,
+    // Mapear estudantes (se houver)
+    students: classData.students?.map((s: any) => ({
+      id: s.id,
+      name: s.name,
+      email: s.email,
+      role: s.role,
+      class_students: s.class_students,
+    })),
+    // Mapear professores - converte 'nome' para 'name'
+    teachers: classData.teachers?.map((t: any) => ({
+      id: t.id,
+      name: t.nome || t.name, // Campo 'nome' na tabela teachers
+      email: t.email,
+      class_teachers: t.class_teachers,
+    })),
     // Mapear disciplinas - converte snake_case para camelCase se necessário
     disciplines: classData.disciplines?.map((d: any) => ({
       id: d.id,
