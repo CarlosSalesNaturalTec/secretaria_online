@@ -148,6 +148,50 @@ frontend/
 - Validação de tipos e tamanhos
 - Aprovação/rejeição por administradores
 
+### ✅ Gestão de Avaliações
+- **Página dedicada**: `/admin/evaluations` e `/teacher/evaluations`
+- **Funcionalidades**:
+  - Listagem de todas as avaliações em tabela organizada
+  - Colunas: Nome, Turma, Disciplina, Data, Tipo, Ações
+  - Filtro por turma (dropdown)
+  - Modal para criar nova avaliação
+  - Modal para editar avaliação existente
+  - Confirmação antes de deletar
+  - Badges coloridas por tipo: "Nota" (azul) e "Conceito" (verde)
+  - Formatação de datas (DD/MM/YYYY)
+  - Toasts de sucesso/erro para feedback
+  - Design responsivo (desktop e mobile)
+- **Formulário de Avaliação**:
+  - Select de turma (obrigatório)
+  - Select de disciplina (filtrado por turma selecionada)
+  - Campo de nome da avaliação (texto)
+  - Campo de data (date picker)
+  - Seleção de tipo (radio buttons: Nota ou Conceito)
+  - Validação completa com Zod
+  - Suporta criar e editar
+- **Rotas**:
+  - `/admin/evaluations` - Acesso admin (todas as avaliações)
+  - `/teacher/evaluations` - Acesso professor (próprias avaliações)
+- **Services**:
+  - `evaluation.service.ts` - Comunicação com API
+  - Métodos: getAll, getById, create, update, delete
+  - Conversão automática snake_case ↔ camelCase
+- **Hooks**:
+  - `useEvaluations.ts` - TanStack Query hooks
+  - Cache otimizado (5min stale time)
+  - Invalidação automática após mutations
+- **Tipos**:
+  - `evaluation.types.ts` - Interfaces TypeScript
+  - IEvaluation, ICreateEvaluationData, IUpdateEvaluationData
+  - Type-safe em todas as camadas
+- **Operações disponíveis**:
+  - ✅ Listar todas as avaliações
+  - ✅ Criar nova avaliação (vinculada a turma, disciplina e professor)
+  - ✅ Editar avaliação existente
+  - ✅ Deletar avaliação (com confirmação)
+  - ✅ Filtrar por turma
+  - ✅ Visualizar detalhes (turma, disciplina, professor, tipo, data)
+
 ### ✅ Gestão de Cursos do Estudante
 - **Página dedicada**: `/admin/students/:studentId/courses`
 - **Funcionalidades**:
@@ -467,9 +511,26 @@ Desenvolvido seguindo as melhores práticas de:
 ---
 
 **Última atualização:** 2025-12-09
-**Versão:** 0.2.1
+**Versão:** 0.3.0
 
 ## 📝 Changelog
+
+### Versão 0.3.0 (2025-12-09)
+- ✅ **NOVO**: Interface completa de gestão de avaliações
+- ✅ Criada página `Evaluations.tsx` para admin e professores
+- ✅ Criado formulário `EvaluationForm.tsx` com validação Zod
+- ✅ Criado service `evaluation.service.ts` com métodos CRUD
+- ✅ Criados hooks `useEvaluations.ts` com TanStack Query
+- ✅ Criados types `evaluation.types.ts` para TypeScript
+- ✅ Adicionado item "Avaliações" no menu Sidebar (admin e professor)
+- ✅ Implementado filtro por turma na listagem
+- ✅ Implementado filtro de disciplinas por turma no formulário
+- ✅ Badges coloridas por tipo: Nota (azul) e Conceito (verde)
+- ✅ Formatação de datas com date-fns (DD/MM/YYYY)
+- ✅ Modais para criar, editar e deletar avaliações
+- ✅ Toasts de feedback para todas as operações
+- ✅ Design responsivo com Tailwind CSS
+- ✅ Rotas configuradas: `/admin/evaluations` e `/teacher/evaluations`
 
 ### Versão 0.2.1 (2025-12-09)
 - ✅ Adicionado botão "Cadastrar em Novo Curso" na página de Cursos do Estudante

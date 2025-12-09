@@ -1,163 +1,139 @@
 /**
  * Arquivo: frontend/src/services/evaluation.service.ts
  * Descrição: Serviço para gerenciamento de avaliações
- * Feature: feat-097 - Criar evaluation.service.ts
- * Criado em: 2025-11-04
- *
- * Responsabilidades:
- * - Criar nova avaliação para uma turma
- * - Buscar avaliações de uma turma específica
- * - Atualizar avaliação existente
- * - Deletar avaliação do sistema
+ * Feature: feat-evaluation-ui - Criar interface de gerenciamento de avaliações
+ * Criado em: 2025-12-09
  */
 
 import api from './api';
 import type { ApiResponse } from '@/types/api.types';
+import type { IEvaluation, ICreateEvaluationData, IUpdateEvaluationData } from '@/types/evaluation.types';
 
-/**
- * Tipos de avaliação disponíveis
- *
- * Define os tipos possíveis para uma avaliação:
- * - 'grade': Avaliação com nota numérica (0-10)
- * - 'concept': Avaliação com conceito (satisfactory/unsatisfactory)
- */
-export const EVALUATION_TYPES = {
-  GRADE: 'grade',
-  CONCEPT: 'concept',
-} as const;
-
-export type EvaluationType = (typeof EVALUATION_TYPES)[keyof typeof EVALUATION_TYPES];
-
-/**
- * Interface para dados de avaliação
- *
- * Representa uma avaliação completa com todas as suas propriedades
- */
-export interface IEvaluation {
-  /** ID da avaliação */
-  id: number;
-  /** ID da turma à qual a avaliação pertence */
-  classId: number;
-  /** ID do professor responsável por criar a avaliação */
-  teacherId: number;
-  /** ID da disciplina relacionada à avaliação */
-  disciplineId: number;
-  /** Nome da avaliação (ex: "Prova 1", "Trabalho Final") */
-  name: string;
-  /** Data da avaliação */
-  date: string; // ISO 8601 format (YYYY-MM-DD)
-  /** Tipo de avaliação: 'grade' ou 'concept' */
-  type: EvaluationType;
-  /** Data de criação */
-  createdAt: string;
-  /** Data de última atualização */
-  updatedAt: string;
+function mapEvaluationData(data: any): IEvaluation {
+  return {
+    id: data.id,
+    classId: data.class_id || data.classId,
+    teacherId: data.teacher_id || data.teacherId,
+    disciplineId: data.discipline_id || data.disciplineId,
+    name: data.name,
+    date: data.date,
+    type: data.type,
+    class: data.class ? {
+      id: data.class.id,
+      courseId: data.class.course_id || data.class.courseId,
+      semester: data.class.semester,
+      year: data.class.year,
+      course: data.class.course ? {
+        id: data.class.course.id,
+        name: data.class.course.name,
+        description: data.class.course.description,
+        duration: data.class.course.duration,
+        durationType: data.class.course.duration_type || data.class.course.durationType,
+        courseType: data.class.course.course_type || data.class.course.courseType,
+        createdAt: data.class.course.created_at || data.class.course.createdAt,
+        updatedAt: data.class.course.updated_at || data.class.course.updatedAt,
+        deletedAt: data.class.course.deleted_at || data.class.course.deletedAt,
+      } : undefined,
+      createdAt: data.class.created_at || data.class.createdAt,
+      updatedAt: data.class.updated_at || data.class.updatedAt,
+      deletedAt: data.class.deleted_at || data.class.deletedAt,
+    } : undefined,
+    teacher: data.teacher ? {
+      id: data.teacher.id,
+      nome: data.teacher.nome || data.teacher.name,
+      email: data.teacher.email,
+      cpf: data.teacher.cpf,
+    } : undefined,
+    discipline: data.discipline ? {
+      id: data.discipline.id,
+      name: data.discipline.name,
+      code: data.discipline.code,
+      workloadHours: data.discipline.workload_hours || data.discipline.workloadHours,
+      createdAt: data.discipline.created_at || data.discipline.createdAt,
+      updatedAt: data.discipline.updated_at || data.discipline.updatedAt,
+      deletedAt: data.discipline.deleted_at || data.discipline.deletedAt,
+    } : undefined,
+    createdAt: data.created_at || data.createdAt,
+    updatedAt: data.updated_at || data.updatedAt,
+  };
 }
 
-/**
- * Interface para dados de criação de avaliação
- *
- * Contém todos os campos obrigatórios para cadastro de avaliação
- */
-export interface ICreateEvaluationData {
-  /** ID da turma à qual a avaliação pertence */
-  classId: number;
-  /** ID da disciplina relacionada à avaliação */
-  disciplineId: number;
-  /** Nome da avaliação (ex: "Prova 1", "Trabalho Final") */
-  name: string;
-  /** Data da avaliação */
-  date: string; // ISO 8601 format (YYYY-MM-DD)
-  /** Tipo de avaliação: 'grade' ou 'concept' */
-  type: EvaluationType;
-}
-
-/**
- * Interface para dados de atualização de avaliação
- *
- * Todos os campos são opcionais, permitindo atualização parcial
- */
-export interface IUpdateEvaluationData {
-  /** Nome da avaliação */
-  name?: string;
-  /** Data da avaliação */
-  date?: string;
-  /** Tipo de avaliação */
-  type?: EvaluationType;
-}
-
-/**
- * Cria nova avaliação para uma turma
- *
- * Valida e envia dados da nova avaliação para API.
- * A avaliação será vinculada automaticamente a todos os alunos da turma.
- * Apenas professores da turma têm permissão para esta operação.
- *
- * @param {ICreateEvaluationData} data - Dados da avaliação a ser criada
- * @returns {Promise<IEvaluation>} Dados da avaliação criada
- * @throws {Error} Quando dados são inválidos ou ocorre erro na API
- *
- * @example
- * try {
- *   const newEvaluation = await create({
- *     classId: 1,
- *     disciplineId: 3,
- *     name: 'Prova 1',
- *     date: '2025-11-10',
- *     type: EvaluationType.GRADE
- *   });
- *   console.log('Avaliação criada:', newEvaluation.id);
- * } catch (error) {
- *   console.error('Erro ao criar avaliação:', error);
- * }
- */
-export async function create(
-  data: ICreateEvaluationData
-): Promise<IEvaluation> {
+export async function getAll(): Promise<IEvaluation[]> {
   try {
-    // Validações de campos obrigatórios
+    if (import.meta.env.DEV) {
+      console.log('[EvaluationService] Buscando todas as avaliações...');
+    }
+
+    const response = await api.get<ApiResponse<any[]>>('/evaluations');
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.error?.message || 'Erro ao buscar avaliações');
+    }
+
+    if (import.meta.env.DEV) {
+      console.log('[EvaluationService] Avaliações recuperadas:', response.data.data.length);
+    }
+
+    return response.data.data.map(mapEvaluationData);
+  } catch (error) {
+    console.error('[EvaluationService] Erro ao buscar avaliações:', error);
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Falha ao buscar avaliações. Tente novamente.');
+  }
+}
+
+export async function getById(id: number): Promise<IEvaluation> {
+  try {
+    if (!id || id <= 0) {
+      throw new Error('ID da avaliação é obrigatório e deve ser maior que zero');
+    }
+
+    if (import.meta.env.DEV) {
+      console.log('[EvaluationService] Buscando avaliação por ID:', id);
+    }
+
+    const response = await api.get<ApiResponse<any>>(`/evaluations/${id}`);
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.error?.message || 'Erro ao buscar avaliação');
+    }
+
+    if (import.meta.env.DEV) {
+      console.log('[EvaluationService] Avaliação encontrada:', response.data.data.id);
+    }
+
+    return mapEvaluationData(response.data.data);
+  } catch (error) {
+    console.error('[EvaluationService] Erro ao buscar avaliação:', error);
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Falha ao buscar avaliação. Tente novamente.');
+  }
+}
+
+export async function create(data: ICreateEvaluationData): Promise<IEvaluation> {
+  try {
     if (!data.classId || data.classId <= 0) {
-      throw new Error('ID da turma é obrigatório e deve ser maior que zero');
+      throw new Error('Turma é obrigatória');
     }
 
     if (!data.disciplineId || data.disciplineId <= 0) {
-      throw new Error(
-        'ID da disciplina é obrigatório e deve ser maior que zero'
-      );
+      throw new Error('Disciplina é obrigatória');
     }
 
-    if (!data.name || data.name.trim().length === 0) {
-      throw new Error('Nome da avaliação é obrigatório');
-    }
-
-    if (data.name.trim().length > 255) {
-      throw new Error('Nome da avaliação não pode exceder 255 caracteres');
+    if (!data.name || data.name.trim().length < 3) {
+      throw new Error('Nome é obrigatório e deve ter no mínimo 3 caracteres');
     }
 
     if (!data.date) {
-      throw new Error('Data da avaliação é obrigatória');
+      throw new Error('Data é obrigatória');
     }
 
-    // Validação de formato de data (ISO 8601: YYYY-MM-DD)
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(data.date)) {
-      throw new Error('Data deve estar no formato YYYY-MM-DD');
-    }
-
-    // Validação de data válida
-    const dateObj = new Date(data.date);
-    if (isNaN(dateObj.getTime())) {
-      throw new Error('Data fornecida é inválida');
-    }
-
-    if (!data.type) {
-      throw new Error('Tipo de avaliação é obrigatório');
-    }
-
-    if (!Object.values(EVALUATION_TYPES).includes(data.type)) {
-      throw new Error(
-        `Tipo de avaliação deve ser "${EVALUATION_TYPES.GRADE}" ou "${EVALUATION_TYPES.CONCEPT}"`
-      );
+    if (!data.type || (data.type !== 'grade' && data.type !== 'concept')) {
+      throw new Error('Tipo é obrigatório e deve ser "grade" ou "concept"');
     }
 
     if (import.meta.env.DEV) {
@@ -165,223 +141,96 @@ export async function create(
         classId: data.classId,
         disciplineId: data.disciplineId,
         name: data.name,
-        date: data.date,
         type: data.type,
       });
     }
 
-    const response = await api.post<ApiResponse<IEvaluation>>(
-      '/evaluations',
-      data
-    );
+    const payload = {
+      class_id: data.classId,
+      teacher_id: data.teacherId,
+      discipline_id: data.disciplineId,
+      name: data.name.trim(),
+      date: data.date,
+      type: data.type,
+    };
+
+    const response = await api.post<ApiResponse<any>>('/evaluations', payload);
 
     if (!response.data.success || !response.data.data) {
-      throw new Error(
-        response.data.error?.message || 'Erro ao criar avaliação'
-      );
+      throw new Error(response.data.error?.message || 'Erro ao criar avaliação');
     }
 
     if (import.meta.env.DEV) {
-      console.log(
-        '[EvaluationService] Avaliação criada com sucesso:',
-        response.data.data.id
-      );
+      console.log('[EvaluationService] Avaliação criada com sucesso:', response.data.data.id);
     }
 
-    return response.data.data;
+    return mapEvaluationData(response.data.data);
   } catch (error) {
     console.error('[EvaluationService] Erro ao criar avaliação:', error);
-
     if (error instanceof Error) {
       throw error;
     }
-
     throw new Error('Falha ao criar avaliação. Tente novamente.');
   }
 }
 
-/**
- * Busca todas as avaliações de uma turma específica
- *
- * Retorna lista completa de avaliações associadas a uma turma.
- * Apenas professores da turma ou administradores têm permissão para esta operação.
- *
- * @param {number} classId - ID da turma
- * @returns {Promise<IEvaluation[]>} Lista de avaliações da turma
- * @throws {Error} Quando ID é inválido, turma não encontrada ou erro na API
- *
- * @example
- * try {
- *   const evaluations = await getByClass(1);
- *   console.log('Avaliações da turma:', evaluations.length);
- * } catch (error) {
- *   console.error('Erro ao buscar avaliações:', error);
- * }
- */
-export async function getByClass(classId: number): Promise<IEvaluation[]> {
+export async function update(id: number, data: IUpdateEvaluationData): Promise<IEvaluation> {
   try {
-    // Validação do ID
-    if (!classId || classId <= 0) {
-      throw new Error('ID da turma é obrigatório e deve ser maior que zero');
-    }
-
-    if (import.meta.env.DEV) {
-      console.log('[EvaluationService] Buscando avaliações da turma:', classId);
-    }
-
-    const response = await api.get<ApiResponse<IEvaluation[]>>(
-      `/evaluations/class/${classId}`
-    );
-
-    if (!response.data.success || !response.data.data) {
-      throw new Error(
-        response.data.error?.message ||
-          'Erro ao buscar avaliações da turma'
-      );
-    }
-
-    if (import.meta.env.DEV) {
-      console.log(
-        '[EvaluationService] Avaliações da turma recuperadas:',
-        response.data.data.length
-      );
-    }
-
-    return response.data.data;
-  } catch (error) {
-    console.error('[EvaluationService] Erro ao buscar avaliações da turma:', error);
-
-    if (error instanceof Error) {
-      throw error;
-    }
-
-    throw new Error(
-      'Falha ao buscar avaliações da turma. Tente novamente.'
-    );
-  }
-}
-
-/**
- * Atualiza avaliação existente
- *
- * Permite atualização parcial dos dados da avaliação.
- * Apenas o professor que criou a avaliação pode atualizá-la.
- *
- * @param {number} id - ID da avaliação a ser atualizada
- * @param {IUpdateEvaluationData} data - Dados a serem atualizados
- * @returns {Promise<IEvaluation>} Dados da avaliação atualizada
- * @throws {Error} Quando ID é inválido, dados são inválidos ou erro na API
- *
- * @example
- * try {
- *   const updatedEvaluation = await update(1, {
- *     name: 'Prova 1 - Revisão',
- *     date: '2025-11-11'
- *   });
- *   console.log('Avaliação atualizada:', updatedEvaluation.id);
- * } catch (error) {
- *   console.error('Erro ao atualizar avaliação:', error);
- * }
- */
-export async function update(
-  id: number,
-  data: IUpdateEvaluationData
-): Promise<IEvaluation> {
-  try {
-    // Validação do ID
     if (!id || id <= 0) {
       throw new Error('ID da avaliação é obrigatório e deve ser maior que zero');
     }
 
-    // Validação de nome (se fornecido)
-    if (data.name !== undefined) {
-      if (data.name.trim().length === 0) {
-        throw new Error('Nome da avaliação não pode estar vazio');
-      }
-
-      if (data.name.trim().length > 255) {
-        throw new Error('Nome da avaliação não pode exceder 255 caracteres');
-      }
+    if (data.classId !== undefined && data.classId <= 0) {
+      throw new Error('Turma deve ser válida');
     }
 
-    // Validação de data (se fornecida)
-    if (data.date !== undefined) {
-      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-      if (!dateRegex.test(data.date)) {
-        throw new Error('Data deve estar no formato YYYY-MM-DD');
-      }
-
-      const dateObj = new Date(data.date);
-      if (isNaN(dateObj.getTime())) {
-        throw new Error('Data fornecida é inválida');
-      }
+    if (data.disciplineId !== undefined && data.disciplineId <= 0) {
+      throw new Error('Disciplina deve ser válida');
     }
 
-    // Validação de tipo (se fornecido)
-    if (data.type !== undefined) {
-      if (!Object.values(EVALUATION_TYPES).includes(data.type)) {
-        throw new Error(
-          `Tipo de avaliação deve ser "${EVALUATION_TYPES.GRADE}" ou "${EVALUATION_TYPES.CONCEPT}"`
-        );
-      }
+    if (data.name !== undefined && data.name.trim().length < 3) {
+      throw new Error('Nome deve ter no mínimo 3 caracteres');
+    }
+
+    if (data.type !== undefined && data.type !== 'grade' && data.type !== 'concept') {
+      throw new Error('Tipo deve ser "grade" ou "concept"');
     }
 
     if (import.meta.env.DEV) {
       console.log('[EvaluationService] Atualizando avaliação:', id, data);
     }
 
-    const response = await api.put<ApiResponse<IEvaluation>>(
-      `/evaluations/${id}`,
-      data
-    );
+    const payload: any = {};
+
+    if (data.classId !== undefined) payload.class_id = data.classId;
+    if (data.teacherId !== undefined) payload.teacher_id = data.teacherId;
+    if (data.disciplineId !== undefined) payload.discipline_id = data.disciplineId;
+    if (data.name !== undefined) payload.name = data.name.trim();
+    if (data.date !== undefined) payload.date = data.date;
+    if (data.type !== undefined) payload.type = data.type;
+
+    const response = await api.put<ApiResponse<any>>(`/evaluations/${id}`, payload);
 
     if (!response.data.success || !response.data.data) {
-      throw new Error(
-        response.data.error?.message || 'Erro ao atualizar avaliação'
-      );
+      throw new Error(response.data.error?.message || 'Erro ao atualizar avaliação');
     }
 
     if (import.meta.env.DEV) {
-      console.log(
-        '[EvaluationService] Avaliação atualizada com sucesso:',
-        response.data.data.id
-      );
+      console.log('[EvaluationService] Avaliação atualizada com sucesso:', response.data.data.id);
     }
 
-    return response.data.data;
+    return mapEvaluationData(response.data.data);
   } catch (error) {
     console.error('[EvaluationService] Erro ao atualizar avaliação:', error);
-
     if (error instanceof Error) {
       throw error;
     }
-
     throw new Error('Falha ao atualizar avaliação. Tente novamente.');
   }
 }
 
-/**
- * Deleta avaliação do sistema
- *
- * Realiza soft delete da avaliação (marcada como deletada, não removida fisicamente).
- * Apenas o professor que criou a avaliação pode deletá-la.
- * Ao deletar uma avaliação, todas as notas associadas a ela serão removidas.
- *
- * @param {number} id - ID da avaliação a ser deletada
- * @returns {Promise<void>}
- * @throws {Error} Quando ID é inválido ou erro na API
- *
- * @example
- * try {
- *   await deleteEvaluation(1);
- *   console.log('Avaliação removida com sucesso');
- * } catch (error) {
- *   console.error('Erro ao remover avaliação:', error);
- * }
- */
 export async function deleteEvaluation(id: number): Promise<void> {
   try {
-    // Validação do ID
     if (!id || id <= 0) {
       throw new Error('ID da avaliação é obrigatório e deve ser maior que zero');
     }
@@ -390,18 +239,12 @@ export async function deleteEvaluation(id: number): Promise<void> {
       console.log('[EvaluationService] Removendo avaliação:', id);
     }
 
-    const response = await api.delete<ApiResponse<void>>(
-      `/evaluations/${id}`
-    );
+    const response = await api.delete<ApiResponse<void>>(`/evaluations/${id}`);
 
-    // Handle 204 No Content (successful deletion with no body)
-    // The response.data may be undefined or empty for 204 status
     const responseData = response.data as any;
 
     if (responseData && !responseData.success) {
-      throw new Error(
-        responseData.error?.message || 'Erro ao remover avaliação'
-      );
+      throw new Error(responseData.error?.message || 'Erro ao remover avaliação');
     }
 
     if (import.meta.env.DEV) {
@@ -409,31 +252,17 @@ export async function deleteEvaluation(id: number): Promise<void> {
     }
   } catch (error) {
     console.error('[EvaluationService] Erro ao remover avaliação:', error);
-
     if (error instanceof Error) {
       throw error;
     }
-
     throw new Error('Falha ao remover avaliação. Tente novamente.');
   }
 }
 
-/**
- * Exporta todas as funções do serviço como objeto
- *
- * Permite importação nomeada ou import do objeto completo
- *
- * @example
- * // Importação nomeada (recomendado)
- * import { create, getByClass, update, deleteEvaluation, EVALUATION_TYPES, type EvaluationType } from '@/services/evaluation.service';
- *
- * // Importação do objeto completo
- * import EvaluationService from '@/services/evaluation.service';
- * EvaluationService.getByClass(1).then(evaluations => console.log(evaluations));
- */
 const EvaluationService = {
+  getAll,
+  getById,
   create,
-  getByClass,
   update,
   delete: deleteEvaluation,
 };

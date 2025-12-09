@@ -11,6 +11,46 @@ const { Op } = require('sequelize');
 
 class EvaluationService {
   /**
+   * Lista todas as avaliações
+   *
+   * @returns {Promise<Evaluation[]>} Lista de todas as avaliações
+   * @throws {AppError} Se houver erro ao listar
+   */
+  async list() {
+    try {
+      const evaluations = await Evaluation.findAll({
+        include: [
+          {
+            model: Class,
+            as: 'class',
+            attributes: ['id', 'semester', 'year'],
+          },
+          {
+            model: User,
+            as: 'teacher',
+            attributes: ['id', 'name', 'email'],
+          },
+          {
+            model: Discipline,
+            as: 'discipline',
+            attributes: ['id', 'name', 'code'],
+          },
+        ],
+        order: [['date', 'DESC']],
+      });
+
+      return evaluations.map(e => e.toJSON());
+    } catch (error) {
+      console.error('[EvaluationService] Erro ao listar avaliações:', error);
+      throw new AppError(
+        'Erro ao listar avaliações',
+        500,
+        'EVALUATION_LIST_ERROR'
+      );
+    }
+  }
+
+  /**
    * Cria uma nova avaliação
    *
    * @param {object} evaluationData - Dados da avaliação
@@ -107,6 +147,7 @@ class EvaluationService {
           },
           {
             model: Discipline,
+            as: 'discipline',
             attributes: ['id', 'name', 'code'],
           },
         ],
@@ -146,10 +187,12 @@ class EvaluationService {
         include: [
           {
             model: Class,
+            as: 'class',
             attributes: ['id', 'semester', 'year'],
           },
           {
             model: Discipline,
+            as: 'discipline',
             attributes: ['id', 'name', 'code'],
           },
         ],
@@ -179,6 +222,7 @@ class EvaluationService {
         include: [
           {
             model: Class,
+            as: 'class',
             attributes: ['id', 'semester', 'year'],
           },
           {
@@ -188,10 +232,12 @@ class EvaluationService {
           },
           {
             model: Discipline,
+            as: 'discipline',
             attributes: ['id', 'name', 'code'],
           },
           {
             model: Grade,
+            as: 'grades',
             attributes: ['id', 'student_id', 'grade', 'concept'],
           },
         ],
@@ -330,6 +376,7 @@ class EvaluationService {
           },
           {
             model: Discipline,
+            as: 'discipline',
             attributes: ['id', 'name', 'code'],
           },
         ],

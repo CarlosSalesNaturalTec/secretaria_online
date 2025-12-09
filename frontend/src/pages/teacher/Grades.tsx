@@ -33,14 +33,8 @@ import {
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { getAll as getAllClasses } from '@/services/class.service';
-import {
-  create as createEvaluation,
-  getByClass as getEvaluationsByClass,
-  deleteEvaluation,
-  EVALUATION_TYPES,
-  type IEvaluation,
-  type EvaluationType,
-} from '@/services/evaluation.service';
+import type { IEvaluation, EvaluationType } from '@/types/evaluation.types';
+import * as EvaluationService from '@/services/evaluation.service';
 import {
   getGradesByEvaluation,
   createGrade,
@@ -50,6 +44,21 @@ import {
 } from '@/services/grade.service';
 import type { IClass, IClassStudent } from '@/types/class.types';
 import type { IGrade } from '@/types/grade.types';
+
+// Constantes para tipos de avaliação
+const EVALUATION_TYPES = {
+  GRADE: 'grade' as const,
+  CONCEPT: 'concept' as const,
+};
+
+// Aliases para funções do evaluation service
+const createEvaluation = EvaluationService.create;
+const getEvaluationsByClass = async (classId: number) => {
+  // TODO: Implementar filtro por turma quando disponível
+  const allEvaluations = await EvaluationService.getAll();
+  return allEvaluations.filter(e => e.classId === classId);
+};
+const deleteEvaluation = EvaluationService.deleteEvaluation;
 
 /**
  * Schema de validação para criação de avaliação

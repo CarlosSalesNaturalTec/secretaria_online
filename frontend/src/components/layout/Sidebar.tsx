@@ -23,6 +23,7 @@ import {
   FileTextIcon,
   ClipboardListIcon,
   SchoolIcon,
+  ClipboardCheckIcon,
 } from 'lucide-react';
 import { type UserRole } from '@/types/user.types';
 
@@ -61,6 +62,7 @@ const getNavigationItems = (role: UserRole): NavigationItem[] => {
       { name: 'Cursos', href: '/admin/courses', icon: BookOpenIcon },
       { name: 'Disciplinas', href: '/admin/disciplines', icon: LibraryIcon },
       { name: 'Turmas', href: '/admin/classes', icon: CalendarIcon },
+      { name: 'Avaliações', href: '/admin/evaluations', icon: ClipboardCheckIcon },
       { name: 'Matrículas', href: '/admin/enrollments', icon: UserCheckIcon },
       { name: 'Documentos', href: '/admin/documents', icon: FileTextIcon },
       { name: 'Solicitações', href: '/admin/requests', icon: ClipboardListIcon },
@@ -73,6 +75,7 @@ const getNavigationItems = (role: UserRole): NavigationItem[] => {
       { name: 'Dashboard', href: '/teacher/dashboard', icon: LayoutDashboardIcon },
       { name: 'Minhas Turmas', href: '/teacher/classes', icon: CalendarIcon },
       { name: 'Alunos', href: '/teacher/students', icon: GraduationCapIcon },
+      { name: 'Avaliações', href: '/teacher/evaluations', icon: ClipboardCheckIcon },
       { name: 'Lançar Notas', href: '/teacher/grades', icon: ClipboardListIcon },
       { name: 'Meus Documentos', href: '/teacher/documents', icon: FileTextIcon },
     ];

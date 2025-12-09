@@ -191,9 +191,79 @@ backend/
 - Upload de documentos
 - Validação e aprovação de documentos
 
-### ✅ Avaliações e Notas (feat-036 a feat-040)
-- Cadastro de avaliações
-- Lançamento de notas
+### ✅ Gestão de Avaliações (feat-036 a feat-040, feat-051)
+- **Rotas**:
+  - `GET /api/v1/evaluations` - Listar todas as avaliações
+  - `GET /api/v1/evaluations/:id` - Buscar avaliação por ID
+  - `POST /api/v1/evaluations` - Criar nova avaliação
+  - `PUT /api/v1/evaluations/:id` - Atualizar avaliação
+  - `DELETE /api/v1/evaluations/:id` - Deletar avaliação
+  - `GET /api/v1/classes/:classId/evaluations` - Listar avaliações de uma turma
+  - `GET /api/v1/teachers/:teacherId/evaluations` - Listar avaliações de um professor
+- **Funcionalidades**:
+  - Cadastro de avaliações por professores e administradores
+  - Tipos de avaliação: Nota (grade) ou Conceito (concept)
+  - Vinculação de avaliação a turma, disciplina e professor
+  - Filtragem por turma, professor ou tipo
+  - Soft delete (exclusão lógica)
+  - Ordenação por data (mais recentes primeiro)
+  - Associações com Class, Teacher, Discipline e Grades
+- **Estrutura de Requisição (POST - Criar Avaliação)**:
+  ```json
+  {
+    "class_id": 5,
+    "teacher_id": 2,
+    "discipline_id": 3,
+    "name": "Prova 1 - Matemática",
+    "date": "2025-12-15",
+    "type": "grade"
+  }
+  ```
+- **Estrutura de Resposta (GET)**:
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "id": 1,
+        "class_id": 5,
+        "teacher_id": 2,
+        "discipline_id": 3,
+        "name": "Prova 1",
+        "date": "2025-12-15",
+        "type": "grade",
+        "created_at": "2025-12-09T10:00:00Z",
+        "updated_at": "2025-12-09T10:00:00Z",
+        "class": {
+          "id": 5,
+          "semester": 1,
+          "year": 2025
+        },
+        "teacher": {
+          "id": 2,
+          "name": "Maria Santos",
+          "email": "maria@example.com"
+        },
+        "discipline": {
+          "id": 3,
+          "name": "Matemática",
+          "code": "MAT101"
+        }
+      }
+    ],
+    "count": 1
+  }
+  ```
+- **Regras de Negócio**:
+  - Tipo 'grade': Avaliação por nota numérica (0-10)
+  - Tipo 'concept': Avaliação por conceito (satisfactory/unsatisfactory)
+  - Professor e disciplina devem existir e estar vinculados à turma
+  - Validação de dados no backend (campo obrigatórios, tipos válidos)
+  - RBAC: Admin e Professor podem criar/editar, Estudante pode visualizar
+
+### ✅ Lançamento de Notas (feat-036 a feat-040)
+- Cadastro de notas para avaliações
+- Lançamento em lote
 - Cálculo de médias
 
 ### ✅ Upload de Arquivos (feat-041 a feat-045)
@@ -545,6 +615,54 @@ PUT /api/v1/documents/:id/approve
 PUT /api/v1/documents/:id/reject
 ```
 
+### Avaliações
+
+```http
+# Listar todas as avaliações
+GET /api/v1/evaluations
+Authorization: Bearer <token>
+
+# Criar avaliação
+POST /api/v1/evaluations
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "class_id": 5,
+  "teacher_id": 2,
+  "discipline_id": 3,
+  "name": "Prova 1 - Matemática",
+  "date": "2025-12-15",
+  "type": "grade"
+}
+
+# Obter avaliação por ID
+GET /api/v1/evaluations/:id
+Authorization: Bearer <token>
+
+# Atualizar avaliação
+PUT /api/v1/evaluations/:id
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name": "Prova 1 - Matemática (Revisada)",
+  "date": "2025-12-20"
+}
+
+# Deletar avaliação
+DELETE /api/v1/evaluations/:id
+Authorization: Bearer <token>
+
+# Listar avaliações de uma turma
+GET /api/v1/classes/:classId/evaluations
+Authorization: Bearer <token>
+
+# Listar avaliações de um professor
+GET /api/v1/teachers/:teacherId/evaluations
+Authorization: Bearer <token>
+```
+
 ### Notas
 
 ```http
@@ -753,9 +871,19 @@ Desenvolvido seguindo as melhores práticas de:
 ---
 
 **Última atualização:** 2025-12-09
-**Versão:** 0.2.1
+**Versão:** 0.3.0
 
 ## 📝 Changelog
+
+### Versão 0.3.0 (2025-12-09)
+- ✅ **NOVO**: Sistema completo de gestão de avaliações
+- ✅ Adicionada rota `GET /api/v1/evaluations` para listar todas as avaliações
+- ✅ Adicionado método `list()` no `EvaluationController` e `EvaluationService`
+- ✅ Corrigidas associações no `EvaluationService` (adicionado `as` para Class, Discipline e Grade)
+- ✅ Adicionado item "Avaliações" no menu Sidebar para Admin e Professor
+- ✅ Corrigido erro de coluna `duration_semesters` em `ClassService` (substituído por `duration` e `duration_type`)
+- ✅ API de avaliações totalmente funcional com CRUD completo
+- ✅ Documentação atualizada com endpoints e exemplos de uso
 
 ### Versão 0.2.1 (2025-12-09)
 - ✅ Adicionada funcionalidade de cadastrar estudante em novo curso

@@ -14,6 +14,16 @@ const authMiddleware = require('../middlewares/auth.middleware');
 router.use(authMiddleware);
 
 /**
+ * GET /api/evaluations
+ * Lista todas as avaliações
+ * Requer: Admin ou Professor
+ */
+router.get(
+  '/',
+  EvaluationController.list
+);
+
+/**
  * POST /api/evaluations
  * Cria uma nova avaliação
  * Requer: Admin ou Professor

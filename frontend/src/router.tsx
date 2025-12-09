@@ -40,6 +40,7 @@ const AdminClasses = lazy(() => import('./pages/admin/Classes'));
 const AdminEnrollments = lazy(() => import('./pages/admin/Enrollments'));
 const AdminDocuments = lazy(() => import('./pages/admin/Documents'));
 const AdminRequests = lazy(() => import('./pages/admin/Requests'));
+const AdminEvaluations = lazy(() => import('./pages/teacher/Evaluations'));
 
 /**
  * Páginas de Aluno (Lazy Loading)
@@ -52,6 +53,7 @@ const StudentDashboard = lazy(() => import('./pages/student/Dashboard'));
 const TeacherDashboard = lazy(() => import('./pages/teacher/Dashboard'));
 const TeacherClasses = lazy(() => import('./pages/teacher/Classes'));
 const TeacherStudents = lazy(() => import('./pages/teacher/Students'));
+const TeacherEvaluations = lazy(() => import('./pages/teacher/Evaluations'));
 
 // ============================================================================
 // LOADING FALLBACK
@@ -196,6 +198,14 @@ const privateRoutes: RouteObject[] = [
           </Suspense>
         ),
       },
+      {
+        path: 'evaluations',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AdminEvaluations />
+          </Suspense>
+        ),
+      },
     ],
   },
   {
@@ -227,10 +237,14 @@ const privateRoutes: RouteObject[] = [
           </Suspense>
         ),
       },
-      /**
-       * TODO: Adicionar rotas filhas do professor
-       * - /teacher/classes/:classId/grades
-       */
+      {
+        path: 'evaluations',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <TeacherEvaluations />
+          </Suspense>
+        ),
+      },
     ],
   },
   {

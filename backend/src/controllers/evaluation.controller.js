@@ -10,6 +10,33 @@ const logger = require('../utils/logger');
 
 class EvaluationController {
   /**
+   * Lista todas as avaliações
+   * GET /api/evaluations
+   *
+   * @param {object} req - Requisição Express
+   * @param {object} res - Resposta Express
+   * @param {function} next - Função next do Express
+   */
+  async list(req, res, next) {
+    try {
+      const evaluations = await EvaluationService.list();
+
+      logger.info('Avaliações listadas', {
+        count: evaluations.length,
+        userId: req.user?.id,
+      });
+
+      res.status(200).json({
+        success: true,
+        data: evaluations,
+        count: evaluations.length,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * Cria uma nova avaliação
    * POST /api/evaluations
    *

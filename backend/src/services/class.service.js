@@ -30,7 +30,7 @@ class ClassService {
       include: [
         {
           association: 'course',
-          attributes: ['id', 'name', 'duration_semesters']
+          attributes: ['id', 'name', 'duration', 'duration_type']
         },
         {
           association: 'students',
@@ -62,7 +62,7 @@ class ClassService {
       include: [
         {
           association: 'course',
-          attributes: ['id', 'name', 'duration_semesters']
+          attributes: ['id', 'name', 'duration', 'duration_type']
         },
         {
           association: 'students',
