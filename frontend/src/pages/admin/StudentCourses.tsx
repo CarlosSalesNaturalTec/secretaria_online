@@ -146,13 +146,17 @@ export default function StudentCoursesPage() {
     }
   };
 
+  const getEnrollment = (courseId: number) => {
+    return enrollments.find((e: any) => e.courseId === courseId) || null;
+  };
+
   const getEnrollmentStatus = (courseId: number) => {
-    const enrollment = enrollments.find((e: any) => e.courseId === courseId);
+    const enrollment = getEnrollment(courseId);
     return enrollment?.status || null;
   };
 
   const getEnrollmentDate = (courseId: number) => {
-    const enrollment = enrollments.find((e: any) => e.courseId === courseId);
+    const enrollment = getEnrollment(courseId);
     if (!enrollment) return null;
     return new Date(enrollment.enrollmentDate).toLocaleDateString('pt-BR');
   };
@@ -244,6 +248,35 @@ export default function StudentCoursesPage() {
       console.error('[StudentCoursesPage] Erro ao adicionar curso:', err);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleStatusChange = async (
+    enrollmentId: number,
+    newStatus: 'pending' | 'active' | 'cancelled'
+  ) => {
+    try {
+      setLoading(true);
+
+      await EnrollmentService.updateStatus(enrollmentId, newStatus);
+
+      setToast({
+        message: `Status da matrícula atualizado para "${getStatusLabel(newStatus)}" com sucesso!`,
+        type: 'success',
+      });
+
+      // Recarregar dados para refletir a mudança
+      await loadData();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Erro ao atualizar status da matrícula';
+      setToast({
+        message: errorMessage,
+        type: 'error',
+      });
+      console.error('[StudentCoursesPage] Erro ao atualizar status:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -444,27 +477,99 @@ export default function StudentCoursesPage() {
 
                   {status === 'active' && (
                     <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                      <p className="text-green-800 text-sm">
-                        ✓ O estudante está com matrícula <strong>ativa</strong> neste
-                        curso.
-                      </p>
+                      <div className="flex items-start justify-between gap-4">
+                        <p className="text-green-800 text-sm">
+                          ✓ O estudante está com matrícula <strong>ativa</strong> neste
+                          curso.
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <label className="text-xs text-gray-600 whitespace-nowrap">
+                            Alterar para:
+                          </label>
+                          <select
+                            onChange={(e) => {
+                              const enrollment = getEnrollment(selectedCourseId);
+                              if (enrollment && e.target.value) {
+                                handleStatusChange(
+                                  enrollment.id,
+                                  e.target.value as 'pending' | 'active' | 'cancelled'
+                                );
+                                e.target.value = '';
+                              }
+                            }}
+                            className="px-3 py-1 border border-green-300 rounded-md text-xs bg-white hover:border-green-400 focus:ring-2 focus:ring-green-500 focus:border-transparent cursor-pointer"
+                          >
+                            <option value="">-- Alterar Status --</option>
+                            <option value="pending">Pendente</option>
+                            <option value="cancelled">Cancelado</option>
+                          </select>
+                        </div>
+                      </div>
                     </div>
                   )}
 
                   {status === 'pending' && (
                     <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <p className="text-yellow-800 text-sm">
-                        ⚠ A matrícula neste curso está <strong>pendente</strong> de
-                        aprovação de documentos.
-                      </p>
+                      <div className="flex items-start justify-between gap-4">
+                        <p className="text-yellow-800 text-sm">
+                          ⚠ A matrícula neste curso está <strong>pendente</strong> de
+                          aprovação de documentos.
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <label className="text-xs text-gray-600 whitespace-nowrap">
+                            Alterar para:
+                          </label>
+                          <select
+                            onChange={(e) => {
+                              const enrollment = getEnrollment(selectedCourseId);
+                              if (enrollment && e.target.value) {
+                                handleStatusChange(
+                                  enrollment.id,
+                                  e.target.value as 'pending' | 'active' | 'cancelled'
+                                );
+                                e.target.value = '';
+                              }
+                            }}
+                            className="px-3 py-1 border border-yellow-300 rounded-md text-xs bg-white hover:border-yellow-400 focus:ring-2 focus:ring-yellow-500 focus:border-transparent cursor-pointer"
+                          >
+                            <option value="">-- Alterar Status --</option>
+                            <option value="active">Ativo</option>
+                            <option value="cancelled">Cancelado</option>
+                          </select>
+                        </div>
+                      </div>
                     </div>
                   )}
 
                   {status === 'cancelled' && (
                     <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                      <p className="text-red-800 text-sm">
-                        ✗ A matrícula neste curso foi <strong>cancelada</strong>.
-                      </p>
+                      <div className="flex items-start justify-between gap-4">
+                        <p className="text-red-800 text-sm">
+                          ✗ A matrícula neste curso foi <strong>cancelada</strong>.
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <label className="text-xs text-gray-600 whitespace-nowrap">
+                            Alterar para:
+                          </label>
+                          <select
+                            onChange={(e) => {
+                              const enrollment = getEnrollment(selectedCourseId);
+                              if (enrollment && e.target.value) {
+                                handleStatusChange(
+                                  enrollment.id,
+                                  e.target.value as 'pending' | 'active' | 'cancelled'
+                                );
+                                e.target.value = '';
+                              }
+                            }}
+                            className="px-3 py-1 border border-red-300 rounded-md text-xs bg-white hover:border-red-400 focus:ring-2 focus:ring-red-500 focus:border-transparent cursor-pointer"
+                          >
+                            <option value="">-- Alterar Status --</option>
+                            <option value="pending">Pendente</option>
+                            <option value="active">Ativo</option>
+                          </select>
+                        </div>
+                      </div>
                     </div>
                   )}
 

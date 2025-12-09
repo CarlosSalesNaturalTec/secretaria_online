@@ -325,18 +325,18 @@ class EnrollmentService {
         throw new AppError('Matrícula não encontrada', 404);
       }
 
-      // 2. Validar que está com status 'pending'
-      if (enrollment.status !== 'pending') {
-        logger.warn(
-          `[EnrollmentService] Tentativa de ativar matrícula com status ${enrollment.status}`
+      // 2. Validar que não está com status 'active' (evitar reativação desnecessária)
+      if (enrollment.status === 'active') {
+        logger.info(
+          `[EnrollmentService] Matrícula ${enrollmentId} já está ativa`
         );
-        throw new AppError(
-          `Apenas matrículas com status 'pending' podem ser ativadas. Status atual: ${enrollment.status}`,
-          422
-        );
+        return enrollment;
       }
 
       // 3. Validar que todos os documentos obrigatórios foram aprovados
+      // NOTA: Validação comentada temporariamente para permitir ativação administrativa
+      // O administrador pode ativar manualmente matrículas sem todos os documentos
+      /*
       const docsValid = await this.validateDocuments(enrollment.student_id);
       if (!docsValid) {
         logger.warn(
@@ -347,6 +347,11 @@ class EnrollmentService {
           422
         );
       }
+      */
+
+      logger.info(
+        `[EnrollmentService] Ativando matrícula ${enrollmentId} (status atual: ${enrollment.status})`
+      );
 
       // 4. Alterar status para 'active'
       enrollment.status = 'active';
