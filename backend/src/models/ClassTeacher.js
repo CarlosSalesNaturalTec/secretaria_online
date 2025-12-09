@@ -53,15 +53,12 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       /**
-       * Associação N:1 com User (Teacher)
+       * Associação N:1 com Teacher
        * Muitos registros podem estar associados a um professor
        */
-      ClassTeacher.belongsTo(models.User, {
+      ClassTeacher.belongsTo(models.Teacher, {
         foreignKey: 'teacher_id',
         as: 'teacher',
-        constraints: {
-          where: { role: 'teacher' }
-        },
         onUpdate: 'CASCADE',
         onDelete: 'RESTRICT'
       });
@@ -106,10 +103,10 @@ module.exports = (sequelize, DataTypes) => {
         comment: 'ID da turma'
       },
       teacher_id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.INTEGER.UNSIGNED,
         allowNull: false,
         references: {
-          model: 'users',
+          model: 'teachers',
           key: 'id'
         },
         validate: {
@@ -120,7 +117,7 @@ module.exports = (sequelize, DataTypes) => {
             msg: 'O ID do professor deve ser um número inteiro'
           }
         },
-        comment: 'ID do professor (usuário com role teacher)'
+        comment: 'ID do professor (tabela teachers)'
       },
       discipline_id: {
         type: DataTypes.INTEGER,

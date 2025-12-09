@@ -5,7 +5,7 @@
  * Criado em: 28/10/2025
  */
 
-const { Class, User, Discipline, ClassTeacher, ClassStudent } = require('../models');
+const { Class, User, Teacher, Discipline, ClassTeacher, ClassStudent } = require('../models');
 
 class ClassService {
   /**
@@ -39,7 +39,7 @@ class ClassService {
         },
         {
           association: 'teachers',
-          attributes: ['id', 'name', 'email'],
+          attributes: ['id', 'nome', 'email'],
           through: { attributes: ['discipline_id'] }
         },
         {
@@ -71,7 +71,7 @@ class ClassService {
         },
         {
           association: 'teachers',
-          attributes: ['id', 'name', 'email'],
+          attributes: ['id', 'nome', 'email'],
           through: { attributes: ['discipline_id'] }
         },
         {
@@ -176,7 +176,7 @@ class ClassService {
       throw new Error('Turma não encontrada.');
     }
 
-    const teacher = await User.findOne({ where: { id: teacherId, role: 'teacher' } });
+    const teacher = await Teacher.findByPk(teacherId);
     if (!teacher) {
       throw new Error('Professor não encontrado');
     }
@@ -289,12 +289,12 @@ class ClassService {
       where: { id: classId },
       include: [
         {
-          model: User,
+          model: Teacher,
           as: 'teachers',
           through: {
             attributes: ['discipline_id'],
           },
-          attributes: ['id', 'name', 'email'],
+          attributes: ['id', 'nome', 'email'],
         },
         {
           model: Discipline,

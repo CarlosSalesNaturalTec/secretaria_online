@@ -58,18 +58,15 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       /**
-       * Associação N:N com User (Teachers) através de class_teachers
+       * Associação N:N com Teacher através de class_teachers
        * Uma turma possui múltiplos professores (cada um lecionando disciplinas diferentes)
        * Um professor pode lecionar em múltiplas turmas
        */
-      Class.belongsToMany(models.User, {
+      Class.belongsToMany(models.Teacher, {
         through: 'class_teachers',
         foreignKey: 'class_id',
         otherKey: 'teacher_id',
-        as: 'teachers',
-        scope: {
-          role: 'teacher' // Apenas usuários com role teacher
-        }
+        as: 'teachers'
       });
 
       /**
@@ -208,7 +205,7 @@ module.exports = (sequelize, DataTypes) => {
     static async countTeachers(classId) {
       const classInstance = await this.findByPk(classId, {
         include: [{
-          model: sequelize.models.User,
+          model: sequelize.models.Teacher,
           as: 'teachers',
           attributes: ['id']
         }]
@@ -396,7 +393,7 @@ module.exports = (sequelize, DataTypes) => {
             },
             {
               association: 'teachers',
-              attributes: ['id', 'name', 'email'],
+              attributes: ['id', 'nome', 'email'],
               through: { attributes: [] }
             }
           ]

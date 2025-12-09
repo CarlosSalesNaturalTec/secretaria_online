@@ -99,8 +99,15 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'SET NULL',
       });
 
+      // Associação N:N com Class através de class_teachers
+      Teacher.belongsToMany(models.Class, {
+        through: 'class_teachers',
+        foreignKey: 'teacher_id',
+        otherKey: 'class_id',
+        as: 'classes'
+      });
+
       // Associações futuras com outras entidades
-      // Teacher.hasMany(models.ClassTeacher, { ... });
       // Teacher.hasMany(models.Evaluation, { ... });
     }
 
