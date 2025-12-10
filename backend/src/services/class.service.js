@@ -26,7 +26,7 @@ class ClassService {
    * @returns {Promise<Class[]>} Uma lista de Turmas com curso, alunos e professores.
    */
   async list() {
-    return Class.findAll({
+    const classes = await Class.findAll({
       include: [
         {
           association: 'course',
@@ -49,6 +49,29 @@ class ClassService {
         }
       ]
     });
+
+    // Mapear dados para converter 'nome' para 'name' para compatibilidade com o frontend
+    return classes.map(cls => {
+      const clsJSON = cls.toJSON();
+
+      // Converter 'nome' para 'name' nos alunos
+      if (clsJSON.students) {
+        clsJSON.students = clsJSON.students.map(student => ({
+          ...student,
+          name: student.nome
+        }));
+      }
+
+      // Converter 'nome' para 'name' nos professores
+      if (clsJSON.teachers) {
+        clsJSON.teachers = clsJSON.teachers.map(teacher => ({
+          ...teacher,
+          name: teacher.nome
+        }));
+      }
+
+      return clsJSON;
+    });
   }
 
   /**
@@ -57,7 +80,7 @@ class ClassService {
    * @returns {Promise<Class>} O Turma encontrado com curso, alunos e professores.
    */
   async getById(id) {
-    return Class.findOne({
+    const cls = await Class.findOne({
       where: { id },
       include: [
         {
@@ -81,6 +104,29 @@ class ClassService {
         }
       ]
     });
+
+    if (!cls) return null;
+
+    // Converter para JSON e mapear 'nome' para 'name'
+    const clsJSON = cls.toJSON();
+
+    // Converter 'nome' para 'name' nos alunos
+    if (clsJSON.students) {
+      clsJSON.students = clsJSON.students.map(student => ({
+        ...student,
+        name: student.nome
+      }));
+    }
+
+    // Converter 'nome' para 'name' nos professores
+    if (clsJSON.teachers) {
+      clsJSON.teachers = clsJSON.teachers.map(teacher => ({
+        ...teacher,
+        name: teacher.nome
+      }));
+    }
+
+    return clsJSON;
   }
 
   /**
@@ -90,7 +136,8 @@ class ClassService {
    * @returns {Promise<Class>} O Turma atualizado com professores e alunos sincronizados.
    */
   async update(id, classData) {
-    const turma = await this.getById(id);
+    // Buscar instância do Sequelize (não o JSON transformado)
+    const turma = await Class.findByPk(id);
     if (!turma) {
       return null;
     }
@@ -226,9 +273,21 @@ class ClassService {
       throw new Error('Turma não encontrada.');
     }
 
-    const student = await User.findOne({ where: { id: studentId, role: 'student' } });
+    const student = await Student.findByPk(studentId);
     if (!student) {
       throw new Error('Aluno não encontrado');
+    }
+
+    // Verificar se o aluno já está nesta turma específica
+    const existingAssociation = await ClassStudent.findOne({
+      where: {
+        class_id: classId,
+        student_id: studentId,
+      }
+    });
+
+    if (existingAssociation) {
+      throw new Error('Este aluno já está cadastrado nesta turma');
     }
 
     return ClassStudent.create({

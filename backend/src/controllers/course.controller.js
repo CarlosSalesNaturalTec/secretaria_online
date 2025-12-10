@@ -119,6 +119,16 @@ class CourseController {
       next(error);
     }
   }
+
+  async getAvailableStudents(req, res, next) {
+    try {
+      const { id } = req.params;
+      const students = await CourseService.getAvailableStudents(id);
+      res.status(200).json({ success: true, data: students });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new CourseController();

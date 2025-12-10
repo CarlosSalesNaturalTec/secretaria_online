@@ -25,6 +25,10 @@ router.get('/:id/disciplines', CourseController.getCourseDisciplines);
 router.post('/:id/disciplines', CourseController.addDisciplineToCourse);
 router.delete('/:id/disciplines/:disciplineId', CourseController.removeDisciplineFromCourse);
 
+// Rota para buscar estudantes disponíveis (sem turma) em um curso
+// IMPORTANTE: Esta rota deve vir ANTES de '/:id/students' para evitar conflito
+router.get('/:id/students/available', CourseController.getAvailableStudents);
+
 // Rota para buscar estudantes matriculados em um curso
 router.get('/:id/students', CourseController.getCourseStudents);
 

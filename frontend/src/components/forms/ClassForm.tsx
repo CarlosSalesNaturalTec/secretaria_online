@@ -274,16 +274,18 @@ export function ClassForm({
   };
 
   /**
-   * Carrega alunos matriculados em um curso específico
+   * Carrega alunos DISPONÍVEIS (sem turma) de um curso específico
+   * Usa o endpoint `/courses/:id/students/available` que retorna apenas
+   * alunos que NÃO estão vinculados a nenhuma turma
    */
   const loadCourseStudents = async (courseId: number) => {
     try {
-      console.log('[ClassForm] Carregando alunos do curso:', courseId);
+      console.log('[ClassForm] Carregando alunos disponíveis do curso:', courseId);
 
-      // Busca apenas alunos com matrícula ativa ou pendente
-      const studentsData = await CourseService.getCourseStudents(courseId);
+      // Busca apenas alunos disponíveis (sem turma) com matrícula ativa ou pendente
+      const studentsData = await CourseService.getAvailableStudents(courseId);
 
-      console.log('[ClassForm] Alunos carregados:', studentsData);
+      console.log('[ClassForm] Alunos disponíveis carregados:', studentsData);
 
       // Formata os dados para o formato esperado pelo componente
       const formattedStudents = studentsData.map((student: any) => ({
@@ -294,7 +296,7 @@ export function ClassForm({
 
       setStudents(formattedStudents);
     } catch (error) {
-      console.error('[ClassForm] Erro ao carregar alunos do curso:', error);
+      console.error('[ClassForm] Erro ao carregar alunos disponíveis do curso:', error);
       setStudents([]);
     }
   };
@@ -526,7 +528,7 @@ export function ClassForm({
           </p>
         ) : students.length === 0 ? (
           <p className="text-sm text-gray-600 italic">
-            Nenhum aluno matriculado neste curso
+            Nenhum aluno disponível (sem turma) neste curso
           </p>
         ) : (
           <div className="space-y-2 max-h-64 overflow-y-auto border border-gray-200 rounded-md p-3">

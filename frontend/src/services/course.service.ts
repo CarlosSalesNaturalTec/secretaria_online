@@ -830,6 +830,59 @@ export async function getCourseStudents(courseId: number, status?: string): Prom
 }
 
 /**
+ * Busca estudantes disponíveis (sem turma) de um curso
+ *
+ * Retorna lista de estudantes matriculados no curso que NÃO estão vinculados a nenhuma turma.
+ * Útil para o formulário de cadastro de turmas, para evitar adicionar estudantes que já estão em turmas.
+ *
+ * @param {number} courseId - ID do curso
+ * @returns {Promise<any[]>} Lista de estudantes disponíveis (sem turma)
+ * @throws {Error} Quando ID do curso é inválido ou ocorre erro na comunicação
+ *
+ * @example
+ * try {
+ *   const availableStudents = await getAvailableStudents(123);
+ *   console.log('Estudantes disponíveis:', availableStudents.length);
+ * } catch (error) {
+ *   console.error('Erro ao buscar estudantes disponíveis:', error);
+ * }
+ */
+export async function getAvailableStudents(courseId: number): Promise<any[]> {
+  try {
+    // Validação do ID
+    if (!courseId || courseId <= 0) {
+      throw new Error('ID do curso é obrigatório e deve ser maior que zero');
+    }
+
+    if (import.meta.env.DEV) {
+      console.log('[CourseService] Buscando estudantes disponíveis do curso:', courseId);
+    }
+
+    const response = await api.get<ApiResponse<any[]>>(`/courses/${courseId}/students/available`);
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(
+        response.data.error?.message || 'Erro ao buscar estudantes disponíveis do curso'
+      );
+    }
+
+    if (import.meta.env.DEV) {
+      console.log('[CourseService] Estudantes disponíveis encontrados:', response.data.data);
+    }
+
+    return response.data.data;
+  } catch (error) {
+    console.error('[CourseService] Erro ao buscar estudantes disponíveis do curso:', error);
+
+    if (error instanceof Error) {
+      throw error;
+    }
+
+    throw new Error('Falha ao buscar estudantes disponíveis do curso. Tente novamente.');
+  }
+}
+
+/**
  * Exporta todas as funções do serviço como objeto
  *
  * Permite importação nomeada ou import do objeto completo

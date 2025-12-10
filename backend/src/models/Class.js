@@ -184,7 +184,7 @@ module.exports = (sequelize, DataTypes) => {
     static async countStudents(classId) {
       const classInstance = await this.findByPk(classId, {
         include: [{
-          model: sequelize.models.User,
+          model: sequelize.models.Student,
           as: 'students',
           attributes: ['id']
         }]

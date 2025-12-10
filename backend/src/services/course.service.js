@@ -216,6 +216,63 @@ class CourseService {
       enrollment_date: enrollment.enrollment_date,
     }));
   }
+
+  /**
+   * Lista estudantes matriculados em um curso que NÃO estão vinculados a NENHUMA turma.
+   * @param {number} courseId - O ID do curso.
+   * @returns {Promise<Student[]>} Lista de estudantes disponíveis (sem turma).
+   */
+  async getAvailableStudents(courseId) {
+    const { ClassStudent } = require('../models');
+    const { Op } = require('sequelize');
+
+    const course = await Course.findByPk(courseId);
+    if (!course) {
+      throw new Error('Curso não encontrado');
+    }
+
+    // Buscar IDs de todos os estudantes que estão em alguma turma
+    const studentsInClasses = await ClassStudent.findAll({
+      attributes: ['student_id'],
+      raw: true,
+    });
+
+    const studentsInClassesIds = studentsInClasses.map(s => s.student_id);
+
+    // Construir condições de busca
+    const whereEnrollment = {
+      course_id: courseId,
+      deleted_at: null,
+      status: {
+        [Op.in]: ['active', 'pending'], // Apenas matrículas ativas ou pendentes
+      },
+    };
+
+    // Buscar matrículas com dados dos estudantes, EXCLUINDO os que já estão em turmas
+    const enrollments = await Enrollment.findAll({
+      where: whereEnrollment,
+      include: [
+        {
+          model: Student,
+          as: 'student',
+          attributes: ['id', 'nome', 'email', 'cpf'],
+          where: {
+            id: {
+              [Op.notIn]: studentsInClassesIds.length > 0 ? studentsInClassesIds : [-1], // -1 para evitar erro se lista vazia
+            },
+          },
+        },
+      ],
+      order: [['enrollment_date', 'DESC']],
+    });
+
+    // Extrair apenas os dados dos estudantes
+    return enrollments.map((enrollment) => ({
+      ...enrollment.student.toJSON(),
+      enrollment_status: enrollment.status,
+      enrollment_date: enrollment.enrollment_date,
+    }));
+  }
 }
 
 module.exports = new CourseService();
