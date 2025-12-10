@@ -5,7 +5,7 @@
  * Criado em: 28/10/2025
  */
 
-const { Class, User, Teacher, Discipline, ClassTeacher, ClassStudent } = require('../models');
+const { Class, Student, Teacher, Discipline, ClassTeacher, ClassStudent } = require('../models');
 
 class ClassService {
   /**
@@ -34,7 +34,7 @@ class ClassService {
         },
         {
           association: 'students',
-          attributes: ['id', 'name', 'email'],
+          attributes: ['id', 'nome', 'email'],
           through: { attributes: [] }
         },
         {
@@ -66,7 +66,7 @@ class ClassService {
         },
         {
           association: 'students',
-          attributes: ['id', 'name', 'email'],
+          attributes: ['id', 'nome', 'email'],
           through: { attributes: [] }
         },
         {

@@ -775,6 +775,61 @@ export async function removeDisciplineFromCourse(
 }
 
 /**
+ * Busca todos os estudantes matriculados em um curso
+ *
+ * Retorna lista de estudantes com matrícula ativa, pendente ou cancelada em um curso específico.
+ * Apenas usuários administrativos têm permissão para esta operação.
+ *
+ * @param {number} courseId - ID do curso
+ * @param {string} status - Filtro de status (opcional: 'active', 'pending', 'cancelled')
+ * @returns {Promise<any[]>} Lista de estudantes matriculados
+ * @throws {Error} Quando ID é inválido, curso não encontrado ou erro na API
+ *
+ * @example
+ * try {
+ *   const students = await getCourseStudents(123);
+ *   console.log('Total de estudantes:', students.length);
+ * } catch (error) {
+ *   console.error('Erro ao buscar estudantes do curso:', error);
+ * }
+ */
+export async function getCourseStudents(courseId: number, status?: string): Promise<any[]> {
+  try {
+    // Validação do ID
+    if (!courseId || courseId <= 0) {
+      throw new Error('ID do curso é obrigatório e deve ser maior que zero');
+    }
+
+    if (import.meta.env.DEV) {
+      console.log('[CourseService] Buscando estudantes do curso:', courseId, 'status:', status);
+    }
+
+    const params = status ? { status } : {};
+    const response = await api.get<ApiResponse<any[]>>(`/courses/${courseId}/students`, { params });
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(
+        response.data.error?.message || 'Erro ao buscar estudantes do curso'
+      );
+    }
+
+    if (import.meta.env.DEV) {
+      console.log('[CourseService] Estudantes encontrados:', response.data.data);
+    }
+
+    return response.data.data;
+  } catch (error) {
+    console.error('[CourseService] Erro ao buscar estudantes do curso:', error);
+
+    if (error instanceof Error) {
+      throw error;
+    }
+
+    throw new Error('Falha ao buscar estudantes do curso. Tente novamente.');
+  }
+}
+
+/**
  * Exporta todas as funções do serviço como objeto
  *
  * Permite importação nomeada ou import do objeto completo
@@ -796,6 +851,7 @@ const CourseService = {
   getCourseDisciplines,
   addDisciplineToCourse,
   removeDisciplineFromCourse,
+  getCourseStudents,
 };
 
 export default CourseService;

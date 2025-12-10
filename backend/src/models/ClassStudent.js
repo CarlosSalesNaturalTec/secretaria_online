@@ -3,10 +3,11 @@
  * Descrição: Model Sequelize para a tabela class_students (relação turma-aluno)
  * Feature: feat-010 - Criar migrations para Class e relacionamentos
  * Criado em: 2025-10-30
+ * Atualizado em: 2025-12-10 - Corrigido FK para referenciar students ao invés de users
  *
  * Responsabilidades:
  * - Definir estrutura e validações para a entidade ClassStudent
- * - Representa o relacionamento N:N entre Class e User (students)
+ * - Representa o relacionamento N:N entre Class e Student
  * - Implementar validações de integridade referencial
  *
  * @example
@@ -30,7 +31,7 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   /**
    * Model ClassStudent
-   * Tabela pivot para relacionamento N:N entre Class e User (students)
+   * Tabela pivot para relacionamento N:N entre Class e Student
    */
   class ClassStudent extends Model {
     /**
@@ -51,15 +52,12 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       /**
-       * Associação N:1 com User (Student)
+       * Associação N:1 com Student
        * Muitos registros podem estar associados a um aluno
        */
-      ClassStudent.belongsTo(models.User, {
+      ClassStudent.belongsTo(models.Student, {
         foreignKey: 'student_id',
         as: 'student',
-        constraints: {
-          where: { role: 'student' }
-        },
         onUpdate: 'CASCADE',
         onDelete: 'RESTRICT'
       });
@@ -93,10 +91,10 @@ module.exports = (sequelize, DataTypes) => {
         comment: 'ID da turma'
       },
       student_id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.INTEGER.UNSIGNED,
         allowNull: false,
         references: {
-          model: 'users',
+          model: 'students',
           key: 'id'
         },
         validate: {
@@ -107,7 +105,7 @@ module.exports = (sequelize, DataTypes) => {
             msg: 'O ID do aluno deve ser um número inteiro'
           }
         },
-        comment: 'ID do aluno (usuário com role student)'
+        comment: 'ID do aluno (referência à tabela students)'
       }
     },
     {

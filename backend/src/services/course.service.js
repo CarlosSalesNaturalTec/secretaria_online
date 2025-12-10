@@ -5,7 +5,7 @@
  * Criado em: 28/10/2025
  */
 
-const { Course, Discipline, CourseDiscipline } = require('../models');
+const { Course, Discipline, CourseDiscipline, Enrollment, Student } = require('../models');
 
 class CourseService {
   /**
@@ -171,6 +171,50 @@ class CourseService {
     }
 
     return course.disciplines;
+  }
+
+  /**
+   * Lista todos os estudantes matriculados em um curso.
+   * @param {number} courseId - O ID do curso.
+   * @param {string} status - Filtro de status (opcional: 'active', 'pending', 'cancelled').
+   * @returns {Promise<Student[]>} Lista de estudantes matriculados.
+   */
+  async getCourseStudents(courseId, status = null) {
+    const course = await Course.findByPk(courseId);
+    if (!course) {
+      throw new Error('Curso não encontrado');
+    }
+
+    // Construir condições de busca
+    const where = {
+      course_id: courseId,
+      deleted_at: null,
+    };
+
+    // Filtrar por status se fornecido
+    if (status) {
+      where.status = status;
+    }
+
+    // Buscar matrículas com dados dos estudantes
+    const enrollments = await Enrollment.findAll({
+      where,
+      include: [
+        {
+          model: Student,
+          as: 'student',
+          attributes: ['id', 'nome', 'email', 'cpf'],
+        },
+      ],
+      order: [['enrollment_date', 'DESC']],
+    });
+
+    // Extrair apenas os dados dos estudantes
+    return enrollments.map((enrollment) => ({
+      ...enrollment.student.toJSON(),
+      enrollment_status: enrollment.status,
+      enrollment_date: enrollment.enrollment_date,
+    }));
   }
 }
 

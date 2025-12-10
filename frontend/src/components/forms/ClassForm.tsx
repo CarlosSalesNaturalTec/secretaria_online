@@ -169,7 +169,7 @@ export function ClassForm({
   }, []);
 
   /**
-   * Atualiza lista de disciplinas quando curso muda
+   * Atualiza lista de disciplinas e alunos quando curso muda
    */
   useEffect(() => {
     if (selectedCourseId > 0) {
@@ -185,8 +185,12 @@ export function ClassForm({
       } else {
         setDisciplines([]);
       }
+
+      // Carregar alunos matriculados no curso selecionado
+      loadCourseStudents(selectedCourseId);
     } else {
       setDisciplines([]);
+      setStudents([]);
     }
   }, [selectedCourseId, courses]);
 
@@ -238,31 +242,60 @@ export function ClassForm({
         console.log('[ClassForm] Student IDs finais:', studentIds);
         setSelectedStudents(studentIds);
       }
+
+      // Carregar alunos do curso para permitir adicionar/remover
+      if (initialData.courseId && initialData.courseId > 0) {
+        loadCourseStudents(initialData.courseId);
+      }
     }
   }, [initialData, reset]);
 
   /**
-   * Carrega cursos, professores e alunos
+   * Carrega cursos e professores
    */
   const loadFormData = async () => {
     try {
       setLoadingData(true);
 
-      const [coursesData, studentsData, teachersData] = await Promise.all([
-        CourseService.getAll(),
-        StudentService.getAll(),
+      const [coursesData, teachersData] = await Promise.all([
+        CourseService.getAll({ limit: 1000 }),
         TeacherService.getAll(),
       ]);
 
       // coursesData agora é IPaginatedCoursesResponse, então acessa .data
       setCourses(coursesData.data);
-      setStudents(studentsData.students);
       setTeachers(teachersData);
     } catch (error) {
       console.error('[ClassForm] Erro ao carregar dados:', error);
       alert('Erro ao carregar dados necessários para o formulário');
     } finally {
       setLoadingData(false);
+    }
+  };
+
+  /**
+   * Carrega alunos matriculados em um curso específico
+   */
+  const loadCourseStudents = async (courseId: number) => {
+    try {
+      console.log('[ClassForm] Carregando alunos do curso:', courseId);
+
+      // Busca apenas alunos com matrícula ativa ou pendente
+      const studentsData = await CourseService.getCourseStudents(courseId);
+
+      console.log('[ClassForm] Alunos carregados:', studentsData);
+
+      // Formata os dados para o formato esperado pelo componente
+      const formattedStudents = studentsData.map((student: any) => ({
+        id: student.id,
+        name: student.nome,
+        email: student.email,
+      }));
+
+      setStudents(formattedStudents);
+    } catch (error) {
+      console.error('[ClassForm] Erro ao carregar alunos do curso:', error);
+      setStudents([]);
     }
   };
 
@@ -487,9 +520,13 @@ export function ClassForm({
           Alunos
         </h3>
 
-        {students.length === 0 ? (
+        {selectedCourseId === 0 ? (
           <p className="text-sm text-gray-600 italic">
-            Nenhum aluno cadastrado no sistema
+            Selecione um curso primeiro para vincular alunos
+          </p>
+        ) : students.length === 0 ? (
+          <p className="text-sm text-gray-600 italic">
+            Nenhum aluno matriculado neste curso
           </p>
         ) : (
           <div className="space-y-2 max-h-64 overflow-y-auto border border-gray-200 rounded-md p-3">

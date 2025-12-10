@@ -70,18 +70,15 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       /**
-       * Associação N:N com User (Students) através de class_students
+       * Associação N:N com Student através de class_students
        * Uma turma possui múltiplos alunos
        * Um aluno pode estar em múltiplas turmas (se estiver matriculado em mais de um curso)
        */
-      Class.belongsToMany(models.User, {
+      Class.belongsToMany(models.Student, {
         through: 'class_students',
         foreignKey: 'class_id',
         otherKey: 'student_id',
-        as: 'students',
-        scope: {
-          role: 'student' // Apenas usuários com role student
-        }
+        as: 'students'
       });
 
       /**

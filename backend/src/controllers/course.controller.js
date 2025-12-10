@@ -108,6 +108,17 @@ class CourseController {
       next(error);
     }
   }
+
+  async getCourseStudents(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { status } = req.query;
+      const students = await CourseService.getCourseStudents(id, status);
+      res.status(200).json({ success: true, data: students });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new CourseController();

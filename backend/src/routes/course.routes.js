@@ -25,4 +25,7 @@ router.get('/:id/disciplines', CourseController.getCourseDisciplines);
 router.post('/:id/disciplines', CourseController.addDisciplineToCourse);
 router.delete('/:id/disciplines/:disciplineId', CourseController.removeDisciplineFromCourse);
 
+// Rota para buscar estudantes matriculados em um curso
+router.get('/:id/students', CourseController.getCourseStudents);
+
 module.exports = router;
