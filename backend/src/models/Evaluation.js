@@ -63,17 +63,14 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       /**
-       * Associação N:1 com User (Teacher)
+       * Associação N:1 com Teacher
        * Uma avaliação é criada por um professor
        */
-      Evaluation.belongsTo(models.User, {
+      Evaluation.belongsTo(models.Teacher, {
         foreignKey: 'teacher_id',
         as: 'teacher',
         onUpdate: 'CASCADE',
-        onDelete: 'RESTRICT',
-        scope: {
-          role: 'teacher'
-        }
+        onDelete: 'RESTRICT'
       });
 
       /**
@@ -300,7 +297,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER.UNSIGNED,
         allowNull: false,
         references: {
-          model: 'users',
+          model: 'teachers',
           key: 'id'
         },
         validate: {

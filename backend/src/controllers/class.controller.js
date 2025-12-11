@@ -6,6 +6,7 @@
  */
 
 const ClassService = require('../services/class.service');
+const { User } = require('../models');
 
 class ClassController {
   async create(req, res, next) {
@@ -19,7 +20,18 @@ class ClassController {
 
   async list(req, res, next) {
     try {
-      const classs = await ClassService.list();
+      let teacherId = null;
+
+      // Se o usuário logado for professor, filtrar apenas suas turmas
+      if (req.user && req.user.role === 'teacher') {
+        // Buscar o teacher_id associado ao user_id logado
+        const user = await User.findByPk(req.user.id);
+        if (user && user.teacher_id) {
+          teacherId = user.teacher_id;
+        }
+      }
+
+      const classs = await ClassService.list(teacherId);
       res.status(200).json({ success: true, data: classs });
     } catch (error) {
       next(error);

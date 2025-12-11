@@ -5,7 +5,7 @@
  * Criado em: 2025-11-01
  */
 
-const { Evaluation, Class, User, Discipline, Grade } = require('../models');
+const { Evaluation, Class, Teacher, Discipline, Grade, User } = require('../models');
 const { AppError } = require('../middlewares/error.middleware');
 const { Op } = require('sequelize');
 
@@ -26,9 +26,9 @@ class EvaluationService {
             attributes: ['id', 'semester', 'year'],
           },
           {
-            model: User,
+            model: Teacher,
             as: 'teacher',
-            attributes: ['id', 'name', 'email'],
+            attributes: ['id', 'nome', 'email'],
           },
           {
             model: Discipline,
@@ -55,25 +55,46 @@ class EvaluationService {
    *
    * @param {object} evaluationData - Dados da avaliação
    * @param {number} evaluationData.class_id - ID da turma
-   * @param {number} evaluationData.teacher_id - ID do professor
+   * @param {number} evaluationData.teacher_id - ID do professor (opcional, obtido do usuário logado se não fornecido)
    * @param {number} evaluationData.discipline_id - ID da disciplina
    * @param {string} evaluationData.name - Nome da avaliação
    * @param {string} evaluationData.date - Data da avaliação (YYYY-MM-DD)
    * @param {string} evaluationData.type - Tipo: 'grade' ou 'concept'
+   * @param {object} currentUser - Usuário logado (opcional)
    * @returns {Promise<Evaluation>} A avaliação criada
    * @throws {AppError} Se houver erro na validação
    */
-  async create(evaluationData) {
+  async create(evaluationData, currentUser = null) {
     // Validar se a turma existe
     const classExists = await Class.findByPk(evaluationData.class_id);
     if (!classExists) {
       throw new AppError('Turma não encontrada', 404, 'CLASS_NOT_FOUND');
     }
 
-    // Validar se o professor existe e tem o papel correto
-    const teacher = await User.findOne({
-      where: { id: evaluationData.teacher_id, role: 'teacher' },
-    });
+    // Determinar o teacher_id
+    let teacherId = evaluationData.teacher_id;
+
+    // Se teacher_id não foi fornecido, tentar obter do usuário logado
+    if (!teacherId && currentUser) {
+      // Buscar o teacher_id associado ao user_id logado
+      const user = await User.findByPk(currentUser.id);
+      if (user && user.teacher_id) {
+        teacherId = user.teacher_id;
+      } else {
+        throw new AppError(
+          'Usuário logado não tem um professor associado. Por favor, forneça o ID do professor.',
+          400,
+          'NO_TEACHER_ASSOCIATED'
+        );
+      }
+    }
+
+    if (!teacherId) {
+      throw new AppError('ID do professor é obrigatório', 400, 'TEACHER_ID_REQUIRED');
+    }
+
+    // Validar se o professor existe
+    const teacher = await Teacher.findByPk(teacherId);
     if (!teacher) {
       throw new AppError('Professor não encontrado', 404, 'TEACHER_NOT_FOUND');
     }
@@ -96,7 +117,7 @@ class EvaluationService {
     try {
       const evaluation = await Evaluation.create({
         class_id: evaluationData.class_id,
-        teacher_id: evaluationData.teacher_id,
+        teacher_id: teacherId, // Usar o teacherId determinado (da requisição ou do usuário logado)
         discipline_id: evaluationData.discipline_id,
         name: evaluationData.name,
         date: evaluationData.date,
@@ -105,6 +126,7 @@ class EvaluationService {
 
       return evaluation.toJSON();
     } catch (error) {
+      console.error('[EvaluationService] Erro ao criar avaliação:', error);
       throw new AppError(
         'Erro ao criar avaliação',
         500,
@@ -141,9 +163,9 @@ class EvaluationService {
         where,
         include: [
           {
-            model: User,
+            model: Teacher,
             as: 'teacher',
-            attributes: ['id', 'name', 'email'],
+            attributes: ['id', 'nome', 'email'],
           },
           {
             model: Discipline,
@@ -174,9 +196,7 @@ class EvaluationService {
    */
   async listByTeacher(teacherId) {
     // Validar se o professor existe
-    const teacher = await User.findOne({
-      where: { id: teacherId, role: 'teacher' },
-    });
+    const teacher = await Teacher.findByPk(teacherId);
     if (!teacher) {
       throw new AppError('Professor não encontrado', 404, 'TEACHER_NOT_FOUND');
     }
@@ -226,9 +246,9 @@ class EvaluationService {
             attributes: ['id', 'semester', 'year'],
           },
           {
-            model: User,
+            model: Teacher,
             as: 'teacher',
-            attributes: ['id', 'name', 'email'],
+            attributes: ['id', 'nome', 'email'],
           },
           {
             model: Discipline,
@@ -370,9 +390,9 @@ class EvaluationService {
         },
         include: [
           {
-            model: User,
+            model: Teacher,
             as: 'teacher',
-            attributes: ['id', 'name', 'email'],
+            attributes: ['id', 'nome', 'email'],
           },
           {
             model: Discipline,

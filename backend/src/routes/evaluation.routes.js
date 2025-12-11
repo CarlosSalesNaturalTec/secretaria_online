@@ -9,6 +9,7 @@ const express = require('express');
 const router = express.Router();
 const EvaluationController = require('../controllers/evaluation.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
+const { authorizeTeacher, authorizeAny } = require('../middlewares/rbac.middleware');
 
 // Todas as rotas requerem autenticação
 router.use(authMiddleware);
@@ -20,6 +21,7 @@ router.use(authMiddleware);
  */
 router.get(
   '/',
+  authorizeTeacher,
   EvaluationController.list
 );
 
@@ -31,6 +33,7 @@ router.get(
  */
 router.post(
   '/',
+  authorizeTeacher,
   EvaluationController.create
 );
 
@@ -42,6 +45,7 @@ router.post(
  */
 router.get(
   '/classes/:classId/evaluations',
+  authorizeAny,
   EvaluationController.listByClass
 );
 
@@ -52,6 +56,7 @@ router.get(
  */
 router.get(
   '/classes/:classId/evaluations/upcoming',
+  authorizeAny,
   EvaluationController.listUpcomingByClass
 );
 
@@ -62,6 +67,7 @@ router.get(
  */
 router.get(
   '/teachers/:teacherId/evaluations',
+  authorizeAny,
   EvaluationController.listByTeacher
 );
 
@@ -72,6 +78,7 @@ router.get(
  */
 router.get(
   '/:id',
+  authorizeAny,
   EvaluationController.getById
 );
 
@@ -82,6 +89,7 @@ router.get(
  */
 router.put(
   '/:id',
+  authorizeTeacher,
   EvaluationController.update
 );
 
@@ -92,6 +100,7 @@ router.put(
  */
 router.delete(
   '/:id',
+  authorizeTeacher,
   EvaluationController.delete
 );
 

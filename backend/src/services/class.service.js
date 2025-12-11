@@ -22,11 +22,24 @@ class ClassService {
   }
 
   /**
-   * Lista todos os Turmas.
+   * Lista todos os Turmas (ou filtra por professor se teacherId for fornecido).
+   * @param {number} teacherId - ID do professor para filtrar turmas (opcional)
    * @returns {Promise<Class[]>} Uma lista de Turmas com curso, alunos e professores.
    */
-  async list() {
-    const classes = await Class.findAll({
+  async list(teacherId = null) {
+    const teachersInclude = {
+      association: 'teachers',
+      attributes: ['id', 'nome', 'email'],
+      through: { attributes: ['discipline_id'] }
+    };
+
+    // Se teacherId for fornecido, filtrar turmas desse professor
+    if (teacherId) {
+      teachersInclude.where = { id: teacherId };
+      teachersInclude.required = true;
+    }
+
+    const queryOptions = {
       include: [
         {
           association: 'course',
@@ -37,18 +50,16 @@ class ClassService {
           attributes: ['id', 'nome', 'email'],
           through: { attributes: [] }
         },
-        {
-          association: 'teachers',
-          attributes: ['id', 'nome', 'email'],
-          through: { attributes: ['discipline_id'] }
-        },
+        teachersInclude,
         {
           association: 'disciplines',
           attributes: ['id', 'name', 'code'],
           through: { attributes: [] }
         }
       ]
-    });
+    };
+
+    const classes = await Class.findAll(queryOptions);
 
     // Mapear dados para converter 'nome' para 'name' para compatibilidade com o frontend
     return classes.map(cls => {

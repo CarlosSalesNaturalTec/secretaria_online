@@ -53,7 +53,7 @@ class EvaluationController {
    */
   async create(req, res, next) {
     try {
-      const evaluation = await EvaluationService.create(req.body);
+      const evaluation = await EvaluationService.create(req.body, req.user);
 
       logger.info('Avaliação criada com sucesso', {
         evaluationId: evaluation.id,

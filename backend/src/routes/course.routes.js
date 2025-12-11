@@ -9,27 +9,29 @@ const express = require('express');
 const router = express.Router();
 const CourseController = require('../controllers/course.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
-const { authorizeAdmin } = require('../middlewares/rbac.middleware');
+const { authorizeAdmin, authorizeTeacher } = require('../middlewares/rbac.middleware');
 
 router.use(authMiddleware);
-router.use(authorizeAdmin);
 
-router.post('/', CourseController.create);
-router.get('/', CourseController.list);
-router.get('/:id', CourseController.getById);
-router.put('/:id', CourseController.update);
-router.delete('/:id', CourseController.delete);
+// Rotas de listagem: Admin e Professor
+router.get('/', authorizeTeacher, CourseController.list);
+router.get('/:id', authorizeTeacher, CourseController.getById);
+
+// Rotas de CRUD: Apenas Admin
+router.post('/', authorizeAdmin, CourseController.create);
+router.put('/:id', authorizeAdmin, CourseController.update);
+router.delete('/:id', authorizeAdmin, CourseController.delete);
 
 // Rotas para vincular/desvincular disciplinas
-router.get('/:id/disciplines', CourseController.getCourseDisciplines);
-router.post('/:id/disciplines', CourseController.addDisciplineToCourse);
-router.delete('/:id/disciplines/:disciplineId', CourseController.removeDisciplineFromCourse);
+router.get('/:id/disciplines', authorizeTeacher, CourseController.getCourseDisciplines);
+router.post('/:id/disciplines', authorizeAdmin, CourseController.addDisciplineToCourse);
+router.delete('/:id/disciplines/:disciplineId', authorizeAdmin, CourseController.removeDisciplineFromCourse);
 
 // Rota para buscar estudantes disponíveis (sem turma) em um curso
 // IMPORTANTE: Esta rota deve vir ANTES de '/:id/students' para evitar conflito
-router.get('/:id/students/available', CourseController.getAvailableStudents);
+router.get('/:id/students/available', authorizeTeacher, CourseController.getAvailableStudents);
 
 // Rota para buscar estudantes matriculados em um curso
-router.get('/:id/students', CourseController.getCourseStudents);
+router.get('/:id/students', authorizeTeacher, CourseController.getCourseStudents);
 
 module.exports = router;

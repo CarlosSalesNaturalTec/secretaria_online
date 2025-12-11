@@ -9,16 +9,18 @@ const express = require('express');
 const router = express.Router();
 const DisciplineController = require('../controllers/discipline.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
-const { authorizeAdmin } = require('../middlewares/rbac.middleware');
+const { authorizeAdmin, authorizeTeacher } = require('../middlewares/rbac.middleware');
 const { disciplineValidationRules, handleValidationErrors } = require('../middlewares/validation.middleware');
 
 router.use(authMiddleware);
-router.use(authorizeAdmin);
 
-router.post('/', disciplineValidationRules(), handleValidationErrors, DisciplineController.create);
-router.get('/', DisciplineController.list);
-router.get('/:id', DisciplineController.getById);
-router.put('/:id', disciplineValidationRules(), handleValidationErrors, DisciplineController.update);
-router.delete('/:id', DisciplineController.delete);
+// Rotas de listagem: Admin e Professor
+router.get('/', authorizeTeacher, DisciplineController.list);
+router.get('/:id', authorizeTeacher, DisciplineController.getById);
+
+// Rotas de CRUD: Apenas Admin
+router.post('/', authorizeAdmin, disciplineValidationRules(), handleValidationErrors, DisciplineController.create);
+router.put('/:id', authorizeAdmin, disciplineValidationRules(), handleValidationErrors, DisciplineController.update);
+router.delete('/:id', authorizeAdmin, DisciplineController.delete);
 
 module.exports = router;

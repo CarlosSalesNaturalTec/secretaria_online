@@ -107,8 +107,14 @@ module.exports = (sequelize, DataTypes) => {
         as: 'classes'
       });
 
-      // Associações futuras com outras entidades
-      // Teacher.hasMany(models.Evaluation, { ... });
+      // Associação 1:N com Evaluation
+      // Um professor pode criar múltiplas avaliações
+      Teacher.hasMany(models.Evaluation, {
+        foreignKey: 'teacher_id',
+        as: 'evaluations',
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT'
+      });
     }
 
     /**

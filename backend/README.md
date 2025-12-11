@@ -191,7 +191,12 @@ backend/
 - Upload de documentos
 - Validação e aprovação de documentos
 
-### ✅ Gestão de Avaliações (feat-036 a feat-040, feat-051)
+### ✅ Gestão de Avaliações (feat-036 a feat-040, feat-051, bug-fix-2025-12-11)
+- **Estrutura Corrigida**:
+  - ✅ **Chave estrangeira `teacher_id` corrigida**: Agora referencia tabela `teachers` ao invés de `users`
+  - ✅ **Migration executada**: `20251211002451-fix-evaluations-teacher-foreign-key.js`
+  - ✅ **Busca automática de `teacher_id`**: Sistema busca automaticamente o ID do professor na tabela `teachers` a partir do usuário logado
+  - ✅ **Filtro de turmas por professor**: Professores veem apenas suas próprias turmas ao criar avaliações
 - **Rotas**:
   - `GET /api/v1/evaluations` - Listar todas as avaliações
   - `GET /api/v1/evaluations/:id` - Buscar avaliação por ID
@@ -219,6 +224,7 @@ backend/
     "type": "grade"
   }
   ```
+  **Observação**: O campo `teacher_id` é **opcional** ao criar avaliação. Se não fornecido, o sistema busca automaticamente o `teacher_id` associado ao usuário logado (tabela `users.teacher_id`).
 - **Estrutura de Resposta (GET)**:
   ```json
   {

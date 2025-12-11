@@ -169,6 +169,7 @@ frontend/
   - Seleção de tipo (radio buttons: Nota ou Conceito)
   - Validação completa com Zod
   - Suporta criar e editar
+  - **NOVO**: Campo `teacher_id` opcional - preenchido automaticamente no backend se usuário logado for professor
 - **Rotas**:
   - `/admin/evaluations` - Acesso admin (todas as avaliações)
   - `/teacher/evaluations` - Acesso professor (próprias avaliações)
@@ -184,6 +185,10 @@ frontend/
   - `evaluation.types.ts` - Interfaces TypeScript
   - IEvaluation, ICreateEvaluationData, IUpdateEvaluationData
   - Type-safe em todas as camadas
+- **Filtros Inteligentes**:
+  - **NOVO**: Professores visualizam apenas suas turmas nos dropdowns (filtro automático por backend)
+  - **NOVO**: Administradores visualizam todas as turmas disponíveis
+  - Filtro dinâmico de disciplinas baseado na turma selecionada
 - **Operações disponíveis**:
   - ✅ Listar todas as avaliações
   - ✅ Criar nova avaliação (vinculada a turma, disciplina e professor)
@@ -191,6 +196,7 @@ frontend/
   - ✅ Deletar avaliação (com confirmação)
   - ✅ Filtrar por turma
   - ✅ Visualizar detalhes (turma, disciplina, professor, tipo, data)
+  - ✅ Resolução automática de teacher_id para professores logados
 
 ### ✅ Gestão de Cursos do Estudante
 - **Página dedicada**: `/admin/students/:studentId/courses`
@@ -510,10 +516,18 @@ Desenvolvido seguindo as melhores práticas de:
 
 ---
 
-**Última atualização:** 2025-12-09
-**Versão:** 0.3.0
+**Última atualização:** 2025-12-10
+**Versão:** 0.3.1
 
 ## 📝 Changelog
+
+### Versão 0.3.1 (2025-12-10)
+- 🐛 **BUGFIX**: Corrigida exibição de turmas e disciplinas nos dropdowns para professores
+- ✅ **NOVO**: Filtro automático de turmas por professor logado
+- ✅ **NOVO**: Administradores visualizam todas as turmas, professores apenas suas turmas
+- ✅ **NOVO**: Resolução automática de `teacher_id` no backend para professores logados
+- ✅ Removida necessidade de enviar `teacher_id` explicitamente no formulário
+- ✅ Melhor experiência de usuário para professores ao criar avaliações
 
 ### Versão 0.3.0 (2025-12-09)
 - ✅ **NOVO**: Interface completa de gestão de avaliações
