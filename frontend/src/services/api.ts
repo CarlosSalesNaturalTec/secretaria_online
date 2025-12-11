@@ -30,6 +30,39 @@ interface ApiErrorResponse {
 }
 
 /**
+ * Converte snake_case para camelCase
+ */
+function toCamelCase(str: string): string {
+  return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+}
+
+/**
+ * Converte recursivamente todas as chaves de um objeto de snake_case para camelCase
+ */
+function convertKeysToCamelCase(obj: any): any {
+  if (obj === null || obj === undefined) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(item => convertKeysToCamelCase(item));
+  }
+
+  if (typeof obj === 'object' && obj.constructor === Object) {
+    const converted: any = {};
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const camelKey = toCamelCase(key);
+        converted[camelKey] = convertKeysToCamelCase(obj[key]);
+      }
+    }
+    return converted;
+  }
+
+  return obj;
+}
+
+/**
  * Instância configurada do Axios
  *
  * @property {string} baseURL - URL base da API (variável de ambiente ou fallback para localhost)
@@ -103,6 +136,11 @@ api.interceptors.request.use(
  */
 api.interceptors.response.use(
   (response: AxiosResponse) => {
+    // Converte snake_case para camelCase
+    if (response.data) {
+      response.data = convertKeysToCamelCase(response.data);
+    }
+
     // Log de sucesso em desenvolvimento
     if (import.meta.env.DEV) {
       console.log(

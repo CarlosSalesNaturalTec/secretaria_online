@@ -232,7 +232,15 @@ export async function createGrade(data: ICreateGradeData): Promise<IGrade> {
       });
     }
 
-    const response = await api.post<ApiResponse<IGrade>>('/grades', data);
+    // Converter camelCase para snake_case para o backend
+    const payload = {
+      evaluation_id: data.evaluationId,
+      student_id: data.studentId,
+      grade: data.grade,
+      concept: data.concept,
+    };
+
+    const response = await api.post<ApiResponse<IGrade>>('/grades', payload);
 
     if (!response.data.success || !response.data.data) {
       throw new Error(
