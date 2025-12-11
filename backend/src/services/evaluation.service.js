@@ -18,12 +18,21 @@ class EvaluationService {
    */
   async list() {
     try {
+      const { Course } = require('../models');
+
       const evaluations = await Evaluation.findAll({
         include: [
           {
             model: Class,
             as: 'class',
             attributes: ['id', 'semester', 'year'],
+            include: [
+              {
+                model: Course,
+                as: 'course',
+                attributes: ['id', 'name', 'description', 'duration', 'duration_type', 'course_type'],
+              },
+            ],
           },
           {
             model: Teacher,
@@ -202,6 +211,8 @@ class EvaluationService {
     }
 
     try {
+      const { Course } = require('../models');
+
       const evaluations = await Evaluation.findAll({
         where: { teacher_id: teacherId },
         include: [
@@ -209,6 +220,13 @@ class EvaluationService {
             model: Class,
             as: 'class',
             attributes: ['id', 'semester', 'year'],
+            include: [
+              {
+                model: Course,
+                as: 'course',
+                attributes: ['id', 'name', 'description', 'duration', 'duration_type', 'course_type'],
+              },
+            ],
           },
           {
             model: Discipline,
@@ -238,12 +256,21 @@ class EvaluationService {
    */
   async getById(evaluationId) {
     try {
+      const { Course } = require('../models');
+
       const evaluation = await Evaluation.findByPk(evaluationId, {
         include: [
           {
             model: Class,
             as: 'class',
             attributes: ['id', 'semester', 'year'],
+            include: [
+              {
+                model: Course,
+                as: 'course',
+                attributes: ['id', 'name', 'description', 'duration', 'duration_type', 'course_type'],
+              },
+            ],
           },
           {
             model: Teacher,
