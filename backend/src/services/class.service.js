@@ -27,6 +27,8 @@ class ClassService {
    * @returns {Promise<Class[]>} Uma lista de Turmas com curso, alunos e professores.
    */
   async list(teacherId = null) {
+    const { Course, Discipline, CourseDiscipline } = require('../models');
+
     const teachersInclude = {
       association: 'teachers',
       attributes: ['id', 'nome', 'email'],
@@ -50,39 +52,56 @@ class ClassService {
           attributes: ['id', 'nome', 'email'],
           through: { attributes: [] }
         },
-        teachersInclude,
-        {
-          association: 'disciplines',
-          attributes: ['id', 'name', 'code'],
-          through: { attributes: [] }
-        }
+        teachersInclude
       ]
     };
 
     const classes = await Class.findAll(queryOptions);
 
-    // Mapear dados para converter 'nome' para 'name' para compatibilidade com o frontend
-    return classes.map(cls => {
-      const clsJSON = cls.toJSON();
+    // Mapear dados e buscar disciplinas do curso para cada turma
+    const classesWithDisciplines = await Promise.all(
+      classes.map(async (cls) => {
+        const clsJSON = cls.toJSON();
 
-      // Converter 'nome' para 'name' nos alunos
-      if (clsJSON.students) {
-        clsJSON.students = clsJSON.students.map(student => ({
-          ...student,
-          name: student.nome
-        }));
-      }
+        // Converter 'nome' para 'name' nos alunos
+        if (clsJSON.students) {
+          clsJSON.students = clsJSON.students.map(student => ({
+            ...student,
+            name: student.nome
+          }));
+        }
 
-      // Converter 'nome' para 'name' nos professores
-      if (clsJSON.teachers) {
-        clsJSON.teachers = clsJSON.teachers.map(teacher => ({
-          ...teacher,
-          name: teacher.nome
-        }));
-      }
+        // Converter 'nome' para 'name' nos professores
+        if (clsJSON.teachers) {
+          clsJSON.teachers = clsJSON.teachers.map(teacher => ({
+            ...teacher,
+            name: teacher.nome
+          }));
+        }
 
-      return clsJSON;
-    });
+        // Buscar disciplinas do curso (todas as disciplinas vinculadas ao curso, não apenas as que têm professor)
+        if (clsJSON.course && clsJSON.course.id) {
+          const courseDisciplines = await CourseDiscipline.findAll({
+            where: { course_id: clsJSON.course.id },
+            include: [
+              {
+                model: Discipline,
+                as: 'discipline',
+                attributes: ['id', 'name', 'code']
+              }
+            ]
+          });
+
+          clsJSON.disciplines = courseDisciplines.map(cd => cd.discipline);
+        } else {
+          clsJSON.disciplines = [];
+        }
+
+        return clsJSON;
+      })
+    );
+
+    return classesWithDisciplines;
   }
 
   /**
@@ -91,6 +110,8 @@ class ClassService {
    * @returns {Promise<Class>} O Turma encontrado com curso, alunos e professores.
    */
   async getById(id) {
+    const { Course, Discipline, CourseDiscipline } = require('../models');
+
     const cls = await Class.findOne({
       where: { id },
       include: [
@@ -107,11 +128,6 @@ class ClassService {
           association: 'teachers',
           attributes: ['id', 'nome', 'email'],
           through: { attributes: ['discipline_id'] }
-        },
-        {
-          association: 'disciplines',
-          attributes: ['id', 'name', 'code'],
-          through: { attributes: [] }
         }
       ]
     });
@@ -135,6 +151,24 @@ class ClassService {
         ...teacher,
         name: teacher.nome
       }));
+    }
+
+    // Buscar disciplinas do curso (todas as disciplinas vinculadas ao curso, não apenas as que têm professor)
+    if (clsJSON.course && clsJSON.course.id) {
+      const courseDisciplines = await CourseDiscipline.findAll({
+        where: { course_id: clsJSON.course.id },
+        include: [
+          {
+            model: Discipline,
+            as: 'discipline',
+            attributes: ['id', 'name', 'code']
+          }
+        ]
+      });
+
+      clsJSON.disciplines = courseDisciplines.map(cd => cd.discipline);
+    } else {
+      clsJSON.disciplines = [];
     }
 
     return clsJSON;
