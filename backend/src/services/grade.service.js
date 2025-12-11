@@ -395,6 +395,7 @@ class GradeService {
         include: [
           {
             model: Evaluation,
+            as: 'evaluation',
             attributes: ['id', 'type', 'class_id']
           }
         ]
