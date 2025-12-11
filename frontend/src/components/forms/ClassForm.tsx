@@ -29,7 +29,6 @@ import type {
   ITeacherDisciplineAssignment
 } from '@/services/class.service';
 import * as CourseService from '@/services/course.service';
-import * as StudentService from '@/services/student.service';
 import * as TeacherService from '@/services/teacher.service';
 
 /**
