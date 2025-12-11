@@ -14,7 +14,7 @@
 
 const GradeService = require('../services/grade.service');
 const EvaluationService = require('../services/evaluation.service');
-const { Evaluation, ClassTeacher } = require('../models');
+const { Evaluation, ClassTeacher, User } = require('../models');
 const logger = require('../utils/logger');
 
 class GradeController {
@@ -32,15 +32,27 @@ class GradeController {
   /**
    * Valida se o professor leciona a disciplina da avaliação
    *
-   * @param {number} teacherId - ID do professor
+   * @param {number} userId - ID do usuário (users.id)
    * @param {number} evaluationId - ID da avaliação
    * @returns {Promise<boolean>} True se professor leciona a disciplina
    * @throws {Error} Se validação falhar
    *
    * @private
    */
-  async _validateTeacherOwnership(teacherId, evaluationId) {
+  async _validateTeacherOwnership(userId, evaluationId) {
     try {
+      // Buscar teacher_id associado ao usuário logado
+      const user = await User.findByPk(userId, {
+        attributes: ['teacher_id']
+      });
+
+      if (!user || !user.teacher_id) {
+        logger.warn('[GradeController._validateTeacherOwnership] Usuário não possui teacher_id associado', {
+          userId
+        });
+        return false;
+      }
+
       const evaluation = await Evaluation.findByPk(evaluationId);
 
       if (!evaluation) {
@@ -51,7 +63,7 @@ class GradeController {
       const classTeacher = await ClassTeacher.findOne({
         where: {
           class_id: evaluation.class_id,
-          teacher_id: teacherId,
+          teacher_id: user.teacher_id,
           discipline_id: evaluation.discipline_id
         }
       });
@@ -85,7 +97,7 @@ class GradeController {
   async create(req, res, next) {
     try {
       const { evaluation_id, student_id, grade, concept } = req.body;
-      const { id: teacherId, role } = req.user;
+      const { id: userId, role } = req.user;
 
       // Validar dados obrigatórios
       if (!evaluation_id || !student_id) {
@@ -122,11 +134,11 @@ class GradeController {
 
       // Se for professor, validar se leciona a disciplina
       if (role === 'teacher') {
-        const isTeacherValid = await this._validateTeacherOwnership(teacherId, evaluation_id);
+        const isTeacherValid = await this._validateTeacherOwnership(userId, evaluation_id);
 
         if (!isTeacherValid) {
           logger.warn('[GradeController.create] Professor tentou lançar nota em avaliação não lecionada', {
-            teacherId,
+            userId,
             evaluationId: evaluation_id,
             studentId: student_id
           });
@@ -153,7 +165,7 @@ class GradeController {
         gradeId: gradeData.id,
         evaluationId: evaluation_id,
         studentId: student_id,
-        teacherId,
+        userId,
         grade: gradeData.grade,
         concept: gradeData.concept
       });
@@ -191,7 +203,7 @@ class GradeController {
     try {
       const { id } = req.params;
       const { grade, concept } = req.body;
-      const { id: teacherId, role } = req.user;
+      const { id: userId, role } = req.user;
 
       // Validar ID
       if (!id || isNaN(parseInt(id))) {
@@ -244,11 +256,11 @@ class GradeController {
         }
 
         // Validar se professor leciona
-        const isTeacherValid = await this._validateTeacherOwnership(teacherId, gradeRecord.evaluation_id);
+        const isTeacherValid = await this._validateTeacherOwnership(userId, gradeRecord.evaluation_id);
 
         if (!isTeacherValid) {
           logger.warn('[GradeController.update] Professor tentou editar nota em avaliação não lecionada', {
-            teacherId,
+            userId,
             gradeId: id
           });
 
@@ -271,7 +283,7 @@ class GradeController {
       logger.info('[GradeController.update] Nota atualizada com sucesso', {
         gradeId: id,
         evaluationId: updatedGrade.evaluation_id,
-        teacherId,
+        userId,
         grade: updatedGrade.grade,
         concept: updatedGrade.concept
       });
@@ -326,7 +338,7 @@ class GradeController {
 
         if (!isTeacherValid) {
           logger.warn('[GradeController.getByEvaluation] Professor tentou listar notas de avaliação não lecionada', {
-            teacherId: userId,
+            userId,
             evaluationId
           });
 
@@ -537,7 +549,7 @@ class GradeController {
     try {
       const { id: evaluationId } = req.params;
       const { grades } = req.body;
-      const { id: teacherId, role } = req.user;
+      const { id: userId, role } = req.user;
 
       // Validar ID da avaliação
       if (!evaluationId || isNaN(parseInt(evaluationId))) {
@@ -584,11 +596,11 @@ class GradeController {
 
       // Se for professor, validar se leciona a disciplina
       if (role === 'teacher') {
-        const isTeacherValid = await this._validateTeacherOwnership(teacherId, evaluationId);
+        const isTeacherValid = await this._validateTeacherOwnership(userId, evaluationId);
 
         if (!isTeacherValid) {
           logger.warn('[GradeController.batchCreate] Professor tentou lançar notas em lote em avaliação não lecionada', {
-            teacherId,
+            userId,
             evaluationId
           });
 
@@ -607,7 +619,7 @@ class GradeController {
 
       logger.info('[GradeController.batchCreate] Lançamento em lote processado', {
         evaluationId,
-        teacherId,
+        userId,
         total: result.total,
         success: result.success,
         failed: result.failed

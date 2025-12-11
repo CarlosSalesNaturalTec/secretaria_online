@@ -141,6 +141,7 @@ class GradeService {
         include: [
           {
             model: Class,
+            as: 'class',
             attributes: ['id', 'semester', 'year']
           }
         ]
