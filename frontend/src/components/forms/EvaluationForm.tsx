@@ -11,6 +11,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { useAuth } from '@/hooks/useAuth';
+import { useTeachers } from '@/hooks/useTeachers';
 import ClassService from '@/services/class.service';
 import DisciplineService from '@/services/discipline.service';
 import type { IEvaluation, ICreateEvaluationData, IUpdateEvaluationData } from '@/types/evaluation.types';
@@ -19,6 +21,7 @@ import type { IDiscipline } from '@/types/course.types';
 
 const evaluationFormSchema = z.object({
   classId: z.coerce.number().min(1, 'Turma é obrigatória'),
+  teacherId: z.coerce.number().optional(),
   disciplineId: z.coerce.number().min(1, 'Disciplina é obrigatória'),
   name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres').max(200, 'Nome deve ter no máximo 200 caracteres'),
   date: z.string().min(1, 'Data é obrigatória'),
@@ -35,16 +38,23 @@ interface EvaluationFormProps {
 }
 
 export function EvaluationForm({ initialData, onSubmit, onCancel, loading = false }: EvaluationFormProps) {
+  const { user } = useAuth();
+  const { listTeachers } = useTeachers();
+
   const [classes, setClasses] = useState<IClass[]>([]);
   const [disciplines, setDisciplines] = useState<IDiscipline[]>([]);
   const [loadingClasses, setLoadingClasses] = useState(true);
   const [loadingDisciplines, setLoadingDisciplines] = useState(true);
   const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
 
+  const isAdmin = user?.role === 'admin';
+  const teachers = listTeachers.data || [];
+
   const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<EvaluationFormData>({
     resolver: zodResolver(evaluationFormSchema) as any,
     defaultValues: {
       classId: 0,
+      teacherId: undefined,
       disciplineId: 0,
       name: '',
       date: '',
@@ -63,6 +73,7 @@ export function EvaluationForm({ initialData, onSubmit, onCancel, loading = fals
     if (initialData) {
       reset({
         classId: initialData.classId,
+        teacherId: initialData.teacherId || undefined,
         disciplineId: initialData.disciplineId,
         name: initialData.name,
         date: initialData.date,
@@ -116,6 +127,17 @@ export function EvaluationForm({ initialData, onSubmit, onCancel, loading = fals
 
   const handleFormSubmit = async (data: EvaluationFormData) => {
     try {
+      // Validação: Admin deve selecionar um professor
+      if (isAdmin && (!data.teacherId || data.teacherId === 0)) {
+        alert('Por favor, selecione um professor responsável pela avaliação.');
+        return;
+      }
+
+      // Se for professor, remove o teacherId do objeto (backend resolve automaticamente)
+      if (!isAdmin) {
+        delete data.teacherId;
+      }
+
       await onSubmit(data);
     } catch (error) {
       console.error('[EvaluationForm] Erro ao submeter formulário:', error);
@@ -148,6 +170,30 @@ export function EvaluationForm({ initialData, onSubmit, onCancel, loading = fals
             </select>
             {errors.classId && <p className="mt-1 text-sm text-red-600">{errors.classId.message}</p>}
           </div>
+
+          {isAdmin && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Professor <span className="text-red-500">*</span>
+              </label>
+              <select
+                {...register('teacherId')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={loading || listTeachers.isLoading}
+              >
+                <option value="">Selecione um professor...</option>
+                {teachers.map((teacher) => (
+                  <option key={teacher.id} value={teacher.id}>
+                    {teacher.nome} {teacher.email ? `(${teacher.email})` : ''}
+                  </option>
+                ))}
+              </select>
+              {errors.teacherId && <p className="mt-1 text-sm text-red-600">{errors.teacherId.message}</p>}
+              {listTeachers.isLoading && (
+                <p className="mt-1 text-sm text-gray-500">Carregando professores...</p>
+              )}
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
