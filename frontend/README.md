@@ -516,10 +516,26 @@ Desenvolvido seguindo as melhores práticas de:
 
 ---
 
-**Última atualização:** 2025-12-10
-**Versão:** 0.3.1
+**Última atualização:** 2025-12-11
+**Versão:** 0.3.2
 
 ## 📝 Changelog
+
+### Versão 0.3.2 (2025-12-11) - Melhorias de Backend (Reflexos no Frontend)
+- 📋 **NOTA**: Esta versão documenta principalmente correções de backend que melhoram a estabilidade do frontend
+- ✅ **MELHORIA**: Sistema de notas agora usa corretamente a tabela `students` ao invés de `users`
+  - Backend corrigiu FK `student_id` em `grades` para referenciar `students.id`
+  - Services de grades agora buscam dados de alunos com campo `nome` ao invés de `name`
+  - Melhor alinhamento com a arquitetura de separação Students/Users
+- ✅ **MELHORIA**: Validação de professor em avaliações
+  - Backend valida se professor leciona a disciplina antes de criar avaliação
+  - Frontend recebe erros mais claros quando tenta criar avaliação inválida
+- ✅ **MELHORIA**: Filtro automático de avaliações por professor
+  - Professores veem apenas suas próprias avaliações nos endpoints do backend
+  - Frontend recebe lista já filtrada, melhorando performance
+- 🐛 **BUGFIX**: Corrigido erro ao listar notas de avaliações
+  - Resolvido erro "Cannot read properties of undefined" no backend
+  - Frontend agora pode carregar notas sem erros 403 ou 500
 
 ### Versão 0.3.1 (2025-12-10)
 - 🐛 **BUGFIX**: Corrigida exibição de turmas e disciplinas nos dropdowns para professores

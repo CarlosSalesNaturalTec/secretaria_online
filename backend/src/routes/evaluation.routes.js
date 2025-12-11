@@ -1,13 +1,21 @@
 /**
  * Arquivo: backend/src/routes/evaluation.routes.js
- * Descrição: Rotas para o CRUD de Avaliações
+ * Descrição: Rotas para o CRUD de Avaliações e gerenciamento de notas por avaliação
  * Feature: feat-051 - Criar EvaluationController e rotas
  * Criado em: 2025-11-01
+ * Atualizado em: 2025-12-11
+ *
+ * Endpoints adicionais de Notas:
+ * - GET /api/evaluations/:id/grades - Listar notas de avaliação
+ * - GET /api/evaluations/:id/grades/stats - Estatísticas de lançamento
+ * - GET /api/evaluations/:id/grades/pending - Notas pendentes
+ * - POST /api/evaluations/:id/grades/batch - Lançamento em lote
  */
 
 const express = require('express');
 const router = express.Router();
 const EvaluationController = require('../controllers/evaluation.controller');
+const GradeController = require('../controllers/grade.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 const { authorizeTeacher, authorizeAny } = require('../middlewares/rbac.middleware');
 
@@ -102,6 +110,46 @@ router.delete(
   '/:id',
   authorizeTeacher,
   EvaluationController.delete
+);
+
+/**
+ * GET /api/evaluations/:id/grades
+ * Lista todas as notas de uma avaliação
+ * Requer: Autenticado (Professor que leciona ou Admin)
+ */
+router.get(
+  '/:id/grades',
+  GradeController.getByEvaluation
+);
+
+/**
+ * GET /api/evaluations/:id/grades/stats
+ * Obtém estatísticas de lançamento de notas para uma avaliação
+ * Requer: Autenticado (Professor que leciona ou Admin)
+ */
+router.get(
+  '/:id/grades/stats',
+  GradeController.getStats
+);
+
+/**
+ * GET /api/evaluations/:id/grades/pending
+ * Lista alunos que ainda não tiveram nota lançada em uma avaliação
+ * Requer: Autenticado (Professor que leciona ou Admin)
+ */
+router.get(
+  '/:id/grades/pending',
+  GradeController.getPending
+);
+
+/**
+ * POST /api/evaluations/:id/grades/batch
+ * Lança múltiplas notas em lote para uma avaliação
+ * Requer: Autenticado (Professor que leciona ou Admin)
+ */
+router.post(
+  '/:id/grades/batch',
+  GradeController.batchCreate
 );
 
 module.exports = router;

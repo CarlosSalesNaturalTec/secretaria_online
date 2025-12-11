@@ -41,6 +41,7 @@ const AdminEnrollments = lazy(() => import('./pages/admin/Enrollments'));
 const AdminDocuments = lazy(() => import('./pages/admin/Documents'));
 const AdminRequests = lazy(() => import('./pages/admin/Requests'));
 const AdminEvaluations = lazy(() => import('./pages/teacher/Evaluations'));
+const AdminGrades = lazy(() => import('./pages/admin/Grades'));
 
 /**
  * Páginas de Aluno (Lazy Loading)
@@ -54,6 +55,7 @@ const TeacherDashboard = lazy(() => import('./pages/teacher/Dashboard'));
 const TeacherClasses = lazy(() => import('./pages/teacher/Classes'));
 const TeacherStudents = lazy(() => import('./pages/teacher/Students'));
 const TeacherEvaluations = lazy(() => import('./pages/teacher/Evaluations'));
+const TeacherGrades = lazy(() => import('./pages/teacher/Grades'));
 
 // ============================================================================
 // LOADING FALLBACK
@@ -206,6 +208,22 @@ const privateRoutes: RouteObject[] = [
           </Suspense>
         ),
       },
+      {
+        path: 'classes/:classId/grades',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AdminGrades />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'grades',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AdminGrades />
+          </Suspense>
+        ),
+      },
     ],
   },
   {
@@ -242,6 +260,22 @@ const privateRoutes: RouteObject[] = [
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <TeacherEvaluations />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'classes/:classId/grades',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <TeacherGrades />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'grades',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <TeacherGrades />
           </Suspense>
         ),
       },

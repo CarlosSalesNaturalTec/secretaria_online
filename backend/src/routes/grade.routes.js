@@ -3,13 +3,18 @@
  * Descrição: Rotas para lançamento e gerenciamento de notas
  * Feature: feat-053 - Criar GradeController e rotas
  * Criado em: 2025-11-01
+ * Atualizado em: 2025-12-11
  *
  * Endpoints:
- * - POST /api/grades - Lançar nota
+ * - POST /api/grades - Lançar nota individual
  * - PUT /api/grades/:id - Editar nota
- * - GET /api/evaluations/:evaluationId/grades - Listar notas de avaliação
- * - GET /api/evaluations/:evaluationId/grades/stats - Estatísticas de lançamento
- * - GET /api/evaluations/:evaluationId/grades/pending - Notas pendentes
+ * - GET /api/grades/my-grades - Obter minhas notas (aluno)
+ *
+ * Nota: Rotas relacionadas a avaliações estão em evaluation.routes.js:
+ * - GET /api/evaluations/:id/grades - Listar notas de avaliação
+ * - GET /api/evaluations/:id/grades/stats - Estatísticas de lançamento
+ * - GET /api/evaluations/:id/grades/pending - Notas pendentes
+ * - POST /api/evaluations/:id/grades/batch - Lançamento em lote
  */
 
 const express = require('express');
@@ -75,135 +80,7 @@ router.put(
 );
 
 /**
- * GET /api/evaluations/:evaluationId/grades
- * Lista todas as notas de uma avaliação
- *
- * Requer: Autenticado (Professor que leciona ou Admin)
- *
- * Parâmetros:
- * - evaluationId (number): ID da avaliação
- *
- * Query params:
- * - includePending=true (opcional): Incluir alunos sem nota lançada
- *
- * Respostas:
- * - 200: Lista de notas
- * - 400: Parâmetros inválidos
- * - 403: Sem permissão
- * - 404: Avaliação não encontrada
- * - 500: Erro servidor
- */
-router.get(
-  '/evaluations/:id/grades',
-  GradeController.getByEvaluation
-);
-
-/**
- * GET /api/evaluations/:evaluationId/grades/stats
- * Obtém estatísticas de lançamento de notas para uma avaliação
- *
- * Requer: Autenticado (Professor que leciona ou Admin)
- *
- * Parâmetros:
- * - evaluationId (number): ID da avaliação
- *
- * Respostas (200):
- * {
- *   success: true,
- *   data: {
- *     total: number (total de alunos da turma),
- *     launched: number (notas já lançadas),
- *     pending: number (notas ainda não lançadas)
- *   }
- * }
- */
-router.get(
-  '/evaluations/:id/grades/stats',
-  GradeController.getStats
-);
-
-/**
- * GET /api/evaluations/:evaluationId/grades/pending
- * Lista alunos que ainda não tiveram nota lançada em uma avaliação
- *
- * Requer: Autenticado (Professor que leciona ou Admin)
- *
- * Parâmetros:
- * - evaluationId (number): ID da avaliação
- *
- * Respostas (200):
- * {
- *   success: true,
- *   data: [
- *     {
- *       id: number,
- *       name: string,
- *       email: string
- *     }
- *   ],
- *   count: number
- * }
- */
-router.get(
-  '/evaluations/:id/grades/pending',
-  GradeController.getPending
-);
-
-/**
- * POST /api/evaluations/:id/grades/batch
- * Lança múltiplas notas em lote para uma avaliação
- *
- * Requer: Autenticado (Professor que leciona ou Admin)
- *
- * Parâmetros:
- * - id (number): ID da avaliação
- *
- * Body:
- * {
- *   grades: [
- *     {
- *       student_id: number (obrigatório),
- *       grade?: number (0-10) - para avaliações numéricas,
- *       concept?: string (satisfactory|unsatisfactory) - para avaliações conceituais
- *     },
- *     ...
- *   ]
- * }
- *
- * Respostas:
- * - 201: Todas as notas lançadas com sucesso
- * - 207: Processamento parcial (algumas notas falharam)
- * - 400: Dados inválidos
- * - 403: Sem permissão (não leciona a disciplina)
- * - 422: Todas as notas falharam
- * - 500: Erro servidor
- *
- * Resposta de sucesso (200/207):
- * {
- *   success: boolean,
- *   data: {
- *     total: number,
- *     success: number,
- *     failed: number,
- *     results: [
- *       {
- *         student_id: number,
- *         status: 'success'|'failed',
- *         grade?: object (se success),
- *         error?: string (se failed)
- *       }
- *     ]
- *   },
- *   message: string
- * }
- */
-router.post(
-  '/evaluations/:id/grades/batch',
-  GradeController.batchCreate
-);
-
-/**
- * GET /api/my-grades
+ * GET /api/grades/my-grades
  * Obtém todas as notas do aluno autenticado
  *
  * Requer: Autenticado (Estudante)

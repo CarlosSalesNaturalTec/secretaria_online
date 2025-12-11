@@ -19,11 +19,12 @@ class EvaluationController {
    */
   async list(req, res, next) {
     try {
-      const evaluations = await EvaluationService.list();
+      const evaluations = await EvaluationService.list(req.user);
 
       logger.info('Avaliações listadas', {
         count: evaluations.length,
         userId: req.user?.id,
+        userRole: req.user?.role,
       });
 
       res.status(200).json({
@@ -89,12 +90,16 @@ class EvaluationController {
       const { classId } = req.params;
       const { type } = req.query;
 
-      const evaluations = await EvaluationService.listByClass(classId, { type });
+      const evaluations = await EvaluationService.listByClass(classId, {
+        type,
+        currentUser: req.user, // Passa usuário logado para filtrar avaliações de professor
+      });
 
       logger.info('Avaliações listadas por turma', {
         classId,
         count: evaluations.length,
         userId: req.user?.id,
+        userRole: req.user?.role,
       });
 
       res.status(200).json({

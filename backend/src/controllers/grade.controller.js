@@ -18,6 +18,17 @@ const { Evaluation, ClassTeacher } = require('../models');
 const logger = require('../utils/logger');
 
 class GradeController {
+  constructor() {
+    // Fazer bind dos métodos para manter o contexto 'this'
+    this.create = this.create.bind(this);
+    this.update = this.update.bind(this);
+    this.getByEvaluation = this.getByEvaluation.bind(this);
+    this.getStats = this.getStats.bind(this);
+    this.getPending = this.getPending.bind(this);
+    this.batchCreate = this.batchCreate.bind(this);
+    this.getMyGrades = this.getMyGrades.bind(this);
+  }
+
   /**
    * Valida se o professor leciona a disciplina da avaliação
    *

@@ -267,10 +267,36 @@ backend/
   - Validação de dados no backend (campo obrigatórios, tipos válidos)
   - RBAC: Admin e Professor podem criar/editar, Estudante pode visualizar
 
-### ✅ Lançamento de Notas (feat-036 a feat-040)
-- Cadastro de notas para avaliações
-- Lançamento em lote
-- Cálculo de médias
+### ✅ Lançamento de Notas (feat-036 a feat-040, feat-052, feat-053, bug-fix-2025-12-11)
+- **Estrutura Corrigida**:
+  - ✅ **Chave estrangeira `student_id` corrigida**: Agora referencia tabela `students` ao invés de `users`
+  - ✅ **Migration executada**: `20251211142545-fix-grades-student-fk.js`
+  - ✅ **Modelo `Grade.js` corrigido**: Associação alterada de `User` para `Student`
+  - ✅ **Service `grade.service.js` corrigido**: Busca alunos na tabela `students` com campo `nome` (ao invés de `name`)
+  - ✅ **Controller `grade.controller.js` corrigido**: Bind de métodos para manter contexto `this`
+- **Rotas**:
+  - `POST /api/v1/grades` - Lançar nota individual
+  - `PUT /api/v1/grades/:id` - Atualizar nota existente
+  - `GET /api/v1/grades/my-grades` - Obter notas do aluno autenticado
+  - `GET /api/v1/evaluations/:id/grades` - Listar notas de uma avaliação
+  - `GET /api/v1/evaluations/:id/grades/stats` - Estatísticas de lançamento
+  - `GET /api/v1/evaluations/:id/grades/pending` - Notas pendentes de uma avaliação
+  - `POST /api/v1/evaluations/:id/grades/batch` - Lançamento em lote
+- **Funcionalidades**:
+  - Lançamento de notas individuais por professores
+  - Lançamento em lote para múltiplos alunos
+  - Suporte para nota numérica (0-10) ou conceito (satisfactory/unsatisfactory)
+  - Validação de permissões (professor deve lecionar a disciplina)
+  - Validação de aluno matriculado na turma
+  - Consulta de notas por avaliação, aluno ou disciplina
+  - Estatísticas de lançamento (total, lançadas, pendentes)
+  - Soft delete (exclusão lógica)
+- **Validações**:
+  - Professor deve lecionar a disciplina da avaliação
+  - Aluno deve estar matriculado na turma da avaliação
+  - Nota numérica deve estar entre 0 e 10
+  - Conceito deve ser 'satisfactory' ou 'unsatisfactory'
+  - Apenas grade OU concept pode ser preenchido (não ambos)
 
 ### ✅ Upload de Arquivos (feat-041 a feat-045)
 - Configuração de Multer
@@ -876,10 +902,33 @@ Desenvolvido seguindo as melhores práticas de:
 
 ---
 
-**Última atualização:** 2025-12-09
-**Versão:** 0.3.0
+**Última atualização:** 2025-12-11
+**Versão:** 0.3.1
 
 ## 📝 Changelog
+
+### Versão 0.3.1 (2025-12-11) - Correções Arquiteturais Críticas
+- 🔧 **CORREÇÃO CRÍTICA**: Corrigida FK `student_id` na tabela `grades`
+  - **Antes**: `grades.student_id` referenciava `users.id` (incorreto)
+  - **Depois**: `grades.student_id` referencia `students.id` (correto)
+  - Migration executada: `20251211142545-fix-grades-student-fk.js`
+  - Modelo `Grade.js` atualizado com associação para `Student` ao invés de `User`
+  - Migration original `20251027181409-create-grades.js` corrigida
+- 🔧 **CORREÇÃO**: Corrigido `GradeService` para usar tabela `students`
+  - Método `_getAndValidateStudent` alterado para usar `Student.findByPk`
+  - Atributo `name` alterado para `nome` (campo correto na tabela students)
+  - Todos os includes alterados de `model: User` para `model: Student`
+  - Import atualizado de `User` para `Student`
+- 🔧 **CORREÇÃO**: Corrigido contexto `this` em `GradeController`
+  - Adicionado construtor com bind de todos os métodos públicos
+  - Resolvido erro: "Cannot read properties of undefined (reading '_validateTeacherOwnership')"
+- 🔧 **MELHORIA**: Validação de professor em avaliações
+  - Adicionada validação no `EvaluationService` para verificar se professor leciona a disciplina na turma antes de criar avaliação
+  - Corrigidas 2 avaliações inconsistentes existentes no banco (IDs 4 e 5)
+- 🔧 **MELHORIA**: Filtro de avaliações por professor
+  - Métodos `list()` e `listByClass()` do `EvaluationService` agora filtram avaliações quando usuário é professor
+  - Professores veem apenas suas próprias avaliações
+  - Controllers atualiza dos para passar `currentUser` aos services
 
 ### Versão 0.3.0 (2025-12-09)
 - ✅ **NOVO**: Sistema completo de gestão de avaliações

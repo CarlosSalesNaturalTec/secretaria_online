@@ -5,7 +5,7 @@
  * Criado em: 2025-11-01
  */
 
-const { Evaluation, Class, Teacher, Discipline, Grade, User } = require('../models');
+const { Evaluation, Class, Teacher, Discipline, Grade, User, ClassTeacher } = require('../models');
 const { AppError } = require('../middlewares/error.middleware');
 const { Op } = require('sequelize');
 
@@ -13,14 +13,26 @@ class EvaluationService {
   /**
    * Lista todas as avaliações
    *
+   * @param {object} currentUser - Usuário logado (opcional, para filtrar avaliações de professor)
    * @returns {Promise<Evaluation[]>} Lista de todas as avaliações
    * @throws {AppError} Se houver erro ao listar
    */
-  async list() {
+  async list(currentUser = null) {
     try {
       const { Course } = require('../models');
 
+      const where = {};
+
+      // Se o usuário logado é professor, filtrar apenas suas avaliações
+      if (currentUser && currentUser.role === 'teacher') {
+        const user = await User.findByPk(currentUser.id);
+        if (user && user.teacher_id) {
+          where.teacher_id = user.teacher_id;
+        }
+      }
+
       const evaluations = await Evaluation.findAll({
+        where,
         include: [
           {
             model: Class,
@@ -114,6 +126,23 @@ class EvaluationService {
       throw new AppError('Disciplina não encontrada', 404, 'DISCIPLINE_NOT_FOUND');
     }
 
+    // Validar se o professor leciona essa disciplina nessa turma
+    const classTeacher = await ClassTeacher.findOne({
+      where: {
+        class_id: evaluationData.class_id,
+        teacher_id: teacherId,
+        discipline_id: evaluationData.discipline_id
+      }
+    });
+
+    if (!classTeacher) {
+      throw new AppError(
+        'O professor não leciona essa disciplina nessa turma',
+        422,
+        'TEACHER_NOT_TEACHING_DISCIPLINE'
+      );
+    }
+
     // Validar tipo de avaliação
     if (!['grade', 'concept'].includes(evaluationData.type)) {
       throw new AppError(
@@ -150,6 +179,7 @@ class EvaluationService {
    * @param {number} classId - ID da turma
    * @param {object} options - Opções de filtro
    * @param {string} options.type - Filtrar por tipo ('grade' ou 'concept')
+   * @param {object} options.currentUser - Usuário logado (para filtrar avaliações de professor)
    * @returns {Promise<Evaluation[]>} Lista de avaliações
    * @throws {AppError} Se a turma não existir
    */
@@ -166,6 +196,15 @@ class EvaluationService {
       // Filtro opcional por tipo
       if (options.type && ['grade', 'concept'].includes(options.type)) {
         where.type = options.type;
+      }
+
+      // Se o usuário logado é professor, filtrar apenas avaliações que ele criou
+      if (options.currentUser && options.currentUser.role === 'teacher') {
+        // Buscar o teacher_id associado ao user_id
+        const user = await User.findByPk(options.currentUser.id);
+        if (user && user.teacher_id) {
+          where.teacher_id = user.teacher_id;
+        }
       }
 
       const evaluations = await Evaluation.findAll({

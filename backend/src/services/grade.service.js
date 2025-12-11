@@ -14,7 +14,7 @@
  * - Tratamento robusto de erros
  */
 
-const { Grade, Evaluation, Class, ClassStudent, User } = require('../models');
+const { Grade, Evaluation, Class, ClassStudent, Student } = require('../models');
 const { AppError } = require('../middlewares/error.middleware');
 const { Op } = require('sequelize');
 
@@ -176,9 +176,8 @@ class GradeService {
    */
   async _getAndValidateStudent(studentId) {
     try {
-      const student = await User.findOne({
-        where: { id: studentId, role: 'student' },
-        attributes: ['id', 'name', 'email']
+      const student = await Student.findByPk(studentId, {
+        attributes: ['id', 'nome', 'email']
       });
 
       if (!student) {
@@ -328,9 +327,9 @@ class GradeService {
         where,
         include: [
           {
-            model: User,
+            model: Student,
             as: 'student',
-            attributes: ['id', 'name', 'email']
+            attributes: ['id', 'nome', 'email']
           }
         ],
         order: [['created_at', 'DESC']]
@@ -364,9 +363,9 @@ class GradeService {
         },
         include: [
           {
-            model: User,
+            model: Student,
             as: 'student',
-            attributes: ['id', 'name', 'email']
+            attributes: ['id', 'nome', 'email']
           }
         ]
       });
@@ -508,9 +507,9 @@ class GradeService {
         where: { class_id: evaluation.class_id },
         include: [
           {
-            model: User,
+            model: Student,
             as: 'student',
-            attributes: ['id', 'name', 'email']
+            attributes: ['id', 'nome', 'email']
           }
         ]
       });
@@ -855,9 +854,9 @@ class GradeService {
             ]
           },
           {
-            model: User,
+            model: Student,
             as: 'student',
-            attributes: ['id', 'name', 'email']
+            attributes: ['id', 'nome', 'email']
           }
         ],
         order: [['created_at', 'DESC']]

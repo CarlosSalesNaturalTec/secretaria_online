@@ -63,17 +63,14 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       /**
-       * Associação N:1 com User (Student)
+       * Associação N:1 com Student
        * Uma nota pertence a um aluno
        */
-      Grade.belongsTo(models.User, {
+      Grade.belongsTo(models.Student, {
         foreignKey: 'student_id',
         as: 'student',
         onUpdate: 'CASCADE',
-        onDelete: 'RESTRICT',
-        scope: {
-          role: 'student'
-        }
+        onDelete: 'RESTRICT'
       });
     }
 
@@ -296,7 +293,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER.UNSIGNED,
         allowNull: false,
         references: {
-          model: 'users',
+          model: 'students',
           key: 'id'
         },
         validate: {
