@@ -721,7 +721,7 @@ export default function TeacherGrades() {
                             {formatDate(evaluation.date)}
                           </p>
                           <p className="text-xs text-gray-500 mt-1">
-                            {getEvaluationTypeLabel(evaluation.type)}
+                            {evaluation.discipline?.name || 'Sem disciplina'}
                           </p>
                         </div>
                         <button
@@ -765,7 +765,7 @@ export default function TeacherGrades() {
                       </h3>
                       <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
                         <span>📅 {formatDate(selectedEvaluation.date)}</span>
-                        <span>📊 {getEvaluationTypeLabel(selectedEvaluation.type)}</span>
+                        <span>📚 {selectedEvaluation.discipline?.name || 'Sem disciplina'}</span>
                         <span>
                           👥 {students.length}{' '}
                           {students.length !== 1 ? 'alunos' : 'aluno'}
