@@ -61,12 +61,14 @@ export interface IRequest {
  */
 export interface IRequestListResponse {
   success: boolean;
-  data: {
-    requests: IRequest[];
+  data: IRequest[];
+  pagination: {
     total: number;
     page: number;
     limit: number;
-    pages: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
   };
 }
 
