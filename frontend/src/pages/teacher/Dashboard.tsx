@@ -348,7 +348,7 @@ export default function TeacherDashboard() {
               {myClasses.slice(0, 5).map((classItem) => (
                 <Link
                   key={classItem.id}
-                  to={`/teacher/classes/${classItem.id}`}
+                  to={`/teacher/classes/${classItem.id}/students`}
                   className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors group"
                 >
                   <div className="flex-1">
