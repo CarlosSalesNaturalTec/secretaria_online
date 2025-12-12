@@ -610,6 +610,73 @@ class RequestController {
       });
     }
   }
+
+  /**
+   * Listar todos os tipos de solicitação
+   *
+   * Retorna lista de todos os tipos de solicitação disponíveis no sistema.
+   * Acessível por alunos e administradores.
+   *
+   * @param {object} req - Objeto de requisição do Express
+   * @param {object} res - Objeto de resposta do Express
+   * @returns {Promise<object>} Lista de tipos de solicitação
+   * @throws {Error} Se ocorrer erro ao buscar tipos
+   *
+   * @example
+   * GET /api/requests/types
+   * Response: {
+   *   "success": true,
+   *   "data": {
+   *     "requestTypes": [
+   *       {
+   *         "id": 1,
+   *         "name": "Histórico Escolar",
+   *         "description": "Solicitação de histórico escolar completo",
+   *         "expected_days": 5
+   *       }
+   *     ]
+   *   }
+   * }
+   */
+  async listRequestTypes(req, res) {
+    try {
+      const requestTypes = await RequestType.findAll({
+        where: { deleted_at: null, is_active: true },
+        order: [['name', 'ASC']],
+        attributes: ['id', 'name', 'description', 'response_deadline_days', 'created_at', 'updated_at']
+      });
+
+      // Converter snake_case para camelCase para compatibilidade com frontend
+      const formattedRequestTypes = requestTypes.map(type => ({
+        id: type.id,
+        name: type.name,
+        description: type.description,
+        expectedDays: type.response_deadline_days,
+        createdAt: type.created_at,
+        updatedAt: type.updated_at
+      }));
+
+      console.log(`[RequestController] ${formattedRequestTypes.length} tipos de solicitação listados por usuário ${req.user.id} (${req.user.role})`);
+
+      return res.json({
+        success: true,
+        data: {
+          requestTypes: formattedRequestTypes
+        }
+      });
+    } catch (error) {
+      console.error('[RequestController] Erro ao listar tipos de solicitação:', error);
+
+      return res.status(500).json({
+        success: false,
+        error: {
+          code: 'INTERNAL_ERROR',
+          message: 'Erro ao listar tipos de solicitação',
+          details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        }
+      });
+    }
+  }
 }
 
 module.exports = new RequestController();

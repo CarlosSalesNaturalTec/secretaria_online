@@ -235,7 +235,7 @@ export async function getRequestTypes(): Promise<IRequestType[]> {
     const response = await api.get<{
       success: boolean;
       data: { requestTypes: IRequestType[] };
-    }>('/request-types');
+    }>('/requests/types');
 
     return response.data.data.requestTypes;
   } catch (error) {

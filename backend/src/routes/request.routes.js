@@ -118,6 +118,38 @@ router.get(
 );
 
 /**
+ * @route   GET /api/requests/types
+ * @desc    Listar todos os tipos de solicitação disponíveis
+ * @access  Aluno, Admin
+ *
+ * @example
+ * GET /api/requests/types
+ *
+ * Response:
+ * {
+ *   "success": true,
+ *   "data": {
+ *     "requestTypes": [
+ *       {
+ *         "id": 1,
+ *         "name": "Histórico Escolar",
+ *         "description": "Solicitação de histórico escolar completo",
+ *         "expected_days": 5,
+ *         "created_at": "2025-01-01T00:00:00.000Z",
+ *         "updated_at": "2025-01-01T00:00:00.000Z"
+ *       }
+ *     ]
+ *   }
+ * }
+ */
+router.get(
+  '/types',
+  authenticate,
+  authorize('student', 'admin'),
+  RequestController.listRequestTypes
+);
+
+/**
  * @route   GET /api/requests/:id
  * @desc    Buscar solicitação por ID
  * @access  Aluno (própria), Admin (qualquer)
