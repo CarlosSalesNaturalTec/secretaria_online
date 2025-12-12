@@ -211,7 +211,13 @@ export async function create(data: ICreateRequestRequest): Promise<IRequest> {
       throw new Error('Descrição é obrigatória');
     }
 
-    const response = await api.post<IRequestResponse>('/requests', data);
+    // Converter camelCase para snake_case para o backend
+    const requestData = {
+      request_type_id: data.requestTypeId,
+      description: data.description,
+    };
+
+    const response = await api.post<IRequestResponse>('/requests', requestData);
 
     return response.data.data;
   } catch (error) {
