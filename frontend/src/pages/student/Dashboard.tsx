@@ -25,6 +25,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { getMyGrades } from '@/services/grade.service';
 import type { IGradeWithEvaluation, IEvaluation } from '@/types/grade.types';
 import type { IDocument } from '@/types/document.types';
 
@@ -68,122 +69,34 @@ export default function StudentDashboard() {
       setLoading(true);
       setError(null);
 
-      // TODO: Implementar chamadas reais à API quando os endpoints estiverem disponíveis
-      // const gradeSummary = await gradeService.getMySummary();
-      // const documents = await documentService.getAll({ status: 'pending' });
-      // const requests = await requestService.getAll({ limit: 5 });
+      // Buscar notas do aluno autenticado
+      const grades = await getMyGrades();
 
-      // Mock de dados para desenvolvimento
-      setRecentGrades([
-        {
-          id: 1,
-          evaluationId: 1,
-          studentId: 1,
-          grade: 8.5,
-          concept: null,
-          createdAt: '2025-11-01T10:00:00Z',
-          updatedAt: '2025-11-01T10:00:00Z',
-          evaluation: {
-            id: 1,
-            classId: 1,
-            teacherId: 1,
-            disciplineId: 1,
-            name: 'Prova 1',
-            date: '2025-10-30T00:00:00Z',
-            type: 'grade',
-            createdAt: '2025-10-20T00:00:00Z',
-            updatedAt: '2025-10-20T00:00:00Z',
-            discipline: {
-              id: 1,
-              name: 'Matemática',
-              code: 'MAT101',
-              workloadHours: 60,
-            },
-            teacher: {
-              id: 1,
-              name: 'Prof. João Silva',
-            },
-          },
-        },
-        {
-          id: 2,
-          evaluationId: 2,
-          studentId: 1,
-          grade: 9.0,
-          concept: null,
-          createdAt: '2025-10-28T14:00:00Z',
-          updatedAt: '2025-10-28T14:00:00Z',
-          evaluation: {
-            id: 2,
-            classId: 1,
-            teacherId: 2,
-            disciplineId: 2,
-            name: 'Trabalho 1',
-            date: '2025-10-25T00:00:00Z',
-            type: 'grade',
-            createdAt: '2025-10-15T00:00:00Z',
-            updatedAt: '2025-10-15T00:00:00Z',
-            discipline: {
-              id: 2,
-              name: 'Programação',
-              code: 'PROG101',
-              workloadHours: 80,
-            },
-            teacher: {
-              id: 2,
-              name: 'Prof. Maria Santos',
-            },
-          },
-        },
-      ]);
+      // Filtrar apenas as últimas 5 notas
+      const recentGradesData = grades.slice(0, 5);
+      setRecentGrades(recentGradesData);
 
-      setUpcomingEvaluations([
-        {
-          id: 3,
-          classId: 1,
-          teacherId: 1,
-          disciplineId: 1,
-          name: 'Prova 2',
-          date: '2025-11-15T00:00:00Z',
-          type: 'grade',
-          createdAt: '2025-11-01T00:00:00Z',
-          updatedAt: '2025-11-01T00:00:00Z',
-          discipline: {
-            id: 1,
-            name: 'Matemática',
-            code: 'MAT101',
-            workloadHours: 60,
-          },
-          teacher: {
-            id: 1,
-            name: 'Prof. João Silva',
-          },
-        },
-        {
-          id: 4,
-          classId: 1,
-          teacherId: 3,
-          disciplineId: 3,
-          name: 'Apresentação Seminário',
-          date: '2025-11-20T00:00:00Z',
-          type: 'grade',
-          createdAt: '2025-11-02T00:00:00Z',
-          updatedAt: '2025-11-02T00:00:00Z',
-          discipline: {
-            id: 3,
-            name: 'História',
-            code: 'HIST101',
-            workloadHours: 40,
-          },
-          teacher: {
-            id: 3,
-            name: 'Prof. Ana Costa',
-          },
-        },
-      ]);
+      // Calcular média geral das notas
+      if (grades.length > 0) {
+        const gradesWithValue = grades.filter((g) => g.grade !== null);
+        if (gradesWithValue.length > 0) {
+          const sum = gradesWithValue.reduce((acc, g) => acc + (g.grade || 0), 0);
+          const average = sum / gradesWithValue.length;
+          setOverallAverage(average);
+        } else {
+          setOverallAverage(null);
+        }
+      } else {
+        setOverallAverage(null);
+      }
 
+      // TODO: Implementar endpoint para buscar próximas avaliações do aluno
+      // Por enquanto, deixamos vazio
+      setUpcomingEvaluations([]);
+
+      // TODO: Implementar endpoint para buscar documentos pendentes
+      // Por enquanto, deixamos vazio
       setPendingDocuments([]);
-      setOverallAverage(8.75);
     } catch (err) {
       console.error('[StudentDashboard] Erro ao carregar dados:', err);
       setError('Erro ao carregar informações do dashboard. Tente novamente.');
