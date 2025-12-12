@@ -95,11 +95,7 @@ export default function Requests() {
 
       // Buscar solicitações do aluno autenticado
       const response = await getAll();
-      setRequests(response.data.requests);
-
-      if (import.meta.env.DEV) {
-        console.log('[Requests] Solicitações carregadas:', response.data.requests.length);
-      }
+      setRequests(response.data);
     } catch (err) {
       console.error('[Requests] Erro ao carregar dados:', err);
       setError(

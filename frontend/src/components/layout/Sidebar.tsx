@@ -19,7 +19,6 @@ import {
   BookOpenIcon,
   LibraryIcon,
   CalendarIcon,
-  UserCheckIcon,
   FileTextIcon,
   ClipboardListIcon,
   SchoolIcon,
