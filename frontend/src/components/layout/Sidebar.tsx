@@ -74,7 +74,6 @@ const getNavigationItems = (role: UserRole): NavigationItem[] => {
     return [
       { name: 'Dashboard', href: '/teacher/dashboard', icon: LayoutDashboardIcon },
       { name: 'Minhas Turmas', href: '/teacher/classes', icon: CalendarIcon },
-      { name: 'Alunos', href: '/teacher/students', icon: GraduationCapIcon },
       { name: 'Avaliações', href: '/teacher/evaluations', icon: ClipboardCheckIcon },
       { name: 'Lançar Notas', href: '/teacher/grades', icon: ClipboardListIcon },
       { name: 'Meus Documentos', href: '/teacher/documents', icon: FileTextIcon },
