@@ -56,6 +56,7 @@ const TeacherClasses = lazy(() => import('./pages/teacher/Classes'));
 const TeacherStudents = lazy(() => import('./pages/teacher/Students'));
 const TeacherEvaluations = lazy(() => import('./pages/teacher/Evaluations'));
 const TeacherGrades = lazy(() => import('./pages/teacher/Grades'));
+const TeacherDocuments = lazy(() => import('./pages/teacher/Documents'));
 
 // ============================================================================
 // LOADING FALLBACK
@@ -276,6 +277,14 @@ const privateRoutes: RouteObject[] = [
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <TeacherGrades />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'documents',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <TeacherDocuments />
           </Suspense>
         ),
       },

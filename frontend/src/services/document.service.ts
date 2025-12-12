@@ -43,7 +43,14 @@ export async function getAll(
   filters?: IDocumentFilters
 ): Promise<IDocumentListResponse> {
   try {
-    const response = await api.get<IDocumentListResponse>('/documents', {
+    // Se userType for 'student' ou 'teacher', usar rota /my-documents
+    // que é acessível para próprio usuário. Caso contrário, usar /documents (admin)
+    const endpoint =
+      filters?.userType === 'student' || filters?.userType === 'teacher'
+        ? '/documents/my-documents'
+        : '/documents';
+
+    const response = await api.get<IDocumentListResponse>(endpoint, {
       params: filters,
     });
 

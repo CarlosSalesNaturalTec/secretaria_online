@@ -111,6 +111,27 @@ router.get('/', authenticate, authorize('admin'), DocumentController.list);
 router.get('/stats', authenticate, authorize('admin'), DocumentController.getStats);
 
 /**
+ * GET /api/v1/documents/my-documents
+ * Listar próprios documentos do usuário autenticado
+ *
+ * Autenticação: Requerida (student, teacher ou admin)
+ * Query params:
+ * - page (optional): Página (padrão: 1)
+ * - limit (optional): Itens por página (padrão: 20)
+ *
+ * Status de resposta:
+ * - 200 OK: Lista de documentos do usuário
+ * - 400 Bad Request: Parâmetros inválidos
+ * - 401 Unauthorized: Não autenticado
+ * - 500 Internal Server Error: Erro no servidor
+ *
+ * @example
+ * GET /api/v1/documents/my-documents?page=1&limit=20
+ * Authorization: Bearer <token>
+ */
+router.get('/my-documents', authenticate, DocumentController.getMyDocuments);
+
+/**
  * GET /api/v1/documents/:id
  * Buscar documento por ID
  *
@@ -221,27 +242,6 @@ router.delete(
   authorize('admin'),
   DocumentController.delete
 );
-
-/**
- * GET /api/v1/documents/my-documents
- * Listar próprios documentos do usuário autenticado
- *
- * Autenticação: Requerida (student, teacher ou admin)
- * Query params:
- * - page (optional): Página (padrão: 1)
- * - limit (optional): Itens por página (padrão: 20)
- *
- * Status de resposta:
- * - 200 OK: Lista de documentos do usuário
- * - 400 Bad Request: Parâmetros inválidos
- * - 401 Unauthorized: Não autenticado
- * - 500 Internal Server Error: Erro no servidor
- *
- * @example
- * GET /api/v1/documents/my-documents?page=1&limit=20
- * Authorization: Bearer <token>
- */
-router.get('/my-documents', authenticate, DocumentController.getMyDocuments);
 
 /**
  * GET /api/v1/users/:userId/documents
