@@ -957,7 +957,7 @@ export default function AdminGrades() {
                                       ? 'Não lançada'
                                       : selectedEvaluation.type ===
                                           EVALUATION_TYPES.GRADE
-                                        ? `${studentGrade.grade?.toFixed(1) || '-'}`
+                                        ? `${studentGrade.grade != null ? Number(studentGrade.grade).toFixed(1) : '-'}`
                                         : studentGrade.concept ===
                                             'satisfactory'
                                           ? 'Satisfatório'

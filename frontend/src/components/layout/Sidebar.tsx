@@ -63,7 +63,7 @@ const getNavigationItems = (role: UserRole): NavigationItem[] => {
       { name: 'Disciplinas', href: '/admin/disciplines', icon: LibraryIcon },
       { name: 'Turmas', href: '/admin/classes', icon: CalendarIcon },
       { name: 'Avaliações', href: '/admin/evaluations', icon: ClipboardCheckIcon },
-      { name: 'Matrículas', href: '/admin/enrollments', icon: UserCheckIcon },
+      { name: 'Lançar Notas', href: '/admin/grades', icon: ClipboardListIcon },
       { name: 'Documentos', href: '/admin/documents', icon: FileTextIcon },
       { name: 'Solicitações', href: '/admin/requests', icon: ClipboardListIcon },
     ];
