@@ -47,6 +47,9 @@ const AdminGrades = lazy(() => import('./pages/admin/Grades'));
  * Páginas de Aluno (Lazy Loading)
  */
 const StudentDashboard = lazy(() => import('./pages/student/Dashboard'));
+const StudentGrades = lazy(() => import('./pages/student/Grades'));
+const StudentDocuments = lazy(() => import('./pages/student/Documents'));
+const StudentRequests = lazy(() => import('./pages/student/Requests'));
 
 /**
  * Páginas de Professor (Lazy Loading)
@@ -303,12 +306,30 @@ const privateRoutes: RouteObject[] = [
           </Suspense>
         ),
       },
-      /**
-       * TODO: Adicionar rotas filhas do aluno
-       * - /student/documents
-       * - /student/grades
-       * - /student/requests
-       */
+      {
+        path: 'grades',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <StudentGrades />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'documents',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <StudentDocuments />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'requests',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <StudentRequests />
+          </Suspense>
+        ),
+      },
     ],
   },
 ];
