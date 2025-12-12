@@ -62,9 +62,14 @@ export async function getAll(): Promise<IEvaluation[]> {
   try {
     if (import.meta.env.DEV) {
       console.log('[EvaluationService] Buscando todas as avaliações...');
+      console.log('[EvaluationService] Token:', localStorage.getItem('token') ? 'Presente' : 'Ausente');
     }
 
     const response = await api.get<ApiResponse<any[]>>('/evaluations');
+
+    if (import.meta.env.DEV) {
+      console.log('[EvaluationService] Resposta completa da API:', response.data);
+    }
 
     if (!response.data.success || !response.data.data) {
       throw new Error(response.data.error?.message || 'Erro ao buscar avaliações');
@@ -72,9 +77,16 @@ export async function getAll(): Promise<IEvaluation[]> {
 
     if (import.meta.env.DEV) {
       console.log('[EvaluationService] Avaliações recuperadas:', response.data.data.length);
+      console.log('[EvaluationService] Dados brutos:', response.data.data);
     }
 
-    return response.data.data.map(mapEvaluationData);
+    const mapped = response.data.data.map(mapEvaluationData);
+
+    if (import.meta.env.DEV) {
+      console.log('[EvaluationService] Avaliações mapeadas:', mapped);
+    }
+
+    return mapped;
   } catch (error) {
     console.error('[EvaluationService] Erro ao buscar avaliações:', error);
     if (error instanceof Error) {

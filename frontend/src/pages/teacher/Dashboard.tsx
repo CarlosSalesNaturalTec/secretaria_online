@@ -26,8 +26,10 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { getAll as getAllClasses } from '@/services/class.service';
+import { useEvaluations } from '@/hooks/useEvaluations';
 import type { IClass } from '@/types/class.types';
 import type { IUser } from '@/types/user.types';
+import type { IEvaluation } from '@/types/evaluation.types';
 
 /**
  * TeacherDashboard - Dashboard do professor
@@ -49,8 +51,11 @@ export default function TeacherDashboard() {
   // Estados para dados do dashboard
   const [teacherData, setTeacherData] = useState<IUser | null>(null);
   const [myClasses, setMyClasses] = useState<IClass[]>([]);
-  const [upcomingEvaluations, setUpcomingEvaluations] = useState<any[]>([]);
   const [totalStudents, setTotalStudents] = useState(0);
+
+  // Hook para buscar avaliações do professor
+  const { listEvaluations } = useEvaluations();
+  const { data: allEvaluations, isLoading: loadingEvaluations } = listEvaluations();
 
   /**
    * Carrega dados do dashboard ao montar o componente
@@ -58,6 +63,57 @@ export default function TeacherDashboard() {
   useEffect(() => {
     loadDashboardData();
   }, []);
+
+  /**
+   * Filtra e processa as próximas avaliações
+   * Retorna apenas avaliações futuras, ordenadas por data (mais próximas primeiro)
+   * Limitado a 5 avaliações
+   *
+   * @param {IEvaluation[]} evaluations - Lista de todas as avaliações
+   * @returns {IEvaluation[]} Próximas 5 avaliações
+   */
+  const getUpcomingEvaluations = (evaluations: IEvaluation[] | undefined): IEvaluation[] => {
+    console.log('[TeacherDashboard] Todas avaliações recebidas:', evaluations);
+
+    if (!evaluations || evaluations.length === 0) {
+      console.log('[TeacherDashboard] Nenhuma avaliação encontrada');
+      return [];
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Ignorar horas para comparação apenas de data
+    console.log('[TeacherDashboard] Data de hoje (sem hora):', today);
+
+    const filtered = evaluations.filter((evaluation) => {
+      const evalDate = new Date(evaluation.date);
+      evalDate.setHours(0, 0, 0, 0);
+      const isFuture = evalDate >= today;
+
+      console.log('[TeacherDashboard] Avaliação:', {
+        id: evaluation.id,
+        name: evaluation.name,
+        date: evaluation.date,
+        evalDate: evalDate,
+        today: today,
+        isFuture: isFuture
+      });
+
+      return isFuture; // Apenas avaliações futuras ou de hoje
+    });
+
+    console.log('[TeacherDashboard] Avaliações futuras filtradas:', filtered);
+
+    const sorted = filtered.sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return dateA - dateB; // Ordenar por data (mais próximas primeiro)
+    });
+
+    const result = sorted.slice(0, 5); // Limitar a 5 avaliações
+    console.log('[TeacherDashboard] Resultado final (até 5 avaliações):', result);
+
+    return result;
+  };
 
   /**
    * Carrega todos os dados necessários para o dashboard
@@ -91,24 +147,6 @@ export default function TeacherDashboard() {
       // Calcular total de alunos (mock)
       const totalStudentsCount = classes.reduce((acc, cls) => acc + (cls.students?.length || 0), 0);
       setTotalStudents(totalStudentsCount);
-
-      // Mock de próximas avaliações (seriam carregadas de uma API)
-      setUpcomingEvaluations([
-        {
-          id: 1,
-          className: 'Turma A - 1º Semestre',
-          disciplineName: 'Matemática',
-          evaluationName: 'Prova 1',
-          date: '2025-11-15T14:00:00Z',
-        },
-        {
-          id: 2,
-          className: 'Turma B - 2º Semestre',
-          disciplineName: 'Programação',
-          evaluationName: 'Trabalho Final',
-          date: '2025-11-20T10:00:00Z',
-        },
-      ]);
     } catch (err) {
       console.error('[TeacherDashboard] Erro ao carregar dados:', err);
       setError('Erro ao carregar informações do dashboard. Tente novamente.');
@@ -145,7 +183,10 @@ export default function TeacherDashboard() {
     return diffDays;
   };
 
-  if (loading) {
+  // Processar próximas avaliações usando dados reais da API
+  const upcomingEvaluations = getUpcomingEvaluations(allEvaluations);
+
+  if (loading || loadingEvaluations) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -250,6 +291,12 @@ export default function TeacherDashboard() {
             <div className="space-y-3">
               {upcomingEvaluations.map((evaluation) => {
                 const days = daysUntil(evaluation.date);
+                const className = evaluation.class
+                  ? `${evaluation.class.semester}º Semestre ${evaluation.class.year}`
+                  : 'Turma não especificada';
+                const disciplineName = evaluation.discipline?.name || 'Disciplina não especificada';
+                const typeBadge = evaluation.type === 'grade' ? 'Nota' : 'Conceito';
+
                 return (
                   <div
                     key={evaluation.id}
@@ -259,9 +306,20 @@ export default function TeacherDashboard() {
                       <Calendar className="w-5 h-5 text-purple-600" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-medium text-gray-900">{evaluation.evaluationName}</h3>
-                      <p className="text-sm text-gray-600">{evaluation.disciplineName}</p>
-                      <p className="text-xs text-gray-600 mt-1">{evaluation.className}</p>
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-medium text-gray-900">{evaluation.name}</h3>
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full font-medium ${
+                            evaluation.type === 'grade'
+                              ? 'bg-blue-100 text-blue-700'
+                              : 'bg-green-100 text-green-700'
+                          }`}
+                        >
+                          {typeBadge}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1">{disciplineName}</p>
+                      <p className="text-xs text-gray-600 mt-1">{className}</p>
                       <p className="text-xs text-purple-700 mt-2 font-medium">
                         {formatDateOnly(evaluation.date)} ({days} dia{days !== 1 ? 's' : ''})
                       </p>
