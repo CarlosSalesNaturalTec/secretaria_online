@@ -27,7 +27,8 @@ import {
 import { Button } from '@/components/ui/Button';
 import { getMyGrades } from '@/services/grade.service';
 import EvaluationService from '@/services/evaluation.service';
-import type { IGradeWithEvaluation, IEvaluation } from '@/types/grade.types';
+import type { IGradeWithEvaluation } from '@/types/grade.types';
+import type { IEvaluation } from '@/types/evaluation.types';
 import type { IDocument } from '@/types/document.types';
 
 /**
