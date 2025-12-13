@@ -18,6 +18,13 @@ const router = express.Router();
 
 router.use(authMiddleware);
 
+// Buscar avaliações futuras do aluno logado (apenas para estudantes autenticados)
+// IMPORTANTE: Esta rota deve vir ANTES de rotas com parâmetros dinâmicos como /:id
+router.get(
+  '/my-upcoming-evaluations',
+  StudentController.getMyUpcomingEvaluations
+);
+
 // Rotas que requerem admin
 router.post(
   '/',

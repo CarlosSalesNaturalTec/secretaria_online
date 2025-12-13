@@ -271,12 +271,45 @@ export async function deleteEvaluation(id: number): Promise<void> {
   }
 }
 
+/**
+ * Busca as avaliações futuras (próximas 30 dias) das turmas do aluno logado.
+ *
+ * @returns {Promise<IEvaluation[]>} Lista de avaliações futuras do aluno
+ * @throws {Error} Se houver erro ao buscar
+ */
+export async function getMyUpcomingEvaluations(): Promise<IEvaluation[]> {
+  try {
+    if (import.meta.env.DEV) {
+      console.log('[EvaluationService] Buscando avaliações futuras do aluno logado...');
+    }
+
+    const response = await api.get<ApiResponse<any[]>>('/students/my-upcoming-evaluations');
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.error?.message || 'Erro ao buscar avaliações futuras');
+    }
+
+    if (import.meta.env.DEV) {
+      console.log('[EvaluationService] Avaliações futuras recuperadas:', response.data.data.length);
+    }
+
+    return response.data.data.map(mapEvaluationData);
+  } catch (error) {
+    console.error('[EvaluationService] Erro ao buscar avaliações futuras:', error);
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Falha ao buscar avaliações futuras. Tente novamente.');
+  }
+}
+
 const EvaluationService = {
   getAll,
   getById,
   create,
   update,
   delete: deleteEvaluation,
+  getMyUpcomingEvaluations,
 };
 
 export default EvaluationService;

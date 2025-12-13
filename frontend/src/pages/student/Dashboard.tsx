@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { getMyGrades } from '@/services/grade.service';
+import EvaluationService from '@/services/evaluation.service';
 import type { IGradeWithEvaluation, IEvaluation } from '@/types/grade.types';
 import type { IDocument } from '@/types/document.types';
 
@@ -90,9 +91,15 @@ export default function StudentDashboard() {
         setOverallAverage(null);
       }
 
-      // TODO: Implementar endpoint para buscar próximas avaliações do aluno
-      // Por enquanto, deixamos vazio
-      setUpcomingEvaluations([]);
+      // Buscar próximas avaliações do aluno (próximas 30 dias)
+      try {
+        const evaluations = await EvaluationService.getMyUpcomingEvaluations();
+        setUpcomingEvaluations(evaluations);
+      } catch (evalError) {
+        console.error('[StudentDashboard] Erro ao carregar avaliações futuras:', evalError);
+        // Não bloqueia o carregamento do dashboard se falhar
+        setUpcomingEvaluations([]);
+      }
 
       // TODO: Implementar endpoint para buscar documentos pendentes
       // Por enquanto, deixamos vazio
@@ -316,7 +323,7 @@ export default function StudentDashboard() {
                       Data: {formatDate(evaluation.date)}
                     </p>
                     <p className="text-xs text-gray-500 mt-0.5">
-                      {evaluation.teacher?.name}
+                      Prof. {evaluation.teacher?.nome}
                     </p>
                   </div>
                 </div>

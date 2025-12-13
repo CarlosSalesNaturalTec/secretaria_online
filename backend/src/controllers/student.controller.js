@@ -157,6 +157,29 @@ class StudentController {
       next(error);
     }
   }
+
+  /**
+   * Busca as avaliações futuras (próximas 30 dias) das turmas do aluno logado.
+   * GET /api/students/my-upcoming-evaluations
+   *
+   * @param {import('express').Request} req - A requisição.
+   * @param {import('express').Response} res - A resposta.
+   * @param {import('express').NextFunction} next - O próximo middleware.
+   */
+  async getMyUpcomingEvaluations(req, res, next) {
+    try {
+      const userId = req.user.id;
+      const evaluations = await StudentService.getMyUpcomingEvaluations(userId);
+
+      return res.json({
+        success: true,
+        data: evaluations,
+        count: evaluations.length,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new StudentController();

@@ -355,6 +355,107 @@ class StudentService {
       user: user || null,
     };
   }
+
+  /**
+   * Busca as avaliações futuras (próximas 30 dias) das turmas do aluno logado.
+   *
+   * @param {number} userId - ID do usuário logado.
+   * @returns {Promise<Evaluation[]>} Lista de avaliações futuras.
+   * @throws {AppError} Se o usuário não for encontrado ou não for estudante.
+   */
+  async getMyUpcomingEvaluations(userId) {
+    const { ClassStudent, Evaluation, Class, Teacher, Discipline, Course } = require('../models');
+    const { Op } = require('sequelize');
+
+    // Buscar usuário logado
+    const user = await User.findByPk(userId);
+    if (!user) {
+      throw new AppError('Usuário não encontrado.', 404, 'USER_NOT_FOUND');
+    }
+
+    // Verificar se usuário é estudante
+    if (user.role !== 'student') {
+      throw new AppError('Apenas estudantes podem acessar suas avaliações.', 403, 'FORBIDDEN');
+    }
+
+    // Verificar se usuário tem student_id vinculado
+    if (!user.student_id) {
+      throw new AppError(
+        'Usuário não possui estudante vinculado.',
+        400,
+        'NO_STUDENT_ASSOCIATED'
+      );
+    }
+
+    const studentId = user.student_id;
+
+    // Buscar todas as turmas do aluno
+    const classStudents = await ClassStudent.findAll({
+      where: { student_id: studentId },
+      attributes: ['class_id'],
+    });
+
+    if (classStudents.length === 0) {
+      logger.info('[STUDENT_SERVICE] Aluno não está matriculado em nenhuma turma', {
+        userId,
+        studentId,
+      });
+      return [];
+    }
+
+    const classIds = classStudents.map((cs) => cs.class_id);
+
+    // Buscar avaliações futuras (próximas 30 dias) das turmas do aluno
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const futureDate = new Date(today);
+    futureDate.setDate(futureDate.getDate() + 30);
+
+    const evaluations = await Evaluation.findAll({
+      where: {
+        class_id: { [Op.in]: classIds },
+        date: {
+          [Op.gte]: today,
+          [Op.lte]: futureDate,
+        },
+      },
+      include: [
+        {
+          model: Class,
+          as: 'class',
+          attributes: ['id', 'semester', 'year'],
+          include: [
+            {
+              model: Course,
+              as: 'course',
+              attributes: ['id', 'name'],
+            },
+          ],
+        },
+        {
+          model: Teacher,
+          as: 'teacher',
+          attributes: ['id', 'nome'],
+        },
+        {
+          model: Discipline,
+          as: 'discipline',
+          attributes: ['id', 'name', 'code'],
+        },
+      ],
+      order: [['date', 'ASC']],
+    });
+
+    logger.info('[STUDENT_SERVICE] Avaliações futuras encontradas para aluno', {
+      userId,
+      studentId,
+      classCount: classIds.length,
+      evaluationCount: evaluations.length,
+    });
+
+    return evaluations.map((e) => e.toJSON());
+  }
 }
 
 module.exports = new StudentService();
