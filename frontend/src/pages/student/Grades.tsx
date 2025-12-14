@@ -119,11 +119,12 @@ export default function Grades() {
         .filter((g) => g.grade !== null)
         .map((g) => {
           const gradeValue = typeof g.grade === 'string' ? parseFloat(g.grade) : g.grade;
-          return gradeValue;
-        });
+          return gradeValue!;
+        })
+        .filter((grade): grade is number => !isNaN(grade));
 
       if (numericGrades.length > 0) {
-        const sum = numericGrades.reduce((acc, grade) => acc + (grade || 0), 0);
+        const sum = numericGrades.reduce((acc: number, grade: number) => acc + grade, 0);
         disciplineData.average = sum / numericGrades.length;
       }
 
