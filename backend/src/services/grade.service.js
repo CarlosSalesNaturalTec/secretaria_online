@@ -851,7 +851,13 @@ class GradeService {
               {
                 model: require('../models').Discipline,
                 as: 'discipline',
-                attributes: ['id', 'name', 'code']
+                attributes: ['id', 'name', 'code', 'workload_hours']
+              },
+              {
+                model: require('../models').Teacher,
+                as: 'teacher',
+                attributes: ['id', 'nome'],
+                required: false
               }
             ]
           },
@@ -895,7 +901,18 @@ class GradeService {
             id: gradeData.evaluation.id,
             name: gradeData.evaluation.name,
             date: gradeData.evaluation.date,
-            type: gradeData.evaluation.type
+            type: gradeData.evaluation.type,
+            disciplineId: gradeData.evaluation.discipline.id,
+            discipline: {
+              id: gradeData.evaluation.discipline.id,
+              name: gradeData.evaluation.discipline.name,
+              code: gradeData.evaluation.discipline.code,
+              workloadHours: gradeData.evaluation.discipline.workload_hours
+            },
+            teacher: gradeData.evaluation.teacher ? {
+              id: gradeData.evaluation.teacher.id,
+              name: gradeData.evaluation.teacher.nome
+            } : null
           },
           class: {
             id: gradeData.evaluation.class.id,

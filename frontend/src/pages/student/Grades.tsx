@@ -59,7 +59,6 @@ export default function Grades() {
   const [allGrades, setAllGrades] = useState<IGradeWithEvaluation[]>([]);
   const [disciplineGrades, setDisciplineGrades] = useState<IDisciplineGrades[]>([]);
   const [expandedDisciplines, setExpandedDisciplines] = useState<Set<number>>(new Set());
-  const [overallAverage, setOverallAverage] = useState<number | null>(null);
 
   /**
    * Carrega notas do aluno ao montar o componente
@@ -76,7 +75,6 @@ export default function Grades() {
   useEffect(() => {
     if (allGrades.length === 0) {
       setDisciplineGrades([]);
-      setOverallAverage(null);
       return;
     }
 
@@ -87,7 +85,9 @@ export default function Grades() {
       const disciplineId = gradeItem.evaluation.disciplineId;
       const discipline = gradeItem.evaluation.discipline;
 
-      if (!discipline) return;
+      if (!discipline) {
+        return;
+      }
 
       if (!disciplineMap.has(disciplineId)) {
         disciplineMap.set(disciplineId, {
@@ -117,10 +117,13 @@ export default function Grades() {
       // Calcular média das notas numéricas
       const numericGrades = disciplineData.grades
         .filter((g) => g.grade !== null)
-        .map((g) => g.grade!);
+        .map((g) => {
+          const gradeValue = typeof g.grade === 'string' ? parseFloat(g.grade) : g.grade;
+          return gradeValue;
+        });
 
       if (numericGrades.length > 0) {
-        const sum = numericGrades.reduce((acc, grade) => acc + grade, 0);
+        const sum = numericGrades.reduce((acc, grade) => acc + (grade || 0), 0);
         disciplineData.average = sum / numericGrades.length;
       }
 
@@ -133,21 +136,6 @@ export default function Grades() {
     );
 
     setDisciplineGrades(disciplinesArray);
-
-    // Calcular média geral (apenas disciplinas com notas numéricas)
-    const disciplinesWithAverage = disciplinesArray.filter(
-      (d) => d.average !== null
-    );
-
-    if (disciplinesWithAverage.length > 0) {
-      const totalAverage = disciplinesWithAverage.reduce(
-        (acc, d) => acc + d.average!,
-        0
-      );
-      setOverallAverage(totalAverage / disciplinesWithAverage.length);
-    } else {
-      setOverallAverage(null);
-    }
 
     // Expandir primeira disciplina por padrão
     if (disciplinesArray.length > 0) {
@@ -232,11 +220,13 @@ export default function Grades() {
   /**
    * Formata nota para exibição
    *
-   * @param {number} grade - Nota numérica (0-10)
+   * @param {number | string} grade - Nota numérica (0-10)
    * @returns {string} Nota formatada (ex: "8,5")
    */
-  const formatGrade = (grade: number): string => {
-    return grade.toFixed(1).replace('.', ',');
+  const formatGrade = (grade: number | string): string => {
+    const numericGrade = typeof grade === 'string' ? parseFloat(grade) : grade;
+    if (isNaN(numericGrade)) return '-';
+    return numericGrade.toFixed(1).replace('.', ',');
   };
 
   /**
@@ -252,13 +242,15 @@ export default function Grades() {
   /**
    * Retorna classe CSS de cor baseada na nota
    *
-   * @param {number} grade - Nota numérica (0-10)
+   * @param {number | string} grade - Nota numérica (0-10)
    * @returns {string} Classes CSS do Tailwind
    */
-  const getGradeColorClass = (grade: number): string => {
-    if (grade >= 9.0) return 'text-green-600 bg-green-50 border-green-200';
-    if (grade >= 7.0) return 'text-blue-600 bg-blue-50 border-blue-200';
-    if (grade >= 6.0) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+  const getGradeColorClass = (grade: number | string): string => {
+    const numericGrade = typeof grade === 'string' ? parseFloat(grade) : grade;
+    if (isNaN(numericGrade)) return 'text-gray-600 bg-gray-100 border-gray-200';
+    if (numericGrade >= 9.0) return 'text-green-600 bg-green-50 border-green-200';
+    if (numericGrade >= 7.0) return 'text-blue-600 bg-blue-50 border-blue-200';
+    if (numericGrade >= 6.0) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
     return 'text-red-600 bg-red-50 border-red-200';
   };
 
@@ -277,25 +269,32 @@ export default function Grades() {
   /**
    * Retorna ícone e cor baseado na média
    *
-   * @param {number} average - Média numérica (0-10)
+   * @param {number | string} average - Média numérica (0-10)
    * @returns {{ icon: JSX.Element, colorClass: string }}
    */
   const getAverageIndicator = (
-    average: number
+    average: number | string
   ): { icon: JSX.Element; colorClass: string } => {
-    if (average >= 9.0) {
+    const numericAverage = typeof average === 'string' ? parseFloat(average) : average;
+    if (isNaN(numericAverage)) {
+      return {
+        icon: <AlertCircle className="w-5 h-5" />,
+        colorClass: 'text-gray-600',
+      };
+    }
+    if (numericAverage >= 9.0) {
       return {
         icon: <Award className="w-5 h-5" />,
         colorClass: 'text-green-600',
       };
     }
-    if (average >= 7.0) {
+    if (numericAverage >= 7.0) {
       return {
         icon: <TrendingUp className="w-5 h-5" />,
         colorClass: 'text-blue-600',
       };
     }
-    if (average >= 6.0) {
+    if (numericAverage >= 6.0) {
       return {
         icon: <TrendingUp className="w-5 h-5" />,
         colorClass: 'text-yellow-600',
@@ -348,19 +347,7 @@ export default function Grades() {
       </div>
 
       {/* Estatísticas Gerais */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Média Geral */}
-        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-gray-600">Média Geral</h3>
-            <TrendingUp className="w-5 h-5 text-blue-600" />
-          </div>
-          <p className="text-3xl font-bold text-gray-900">
-            {overallAverage !== null ? formatGrade(overallAverage) : '-'}
-          </p>
-          <p className="text-xs text-gray-500 mt-1">Todas as disciplinas</p>
-        </div>
-
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Total de Disciplinas */}
         <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
           <div className="flex items-center justify-between mb-2">
