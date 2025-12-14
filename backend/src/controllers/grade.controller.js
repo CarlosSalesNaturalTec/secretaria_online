@@ -679,6 +679,25 @@ class GradeController {
         });
       }
 
+      // Buscar student_id do usuário autenticado
+      const user = await User.findByPk(userId, {
+        attributes: ['id', 'student_id']
+      });
+
+      if (!user || !user.student_id) {
+        logger.warn('[GradeController.getMyGrades] Usuário não possui student_id associado', {
+          userId
+        });
+
+        return res.status(404).json({
+          success: false,
+          error: {
+            code: 'STUDENT_NOT_FOUND',
+            message: 'Registro de aluno não encontrado para este usuário'
+          }
+        });
+      }
+
       // Construir filtros
       const filters = {};
 
@@ -712,11 +731,12 @@ class GradeController {
         filters.discipline_id = disciplineNum;
       }
 
-      // Obter notas do aluno
-      const grades = await GradeService.getStudentGrades(userId, filters);
+      // Obter notas do aluno usando student_id
+      const grades = await GradeService.getStudentGrades(user.student_id, filters);
 
       logger.info('[GradeController.getMyGrades] Notas do aluno obtidas com sucesso', {
-        studentId: userId,
+        userId,
+        studentId: user.student_id,
         count: grades.length,
         filters
       });

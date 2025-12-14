@@ -19,7 +19,6 @@ import {
   FileText,
   ClipboardList,
   AlertCircle,
-  TrendingUp,
   Calendar,
   CheckCircle,
   Clock,
@@ -52,7 +51,6 @@ export default function StudentDashboard() {
   const [recentGrades, setRecentGrades] = useState<IGradeWithEvaluation[]>([]);
   const [upcomingEvaluations, setUpcomingEvaluations] = useState<IEvaluation[]>([]);
   const [pendingDocuments, setPendingDocuments] = useState<IDocument[]>([]);
-  const [overallAverage, setOverallAverage] = useState<number | null>(null);
 
   /**
    * Carrega dados do dashboard ao montar o componente
@@ -77,20 +75,6 @@ export default function StudentDashboard() {
       // Filtrar apenas as últimas 5 notas
       const recentGradesData = grades.slice(0, 5);
       setRecentGrades(recentGradesData);
-
-      // Calcular média geral das notas
-      if (grades.length > 0) {
-        const gradesWithValue = grades.filter((g) => g.grade !== null);
-        if (gradesWithValue.length > 0) {
-          const sum = gradesWithValue.reduce((acc, g) => acc + (g.grade || 0), 0);
-          const average = sum / gradesWithValue.length;
-          setOverallAverage(average);
-        } else {
-          setOverallAverage(null);
-        }
-      } else {
-        setOverallAverage(null);
-      }
 
       // Buscar próximas avaliações do aluno (próximas 30 dias)
       try {
@@ -130,23 +114,27 @@ export default function StudentDashboard() {
   /**
    * Formata nota para exibição
    *
-   * @param {number} grade - Nota numérica (0-10)
+   * @param {number | string} grade - Nota numérica (0-10)
    * @returns {string} Nota formatada (ex: "8,5")
    */
-  const formatGrade = (grade: number): string => {
-    return grade.toFixed(1).replace('.', ',');
+  const formatGrade = (grade: number | string): string => {
+    const numericGrade = typeof grade === 'string' ? parseFloat(grade) : grade;
+    if (isNaN(numericGrade)) return '-';
+    return numericGrade.toFixed(1).replace('.', ',');
   };
 
   /**
    * Retorna classe CSS de cor baseada na nota
    *
-   * @param {number} grade - Nota numérica (0-10)
+   * @param {number | string} grade - Nota numérica (0-10)
    * @returns {string} Classes CSS do Tailwind
    */
-  const getGradeColorClass = (grade: number): string => {
-    if (grade >= 9.0) return 'text-green-600 bg-green-50';
-    if (grade >= 7.0) return 'text-blue-600 bg-blue-50';
-    if (grade >= 6.0) return 'text-yellow-600 bg-yellow-50';
+  const getGradeColorClass = (grade: number | string): string => {
+    const numericGrade = typeof grade === 'string' ? parseFloat(grade) : grade;
+    if (isNaN(numericGrade)) return 'text-gray-600 bg-gray-100';
+    if (numericGrade >= 9.0) return 'text-green-600 bg-green-50';
+    if (numericGrade >= 7.0) return 'text-blue-600 bg-blue-50';
+    if (numericGrade >= 6.0) return 'text-yellow-600 bg-yellow-50';
     return 'text-red-600 bg-red-50';
   };
 
@@ -189,19 +177,7 @@ export default function StudentDashboard() {
       </div>
 
       {/* Cards de Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Média Geral */}
-        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-gray-600">Média Geral</h3>
-            <TrendingUp className="w-5 h-5 text-blue-600" />
-          </div>
-          <p className="text-3xl font-bold text-gray-900">
-            {overallAverage ? formatGrade(overallAverage) : '-'}
-          </p>
-          <p className="text-xs text-gray-500 mt-1">Semestre atual</p>
-        </div>
-
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Notas Recentes */}
         <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
           <div className="flex items-center justify-between mb-2">
@@ -217,6 +193,16 @@ export default function StudentDashboard() {
           </Link>
         </div>
 
+        {/* Próximas Avaliações */}
+        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-gray-600">Próximas Avaliações</h3>
+            <Calendar className="w-5 h-5 text-purple-600" />
+          </div>
+          <p className="text-3xl font-bold text-gray-900">{upcomingEvaluations.length}</p>
+          <p className="text-xs text-gray-500 mt-1">Próximos 30 dias</p>
+        </div>
+
         {/* Documentos Pendentes */}
         <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-orange-500">
           <div className="flex items-center justify-between mb-2">
@@ -230,16 +216,6 @@ export default function StudentDashboard() {
           >
             Enviar documentos →
           </Link>
-        </div>
-
-        {/* Próximas Avaliações */}
-        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-gray-600">Próximas Avaliações</h3>
-            <Calendar className="w-5 h-5 text-purple-600" />
-          </div>
-          <p className="text-3xl font-bold text-gray-900">{upcomingEvaluations.length}</p>
-          <p className="text-xs text-gray-500 mt-1">Próximos 30 dias</p>
         </div>
       </div>
 
