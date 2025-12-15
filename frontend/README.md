@@ -240,6 +240,61 @@ frontend/
 - **Rota**: Acessível via botão 📋 (List) na coluna de ações da página de cursos
 - **Dados persistidos**: Tabela `course_disciplines` com `course_id`, `discipline_id` e `semester`
 
+### ✅ Rematrícula Global de Estudantes (Etapa 5/9 - Frontend Concluído)
+- **Página dedicada**: `/admin/reenrollment`
+- **Status**: Frontend implementado ✅ | Backend implementado ✅
+- **Descrição**: Sistema de rematrícula semestral/anual que permite processar rematrícula de TODOS os estudantes ativos do sistema em lote
+- **Funcionalidades**:
+  - ✅ Página administrativa com informações detalhadas sobre o processo
+  - ✅ Cards informativos explicando como funciona a rematrícula
+  - ✅ Alertas de atenção sobre operação irreversível
+  - ✅ Botão principal para iniciar rematrícula global
+  - ✅ Modal de rematrícula com formulário de captura de dados
+  - ✅ Campos validados: Semestre (1-2), Ano (YYYY), Senha do admin
+  - ✅ Tela de confirmação com resumo da operação
+  - ✅ Validação de senha do admin antes de processar
+  - ✅ Feedback de loading durante processamento
+  - ✅ Mensagens de sucesso/erro com toasts/alerts
+  - ✅ Invalidação automática de cache após sucesso
+  - ✅ Integração completa com TanStack Query
+- **Arquivos implementados**:
+  - ✅ `src/types/reenrollment.types.ts` - Tipos TypeScript
+  - ✅ `src/services/reenrollment.service.ts` - Service de API
+  - ✅ `src/hooks/useReenrollment.ts` - Hook customizado com TanStack Query
+  - ✅ `src/pages/admin/Reenrollment.tsx` - Página principal
+  - ✅ `src/components/modals/GlobalReenrollmentModal.tsx` - Modal de processamento
+  - ✅ Rota adicionada em `src/router.tsx`
+  - ✅ Item adicionado no menu Sidebar (/admin/reenrollment)
+- **Endpoint utilizado**: `POST /api/v1/reenrollments/process-all`
+- **Fluxo de operação**:
+  1. Admin acessa página `/admin/reenrollment`
+  2. Clica em "Iniciar Rematrícula Global"
+  3. Preenche formulário no modal (semestre, ano, senha)
+  4. Sistema valida dados com Zod
+  5. Exibe tela de confirmação com resumo
+  6. Admin confirma operação
+  7. Backend valida senha e processa rematrícula em lote
+  8. Todos os enrollments ativos viram 'pending'
+  9. Cache é invalidado e dados são atualizados
+  10. Mensagem de sucesso é exibida
+- **Validações implementadas**:
+  - Semestre: 1 ou 2 (obrigatório)
+  - Ano: entre 2020 e 2100 (obrigatório)
+  - Senha: mínimo 6 caracteres (obrigatória)
+  - Validação de senha no backend antes de processar
+- **Características**:
+  - ✅ Processa TODOS os estudantes ativos do sistema (não por curso individual)
+  - ✅ Usa transação no backend (rollback automático em caso de erro)
+  - ✅ NÃO cria contratos (criados após aceite do estudante - Etapa 8)
+  - ✅ Modal não pode ser fechado durante processamento
+  - ✅ Botões desabilitados durante processamento
+  - ✅ Ícones e design consistentes com resto do sistema
+- **Próximas etapas** (Backend - Etapas 6, 7, 8 e 9):
+  - ⏳ Endpoint para preview de contrato HTML
+  - ⏳ Frontend - Tela de aceite de rematrícula (estudante)
+  - ⏳ Backend - Endpoint de aceite e criação de contrato
+  - ⏳ Documentação final
+
 ## 🧪 Testes
 
 ### Configuração de Testes

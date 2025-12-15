@@ -42,6 +42,7 @@ const AdminDocuments = lazy(() => import('./pages/admin/Documents'));
 const AdminRequests = lazy(() => import('./pages/admin/Requests'));
 const AdminEvaluations = lazy(() => import('./pages/teacher/Evaluations'));
 const AdminGrades = lazy(() => import('./pages/admin/Grades'));
+const AdminReenrollment = lazy(() => import('./pages/admin/Reenrollment'));
 
 /**
  * Páginas de Aluno (Lazy Loading)
@@ -225,6 +226,14 @@ const privateRoutes: RouteObject[] = [
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <AdminGrades />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'reenrollment',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AdminReenrollment />
           </Suspense>
         ),
       },
