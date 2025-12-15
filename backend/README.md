@@ -405,6 +405,118 @@ backend/
   }
   ```
 
+### 🔄 Rematrícula Global de Estudantes (Em Desenvolvimento)
+
+**Status:** 🏗️ Em implementação - Etapa 1/9 concluída
+
+**Descrição:** Sistema de rematrícula semestral/anual global que permite processar rematrículas em lote de TODOS os estudantes do sistema e controle de aceite de contratos.
+
+**Objetivo:** Automatizar o processo de renovação de matrículas semestrais, permitindo que administradores processem rematrículas globalmente e estudantes aceitem contratos de renovação antes de retornar ao sistema.
+
+#### 📋 Etapas do Desenvolvimento
+
+- ✅ **Etapa 1: Análise e Modelagem de Dados** (Concluída em 2025-12-15)
+  - Análise completa da estrutura atual do banco de dados
+  - Identificação de campos e relacionamentos necessários
+  - Documentação técnica criada: `docs/analise_rematricula.md`
+  - **Principais Conclusões:**
+    - ✅ Model `Enrollment.js`: Não precisa de alterações estruturais (campos semester/year não necessários)
+    - ⚠️ Model `Contract.js`: Necessita de 2 mudanças:
+      1. Adicionar campo `enrollment_id` (FK para enrollments, nullable)
+      2. Alterar `file_path` e `file_name` para nullable (suportar contratos sem PDF)
+    - ✅ Retrocompatibilidade garantida para dados existentes
+    - ✅ Impacto avaliado e documentado
+
+- ⏳ **Etapa 2: Migrations e Atualização de Models** (Próxima)
+  - Criar migration para adicionar campo `enrollment_id` em `contracts`
+  - Criar migration para permitir `file_path` e `file_name` nullable em `contracts`
+  - Atualizar model `Contract.js` com nova associação `belongsTo(Enrollment)`
+  - Atualizar model `Enrollment.js` com associação reversa `hasMany(Contract)`
+  - Executar e testar migrations
+
+- ⏳ **Etapa 3: Backend - Service de Rematrícula**
+  - Criar `ReenrollmentService` com lógica de rematrícula global
+  - Implementar processamento em lote de TODOS os enrollments ativos
+  - Validação de senha do admin
+  - Transações para garantir atomicidade
+
+- ⏳ **Etapa 4: Backend - Controller e Rotas**
+  - Criar `ReenrollmentController`
+  - Endpoint: `POST /api/v1/reenrollments/process-all` (rematrícula global)
+  - Proteção: Apenas admin + validação de senha
+
+- ⏳ **Etapa 5: Frontend - Interface de Rematrícula Global**
+  - Página administrativa para rematrícula global
+  - Modal de confirmação com senha
+  - Feedback de progresso
+
+- ⏳ **Etapa 6: Backend - Preview de Contrato HTML**
+  - Endpoint para preview de contrato: `GET /api/v1/reenrollments/contract-preview/:enrollmentId`
+  - Reutilização de `ContractTemplate.replacePlaceholders()`
+  - Retornar HTML renderizado (sem PDF)
+
+- ⏳ **Etapa 7: Frontend - Tela de Aceite**
+  - Página de aceite de rematrícula para estudantes
+  - Bloqueio de acesso até aceitar contrato
+  - Exibição de HTML do contrato
+
+- ⏳ **Etapa 8: Backend - Endpoint de Aceite**
+  - Endpoint: `POST /api/v1/reenrollments/accept/:enrollmentId`
+  - Atualizar enrollment status: 'pending' → 'active'
+  - **CRIAR contrato após aceite** com `file_path=null` e `file_name=null`
+  - Transação para garantir atomicidade
+
+- ⏳ **Etapa 9: Documentação Final**
+  - Consolidar documentação de todas as etapas
+  - Atualizar changelogs
+  - Atualizar API docs
+
+#### 🔑 Conceitos Principais
+
+**Rematrícula Global:**
+- Processa TODOS os enrollments ativos do sistema de uma vez (não por curso individual)
+- Admin define semestre, ano e confirma com senha
+- Todos os enrollments com status 'active' são atualizados para 'pending'
+- **Contratos NÃO são criados** durante o processamento em lote
+- Utiliza transações do Sequelize para garantir atomicidade
+
+**Aceite de Rematrícula:**
+- Estudantes com enrollment 'pending' devem aceitar contrato antes de acessar o sistema
+- **Contrato é criado SOMENTE após aceite** do estudante
+- Contrato de rematrícula não possui PDF (`file_path=null`, `file_name=null`)
+- Após aceite: enrollment volta para 'active' e estudante acessa normalmente
+
+**Estrutura de Dados:**
+```
+Enrollment (matrícula no curso)
+  ├── status: 'pending' | 'active' | 'cancelled'
+  ├── NÃO possui semester/year (curso completo, não semestral)
+  └── hasMany Contract (1 enrollment pode ter vários contratos ao longo do tempo)
+
+Contract (renovação semestral)
+  ├── enrollment_id (FK para enrollments) ← NOVO
+  ├── semester, year (período específico do contrato)
+  ├── file_path, file_name (nullable para contratos de rematrícula) ← ALTERADO
+  ├── accepted_at (data do aceite)
+  └── belongsTo Enrollment ← NOVO
+```
+
+#### 📚 Documentação Relacionada
+
+- **Backlog Completo:** `backlog/backlog_rematricula.json`
+- **Análise Técnica:** `docs/analise_rematricula.md` ✅
+- **Contexto do Sistema:** `docs/contextDoc.md`
+
+#### ⚠️ Notas Importantes
+
+- ✅ Reutilizar sistema existente de `ContractTemplate` (não criar novo)
+- ✅ Usar transações do Sequelize em operações críticas
+- ✅ Manter retrocompatibilidade com contratos e enrollments existentes
+- ✅ Contratos antigos continuam funcionando normalmente (com PDF)
+- ✅ Contratos de rematrícula funcionam sem PDF (apenas registro de aceite)
+
+---
+
 ## 📡 API Endpoints
 
 ### Autenticação
