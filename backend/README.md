@@ -407,7 +407,7 @@ backend/
 
 ### 🔄 Rematrícula Global de Estudantes (Em Desenvolvimento)
 
-**Status:** 🏗️ Em implementação - Etapa 1/9 concluída
+**Status:** 🏗️ Em implementação - Etapa 3/9 concluída
 
 **Descrição:** Sistema de rematrícula semestral/anual global que permite processar rematrículas em lote de TODOS os estudantes do sistema e controle de aceite de contratos.
 
@@ -450,11 +450,25 @@ backend/
   - ✅ Migrations executadas com sucesso no banco de desenvolvimento
   - ✅ Rollback testado e funcionando corretamente
 
-- ⏳ **Etapa 3: Backend - Service de Rematrícula**
-  - Criar `ReenrollmentService` com lógica de rematrícula global
-  - Implementar processamento em lote de TODOS os enrollments ativos
-  - Validação de senha do admin
-  - Transações para garantir atomicidade
+- ✅ **Etapa 3: Backend - Service de Rematrícula** (Concluída em 2025-12-15)
+  - ✅ Criado `ReenrollmentService` (`src/services/reenrollment.service.js`)
+  - ✅ Implementado método `validateAdminPassword(userId, password)`:
+    - Busca usuário por ID e valida que é admin
+    - Compara senha fornecida com hash usando bcrypt
+    - Retorna true/false conforme validação
+    - Lança AppError se usuário não existe ou não é admin
+  - ✅ Implementado método `processGlobalReenrollment(semester, year, adminUserId)`:
+    - Busca TODOS os enrollments ativos do sistema (não por curso)
+    - Atualiza status de 'active' para 'pending' em batch
+    - Usa transação do Sequelize para garantir atomicidade
+    - Registra log detalhado da operação (admin_id, total_affected, semester, year)
+    - Retorna objeto com totalStudents e affectedEnrollmentIds
+    - Rollback automático em caso de erro
+  - ✅ Service implementado seguindo padrões do projeto:
+    - Logging detalhado com Winston
+    - Tratamento de erros com AppError
+    - Documentação JSDoc completa
+    - Validações de regras de negócio
 
 - ⏳ **Etapa 4: Backend - Controller e Rotas**
   - Criar `ReenrollmentController`
@@ -486,6 +500,49 @@ backend/
   - Consolidar documentação de todas as etapas
   - Atualizar changelogs
   - Atualizar API docs
+
+#### 💡 Uso do ReenrollmentService
+
+O `ReenrollmentService` está localizado em `backend/src/services/reenrollment.service.js` e fornece dois métodos principais:
+
+**1. Validar senha do administrador:**
+```javascript
+const ReenrollmentService = require('./services/reenrollment.service');
+
+// Validar senha do admin antes de operação crítica
+const isValid = await ReenrollmentService.validateAdminPassword(adminUserId, 'senha123');
+
+if (!isValid) {
+  throw new AppError('Senha incorreta', 401);
+}
+```
+
+**2. Processar rematrícula global:**
+```javascript
+const ReenrollmentService = require('./services/reenrollment.service');
+
+try {
+  // Processar rematrícula de TODOS os estudantes do sistema
+  const result = await ReenrollmentService.processGlobalReenrollment(
+    1,           // semester (1 ou 2)
+    2025,        // year
+    adminUserId  // ID do admin que executou
+  );
+
+  console.log(`Total de estudantes rematriculados: ${result.totalStudents}`);
+  console.log(`IDs dos enrollments afetados:`, result.affectedEnrollmentIds);
+} catch (error) {
+  console.error('Erro ao processar rematrícula:', error.message);
+  // Transação foi revertida automaticamente
+}
+```
+
+**Características importantes:**
+- ✅ Usa transação do Sequelize (rollback automático em caso de erro)
+- ✅ Processa TODOS os enrollments ativos do sistema em batch
+- ✅ Registra log detalhado com Winston (admin_id, total_affected, semester, year)
+- ✅ NÃO cria contratos (contratos serão criados após aceite do estudante - Etapa 8)
+- ✅ Retorna lista de IDs dos enrollments afetados para auditoria
 
 #### 🔑 Conceitos Principais
 
