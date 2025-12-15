@@ -407,7 +407,7 @@ backend/
 
 ### 🔄 Rematrícula Global de Estudantes (Em Desenvolvimento)
 
-**Status:** 🏗️ Em implementação - Etapa 3/9 concluída
+**Status:** 🏗️ Em implementação - Etapa 4/9 concluída
 
 **Descrição:** Sistema de rematrícula semestral/anual global que permite processar rematrículas em lote de TODOS os estudantes do sistema e controle de aceite de contratos.
 
@@ -470,10 +470,22 @@ backend/
     - Documentação JSDoc completa
     - Validações de regras de negócio
 
-- ⏳ **Etapa 4: Backend - Controller e Rotas**
-  - Criar `ReenrollmentController`
-  - Endpoint: `POST /api/v1/reenrollments/process-all` (rematrícula global)
-  - Proteção: Apenas admin + validação de senha
+- ✅ **Etapa 4: Backend - Controller e Rotas** (Concluída em 2025-12-15)
+  - ✅ Criado `ReenrollmentController` (`src/controllers/reenrollment.controller.js`)
+  - ✅ Implementado método `processGlobalReenrollment(req, res, next)`:
+    - Valida request body com express-validator (semester, year, adminPassword)
+    - Valida senha do admin com ReenrollmentService.validateAdminPassword()
+    - Retorna erro 401 se senha incorreta
+    - Chama ReenrollmentService.processGlobalReenrollment()
+    - Retorna resposta 200 com totalStudents e affectedEnrollmentIds
+    - Tratamento de erros com middleware next(error)
+  - ✅ Criado arquivo de rotas `src/routes/reenrollment.routes.js`:
+    - Endpoint: `POST /api/v1/reenrollments/process-all`
+    - Middlewares: authenticate + authorizeAdmin (apenas admin)
+    - Validações: semester (1-2), year (YYYY), adminPassword (min 6 chars)
+    - handleValidationErrors para retornar erros de validação
+  - ✅ Rotas registradas em `src/routes/index.js` com prefixo `/reenrollments`
+  - ✅ Documentação completa com JSDoc em controller e rotas
 
 - ⏳ **Etapa 5: Frontend - Interface de Rematrícula Global**
   - Página administrativa para rematrícula global
@@ -892,6 +904,58 @@ POST /api/v1/grades
 # Atualizar nota
 PUT /api/v1/grades/:id
 ```
+
+### Rematrícula Global (Admin Only)
+
+```http
+# Processar rematrícula global de TODOS os estudantes
+POST /api/v1/reenrollments/process-all
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+
+{
+  "semester": 1,
+  "year": 2025,
+  "adminPassword": "senha_admin"
+}
+
+# Resposta de sucesso (200):
+{
+  "success": true,
+  "data": {
+    "totalStudents": 150,
+    "affectedEnrollmentIds": [1, 2, 3, ...]
+  },
+  "message": "Rematrícula global processada com sucesso. 150 estudantes rematriculados."
+}
+
+# Resposta de erro - Senha incorreta (401):
+{
+  "success": false,
+  "error": "Senha incorreta"
+}
+
+# Resposta de erro - Validação falhou (400):
+{
+  "success": false,
+  "error": "Dados inválidos",
+  "details": [
+    {
+      "msg": "semester deve ser 1 ou 2",
+      "param": "semester",
+      "location": "body"
+    }
+  ]
+}
+```
+
+**Observações importantes:**
+- ✅ Processa TODOS os enrollments ativos do sistema (não por curso individual)
+- ✅ Atualiza status de 'active' para 'pending'
+- ✅ Usa transação do Sequelize (rollback automático em caso de erro)
+- ✅ NÃO cria contratos (criados após aceite do estudante na Etapa 8)
+- ✅ Requer autenticação JWT e role 'admin'
+- ✅ Validação de senha do administrador obrigatória
 
 Para documentação completa da API, veja `docs/api-documentation.md`
 

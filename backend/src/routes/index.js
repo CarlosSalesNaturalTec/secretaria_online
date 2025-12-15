@@ -66,6 +66,9 @@ const requestRoutes = require('./request.routes');
 // Funcionalidades Administrativas (feat-081)
 const adminRoutes = require('./admin.routes');
 
+// Rematrícula Global de Estudantes (feat-reenrollment-etapa-4)
+const reenrollmentRoutes = require('./reenrollment.routes');
+
 // ============================================================================
 // INICIALIZAÇÃO DO ROUTER
 // ============================================================================
@@ -305,6 +308,24 @@ router.use('/requests', requestRoutes);
  * Permissões: Admin only
  */
 router.use('/admin', adminRoutes);
+
+/**
+ * Rotas de Rematrícula Global de Estudantes
+ * Base: /api/v1/reenrollments
+ *
+ * Endpoints:
+ * - POST /reenrollments/process-all - Processar rematrícula global de TODOS os estudantes
+ *
+ * Permissões: Admin only
+ *
+ * IMPORTANTE:
+ * - Processa TODOS os enrollments ativos do sistema (não por curso individual)
+ * - Atualiza status de 'active' para 'pending'
+ * - Requer validação de senha do administrador
+ * - Usa transação do Sequelize (rollback automático em caso de erro)
+ * - NÃO cria contratos (criados após aceite do estudante)
+ */
+router.use('/reenrollments', reenrollmentRoutes);
 
 // ============================================================================
 // EXPORTAÇÃO
