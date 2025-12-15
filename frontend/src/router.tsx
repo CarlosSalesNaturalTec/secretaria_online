@@ -51,6 +51,9 @@ const StudentDashboard = lazy(() => import('./pages/student/Dashboard'));
 const StudentGrades = lazy(() => import('./pages/student/Grades'));
 const StudentDocuments = lazy(() => import('./pages/student/Documents'));
 const StudentRequests = lazy(() => import('./pages/student/Requests'));
+const ReenrollmentAcceptance = lazy(
+  () => import('./pages/student/ReenrollmentAcceptance')
+);
 
 /**
  * Páginas de Professor (Lazy Loading)
@@ -336,6 +339,14 @@ const privateRoutes: RouteObject[] = [
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <StudentRequests />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'reenrollment-acceptance',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <ReenrollmentAcceptance />
           </Suspense>
         ),
       },

@@ -71,6 +71,13 @@ interface AuthContextType extends AuthState {
    * @returns true se token e user existem
    */
   isAuthenticated: boolean;
+
+  /**
+   * Indica se o estudante logado tem rematrícula pendente
+   *
+   * @returns true se usuário for estudante e tiver enrollment 'pending'
+   */
+  hasEnrollmentPending: boolean;
 }
 
 /**
@@ -276,6 +283,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const isAuthenticated = Boolean(state.token && state.user);
 
   /**
+   * Computed property: verifica se estudante tem rematrícula pendente
+   */
+  const hasEnrollmentPending =
+    state.user?.role === 'student' &&
+    state.user?.enrollmentStatus === 'pending';
+
+  /**
    * Valor do contexto exposto aos consumers
    */
   const contextValue: AuthContextType = {
@@ -286,6 +300,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     logout,
     updateUser,
     isAuthenticated,
+    hasEnrollmentPending,
   };
 
   return (

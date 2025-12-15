@@ -17,7 +17,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import Modal from '../ui/Modal';
+import { Modal } from '@/components/ui/Modal';
 import { useProcessGlobalReenrollment } from '@/hooks/useReenrollment';
 import { AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react';
 

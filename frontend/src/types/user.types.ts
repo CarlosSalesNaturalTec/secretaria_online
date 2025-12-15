@@ -53,6 +53,9 @@ export interface IUser {
   /** Data de exclusão lógica (soft delete) */
   deletedAt?: string | null;
   deleted_at?: string | null;
+
+  /** Status da matrícula do estudante (se aplicável) */
+  enrollmentStatus?: 'pending' | 'active' | 'cancelled';
 }
 
 /**

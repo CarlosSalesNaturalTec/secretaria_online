@@ -5,82 +5,93 @@
  * Criado em: 2025-11-03
  */
 
-import { type ReactNode } from 'react';
+import { type ReactNode, useContext } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { AuthContext } from '@/contexts/AuthContext';
 
 interface PrivateRouteProps {
   children: ReactNode;
   requiredRole?: 'admin' | 'teacher' | 'student';
 }
 
+function LoadingFallback() {
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Carregando...</p>
+      </div>
+    </div>
+  );
+}
+
 /**
  * PrivateRoute - Wrapper para rotas protegidas
  *
- * Verifica se o usuário está autenticado (token JWT em localStorage).
- * Se requiredRole for especificado, valida se o papel do usuário é permitido.
+ * Utiliza AuthContext para verificar autenticação e autorização.
  *
  * Fluxo:
- * 1. Verifica se existe token JWT em localStorage
- * 2. Se não houver token, redireciona para /login
- * 3. Se houver requiredRole, decodifica o token e verifica se o role é permitido
- * 4. Se role não corresponder, redireciona para dashboard apropriado ou login
- * 5. Se tudo OK, renderiza o componente filho
+ * 1. Acessa o AuthContext para obter status de autenticação, loading e dados do usuário.
+ * 2. Se estiver carregando, exibe um componente de loading.
+ * 3. Se não estiver autenticado, redireciona para /login.
+ * 4. Se um `requiredRole` for especificado, valida se o papel do usuário é o correto.
+ * 5. Se o papel for incorreto, redireciona para o dashboard apropriado ao papel do usuário.
+ * 6. Se tudo estiver correto, renderiza o componente filho.
  *
- * @param children - Componente a renderizar se autenticado
- * @param requiredRole - Papel requerido para acessar a rota (opcional)
+ * @param children - Componente a renderizar se autenticado e autorizado.
+ * @param requiredRole - Papel requerido para acessar a rota (opcional).
  * @returns Componente filho ou redirecionamento
  */
 export function PrivateRoute({ children, requiredRole }: PrivateRouteProps) {
   const location = useLocation();
+  const authContext = useContext(AuthContext);
 
-  // Obter token JWT do localStorage
-  const token = localStorage.getItem('token');
+  if (!authContext) {
+    throw new Error('PrivateRoute deve ser usado dentro de um AuthProvider');
+  }
 
-  // Se não houver token, redirecionar para login
-  if (!token) {
-    console.warn('[PrivateRoute] Token não encontrado, redirecionando para login');
+  const { isAuthenticated, loading, user, hasEnrollmentPending } = authContext;
+
+  // 1. Exibir loading enquanto o contexto de autenticação está inicializando
+  if (loading) {
+    return <LoadingFallback />;
+  }
+
+  // 2. Se não estiver autenticado, redirecionar para login
+  if (!isAuthenticated || !user) {
+    console.warn('[PrivateRoute] Usuário não autenticado, redirecionando para login');
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Se requiredRole for especificado, validar papel do usuário
-  if (requiredRole) {
-    try {
-      // Decodificar token JWT (sem validar assinatura no frontend)
-      const parts = token.split('.');
-      if (parts.length !== 3) {
-        throw new Error('Token JWT inválido');
-      }
-
-      // Decodificar payload (segunda parte do JWT)
-      const payload = JSON.parse(
-        atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))
-      );
-
-      const userRole = payload.role;
-
-      // Se role não corresponder, redirecionar baseado no papel do usuário
-      if (userRole !== requiredRole) {
-        console.warn(
-          `[PrivateRoute] Papel do usuário (${userRole}) não é permitido. Requerido: ${requiredRole}`
-        );
-
-        // Redirecionar para dashboard apropriado de acordo com seu papel
-        const dashboardMap: Record<string, string> = {
-          admin: '/admin/dashboard',
-          teacher: '/teacher/dashboard',
-          student: '/student/dashboard',
-        };
-
-        const redirectPath = dashboardMap[userRole] || '/login';
-        return <Navigate to={redirectPath} replace />;
-      }
-    } catch (error) {
-      console.error('[PrivateRoute] Erro ao decodificar token:', error);
-      localStorage.removeItem('authToken');
-      return <Navigate to="/login" replace />;
-    }
+  // 3. Se estudante com rematrícula pendente, redirecionar para aceite
+  // (Exceto se ele já estiver tentando acessar a página de aceite)
+  if (
+    user.role === 'student' &&
+    hasEnrollmentPending &&
+    location.pathname !== '/student/reenrollment-acceptance'
+  ) {
+    console.log(
+      '[PrivateRoute] Estudante com rematrícula pendente, redirecionando para aceite.'
+    );
+    return <Navigate to="/student/reenrollment-acceptance" replace />;
   }
 
-  // Token é válido e role é permitido (se verificado), renderizar componente
+  // 4. Se um papel for requerido, validar o papel do usuário
+  if (requiredRole && user.role !== requiredRole) {
+    console.warn(
+      `[PrivateRoute] Acesso negado. Rota requer ${requiredRole}, mas usuário é ${user.role}.`
+    );
+
+    const dashboardMap: Record<string, string> = {
+      admin: '/admin/dashboard',
+      teacher: '/teacher/dashboard',
+      student: '/student/dashboard',
+    };
+
+    const redirectPath = dashboardMap[user.role] || '/login';
+    return <Navigate to={redirectPath} replace />;
+  }
+
+  // 5. Se tudo OK, renderizar componente
   return <>{children}</>;
 }

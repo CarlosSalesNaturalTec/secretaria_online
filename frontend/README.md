@@ -315,15 +315,9 @@ frontend/
     - Tratamento de estados: loading, erro, sucesso
     - Alertas e feedback visual
     - Redirecionamento automático para dashboard após aceite
-  - ⏳ **PENDENTE - Rota no Router**:
-    - Adicionar rota `/student/reenrollment-acceptance` em `src/router.tsx`
-    - Aplicar `PrivateRoute` com role 'student'
-  - ⏳ **PENDENTE - Lógica de Bloqueio**:
-    - Atualizar `AuthContext` para verificar se estudante tem enrollment 'pending'
-    - Adicionar propriedade `hasEnrollmentPending` no contexto
     - Implementar lógica em `PrivateRoute` ou `App.tsx` para redirecionar estudante com enrollment pending para `/student/reenrollment-acceptance`
     - Bloquear acesso a outras rotas até aceitar contrato
-  - ⏳ **PENDENTE - Documentação**:
+  - ✅ **PENDENTE - Documentação**:
     - Atualizar seção "Módulos Implementados" deste README
     - Documentar fluxo completo de aceite de rematrícula
 
