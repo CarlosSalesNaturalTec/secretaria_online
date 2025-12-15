@@ -1,0 +1,488 @@
+{
+  "projeto": "Secretaria Online",
+  "modulo": "Rematrícula de Estudantes",
+  "versao": "1.2.0",
+  "data_criacao": "2025-12-15",
+  "data_atualizacao": "2025-12-15",
+  "status_geral": "Não implementada",
+  "descricao": "Processo completo de rematrícula semestral/anual de TODOS os estudantes do sistema, permitindo que administradores iniciem rematrículas em lote global e estudantes aceitem contratos para reativação de matrícula.",
+  "regras_negocio_gerais": [
+    "Rematrícula processa TODOS os enrollments ativos do sistema, independente do curso",
+    "Utilizar tabelas existentes: students, enrollments, documents, document_types, courses, classes, contracts, contract_templates",
+    "Manter número de matrícula existente do estudante",
+    "NÃO criar contratos na rematrícula em lote - contratos serão criados APENAS após aceite do estudante",
+    "Contrato criado após aceite deve ter file_path=null e file_name=null (sem PDF)",
+    "Estudante com status 'pending' deve confirmar rematrícula antes de acessar sistema normalmente",
+    "Validação de senha do admin para confirmação de operações em lote",
+    "Reutilizar sistema existente de ContractTemplate com método replacePlaceholders()",
+    "Atualização de READMEs ao final de cada macro-etapa concluída"
+  ],
+  "macro_etapas": [
+    {
+      "id": 1,
+      "etapa": "Análise e Modelagem de Dados",
+      "status": "Não implementada",
+      "descricao": "Analisar estrutura atual do banco de dados e definir campos/relacionamentos necessários para suportar rematrícula global. Verificar se tabelas existentes são suficientes ou se é necessário adicionar campos.",
+      "regras_negocio": [
+        "Verificar se tabela 'enrollments' já possui campos semester e year",
+        "Verificar se tabela 'contracts' já possui campo enrollment_id",
+        "Tabela 'contracts' deve armazenar contratos de rematrícula vinculados a enrollment",
+        "Não criar novas tabelas, apenas adicionar campos se necessário",
+        "Manter retrocompatibilidade com dados existentes"
+      ],
+      "tarefas_backend": [
+        "Ler arquivo backend/src/models/Enrollment.js e verificar campos existentes",
+        "Ler arquivo backend/src/models/Contract.js e verificar campos existentes",
+        "Verificar se Contract.js já possui associação belongsTo(Enrollment)",
+        "Identificar se é necessário adicionar campos semester/year em enrollments",
+        "Identificar se é necessário adicionar campo enrollment_id em contracts",
+        "Documentar estrutura de dados necessária em arquivo de análise",
+        "Atualizar backend/README.md seção 'Módulos Implementados' documentando início do módulo de rematrícula"
+      ],
+      "tarefas_frontend": [
+        "Não aplicável nesta etapa"
+      ],
+      "arquivos_afetados": [
+        "backend/src/models/Enrollment.js (leitura)",
+        "backend/src/models/Contract.js (leitura)",
+        "docs/database-schema.md (atualização se necessário)",
+        "backend/README.md (documentação)"
+      ],
+      "endpoints": [],
+      "observacoes": "IMPORTANTE: Contract.js já possui campos semester e year. Verificar se enrollment_id existe. Enrollments pode não ter semester/year - avaliar necessidade."
+    },
+    {
+      "id": 2,
+      "etapa": "Migrations e Atualização de Models",
+      "status": "Não implementada",
+      "descricao": "Criar migrations SOMENTE se necessário para adicionar campos identificados na Etapa 1. Atualizar modelos Sequelize com novos campos e associações.",
+      "regras_negocio": [
+        "SOMENTE criar migrations se campos não existirem (verificado na Etapa 1)",
+        "Garantir que contracts tenha vínculo explícito com enrollment via enrollment_id",
+        "Manter retrocompatibilidade com dados existentes",
+        "Permitir enrollment_id como nullable para contratos antigos"
+      ],
+      "tarefas_backend": [
+        "SE NECESSÁRIO: Criar migration para adicionar campo 'enrollment_id' em 'contracts' (verificar se já existe)",
+        "SE NECESSÁRIO: Atualizar modelo Contract.js com associação belongsTo(Enrollment) via enrollment_id",
+        "Atualizar modelo Contract.js para permitir file_path e file_name como nullable (para contratos sem PDF)",
+        "Executar migrations no banco de desenvolvimento: npm run db:migrate",
+        "Testar rollback da migration: npm run db:migrate:undo",
+        "Atualizar backend/README.md com detalhes das migrations criadas (se aplicável)"
+      ],
+      "tarefas_frontend": [
+        "Não aplicável nesta etapa"
+      ],
+      "arquivos_afetados": [
+        "backend/database/migrations/YYYYMMDD-add-enrollment-id-to-contracts.js (se necessário)",
+        "backend/src/models/Contract.js (atualização)",
+        "backend/src/models/Enrollment.js (atualização de associação)",
+        "backend/src/models/index.js (verificação)",
+        "backend/README.md (documentação)"
+      ],
+      "endpoints": [],
+      "observacoes": "Contract.js já possui file_path e file_name NOT NULL - DEVE ser alterado para permitir null para contratos de rematrícula. Executar migrations com 'npm run db:migrate' antes de prosseguir."
+    },
+    {
+      "id": 3,
+      "etapa": "Backend - Service de Rematrícula (Processamento Global em Lote)",
+      "status": "Não implementada",
+      "descricao": "Criar ReenrollmentService com lógica de negócio para processar rematrícula em lote de TODOS os estudantes do sistema. NÃO criar contratos nesta etapa - apenas atualizar enrollments para 'pending'.",
+      "regras_negocio": [
+        "Buscar TODOS os enrollments ativos (status='active') do sistema, independente do curso",
+        "Atualizar status de todos para 'pending'",
+        "NÃO criar contratos nesta etapa - contratos serão criados após aceite do estudante",
+        "Validar senha do admin antes de executar operação",
+        "Registrar log de operação (quem executou, quando, quantos estudantes afetados, semestre, ano)",
+        "Usar transação para garantir atomicidade - rollback completo em caso de erro"
+      ],
+      "tarefas_backend": [
+        "Criar arquivo 'src/services/reenrollment.service.js'",
+        "Implementar método 'validateAdminPassword(userId, password)' usando bcrypt.compare()",
+        "Implementar método 'processGlobalReenrollment(semester, year, adminUserId)'",
+        "Buscar TODOS enrollments ativos do sistema: Enrollment.findAll({ where: { status: 'active' } })",
+        "Contar total de enrollments antes do processamento",
+        "Iniciar transação do Sequelize: const transaction = await sequelize.transaction()",
+        "Atualizar status para 'pending' em batch dentro da transação: Enrollment.update({ status: 'pending' }, { where: { status: 'active' }, transaction })",
+        "Registrar log com logger.info() contendo: admin_id, total_affected, semester, year, timestamp",
+        "Retornar objeto com total de estudantes afetados e lista de enrollment IDs",
+        "Em caso de erro, fazer rollback e lançar AppError",
+        "Adicionar testes unitários básicos (opcional)",
+        "Atualizar backend/README.md documentando ReenrollmentService e métodos criados"
+      ],
+      "tarefas_frontend": [
+        "Não aplicável nesta etapa"
+      ],
+      "arquivos_afetados": [
+        "backend/src/services/reenrollment.service.js (novo)",
+        "backend/README.md (documentação)"
+      ],
+      "endpoints": [],
+      "observacoes": "IMPORTANTE: Processa TODOS os enrollments ativos do sistema, não apenas de um curso. NÃO criar contratos nesta etapa. Contratos serão criados na Etapa 8 após aceite do estudante. Usar transação do Sequelize para garantir atomicidade."
+    },
+    {
+      "id": 4,
+      "etapa": "Backend - Controller e Rotas de Rematrícula Global",
+      "status": "Não implementada",
+      "descricao": "Criar controller e rotas para expor endpoint de rematrícula global em lote, protegido por autenticação e RBAC (apenas admin).",
+      "regras_negocio": [
+        "Apenas usuários com role='admin' podem executar rematrícula global",
+        "Endpoint NÃO recebe courseId - processa todos os enrollments ativos",
+        "Endpoint deve validar senha do admin antes de processar",
+        "Retornar detalhes da operação (total de estudantes, IDs afetados)",
+        "Validar request body com express-validator"
+      ],
+      "tarefas_backend": [
+        "Criar arquivo 'src/controllers/reenrollment.controller.js'",
+        "Implementar método 'processGlobalReenrollment(req, res, next)'",
+        "Validar request body com express-validator: semester (1-2), year (YYYY), adminPassword (string)",
+        "Extrair req.user.id (admin autenticado pelo middleware authenticate)",
+        "Chamar ReenrollmentService.validateAdminPassword(req.user.id, req.body.adminPassword)",
+        "Se senha inválida, retornar erro 401: 'Senha incorreta'",
+        "Chamar ReenrollmentService.processGlobalReenrollment(semester, year, req.user.id)",
+        "Retornar resposta 200: { success: true, data: { totalStudents, affectedEnrollmentIds }, message }",
+        "Criar arquivo 'src/routes/reenrollment.routes.js'",
+        "Definir rota: POST /api/v1/reenrollments/process-all",
+        "Aplicar middlewares: authenticate, rbac(['admin'])",
+        "Registrar rotas em 'src/routes/index.js': app.use('/api/v1/reenrollments', reenrollmentRoutes)",        
+        "Atualizar backend/README.md seção 'API Endpoints' com documentação do endpoint POST /reenrollments/process-all"
+      ],
+      "tarefas_frontend": [
+        "Não aplicável nesta etapa"
+      ],
+      "arquivos_afetados": [
+        "backend/src/controllers/reenrollment.controller.js (novo)",
+        "backend/src/routes/reenrollment.routes.js (novo)",
+        "backend/src/routes/index.js (atualização)",
+        "backend/README.md (documentação)"
+      ],
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/api/v1/reenrollments/process-all",
+          "auth": "JWT + RBAC (admin only)",
+          "body": {
+            "semester": "number (1-2, obrigatório)",
+            "year": "number (YYYY, obrigatório)",
+            "adminPassword": "string (obrigatório)"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "totalStudents": "number (total de enrollments afetados)",
+              "affectedEnrollmentIds": "array de números"
+            },
+            "message": "Rematrícula global processada com sucesso. X estudantes rematriculados."
+          }
+        }
+      ],
+      "observacoes": "Endpoint NÃO recebe courseId. Processa TODOS os enrollments ativos do sistema."
+    },
+    {
+      "id": 5,
+      "etapa": "Frontend - Funcionalidade de Rematrícula Global",
+      "status": "Não implementada",
+      "descricao": "Criar página ou seção administrativa para rematrícula global de todos os estudantes, com modal para capturar semestre, ano e senha do admin.",
+      "regras_negocio": [
+        "Funcionalidade disponível apenas para usuários admin",
+        "Pode ser uma página dedicada (/admin/reenrollment) ou seção no Dashboard admin",
+        "Modal deve exibir total de estudantes ativos que serão afetados",
+        "Campos obrigatórios: semestre (1-2), ano (YYYY), senha (password)",
+        "Validação de formulário com Zod antes de enviar",
+        "Exibir confirmação antes de processar operação"
+      ],
+      "tarefas_backend": [
+        "Não aplicável nesta etapa"
+      ],
+      "tarefas_frontend": [
+        "OPÇÃO A: Criar página dedicada 'src/pages/admin/Reenrollment.tsx' com botão 'Iniciar Rematrícula Global'",
+        "OPÇÃO B: Adicionar seção no Dashboard admin com botão 'Rematricular Todos os Estudantes'",
+        "Adicionar rota '/admin/reenrollment' no router (se opção A)",
+        "Criar componente modal 'src/components/modals/GlobalReenrollmentModal.tsx'",
+        "No modal: exibir total de estudantes ativos que serão afetados (buscar via API ou mostrar info geral)",
+        "Adicionar campos no modal: select de semestre (1 ou 2), input de ano (number), input de senha (type=password)",
+        "Implementar validação com Zod: semester (1-2), year (mín: ano atual, YYYY), password (min: 6 chars)",
+        "Criar arquivo 'src/types/reenrollment.types.ts' com interfaces IReenrollmentRequest, IReenrollmentResponse",
+        "Criar arquivo 'src/services/reenrollment.service.ts' com método 'processGlobalReenrollment(data)'",
+        "Criar arquivo 'src/hooks/useReenrollment.ts' com mutation 'useProcessGlobalReenrollment()'",
+        "Integrar modal com hook de mutation do TanStack Query",
+        "Adicionar dialog de confirmação antes de enviar: 'ATENÇÃO: Isso irá rematricular TODOS os X estudantes ativos do sistema. Tem certeza?'",
+        "Exibir loading spinner durante processamento",
+        "Exibir toast de sucesso após operação: 'X estudantes rematriculados com sucesso'",
+        "Exibir toast de erro em caso de falha (senha incorreta, erro de rede, etc.)",
+        "Invalidar queries de enrollments após sucesso",
+        "Adicionar item no menu Sidebar para acessar página de rematrícula (se opção A)",
+        "Atualizar frontend/README.md seção 'Módulos Implementados' com 'Rematrícula Global de Estudantes' e documentar página/botão"
+      ],
+      "arquivos_afetados": [
+        "frontend/src/pages/admin/Reenrollment.tsx (novo - opção A) OU",
+        "frontend/src/pages/admin/Dashboard.tsx (atualização - opção B)",
+        "frontend/src/components/modals/GlobalReenrollmentModal.tsx (novo)",
+        "frontend/src/services/reenrollment.service.ts (novo)",
+        "frontend/src/hooks/useReenrollment.ts (novo)",
+        "frontend/src/types/reenrollment.types.ts (novo)",
+        "frontend/src/router.tsx (atualização - se opção A)",
+        "frontend/src/components/layout/Sidebar.tsx (atualização - se opção A)",
+        "frontend/README.md (documentação)"
+      ],
+      "endpoints": [],
+      "observacoes": "Sugestão: Criar página dedicada /admin/reenrollment para dar destaque à funcionalidade e evitar acionamento acidental. Modal deve ter avisos claros de que TODOS os estudantes serão afetados. Design do modal deve seguir padrões existentes (Tailwind CSS). Exibir loading durante processamento."
+    },
+    {
+      "id": 6,
+      "etapa": "Backend - Endpoint para Preview de Contrato HTML",
+      "status": "Não implementada",
+      "descricao": "Adaptar ContractTemplate existente para gerar HTML de contrato dinamicamente com dados do estudante, a ser exibido no frontend para aceite. Reutilizar método replacePlaceholders() do model ContractTemplate.",
+      "regras_negocio": [
+        "Reutilizar sistema existente: ContractTemplate model com método replacePlaceholders()",
+        "Buscar template ativo no banco de dados (tabela contract_templates)",
+        "Template HTML deve conter placeholders: {{studentName}}, {{studentId}}, {{cpf}}, {{courseName}}, {{semester}}, {{year}}, {{date}}, {{institutionName}}",
+        "Retornar HTML renderizado pronto para exibição em iframe ou div",
+        "NÃO gerar PDF nesta etapa - apenas HTML",
+        "Validar que estudante tem enrollment com status 'pending'"
+      ],
+      "tarefas_backend": [
+        "Adicionar método 'getReenrollmentContractPreview(enrollmentId, studentUserId)' em ReenrollmentService",
+        "Buscar enrollment por ID e validar que pertence ao estudante: Enrollment.findByPk(enrollmentId, { include: ['student', 'course'] })",
+        "Validar que enrollment.status === 'pending' (retornar erro se não for)",
+        "Buscar template ativo: ContractTemplate.findAvailable() ou buscar template específico para rematrícula",
+        "Se não houver template, retornar erro 422: 'Nenhum template de contrato disponível'",
+        "Coletar dados para substituição: studentName, studentId, cpf, courseName, semester, year, currentDate, institutionName",
+        "Chamar template.replacePlaceholders(data) para gerar HTML renderizado",
+        "Retornar HTML renderizado",
+        "Adicionar método 'previewContract(req, res, next)' em ReenrollmentController",
+        "Criar rota: GET /api/v1/reenrollments/contract-preview/:enrollmentId",
+        "Aplicar middlewares: authenticate, rbac(['student']) - apenas estudante dono pode visualizar",
+        "Validar ownership: req.user.student_id === enrollment.student_id",
+        "Adicionar rota em 'src/routes/reenrollment.routes.js'",
+        "Atualizar backend/README.md seção 'API Endpoints' com documentação do endpoint GET /contract-preview/:enrollmentId"
+      ],
+      "tarefas_frontend": [
+        "Não aplicável nesta etapa"
+      ],
+      "arquivos_afetados": [
+        "backend/src/services/reenrollment.service.js (atualização - adicionar método)",
+        "backend/src/controllers/reenrollment.controller.js (atualização - adicionar método)",
+        "backend/src/routes/reenrollment.routes.js (atualização - adicionar rota)",
+        "backend/README.md (documentação)"
+      ],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/v1/reenrollments/contract-preview/:enrollmentId",
+          "auth": "JWT + RBAC (student only) + ownership validation",
+          "response": {
+            "success": true,
+            "data": {
+              "contractHTML": "string (HTML completo renderizado)",
+              "enrollmentId": "number",
+              "semester": "number",
+              "year": "number"
+            }
+          }
+        }
+      ],
+      "observacoes": "REUTILIZAR ContractTemplate existente. NÃO criar novo service ou template."
+    },
+    {
+      "id": 7,
+      "etapa": "Frontend - Tela de Aceite de Rematrícula (Estudante)",
+      "status": "Não implementada",
+      "descricao": "Criar página dedicada para estudantes com status 'pending' aceitarem contrato de rematrícula antes de acessar sistema normalmente.",
+      "regras_negocio": [
+        "Tela deve ser exibida automaticamente ao logar se enrollment.status='pending'",
+        "Bloquear acesso a outras rotas até aceitar rematrícula",
+        "Exibir contrato dinâmico em div com scroll",
+        "Botão 'Aceitar e Confirmar Rematrícula' sempre habilitado (ou após scroll completo - opcional)",
+        "Ao confirmar, chamar endpoint de aceite e redirecionar para dashboard"
+      ],
+      "tarefas_backend": [
+        "Não aplicável nesta etapa"
+      ],
+      "tarefas_frontend": [
+        "Criar página 'src/pages/student/ReenrollmentAcceptance.tsx'",
+        "Adicionar rota '/student/reenrollment-acceptance' no arquivo 'src/router.tsx'",
+        "Atualizar 'src/contexts/AuthContext.tsx': adicionar verificação se user.enrollmentStatus === 'pending'",
+        "Implementar lógica em PrivateRoute ou useEffect no App.tsx: redirecionar estudante com status='pending' para /student/reenrollment-acceptance",
+        "Na página de aceite: buscar HTML do contrato via endpoint GET /api/v1/reenrollments/contract-preview/:enrollmentId",
+        "Obter enrollmentId do contexto de autenticação ou buscar enrollment ativo do estudante",
+        "Renderizar HTML do contrato em div com dangerouslySetInnerHTML ou iframe",
+        "Adicionar estilo CSS para div do contrato: max-height, overflow-y: auto, border",
+        "Adicionar botão 'Aceitar e Confirmar Rematrícula' (className com Tailwind: botão primário)",
+        "Adicionar método 'acceptReenrollment(enrollmentId)' em 'src/services/reenrollment.service.ts'",
+        "Criar hook mutation 'useAcceptReenrollment()' em 'src/hooks/useReenrollment.ts'",
+        "Ao clicar no botão, chamar mutation",
+        "Em caso de sucesso: atualizar AuthContext com novo status, invalidar queries, redirecionar para '/student/dashboard'",
+        "Exibir toast de sucesso: 'Rematrícula confirmada com sucesso!'",
+        "Exibir toast de erro em caso de falha",
+        "Considerar adicionar checkbox 'Li e aceito os termos' antes de habilitar botão (opcional)",
+        "Atualizar frontend/README.md documentando página de aceite de rematrícula (/student/reenrollment-acceptance)"
+      ],
+      "arquivos_afetados": [
+        "frontend/src/pages/student/ReenrollmentAcceptance.tsx (novo)",
+        "frontend/src/router.tsx (atualização)",
+        "frontend/src/contexts/AuthContext.tsx (atualização - adicionar check de status pending)",
+        "frontend/src/services/reenrollment.service.ts (atualização)",
+        "frontend/src/hooks/useReenrollment.ts (atualização)",
+        "frontend/README.md (documentação)"
+      ],
+      "endpoints": [],
+      "observacoes": "Garantir que estudante não possa acessar outras rotas sem aceitar."
+    },
+    {
+      "id": 8,
+      "etapa": "Backend - Endpoint de Aceite de Rematrícula e Criação de Contrato",
+      "status": "Não implementada",
+      "descricao": "Criar endpoint para processar aceite de rematrícula pelo estudante. NESTA ETAPA o contrato é criado (após aceite), atualizando status do enrollment e salvando dados do contrato na tabela contracts.",
+      "regras_negocio": [
+        "Apenas estudante dono do enrollment pode aceitar",
+        "Atualizar enrollment.status de 'pending' para 'active'",
+        "CRIAR registro em contracts SOMENTE após aceite com: enrollment_id, user_id, template_id, semester, year, accepted_at=now(), file_path=null, file_name=null",
+        "Usar transação para garantir atomicidade (update enrollment + create contract)",
+        "Retornar dados atualizados do enrollment e contrato criado"
+      ],
+      "tarefas_backend": [
+        "Adicionar método 'acceptReenrollment(enrollmentId, studentUserId)' em ReenrollmentService",
+        "Buscar enrollment por ID: Enrollment.findByPk(enrollmentId)",
+        "Validar que enrollment existe: se não, retornar erro 404",
+        "Validar ownership: enrollment.student_id === req.user.student_id (via user.student_id)",
+        "Se não for dono, retornar erro 403: 'Você não tem permissão para aceitar esta rematrícula'",
+        "Validar que status atual é 'pending': se não, retornar erro 422: 'Esta matrícula não está pendente de aceite'",
+        "Buscar template ativo: ContractTemplate.findAvailable()",
+        "Iniciar transação: const transaction = await sequelize.transaction()",
+        "Dentro da transação: atualizar enrollment: Enrollment.update({ status: 'active' }, { where: { id: enrollmentId }, transaction })",
+        "Dentro da transação: criar contrato: Contract.create({ user_id, enrollment_id, template_id, semester, year, accepted_at: new Date(), file_path: null, file_name: null }, { transaction })",
+        "Commit da transação em caso de sucesso",
+        "Rollback em caso de erro",
+        "Retornar objeto com enrollment atualizado e contrato criado",
+        "Adicionar método 'acceptReenrollment(req, res, next)' em ReenrollmentController",
+        "Criar rota: POST /api/v1/reenrollments/accept/:enrollmentId",
+        "Aplicar middlewares: authenticate, rbac(['student'])",
+        "Extrair studentUserId de req.user.student_id",
+        "Chamar ReenrollmentService.acceptReenrollment(enrollmentId, studentUserId)",
+        "Retornar resposta 200: { success: true, data: { enrollment, contract }, message }",
+        "Adicionar rota em 'src/routes/reenrollment.routes.js'",      
+        "Atualizar backend/README.md seção 'API Endpoints' com documentação do endpoint POST /reenrollments/accept/:enrollmentId"
+      ],
+      "tarefas_frontend": [
+        "Não aplicável nesta etapa"
+      ],
+      "arquivos_afetados": [
+        "backend/src/services/reenrollment.service.js (atualização - adicionar método)",
+        "backend/src/controllers/reenrollment.controller.js (atualização - adicionar método)",
+        "backend/src/routes/reenrollment.routes.js (atualização - adicionar rota)",
+        "backend/README.md (documentação)"
+      ],
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/api/v1/reenrollments/accept/:enrollmentId",
+          "auth": "JWT + RBAC (student only) + ownership validation",
+          "body": {},
+          "response": {
+            "success": true,
+            "data": {
+              "enrollment": {
+                "id": "number",
+                "student_id": "number",
+                "course_id": "number",
+                "status": "active",
+                "semester": "number",
+                "year": "number"
+              },
+              "contract": {
+                "id": "number",
+                "user_id": "number",
+                "enrollment_id": "number",
+                "template_id": "number",
+                "semester": "number",
+                "year": "number",
+                "accepted_at": "timestamp",
+                "file_path": "null",
+                "file_name": "null"
+              }
+            },
+            "message": "Rematrícula aceita com sucesso"
+          }
+        }
+      ],
+      "observacoes": "IMPORTANTE: Contrato é criado SOMENTE NESTA ETAPA após aceite do estudante. Usar transação para garantir atomicidade. Garantir que apenas o estudante dono do enrollment possa aceitar (validação de ownership). Retornar erro 403 se tentar aceitar enrollment de outro estudante."
+    },
+    {
+      "id": 9,
+      "etapa": "Documentação Final e Atualização de Changelogs",
+      "status": "Não implementada",
+      "descricao": "Atualizar documentação completa do projeto (READMEs, changelog, API docs) consolidando todas as informações sobre funcionalidade de rematrícula global implementada.",
+      "regras_negocio": [
+        "Consolidar documentação de todas as etapas anteriores",
+        "Documentar endpoints de rematrícula em backend/README.md (se não feito incrementalmente)",
+        "Documentar fluxo de rematrícula global em frontend/README.md (se não feito incrementalmente)",
+        "Atualizar changelog com versão e features implementadas",
+        "Adicionar seção 'Rematrícula Global' em docs/api-documentation.md (se existir)",
+        "Incluir exemplos de requisições e respostas",
+        "Documentar mudanças no banco de dados (migrations executadas)"
+      ],
+      "tarefas_backend": [
+        "Revisar e consolidar backend/README.md seção 'Módulos Implementados' com 'Rematrícula Global de Estudantes'",
+        "Garantir que seção 'API Endpoints' contém todos os endpoints de rematrícula com exemplos",
+        "Incluir exemplos de request/response para POST /reenrollments/process-all e POST /reenrollments/accept/:id",
+        "Incluir exemplo de GET /reenrollments/contract-preview/:enrollmentId",
+        "Adicionar seção sobre validação de senha do admin",
+        "Atualizar changelog do backend com versão (ex: v0.4.0) e features implementadas",
+        "Documentar campos adicionados em contracts (enrollment_id) se aplicável",
+        "Documentar que file_path e file_name agora são nullable em contracts"
+      ],
+      "tarefas_frontend": [
+        "Revisar e consolidar frontend/README.md seção 'Módulos Implementados' com 'Rematrícula Global de Estudantes'",
+        "Documentar página de rematrícula global (/admin/reenrollment) ou seção no dashboard",
+        "Documentar página de aceite de rematrícula (/student/reenrollment-acceptance)",
+        "Adicionar prints/screenshots da funcionalidade (opcional)",
+        "Atualizar changelog do frontend com versão e features implementadas",
+        "Documentar tipos TypeScript adicionados (IReenrollment, IReenrollmentRequest, IReenrollmentResponse)",
+        "Documentar hooks criados (useReenrollment, useProcessGlobalReenrollment, useAcceptReenrollment)",
+        "Documentar services criados (reenrollment.service.ts)"
+      ],
+      "arquivos_afetados": [
+        "backend/README.md (consolidação)",
+        "frontend/README.md (consolidação)",
+        "docs/api-documentation.md (se existir)",
+        "docs/contextDoc.md (atualizar seção de funcionalidades)",
+        "CHANGELOG.md (raiz do projeto, se existir)"
+      ],
+      "endpoints": [],
+      "observacoes": "Manter consistência de formatação com documentação existente. Incluir diagramas de fluxo se necessário (Mermaid ou imagem). Verificar se toda documentação incremental das etapas anteriores foi feita corretamente."
+    }
+  ],
+  "dependencias_entre_etapas": {
+    "1 → 2": "Análise define se migrations são necessárias",
+    "2 → 3": "Models atualizados são usados pelo ReenrollmentService",
+    "3 → 4": "ReenrollmentService é chamado pelo Controller",
+    "4 → 5": "Endpoints backend são consumidos pelo frontend",
+    "5 ← 6": "Página de rematrícula e tela de aceite são independentes mas relacionadas",
+    "6 → 7": "HTML do contrato (endpoint de preview) é exibido na tela de aceite",
+    "7 → 8": "Tela de aceite chama endpoint de aceite que cria contrato",
+    "8 → 9": "Documentação final consolida tudo implementado"
+  },
+  "criterios_aceitacao": [
+    "Admin consegue executar rematrícula global para TODOS os estudantes ativos do sistema de uma vez",
+    "Admin deve informar semestre, ano e confirmar com senha",
+    "Todos os enrollments ativos do sistema são atualizados para status 'pending'",
+    "Nenhum contrato é criado durante processamento em lote (apenas após aceite)",
+    "Estudante com status 'pending' é redirecionado para tela de aceite ao logar",
+    "Tela de aceite exibe contrato dinâmico gerado com dados do estudante usando ContractTemplate existente",
+    "Estudante consegue aceitar contrato clicando no botão",
+    "Após aceite, enrollment status é atualizado para 'active'",
+    "Após aceite, contrato é criado na tabela contracts com file_path=null e file_name=null",
+    "Após aceite, estudante é redirecionado para dashboard e acessa sistema normalmente",
+    "READMEs atualizados com detalhes da implementação ao final de cada etapa"
+  ], 
+  "notas_importantes": [
+    "REMATRÍCULA GLOBAL: Processa TODOS os enrollments ativos do sistema de uma vez, não por curso individual.",
+    "CONTRATOS: Não criar na rematrícula em lote (Etapa 3). Criar SOMENTE após aceite do estudante (Etapa 8).",
+    "TEMPLATES: Reutilizar ContractTemplate existente com método replacePlaceholders(). Não criar novo sistema.",
+    "NULLABLES: Campo file_path e file_name em contracts deve permitir null para contratos de rematrícula.",
+    "TRANSAÇÕES: Usar transações do Sequelize nas operações críticas (rematrícula em lote e aceite).",
+    "DOCUMENTAÇÃO: Atualizar READMEs ao final de cada macro-etapa implementada, não apenas no final.",
+    "TESTES: Etapa de testes foi removida. Testes devem ser feitos manualmente durante desenvolvimento."
+  ]
+}
