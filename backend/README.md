@@ -427,12 +427,28 @@ backend/
     - ✅ Retrocompatibilidade garantida para dados existentes
     - ✅ Impacto avaliado e documentado
 
-- ⏳ **Etapa 2: Migrations e Atualização de Models** (Próxima)
-  - Criar migration para adicionar campo `enrollment_id` em `contracts`
-  - Criar migration para permitir `file_path` e `file_name` nullable em `contracts`
-  - Atualizar model `Contract.js` com nova associação `belongsTo(Enrollment)`
-  - Atualizar model `Enrollment.js` com associação reversa `hasMany(Contract)`
-  - Executar e testar migrations
+- ✅ **Etapa 2: Migrations e Atualização de Models** (Concluída em 2025-12-15)
+  - ✅ Criadas 2 migrations:
+    1. **`20251215120000-add-enrollment-id-to-contracts.js`**
+       - Adiciona campo `enrollment_id` (INTEGER, nullable) à tabela `contracts`
+       - Cria FK constraint: `fk_contracts_enrollment_id` → `enrollments.id`
+       - Cria índice `idx_contracts_enrollment_id` para performance
+       - Cria índice composto `idx_contracts_enrollment_period` (enrollment_id, semester, year)
+       - Rollback: Remove coluna, constraints e índices
+    2. **`20251215120001-allow-null-file-fields-in-contracts.js`**
+       - Altera `file_path` para nullable (permite contratos sem PDF)
+       - Altera `file_name` para nullable (permite contratos sem PDF)
+       - Verifica existência de contratos com file_path NULL antes de rollback
+       - Rollback: Restaura campos para NOT NULL (pode falhar se existirem contratos sem PDF)
+  - ✅ Atualizado `Contract.js`:
+    - Adicionado campo `enrollment_id` com validação customizada
+    - Alterados `file_path` e `file_name` para nullable com validações
+    - Adicionada associação `belongsTo(Enrollment)` com alias 'enrollment'
+    - Adicionados métodos: `hasPDF()` e `getContractType()`
+  - ✅ Atualizado `Enrollment.js`:
+    - Adicionada associação `hasMany(Contract)` com alias 'contracts'
+  - ✅ Migrations executadas com sucesso no banco de desenvolvimento
+  - ✅ Rollback testado e funcionando corretamente
 
 - ⏳ **Etapa 3: Backend - Service de Rematrícula**
   - Criar `ReenrollmentService` com lógica de rematrícula global

@@ -60,6 +60,36 @@ module.exports = (sequelize, DataTypes) => {
           },
         },
       },
+      enrollment_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true, // Nullable para retrocompatibilidade com contratos antigos
+        validate: {
+          /**
+           * Validação customizada: Se enrollment_id é fornecido, deve existir e pertencer ao user_id
+           */
+          async isValidEnrollment(value) {
+            if (value === null || value === undefined) {
+              return; // Permite null (contratos antigos)
+            }
+
+            // Verifica se enrollment existe
+            const { Enrollment, User } = require('./index');
+            const enrollment = await Enrollment.findByPk(value);
+
+            if (!enrollment) {
+              throw new Error('Enrollment não encontrado');
+            }
+
+            // Verifica se enrollment pertence ao usuário do contrato
+            if (this.user_id) {
+              const user = await User.findByPk(this.user_id);
+              if (user && user.student_id && user.student_id !== enrollment.student_id) {
+                throw new Error('Enrollment não pertence a este usuário');
+              }
+            }
+          },
+        },
+      },
       template_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -71,25 +101,40 @@ module.exports = (sequelize, DataTypes) => {
       },
       file_path: {
         type: DataTypes.STRING(255),
-        allowNull: false,
+        allowNull: true, // ALTERADO: Permite null para contratos de rematrícula sem PDF
         validate: {
-          notNull: {
-            msg: 'O caminho do arquivo é obrigatório',
+          /**
+           * Validação customizada: Se fornecido, não pode estar vazio
+           */
+          isValidPath(value) {
+            if (value !== null && value !== undefined && value.trim() === '') {
+              throw new Error('file_path, se fornecido, não pode estar vazio');
+            }
           },
-          notEmpty: {
-            msg: 'O caminho do arquivo não pode estar vazio',
+          /**
+           * Validação customizada: file_path e file_name devem ser fornecidos juntos
+           */
+          bothOrNone(value) {
+            const hasPath = value !== null && value !== undefined;
+            const hasName = this.file_name !== null && this.file_name !== undefined;
+
+            if (hasPath !== hasName) {
+              throw new Error('file_path e file_name devem ser fornecidos juntos ou ambos nulos');
+            }
           },
         },
       },
       file_name: {
         type: DataTypes.STRING(255),
-        allowNull: false,
+        allowNull: true, // ALTERADO: Permite null para contratos de rematrícula sem PDF
         validate: {
-          notNull: {
-            msg: 'O nome do arquivo é obrigatório',
-          },
-          notEmpty: {
-            msg: 'O nome do arquivo não pode estar vazio',
+          /**
+           * Validação customizada: Se fornecido, não pode estar vazio
+           */
+          isValidFileName(value) {
+            if (value !== null && value !== undefined && value.trim() === '') {
+              throw new Error('file_name, se fornecido, não pode estar vazio');
+            }
           },
         },
       },
@@ -290,6 +335,22 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   /**
+   * Verifica se o contrato possui PDF gerado
+   * @returns {boolean}
+   */
+  Contract.prototype.hasPDF = function () {
+    return this.file_path !== null && this.file_name !== null;
+  };
+
+  /**
+   * Retorna o tipo do contrato (com ou sem PDF)
+   * @returns {string}
+   */
+  Contract.prototype.getContractType = function () {
+    return this.hasPDF() ? 'PDF Gerado' : 'Aceite Digital';
+  };
+
+  /**
    * Métodos Estáticos (Class Methods)
    */
 
@@ -392,6 +453,15 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'user_id',
       as: 'user',
       onDelete: 'RESTRICT', // Não permite deletar usuário com contratos
+      onUpdate: 'CASCADE',
+    });
+
+    // Um contrato pertence a uma matrícula (enrollment) - NOVO
+    // Usado para contratos de rematrícula (vínculo explícito com enrollment)
+    Contract.belongsTo(models.Enrollment, {
+      foreignKey: 'enrollment_id',
+      as: 'enrollment',
+      onDelete: 'RESTRICT', // Não permite deletar enrollment com contratos
       onUpdate: 'CASCADE',
     });
 

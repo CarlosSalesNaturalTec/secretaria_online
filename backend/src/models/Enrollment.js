@@ -303,6 +303,15 @@ module.exports = (sequelize, DataTypes) => {
       onUpdate: 'RESTRICT',
       onDelete: 'RESTRICT',
     });
+
+    // Enrollment pode ter múltiplos Contracts (renovações semestrais) - NOVO
+    // Um enrollment pode ter vários contratos ao longo do tempo (1 por semestre)
+    Enrollment.hasMany(models.Contract, {
+      foreignKey: 'enrollment_id',
+      as: 'contracts',
+      onDelete: 'RESTRICT', // Não permite deletar enrollment com contratos
+      onUpdate: 'CASCADE',
+    });
   };
 
   // ========================================
