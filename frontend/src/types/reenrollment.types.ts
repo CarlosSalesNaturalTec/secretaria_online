@@ -11,7 +11,6 @@
 export interface IReenrollmentRequest {
   semester: number; // 1 ou 2
   year: number; // YYYY (ex: 2025)
-  adminPassword: string; // Senha do admin para validação
 }
 
 /**

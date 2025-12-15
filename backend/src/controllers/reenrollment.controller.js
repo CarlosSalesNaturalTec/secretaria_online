@@ -96,31 +96,11 @@ class ReenrollmentController {
         });
       }
 
-      const { semester, year, adminPassword } = req.body;
+      const { semester, year } = req.body;
       const adminUserId = req.user.id; // Extraído do token JWT pelo middleware authenticate
 
       logger.info(
         `[ReenrollmentController] Processando rematrícula global - Admin ID: ${adminUserId}, Semestre: ${semester}, Ano: ${year}`
-      );
-
-      // 2. Validar senha do administrador
-      const isPasswordValid = await ReenrollmentService.validateAdminPassword(
-        adminUserId,
-        adminPassword
-      );
-
-      if (!isPasswordValid) {
-        logger.warn(
-          `[ReenrollmentController] Senha incorreta fornecida pelo admin - ID: ${adminUserId}`
-        );
-        return res.status(401).json({
-          success: false,
-          error: 'Senha incorreta',
-        });
-      }
-
-      logger.info(
-        `[ReenrollmentController] Senha validada. Processando rematrícula...`
       );
 
       // 3. Processar rematrícula global

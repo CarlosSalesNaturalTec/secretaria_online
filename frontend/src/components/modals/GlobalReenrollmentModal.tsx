@@ -35,9 +35,6 @@ const reenrollmentSchema = z.object({
     .int('Ano deve ser um número inteiro')
     .min(2020, 'Ano inválido')
     .max(2100, 'Ano inválido'),
-  adminPassword: z
-    .string({ required_error: 'Senha é obrigatória' })
-    .min(6, 'Senha deve ter no mínimo 6 caracteres'),
 });
 
 type ReenrollmentFormData = z.infer<typeof reenrollmentSchema>;
@@ -82,7 +79,6 @@ export default function GlobalReenrollmentModal({
     defaultValues: {
       semester: 1,
       year: new Date().getFullYear(),
-      adminPassword: '',
     },
   });
 
@@ -218,31 +214,6 @@ export default function GlobalReenrollmentModal({
             {errors.year && (
               <p className="mt-1 text-sm text-red-600">{errors.year.message}</p>
             )}
-          </div>
-
-          {/* Campo: Senha do Admin */}
-          <div>
-            <label
-              htmlFor="adminPassword"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Sua senha (confirmação) <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="password"
-              id="adminPassword"
-              {...register('adminPassword')}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              placeholder="Digite sua senha"
-            />
-            {errors.adminPassword && (
-              <p className="mt-1 text-sm text-red-600">
-                {errors.adminPassword.message}
-              </p>
-            )}
-            <p className="mt-1 text-xs text-gray-500">
-              Sua senha será validada antes de processar a rematrícula.
-            </p>
           </div>
 
           {/* Botões */}

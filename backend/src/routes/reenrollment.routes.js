@@ -107,12 +107,6 @@ router.post(
     body('year')
       .isInt({ min: 2020, max: 2100 })
       .withMessage('year deve ser um ano válido no formato YYYY (ex: 2025)'),
-    body('adminPassword')
-      .isString()
-      .notEmpty()
-      .withMessage('adminPassword é obrigatório')
-      .isLength({ min: 6 })
-      .withMessage('adminPassword deve ter no mínimo 6 caracteres'),
   ],
   handleValidationErrors,
   ReenrollmentController.processGlobalReenrollment

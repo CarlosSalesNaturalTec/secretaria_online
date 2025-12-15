@@ -21,7 +21,6 @@ import type { IReenrollmentRequest } from '@/types/reenrollment.types';
  * IMPORTANTE:
  * - Processa TODOS os enrollments ativos do sistema (não por curso)
  * - Atualiza status de 'active' para 'pending'
- * - Requer senha do administrador
  * - NÃO cria contratos (criados após aceite do estudante)
  * - Usa transação no backend (rollback automático em caso de erro)
  *
@@ -35,7 +34,6 @@ import type { IReenrollmentRequest } from '@/types/reenrollment.types';
  *     {
  *       semester: 1,
  *       year: 2025,
- *       adminPassword: 'senha_admin'
  *     },
  *     {
  *       onSuccess: (data) => {

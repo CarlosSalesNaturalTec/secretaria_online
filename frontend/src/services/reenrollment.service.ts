@@ -28,17 +28,15 @@ import type {
  * - NÃO processa por curso individual - é uma operação global
  * - Atualiza status de TODOS para 'pending'
  * - NÃO cria contratos (criados após aceite do estudante)
- * - Requer senha do administrador para confirmação
  *
- * @param data - Dados da rematrícula (semester, year, adminPassword)
+ * @param data - Dados da rematrícula (semester, year)
  * @returns Resultado da rematrícula (totalStudents, affectedEnrollmentIds)
- * @throws Error quando senha incorreta, validação falha ou erro na API
+ * @throws Error quando validação falha ou erro na API
  *
  * @example
  * const result = await reenrollmentService.processGlobalReenrollment({
  *   semester: 1,
  *   year: 2025,
- *   adminPassword: 'senha_admin'
  * });
  *
  * console.log(`Total de estudantes rematriculados: ${result.totalStudents}`);
@@ -58,7 +56,7 @@ async function processGlobalReenrollment(
     }
 
     // Validações básicas
-    if (!data.semester || !data.year || !data.adminPassword) {
+    if (!data.semester || !data.year) {
       throw new Error('Dados incompletos para processar rematrícula');
     }
 
@@ -68,10 +66,6 @@ async function processGlobalReenrollment(
 
     if (data.year < 2020 || data.year > 2100) {
       throw new Error('Ano inválido');
-    }
-
-    if (data.adminPassword.length < 6) {
-      throw new Error('Senha deve ter no mínimo 6 caracteres');
     }
 
     const response = await api.post<
