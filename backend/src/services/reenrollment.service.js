@@ -31,7 +31,7 @@
 
 'use strict';
 
-const { Enrollment, User } = require('../models');
+const { Enrollment, User, Student, Course, ContractTemplate } = require('../models');
 const { sequelize } = require('../models');
 const bcrypt = require('bcryptjs');
 const { AppError } = require('../middlewares/error.middleware');
@@ -222,6 +222,192 @@ class ReenrollmentService {
 
       throw new AppError(
         'Erro ao processar rematrícula global. Operação cancelada.',
+        500
+      );
+    }
+  }
+
+  /**
+   * Gera preview de contrato HTML para rematrícula do estudante
+   *
+   * FLUXO:
+   * 1. Busca enrollment por ID com dados do student e course
+   * 2. Valida ownership (enrollment pertence ao estudante logado)
+   * 3. Valida que enrollment.status === 'pending'
+   * 4. Busca template ativo de contrato
+   * 5. Coleta dados para substituição de placeholders
+   * 6. Chama template.replacePlaceholders() para gerar HTML
+   * 7. Retorna HTML renderizado pronto para exibição
+   *
+   * IMPORTANTE:
+   * - NÃO gera PDF, apenas HTML
+   * - Valida que estudante é dono do enrollment (ownership)
+   * - Apenas enrollments com status 'pending' podem ter preview
+   * - Reutiliza sistema existente de ContractTemplate
+   *
+   * PLACEHOLDERS SUPORTADOS:
+   * - {{studentName}}: Nome completo do estudante
+   * - {{studentId}}: ID do estudante
+   * - {{cpf}}: CPF formatado do estudante
+   * - {{courseName}}: Nome do curso
+   * - {{semester}}: Semestre (1 ou 2)
+   * - {{year}}: Ano (ex: 2025)
+   * - {{date}}: Data atual formatada (DD/MM/YYYY)
+   * - {{institutionName}}: Nome da instituição (hardcoded)
+   *
+   * @param {number} enrollmentId - ID do enrollment
+   * @param {number} studentUserId - ID do usuário estudante logado
+   * @returns {Promise<Object>} { contractHTML: string, enrollmentId: number, semester: number, year: number }
+   * @throws {AppError} Se enrollment não existe, não pertence ao estudante, não está pending, ou sem template
+   */
+  async getReenrollmentContractPreview(enrollmentId, studentUserId) {
+    logger.info(
+      `[ReenrollmentService] Gerando preview de contrato - Enrollment ID: ${enrollmentId}, User ID: ${studentUserId}`
+    );
+
+    try {
+      // 1. Buscar enrollment por ID com dados do student e course
+      const enrollment = await Enrollment.findByPk(enrollmentId, {
+        include: [
+          {
+            model: Student,
+            as: 'student',
+            attributes: ['id', 'nome', 'cpf', 'email'],
+          },
+          {
+            model: Course,
+            as: 'course',
+            attributes: ['id', 'name', 'description'],
+          },
+        ],
+      });
+
+      // Validar que enrollment existe
+      if (!enrollment) {
+        logger.warn(
+          `[ReenrollmentService] Enrollment não encontrado - ID: ${enrollmentId}`
+        );
+        throw new AppError('Matrícula não encontrada', 404);
+      }
+
+      // 2. Buscar usuário logado para obter student_id
+      const user = await User.findByPk(studentUserId, {
+        attributes: ['id', 'student_id', 'role'],
+      });
+
+      if (!user) {
+        logger.warn(
+          `[ReenrollmentService] Usuário não encontrado - ID: ${studentUserId}`
+        );
+        throw new AppError('Usuário não encontrado', 404);
+      }
+
+      if (user.role !== 'student') {
+        logger.warn(
+          `[ReenrollmentService] Usuário não é estudante - ID: ${studentUserId}, Role: ${user.role}`
+        );
+        throw new AppError('Apenas estudantes podem visualizar contratos de rematrícula', 403);
+      }
+
+      // 2. Validar ownership: enrollment.student_id === user.student_id
+      if (enrollment.student_id !== user.student_id) {
+        logger.warn(
+          `[ReenrollmentService] Tentativa de acesso não autorizado - Enrollment ID: ${enrollmentId}, Student ID do enrollment: ${enrollment.student_id}, Student ID do usuário: ${user.student_id}`
+        );
+        throw new AppError(
+          'Você não tem permissão para visualizar este contrato',
+          403
+        );
+      }
+
+      // 3. Validar que enrollment.status === 'pending'
+      if (enrollment.status !== 'pending') {
+        logger.warn(
+          `[ReenrollmentService] Tentativa de preview em enrollment com status incorreto - Enrollment ID: ${enrollmentId}, Status: ${enrollment.status}`
+        );
+        throw new AppError(
+          `Esta matrícula não está pendente de aceite (status atual: ${enrollment.status})`,
+          422
+        );
+      }
+
+      // 4. Buscar template ativo de contrato
+      const templates = await ContractTemplate.findAvailable();
+
+      if (!templates || templates.length === 0) {
+        logger.error(
+          `[ReenrollmentService] Nenhum template de contrato disponível`
+        );
+        throw new AppError(
+          'Nenhum template de contrato disponível. Entre em contato com a administração.',
+          422
+        );
+      }
+
+      // Usar o primeiro template disponível
+      const template = templates[0];
+
+      logger.info(
+        `[ReenrollmentService] Template encontrado - ID: ${template.id}, Nome: ${template.name}`
+      );
+
+      // 5. Coletar dados para substituição de placeholders
+      const currentDate = new Date();
+      const formattedDate = currentDate.toLocaleDateString('pt-BR');
+
+      // Formatar CPF (123.456.789-01)
+      const cpf = enrollment.student?.cpf || '';
+      const cpfFormatted = cpf.replace(
+        /^(\d{3})(\d{3})(\d{3})(\d{2})$/,
+        '$1.$2.$3-$4'
+      );
+
+      // Dados para substituição
+      const placeholderData = {
+        studentName: enrollment.student?.nome || 'N/A',
+        studentId: enrollment.student?.id || 'N/A',
+        cpf: cpfFormatted || 'N/A',
+        courseName: enrollment.course?.name || 'N/A',
+        semester: 1, // Valor padrão - pode ser ajustado conforme lógica de negócio
+        year: currentDate.getFullYear(),
+        date: formattedDate,
+        institutionName: 'Secretaria Online', // Nome da instituição (pode vir de config)
+      };
+
+      logger.info(
+        `[ReenrollmentService] Dados coletados para substituição: ${JSON.stringify(placeholderData)}`
+      );
+
+      // 6. Chamar template.replacePlaceholders() para gerar HTML
+      const contractHTML = template.replacePlaceholders(placeholderData);
+
+      logger.info(
+        `[ReenrollmentService] HTML do contrato gerado com sucesso - Enrollment ID: ${enrollmentId}`
+      );
+
+      // 7. Retornar HTML renderizado
+      return {
+        contractHTML: contractHTML,
+        enrollmentId: enrollment.id,
+        semester: placeholderData.semester,
+        year: placeholderData.year,
+      };
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+
+      logger.error(
+        `[ReenrollmentService] Erro ao gerar preview de contrato: ${error.message}`,
+        {
+          enrollment_id: enrollmentId,
+          user_id: studentUserId,
+          error_stack: error.stack,
+        }
+      );
+
+      throw new AppError(
+        'Erro ao gerar preview de contrato. Tente novamente mais tarde.',
         500
       );
     }

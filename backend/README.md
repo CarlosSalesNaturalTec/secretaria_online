@@ -487,15 +487,22 @@ backend/
   - ✅ Rotas registradas em `src/routes/index.js` com prefixo `/reenrollments`
   - ✅ Documentação completa com JSDoc em controller e rotas
 
-- ⏳ **Etapa 5: Frontend - Interface de Rematrícula Global**
+- ✅ **Etapa 5: Frontend - Interface de Rematrícula Global** (Concluída em 2025-12-15)
   - Página administrativa para rematrícula global
   - Modal de confirmação com senha
   - Feedback de progresso
 
-- ⏳ **Etapa 6: Backend - Preview de Contrato HTML**
-  - Endpoint para preview de contrato: `GET /api/v1/reenrollments/contract-preview/:enrollmentId`
-  - Reutilização de `ContractTemplate.replacePlaceholders()`
-  - Retornar HTML renderizado (sem PDF)
+- ✅ **Etapa 6: Backend - Preview de Contrato HTML** (Concluída em 2025-12-15)
+  - ✅ Endpoint implementado: `GET /api/v1/reenrollments/contract-preview/:enrollmentId`
+  - ✅ Método `getReenrollmentContractPreview()` criado em ReenrollmentService
+  - ✅ Método `previewContract()` criado em ReenrollmentController
+  - ✅ Rota registrada em `reenrollment.routes.js`
+  - ✅ Reutilização de `ContractTemplate.replacePlaceholders()`
+  - ✅ Retorna HTML renderizado (sem PDF)
+  - ✅ Validação de ownership (apenas dono do enrollment pode visualizar)
+  - ✅ Validação de status (apenas enrollments 'pending')
+  - ✅ Suporte a placeholders: studentName, studentId, cpf, courseName, semester, year, date, institutionName
+  - ✅ Documentação completa em README
 
 - ⏳ **Etapa 7: Frontend - Tela de Aceite**
   - Página de aceite de rematrícula para estudantes
@@ -956,6 +963,55 @@ Content-Type: application/json
 - ✅ NÃO cria contratos (criados após aceite do estudante na Etapa 8)
 - ✅ Requer autenticação JWT e role 'admin'
 - ✅ Validação de senha do administrador obrigatória
+
+```http
+# Preview de Contrato HTML para Estudante (Etapa 6)
+GET /api/v1/reenrollments/contract-preview/:enrollmentId
+Authorization: Bearer <student_token>
+
+# Resposta de sucesso (200):
+{
+  "success": true,
+  "data": {
+    "contractHTML": "<html>...</html>",
+    "enrollmentId": 5,
+    "semester": 1,
+    "year": 2025
+  }
+}
+
+# Resposta de erro - Não é dono do enrollment (403):
+{
+  "success": false,
+  "error": "Você não tem permissão para visualizar este contrato"
+}
+
+# Resposta de erro - Enrollment não encontrado (404):
+{
+  "success": false,
+  "error": "Matrícula não encontrada"
+}
+
+# Resposta de erro - Enrollment não está pending (422):
+{
+  "success": false,
+  "error": "Esta matrícula não está pendente de aceite (status atual: active)"
+}
+
+# Resposta de erro - Sem template disponível (422):
+{
+  "success": false,
+  "error": "Nenhum template de contrato disponível. Entre em contato com a administração."
+}
+```
+
+**Observações sobre preview de contrato:**
+- ✅ Retorna HTML renderizado pronto para exibição (NÃO gera PDF)
+- ✅ Apenas estudantes (role: 'student') podem acessar
+- ✅ Validação de ownership: apenas dono do enrollment pode visualizar
+- ✅ Apenas enrollments com status 'pending' podem ter preview
+- ✅ Reutiliza sistema existente de ContractTemplate com método replacePlaceholders()
+- ✅ Placeholders suportados: {{studentName}}, {{studentId}}, {{cpf}}, {{courseName}}, {{semester}}, {{year}}, {{date}}, {{institutionName}}
 
 Para documentação completa da API, veja `docs/api-documentation.md`
 

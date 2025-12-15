@@ -118,4 +118,69 @@ router.post(
   ReenrollmentController.processGlobalReenrollment
 );
 
+/**
+ * GET /reenrollments/contract-preview/:enrollmentId
+ * Gera preview de contrato HTML para rematrícula do estudante
+ *
+ * IMPORTANTE:
+ * - Retorna HTML renderizado pronto para exibição (NÃO gera PDF)
+ * - Apenas estudante dono do enrollment pode visualizar
+ * - Apenas enrollments com status 'pending' podem ter preview
+ * - Reutiliza sistema existente de ContractTemplate com método replacePlaceholders()
+ *
+ * RESTRIÇÕES:
+ * - Apenas estudantes (role: 'student')
+ * - Valida ownership: estudante deve ser dono do enrollment
+ * - Enrollment deve ter status 'pending'
+ *
+ * Params:
+ * - enrollmentId: ID do enrollment (número inteiro)
+ *
+ * Response 200 (sucesso):
+ * {
+ *   "success": true,
+ *   "data": {
+ *     "contractHTML": "<html>...</html>",
+ *     "enrollmentId": 5,
+ *     "semester": 1,
+ *     "year": 2025
+ *   }
+ * }
+ *
+ * Response 403 (não é dono do enrollment):
+ * {
+ *   "success": false,
+ *   "error": "Você não tem permissão para visualizar este contrato"
+ * }
+ *
+ * Response 404 (enrollment não encontrado):
+ * {
+ *   "success": false,
+ *   "error": "Matrícula não encontrada"
+ * }
+ *
+ * Response 422 (enrollment não está pending ou sem template):
+ * {
+ *   "success": false,
+ *   "error": "Esta matrícula não está pendente de aceite (status atual: active)"
+ * }
+ * OU
+ * {
+ *   "success": false,
+ *   "error": "Nenhum template de contrato disponível. Entre em contato com a administração."
+ * }
+ *
+ * Response 500 (erro no servidor):
+ * {
+ *   "success": false,
+ *   "error": "Erro ao gerar preview de contrato. Tente novamente mais tarde."
+ * }
+ */
+router.get(
+  '/contract-preview/:enrollmentId',
+  // Apenas estudantes podem visualizar preview de contrato
+  // (ownership validado no service)
+  ReenrollmentController.previewContract
+);
+
 module.exports = router;
