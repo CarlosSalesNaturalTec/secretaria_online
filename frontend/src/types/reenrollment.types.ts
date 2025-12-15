@@ -30,3 +30,53 @@ export interface IReenrollmentApiResponse {
   data: IReenrollmentResponse;
   message: string;
 }
+
+/**
+ * Response do preview de contrato HTML
+ */
+export interface IContractPreviewResponse {
+  contractHTML: string; // HTML renderizado do contrato
+  enrollmentId: number; // ID do enrollment
+  semester: number; // Semestre (1 ou 2)
+  year: number; // Ano (ex: 2025)
+}
+
+/**
+ * Dados completos retornados pela API de preview
+ */
+export interface IContractPreviewApiResponse {
+  success: boolean;
+  data: IContractPreviewResponse;
+}
+
+/**
+ * Response do aceite de rematrícula
+ */
+export interface IAcceptReenrollmentResponse {
+  enrollment: {
+    id: number;
+    student_id: number;
+    course_id: number;
+    status: 'active' | 'pending' | 'cancelled';
+  };
+  contract: {
+    id: number;
+    user_id: number;
+    enrollment_id: number;
+    template_id: number;
+    semester: number;
+    year: number;
+    accepted_at: string;
+    file_path: null;
+    file_name: null;
+  };
+}
+
+/**
+ * Dados completos retornados pela API de aceite
+ */
+export interface IAcceptReenrollmentApiResponse {
+  success: boolean;
+  data: IAcceptReenrollmentResponse;
+  message: string;
+}

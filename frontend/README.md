@@ -289,11 +289,47 @@ frontend/
   - ✅ Modal não pode ser fechado durante processamento
   - ✅ Botões desabilitados durante processamento
   - ✅ Ícones e design consistentes com resto do sistema
-- **Próximas etapas** (Backend - Etapas 6, 7, 8 e 9):
-  - ⏳ Endpoint para preview de contrato HTML
-  - ⏳ Frontend - Tela de aceite de rematrícula (estudante)
-  - ⏳ Backend - Endpoint de aceite e criação de contrato
-  - ⏳ Documentação final
+- **Etapa 6: Backend - Preview de Contrato HTML** (Concluída em 2025-12-15) ✅
+  - ✅ Endpoint implementado: `GET /api/v1/reenrollments/contract-preview/:enrollmentId`
+  - ✅ Retorna HTML renderizado pronto para exibição
+  - ✅ Validação de ownership e status 'pending'
+  - ✅ Reutiliza `ContractTemplate.replacePlaceholders()`
+
+- **Etapa 7: Frontend - Tela de Aceite** (Em Progresso - ~70% Concluída em 2025-12-15) ⏳
+  - ✅ **Tipos TypeScript criados** (`frontend/src/types/reenrollment.types.ts`):
+    - `IContractPreviewResponse` - Response do preview de contrato
+    - `IAcceptReenrollmentResponse` - Response do aceite de rematrícula
+  - ✅ **Service atualizado** (`frontend/src/services/reenrollment.service.ts`):
+    - Método `getContractPreview(enrollmentId)` - Busca HTML do contrato
+    - Método `acceptReenrollment(enrollmentId)` - Aceita rematrícula
+    - Tratamento completo de erros (403, 404, 422)
+  - ✅ **Hooks customizados criados** (`frontend/src/hooks/useReenrollment.ts`):
+    - `useContractPreview(enrollmentId)` - Query para buscar preview com TanStack Query
+    - `useAcceptReenrollment()` - Mutation para aceitar rematrícula
+    - Invalidação automática de cache após aceite
+  - ✅ **Página criada** (`frontend/src/pages/student/ReenrollmentAcceptance.tsx`):
+    - Interface completa com exibição de contrato HTML
+    - Busca automática de enrollment pending do estudante
+    - Exibição de contrato em div scrollable com HTML renderizado
+    - Botão "Aceitar e Confirmar Rematrícula" com loading
+    - Tratamento de estados: loading, erro, sucesso
+    - Alertas e feedback visual
+    - Redirecionamento automático para dashboard após aceite
+  - ⏳ **PENDENTE - Rota no Router**:
+    - Adicionar rota `/student/reenrollment-acceptance` em `src/router.tsx`
+    - Aplicar `PrivateRoute` com role 'student'
+  - ⏳ **PENDENTE - Lógica de Bloqueio**:
+    - Atualizar `AuthContext` para verificar se estudante tem enrollment 'pending'
+    - Adicionar propriedade `hasEnrollmentPending` no contexto
+    - Implementar lógica em `PrivateRoute` ou `App.tsx` para redirecionar estudante com enrollment pending para `/student/reenrollment-acceptance`
+    - Bloquear acesso a outras rotas até aceitar contrato
+  - ⏳ **PENDENTE - Documentação**:
+    - Atualizar seção "Módulos Implementados" deste README
+    - Documentar fluxo completo de aceite de rematrícula
+
+- **Próximas etapas** (Backend - Etapa 8 e 9):
+  - ⏳ Backend - Endpoint de aceite e criação de contrato (`POST /api/v1/reenrollments/accept/:enrollmentId`)
+  - ⏳ Documentação final e consolidação
 
 ## 🧪 Testes
 

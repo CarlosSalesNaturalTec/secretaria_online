@@ -504,12 +504,17 @@ backend/
   - ✅ Suporte a placeholders: studentName, studentId, cpf, courseName, semester, year, date, institutionName
   - ✅ Documentação completa em README
 
-- ⏳ **Etapa 7: Frontend - Tela de Aceite**
-  - Página de aceite de rematrícula para estudantes
-  - Bloqueio de acesso até aceitar contrato
-  - Exibição de HTML do contrato
+- ⏳ **Etapa 7: Frontend - Tela de Aceite** (Em Progresso - Parcialmente Concluída em 2025-12-15)
+  - ✅ Tipos TypeScript criados (`IContractPreviewResponse`, `IAcceptReenrollmentResponse`)
+  - ✅ Service atualizado com métodos `getContractPreview()` e `acceptReenrollment()`
+  - ✅ Hooks criados: `useContractPreview()` e `useAcceptReenrollment()`
+  - ✅ Página `ReenrollmentAcceptance.tsx` criada com interface completa
+  - ⏳ **PENDENTE**: Adicionar rota `/student/reenrollment-acceptance` no router
+  - ⏳ **PENDENTE**: Atualizar `AuthContext` para verificar enrollment pending e redirecionar
+  - ⏳ **PENDENTE**: Implementar lógica de bloqueio de acesso em `PrivateRoute` ou `App.tsx`
+  - ⏳ **PENDENTE**: Atualizar frontend/README.md com documentação completa
 
-- ⏳ **Etapa 8: Backend - Endpoint de Aceite**
+- ⏳ **Etapa 8: Backend - Endpoint de Aceite** (Não Iniciada)
   - Endpoint: `POST /api/v1/reenrollments/accept/:enrollmentId`
   - Atualizar enrollment status: 'pending' → 'active'
   - **CRIAR contrato após aceite** com `file_path=null` e `file_name=null`
