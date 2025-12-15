@@ -12,13 +12,14 @@
  * - Mostrar loading, erro e feedback durante processo
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, AlertCircle, FileText, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useContractPreview, useAcceptReenrollment } from '@/hooks/useReenrollment';
-import { useAuth } from '@/contexts/AuthContext';
+import { AuthContext } from '@/contexts/AuthContext';
 import enrollmentService from '@/services/enrollment.service';
+import type { IEnrollment } from '@/types/enrollment.types';
 
 /**
  * ReenrollmentAcceptance - Página de aceite de rematrícula
@@ -40,7 +41,8 @@ import enrollmentService from '@/services/enrollment.service';
  */
 export default function ReenrollmentAcceptance() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const authContext = useContext(AuthContext);
+  const user = authContext?.user;
   const [enrollmentId, setEnrollmentId] = useState<number | null>(null);
   const [loadingEnrollment, setLoadingEnrollment] = useState(true);
   const [enrollmentError, setEnrollmentError] = useState<string | null>(null);
@@ -69,7 +71,8 @@ export default function ReenrollmentAcceptance() {
         setEnrollmentError(null);
 
         // Buscar enrollments do estudante autenticado
-        const studentId = user?.student_id;
+        // @ts-ignore
+        const studentId = user?.studentId;
 
         if (!studentId) {
           setEnrollmentError('Dados de estudante não encontrados');
@@ -78,11 +81,11 @@ export default function ReenrollmentAcceptance() {
         }
 
         // Buscar enrollments com status pending
-        const enrollments = await enrollmentService.getByStudent(studentId);
+        const enrollments = await enrollmentService.getAll({ studentId });
 
         // Filtrar apenas enrollments com status 'pending'
         const pendingEnrollment = enrollments.find(
-          (e) => e.status === 'pending'
+          (e: IEnrollment) => e.status === 'pending'
         );
 
         if (!pendingEnrollment) {

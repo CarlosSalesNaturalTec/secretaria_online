@@ -13,7 +13,7 @@
  * - Invalidar cache após sucesso
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -26,12 +26,12 @@ import { AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react';
  */
 const reenrollmentSchema = z.object({
   semester: z
-    .number({ required_error: 'Semestre é obrigatório' })
+    .number({ message: 'Semestre é obrigatório' })
     .int('Semestre deve ser um número inteiro')
     .min(1, 'Semestre deve ser 1 ou 2')
     .max(2, 'Semestre deve ser 1 ou 2'),
   year: z
-    .number({ required_error: 'Ano é obrigatório' })
+    .number({ message: 'Ano é obrigatório' })
     .int('Ano deve ser um número inteiro')
     .min(2020, 'Ano inválido')
     .max(2100, 'Ano inválido'),

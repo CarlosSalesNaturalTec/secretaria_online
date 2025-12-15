@@ -15,7 +15,6 @@ import { useState } from 'react';
 import {
   AlertTriangle,
   RefreshCcw,
-  Users,
   Info,
   CheckCircle2,
 } from 'lucide-react';
@@ -136,16 +135,6 @@ export default function Reenrollment() {
             Clique no botão abaixo para iniciar o processo de rematrícula de
             todos os estudantes
           </p>
-
-          {/* TODO: Exibir total de estudantes ativos (quando disponível) */}
-          {/* {totalActiveStudents !== undefined && (
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-sm">
-              <Users className="h-4 w-4 text-gray-600" />
-              <span className="font-medium text-gray-700">
-                {totalActiveStudents} estudantes ativos
-              </span>
-            </div>
-          )} */}
 
           {/* Botão Principal */}
           <button
