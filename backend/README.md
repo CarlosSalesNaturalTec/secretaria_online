@@ -405,9 +405,7 @@ backend/
   }
   ```
 
-### 🔄 Rematrícula Global de Estudantes (Em Desenvolvimento)
-
-**Status:** 🏗️ Em implementação - Etapa 4/9 concluída
+### 🔄 Rematrícula Global de Estudantes
 
 **Descrição:** Sistema de rematrícula semestral/anual global que permite processar rematrículas em lote de TODOS os estudantes do sistema e controle de aceite de contratos.
 
@@ -415,7 +413,7 @@ backend/
 
 #### 📋 Etapas do Desenvolvimento
 
-- ✅ **Etapa 1: Análise e Modelagem de Dados** (Concluída em 2025-12-15)
+- ✅ **Etapa 1: Análise e Modelagem de Dados** 
   - Análise completa da estrutura atual do banco de dados
   - Identificação de campos e relacionamentos necessários
   - Documentação técnica criada: `docs/analise_rematricula.md`
@@ -427,7 +425,7 @@ backend/
     - ✅ Retrocompatibilidade garantida para dados existentes
     - ✅ Impacto avaliado e documentado
 
-- ✅ **Etapa 2: Migrations e Atualização de Models** (Concluída em 2025-12-15)
+- ✅ **Etapa 2: Migrations e Atualização de Models** 
   - ✅ Criadas 2 migrations:
     1. **`20251215120000-add-enrollment-id-to-contracts.js`**
        - Adiciona campo `enrollment_id` (INTEGER, nullable) à tabela `contracts`
@@ -450,7 +448,7 @@ backend/
   - ✅ Migrations executadas com sucesso no banco de desenvolvimento
   - ✅ Rollback testado e funcionando corretamente
 
-- ✅ **Etapa 3: Backend - Service de Rematrícula** (Concluída em 2025-12-15)
+- ✅ **Etapa 3: Backend - Service de Rematrícula** 
   - ✅ Criado `ReenrollmentService` (`src/services/reenrollment.service.js`)
   - ✅ Implementado método `validateAdminPassword(userId, password)`:
     - Busca usuário por ID e valida que é admin
@@ -470,7 +468,7 @@ backend/
     - Documentação JSDoc completa
     - Validações de regras de negócio
 
-- ✅ **Etapa 4: Backend - Controller e Rotas** (Concluída em 2025-12-15)
+- ✅ **Etapa 4: Backend - Controller e Rotas** 
   - ✅ Criado `ReenrollmentController` (`src/controllers/reenrollment.controller.js`)
   - ✅ Implementado método `processGlobalReenrollment(req, res, next)`:
     - Valida request body com express-validator (semester, year, adminPassword)
@@ -487,12 +485,12 @@ backend/
   - ✅ Rotas registradas em `src/routes/index.js` com prefixo `/reenrollments`
   - ✅ Documentação completa com JSDoc em controller e rotas
 
-- ✅ **Etapa 5: Frontend - Interface de Rematrícula Global** (Concluída em 2025-12-15)
+- ✅ **Etapa 5: Frontend - Interface de Rematrícula Global** 
   - Página administrativa para rematrícula global
   - Modal de confirmação com senha
   - Feedback de progresso
 
-- ✅ **Etapa 6: Backend - Preview de Contrato HTML** (Concluída em 2025-12-15)
+- ✅ **Etapa 6: Backend - Preview de Contrato HTML** 
   - ✅ Endpoint implementado: `GET /api/v1/reenrollments/contract-preview/:enrollmentId`
   - ✅ Método `getReenrollmentContractPreview()` criado em ReenrollmentService
   - ✅ Método `previewContract()` criado em ReenrollmentController
@@ -504,26 +502,21 @@ backend/
   - ✅ Suporte a placeholders: studentName, studentId, cpf, courseName, semester, year, date, institutionName
   - ✅ Documentação completa em README
 
-- ⏳ **Etapa 7: Frontend - Tela de Aceite** (Em Progresso - Parcialmente Concluída em 2025-12-15)
+- ✅ **Etapa 7: Frontend - Tela de Aceite** 
   - ✅ Tipos TypeScript criados (`IContractPreviewResponse`, `IAcceptReenrollmentResponse`)
   - ✅ Service atualizado com métodos `getContractPreview()` e `acceptReenrollment()`
   - ✅ Hooks criados: `useContractPreview()` e `useAcceptReenrollment()`
   - ✅ Página `ReenrollmentAcceptance.tsx` criada com interface completa
-  - ⏳ **PENDENTE**: Adicionar rota `/student/reenrollment-acceptance` no router
-  - ⏳ **PENDENTE**: Atualizar `AuthContext` para verificar enrollment pending e redirecionar
-  - ⏳ **PENDENTE**: Implementar lógica de bloqueio de acesso em `PrivateRoute` ou `App.tsx`
-  - ⏳ **PENDENTE**: Atualizar frontend/README.md com documentação completa
+  - ✅ Adicionar rota `/student/reenrollment-acceptance` no router
+  - ✅ Atualizar `AuthContext` para verificar enrollment pending e redirecionar
+  - ✅ Implementar lógica de bloqueio de acesso em `PrivateRoute` ou `App.tsx`
+  - ✅ Atualizar frontend/README.md com documentação completa
 
-- ⏳ **Etapa 8: Backend - Endpoint de Aceite** (Não Iniciada)
-  - Endpoint: `POST /api/v1/reenrollments/accept/:enrollmentId`
-  - Atualizar enrollment status: 'pending' → 'active'
-  - **CRIAR contrato após aceite** com `file_path=null` e `file_name=null`
-  - Transação para garantir atomicidade
-
-- ⏳ **Etapa 9: Documentação Final**
-  - Consolidar documentação de todas as etapas
-  - Atualizar changelogs
-  - Atualizar API docs
+- ✅ **Etapa 8: Backend - Endpoint de Aceite** 
+  -  ✅ Endpoint: `POST /api/v1/reenrollments/accept/:enrollmentId`
+  -  ✅ Atualizar enrollment status: 'pending' → 'active'
+  -  ✅ **CRIAR contrato após aceite** com `file_path=null` e `file_name=null`
+  -  ✅ Transação para garantir atomicidade
 
 #### 💡 Uso do ReenrollmentService
 
