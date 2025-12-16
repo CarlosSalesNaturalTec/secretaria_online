@@ -19,7 +19,6 @@ import { Button } from '@/components/ui/Button';
 import { useContractPreview, useAcceptReenrollment } from '@/hooks/useReenrollment';
 import { AuthContext } from '@/contexts/AuthContext';
 import enrollmentService from '@/services/enrollment.service';
-import type { IEnrollment } from '@/types/enrollment.types';
 
 /**
  * ReenrollmentAcceptance - Página de aceite de rematrícula

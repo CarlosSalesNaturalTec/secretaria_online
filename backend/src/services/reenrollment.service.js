@@ -400,6 +400,10 @@ class ReenrollmentService {
         currentSemester: 1, // Valor padrão - pode ser ajustado conforme lógica de negócio
         year: currentDate.getFullYear(),
         
+        // Placeholders de rodapé
+        contractId: 'A ser gerado após aceite',
+        generatedAt: currentDate.toLocaleString('pt-BR'),
+
         // Placeholders antigos para retrocompatibilidade
         cpf: student.cpf ? student.cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4') : 'N/A',
         semester: 1, // Valor padrão
