@@ -334,14 +334,14 @@ const privateRoutes: RouteObject[] = [
           </Suspense>
         ),
       },
-      {
+      /* {
         path: 'requests',
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <StudentRequests />
           </Suspense>
         ),
-      },
+      }, */
       {
         path: 'reenrollment-acceptance',
         element: (
