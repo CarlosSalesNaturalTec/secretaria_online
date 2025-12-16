@@ -50,7 +50,7 @@ const AdminReenrollment = lazy(() => import('./pages/admin/Reenrollment'));
 const StudentDashboard = lazy(() => import('./pages/student/Dashboard'));
 const StudentGrades = lazy(() => import('./pages/student/Grades'));
 const StudentDocuments = lazy(() => import('./pages/student/Documents'));
-const StudentRequests = lazy(() => import('./pages/student/Requests'));
+/*const StudentRequests = lazy(() => import('./pages/student/Requests'));*/
 const ReenrollmentAcceptance = lazy(
   () => import('./pages/student/ReenrollmentAcceptance')
 );
