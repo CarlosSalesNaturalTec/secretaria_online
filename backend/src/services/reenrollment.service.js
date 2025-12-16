@@ -272,12 +272,27 @@ class ReenrollmentService {
           {
             model: Student,
             as: 'student',
-            attributes: ['id', 'nome', 'cpf', 'email'],
+            attributes: [
+              'id',
+              'nome',
+              'cpf',
+              'email',
+              'telefone',
+              'celular',
+              'endereco_rua',
+              'endereco_numero',
+              'endereco_complemento',
+              'endereco_bairro',
+              'endereco_cidade',
+              'endereco_uf',
+              'cep',
+              'matricula',
+            ],
           },
           {
             model: Course,
             as: 'course',
-            attributes: ['id', 'name', 'description'],
+            attributes: ['id', 'name', 'description', 'duration', 'duration_type'],
           },
         ],
       });
@@ -351,27 +366,45 @@ class ReenrollmentService {
         `[ReenrollmentService] Template encontrado - ID: ${template.id}, Nome: ${template.name}`
       );
 
-      // 5. Coletar dados para substituição de placeholders
+      // 5. Coletar e formatar dados para substituição
+      const student = enrollment.student || {};
+      const course = enrollment.course || {};
       const currentDate = new Date();
-      const formattedDate = currentDate.toLocaleDateString('pt-BR');
 
-      // Formatar CPF (123.456.789-01)
-      const cpf = enrollment.student?.cpf || '';
-      const cpfFormatted = cpf.replace(
-        /^(\d{3})(\d{3})(\d{3})(\d{2})$/,
-        '$1.$2.$3-$4'
-      );
+      const addressParts = [
+        student.endereco_rua,
+        student.endereco_numero,
+        student.endereco_complemento,
+        student.endereco_bairro,
+        student.endereco_cidade,
+        student.endereco_uf,
+        student.cep,
+      ].filter(Boolean); // Remove partes nulas/vazias
+      const studentAddress = addressParts.join(', ');
 
       // Dados para substituição
       const placeholderData = {
-        studentName: enrollment.student?.nome || 'N/A',
-        studentId: enrollment.student?.id || 'N/A',
-        cpf: cpfFormatted || 'N/A',
-        courseName: enrollment.course?.name || 'N/A',
-        semester: 1, // Valor padrão - pode ser ajustado conforme lógica de negócio
+        studentName: student.nome || 'N/A',
+        studentId: student.id || 'N/A',
+        studentCPF: student.cpf ? student.cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4') : 'N/A',
+        studentEmail: student.email || 'N/A',
+        studentPhone: student.celular || student.telefone || 'N/A',
+        studentAddress: studentAddress || 'N/A',
+        enrollmentNumber: student.matricula || 'N/A',
+        
+        courseName: course.name || 'N/A',
+        courseDuration: `${course.duration || 'N/A'} ${course.duration_type || ''}`.trim(),
+        
+        enrollmentDate: new Date(enrollment.enrollment_date).toLocaleDateString('pt-BR'),
+        contractDate: currentDate.toLocaleDateString('pt-BR'),
+        currentSemester: 1, // Valor padrão - pode ser ajustado conforme lógica de negócio
         year: currentDate.getFullYear(),
-        date: formattedDate,
-        institutionName: 'Secretaria Online', // Nome da instituição (pode vir de config)
+        
+        // Placeholders antigos para retrocompatibilidade
+        cpf: student.cpf ? student.cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4') : 'N/A',
+        semester: 1, // Valor padrão
+        date: currentDate.toLocaleDateString('pt-BR'),
+        institutionName: 'Secretaria Online',
       };
 
       logger.info(
@@ -389,7 +422,7 @@ class ReenrollmentService {
       return {
         contractHTML: contractHTML,
         enrollmentId: enrollment.id,
-        semester: placeholderData.semester,
+        semester: placeholderData.currentSemester,
         year: placeholderData.year,
       };
     } catch (error) {
