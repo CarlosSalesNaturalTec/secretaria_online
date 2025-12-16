@@ -27,10 +27,10 @@
 'use strict';
 
 const express = require('express');
-const { body } = require('express-validator');
+const { body, param } = require('express-validator');
 const ReenrollmentController = require('../controllers/reenrollment.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
-const { authorizeAdmin } = require('../middlewares/rbac.middleware');
+const { authorizeAdmin, authorizeStudent } = require('../middlewares/rbac.middleware');
 const { handleValidationErrors } = require('../middlewares/validation.middleware');
 
 const router = express.Router();
@@ -45,6 +45,21 @@ router.use(authMiddleware);
 // ========================================
 // ROTAS
 // ========================================
+
+/**
+ * POST /reenrollments/accept/:enrollmentId
+ * Endpoint para um estudante aceitar a rematrícula.
+ */
+router.post(
+  '/accept/:enrollmentId',
+  authorizeStudent,
+  [
+    param('enrollmentId').isInt({ min: 1 }).withMessage('O ID da matrícula deve ser um inteiro positivo.'),
+  ],
+  handleValidationErrors,
+  ReenrollmentController.acceptReenrollment
+);
+
 
 /**
  * POST /reenrollments/process-all

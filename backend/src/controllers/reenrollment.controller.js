@@ -23,6 +23,39 @@ const { validationResult } = require('express-validator');
 const logger = require('../utils/logger');
 
 class ReenrollmentController {
+  
+  /**
+   * Processa o aceite de rematrícula de um estudante
+   * @param {import('express').Request} req - A requisição.
+   * @param {import('express').Response} res - A resposta.
+   * @param {import('express').NextFunction} next - O próximo middleware.
+   */
+  async acceptReenrollment(req, res, next) {
+    try {
+      const { enrollmentId } = req.params;
+      const userId = req.user.id;
+
+      logger.info(`[ReenrollmentController] Recebida requisição de aceite - Enrollment ID: ${enrollmentId}, User ID: ${userId}`);
+
+      const result = await ReenrollmentService.acceptReenrollment(parseInt(enrollmentId, 10), userId);
+
+      res.status(200).json({
+        success: true,
+        message: 'Rematrícula aceita com sucesso!',
+        data: result,
+      });
+    } catch (error) {
+      logger.error(`[ReenrollmentController] Erro ao aceitar rematrícula: ${error.message}`);
+      next(error);
+    }
+  }
+
+  /**
+   * Valida a senha de um administrador para operações críticas
+   * @param {import('express').Request} req - A requisição.
+   * @param {import('express').Response} res - A resposta.
+   * @param {import('express').NextFunction} next - O próximo middleware.
+   */
   /**
    * Processa rematrícula global de TODOS os estudantes do sistema
    *

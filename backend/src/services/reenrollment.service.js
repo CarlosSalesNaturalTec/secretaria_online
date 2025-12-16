@@ -31,13 +31,82 @@
 
 'use strict';
 
-const { Enrollment, User, Student, Course, ContractTemplate } = require('../models');
+const { Enrollment, User, Student, Course, ContractTemplate, Contract } = require('../models');
 const { sequelize } = require('../models');
 const bcrypt = require('bcryptjs');
 const { AppError } = require('../middlewares/error.middleware');
 const logger = require('../utils/logger');
 
 class ReenrollmentService {
+  /**
+   * Processa o aceite de rematrícula de um estudante
+   *
+   * @param {number} enrollmentId - ID do enrollment a ser aceito
+   * @param {number} studentUserId - ID do usuário estudante logado
+   * @returns {Promise<{enrollment: Enrollment, contract: Contract}>}
+   * @throws {AppError} Se validações falharem ou ocorrer erro na transação
+   */
+  async acceptReenrollment(enrollmentId, studentUserId) {
+    logger.info(
+      `[ReenrollmentService] Aceitando rematrícula - Enrollment ID: ${enrollmentId}, User ID: ${studentUserId}`
+    );
+
+    const transaction = await sequelize.transaction();
+
+    try {
+      const user = await User.findByPk(studentUserId, { transaction });
+      if (!user || !user.student_id) {
+        throw new AppError('Usuário estudante inválido', 403);
+      }
+
+      const enrollment = await Enrollment.findByPk(enrollmentId, { transaction });
+      if (!enrollment) {
+        throw new AppError('Matrícula não encontrada', 404);
+      }
+      if (enrollment.student_id !== user.student_id) {
+        throw new AppError('Você não tem permissão para aceitar esta rematrícula', 403);
+      }
+      if (enrollment.status !== 'pending') {
+        throw new AppError(`Esta matrícula não está pendente de aceite (status atual: ${enrollment.status})`, 422);
+      }
+
+      const template = await ContractTemplate.findOne({ where: { is_active: true }, transaction });
+      if (!template) {
+        throw new AppError('Nenhum template de contrato ativo encontrado', 422);
+      }
+
+      enrollment.status = 'active';
+      await enrollment.save({ transaction });
+
+      const currentYear = new Date().getFullYear();
+      const currentMonth = new Date().getMonth();
+      const semester = currentMonth < 6 ? 1 : 2;
+
+      const newContract = await Contract.create({
+        user_id: studentUserId,
+        enrollment_id: enrollmentId,
+        template_id: template.id,
+        semester: semester,
+        year: currentYear,
+        accepted_at: new Date(),
+        file_path: null,
+        file_name: null,
+      }, { transaction });
+
+      await transaction.commit();
+
+      logger.info(`[ReenrollmentService] Rematrícula aceita com sucesso - Enrollment ID: ${enrollmentId}`);
+      return { enrollment, contract: newContract };
+    } catch (error) {
+      await transaction.rollback();
+      logger.error(`[ReenrollmentService] Erro ao aceitar rematrícula: ${error.message}`);
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError('Erro ao processar o aceite da rematrícula', 500);
+    }
+  }
+
   /**
    * Valida senha de um usuário administrador
    *

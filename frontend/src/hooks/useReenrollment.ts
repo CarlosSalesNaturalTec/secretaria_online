@@ -14,6 +14,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import ReenrollmentService from '@/services/reenrollment.service';
 import type { IReenrollmentRequest } from '@/types/reenrollment.types';
+import { useAuth } from './useAuth';
 
 /**
  * Hook para processar rematrícula global de TODOS os estudantes
@@ -166,6 +167,7 @@ export function useContractPreview(
  */
 export function useAcceptReenrollment() {
   const queryClient = useQueryClient();
+  const { user, updateUser } = useAuth();
 
   return useMutation({
     mutationFn: (enrollmentId: number) => {
@@ -184,20 +186,20 @@ export function useAcceptReenrollment() {
         );
       }
 
-      // Invalidar cache de enrollments
+      // 1. Atualizar o AuthContext PRIMEIRO para evitar race conditions
+      if (user) {
+        updateUser({
+          ...user,
+          enrollmentStatus: 'active',
+        });
+      }
+
+      // 2. Remover queries que não são mais necessárias ou que causarão erro
+      queryClient.removeQueries({ queryKey: ['contract-preview', enrollmentId] });
+      queryClient.removeQueries({ queryKey: ['enrollments', 'my-pending'] });
+
+      // 3. Invalidar outros caches para garantir consistência
       queryClient.invalidateQueries({ queryKey: ['enrollments'] });
-
-      // Invalidar cache específico do enrollment aceito
-      queryClient.invalidateQueries({
-        queryKey: ['enrollments', enrollmentId],
-      });
-
-      // Invalidar cache do preview de contrato (não é mais necessário)
-      queryClient.invalidateQueries({
-        queryKey: ['contract-preview', enrollmentId],
-      });
-
-      // Invalidar cache de auth (pode ter mudado status do usuário)
       queryClient.invalidateQueries({ queryKey: ['auth'] });
     },
     onError: (error: Error, enrollmentId) => {
