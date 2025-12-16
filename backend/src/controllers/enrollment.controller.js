@@ -359,6 +359,49 @@ class EnrollmentController {
   }
 
   /**
+   * Busca a matrícula pendente do aluno autenticado (GET /enrollments/my-pending)
+   *
+   * @param {import('express').Request} req - Requisição HTTP
+   * @param {import('express').Response} res - Resposta HTTP
+   * @param {import('express').NextFunction} next - Próximo middleware
+   */
+  async getMyPendingEnrollment(req, res, next) {
+    try {
+      const { student_id } = req.user;
+
+      if (!student_id) {
+        logger.warn(`[EnrollmentController] Tentativa de acesso sem student_id por user ID: ${req.user.id}`);
+        return res.status(403).json({
+          success: false,
+          error: 'Apenas estudantes podem acessar este recurso.',
+        });
+      }
+
+      logger.info(`[EnrollmentController] Buscando matrícula pendente para student_id: ${student_id}`);
+
+      const enrollment = await EnrollmentService.getPendingByStudent(student_id);
+
+      if (!enrollment) {
+        logger.warn(`[EnrollmentController] Nenhuma matrícula pendente encontrada para student_id: ${student_id}`);
+        return res.status(404).json({
+          success: false,
+          error: 'Nenhuma matrícula pendente de rematrícula encontrada.',
+        });
+      }
+
+      logger.info(`[EnrollmentController] Matrícula pendente encontrada - ID: ${enrollment.id}`);
+
+      return res.json({
+        success: true,
+        data: enrollment,
+      });
+    } catch (error) {
+      logger.error(`[EnrollmentController] Erro ao buscar matrícula pendente: ${error.message}`);
+      next(error);
+    }
+  }
+
+  /**
    * Cancela uma matrícula (DELETE /enrollments/:id)
    *
    * FLUXO:

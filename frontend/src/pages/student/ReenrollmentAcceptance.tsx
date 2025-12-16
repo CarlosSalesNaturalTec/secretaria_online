@@ -70,23 +70,7 @@ export default function ReenrollmentAcceptance() {
         setLoadingEnrollment(true);
         setEnrollmentError(null);
 
-        // Buscar enrollments do estudante autenticado
-        // @ts-ignore
-        const studentId = user?.studentId;
-
-        if (!studentId) {
-          setEnrollmentError('Dados de estudante não encontrados');
-          setLoadingEnrollment(false);
-          return;
-        }
-
-        // Buscar enrollments com status pending
-        const enrollments = await enrollmentService.getAll({ studentId });
-
-        // Filtrar apenas enrollments com status 'pending'
-        const pendingEnrollment = enrollments.find(
-          (e: IEnrollment) => e.status === 'pending'
-        );
+        const pendingEnrollment = await enrollmentService.getMyPendingEnrollment();
 
         if (!pendingEnrollment) {
           // Se não há enrollment pending, redirecionar para dashboard
@@ -98,17 +82,19 @@ export default function ReenrollmentAcceptance() {
         }
 
         setEnrollmentId(pendingEnrollment.id);
-        setLoadingEnrollment(false);
       } catch (error: any) {
         console.error('[ReenrollmentAcceptance] Erro ao buscar enrollment:', error);
         setEnrollmentError(
           error.message || 'Erro ao carregar dados de matrícula'
         );
+      } finally {
         setLoadingEnrollment(false);
       }
     };
 
-    fetchEnrollment();
+    if (user?.role === 'student') {
+      fetchEnrollment();
+    }
   }, [user, navigate]);
 
   /**

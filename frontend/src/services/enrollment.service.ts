@@ -466,6 +466,50 @@ const EnrollmentService = {
   update,
   updateStatus,
   delete: deleteEnrollment,
+  getMyPendingEnrollment,
 };
+
+/**
+ * Busca a matrícula pendente do aluno autenticado
+ *
+ * @returns {Promise<IEnrollment | null>} Matrícula pendente ou null se não encontrada
+ */
+async function getMyPendingEnrollment(): Promise<IEnrollment | null> {
+  try {
+    if (import.meta.env.DEV) {
+      console.log('[EnrollmentService] Buscando matrícula pendente do aluno...');
+    }
+
+    const response = await api.get<ApiResponse<IEnrollment>>('/enrollments/my-pending');
+
+    if (response.data.success && response.data.data) {
+      if (import.meta.env.DEV) {
+        console.log('[EnrollmentService] Matrícula pendente encontrada:', response.data.data);
+      }
+      return transformEnrollmentData(response.data.data);
+    }
+    
+    // Se a API retornar sucesso mas sem dados (ou erro 404 tratado), significa que não há matrícula pendente
+    if (import.meta.env.DEV) {
+      console.log('[EnrollmentService] Nenhuma matrícula pendente encontrada para o aluno.');
+    }
+    return null;
+
+  } catch (error: any) {
+    // Um erro 404 é esperado se não houver matrícula pendente, não deve ser logado como um erro crítico
+    if (error.response?.status === 404) {
+      if (import.meta.env.DEV) {
+        console.log('[EnrollmentService] Nenhuma matrícula pendente encontrada (404).');
+      }
+      return null;
+    }
+
+    console.error('[EnrollmentService] Erro ao buscar matrícula pendente:', error);
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Falha ao buscar sua matrícula. Tente novamente.');
+  }
+}
 
 export default EnrollmentService;

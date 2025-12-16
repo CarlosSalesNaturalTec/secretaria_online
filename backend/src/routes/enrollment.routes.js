@@ -35,7 +35,7 @@ const express = require('express');
 const { body, param } = require('express-validator');
 const EnrollmentController = require('../controllers/enrollment.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
-const { authorizeAdmin } = require('../middlewares/rbac.middleware');
+const { authorizeAdmin, authorizeStudent } = require('../middlewares/rbac.middleware');
 const { handleValidationErrors } = require('../middlewares/validation.middleware');
 
 const router = express.Router();
@@ -101,6 +101,16 @@ router.get(
   '/',
   authorizeAdmin,
   EnrollmentController.getAll
+);
+
+/**
+ * GET /enrollments/my-pending
+ * Busca a matrícula pendente do aluno autenticado.
+ */
+router.get(
+  '/my-pending',
+  authorizeStudent,
+  EnrollmentController.getMyPendingEnrollment
 );
 
 /**

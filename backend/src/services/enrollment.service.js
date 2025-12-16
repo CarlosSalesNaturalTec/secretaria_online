@@ -489,6 +489,36 @@ class EnrollmentService {
   }
 
   /**
+   * Busca a matrícula pendente de um aluno
+   *
+   * @param {number} studentId - ID do aluno
+   * @returns {Promise<Enrollment|null>} Matrícula pendente encontrada ou null
+   */
+  async getPendingByStudent(studentId) {
+    logger.debug(`[EnrollmentService] Buscando matrícula pendente para o aluno - ID: ${studentId}`);
+
+    try {
+      const enrollment = await Enrollment.findOne({
+        where: {
+          student_id: studentId,
+          status: 'pending',
+        },
+        include: [
+          {
+            association: 'course',
+            attributes: ['id', 'name'],
+          },
+        ],
+      });
+
+      return enrollment;
+    } catch (error) {
+      logger.error(`[EnrollmentService] Erro ao buscar matrícula pendente: ${error.message}`);
+      throw new AppError('Erro ao buscar matrícula pendente', 500);
+    }
+  }
+
+  /**
    * Busca todas as matrículas de um curso
    *
    * @param {number} courseId - ID do curso

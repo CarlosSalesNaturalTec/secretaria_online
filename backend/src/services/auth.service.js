@@ -8,7 +8,7 @@
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { User } = require('../models');
+const { User, Enrollment } = require('../models');
 const { jwtConfig } = require('../config/auth');
 
 class AuthService {
@@ -32,6 +32,19 @@ class AuthService {
       throw new Error('Senha inválida');
     }
 
+    const userWithEnrollment = user.get({ plain: true });
+
+    if (user.role === 'student' && user.student_id) {
+      const enrollment = await Enrollment.findOne({
+        where: { student_id: user.student_id },
+        order: [['created_at', 'DESC']],
+      });
+
+      if (enrollment) {
+        userWithEnrollment.enrollmentStatus = enrollment.status;
+      }
+    }
+
     /**
      * FIX: [secretOrPrivateKey must have a value]
      * 
@@ -39,11 +52,23 @@ class AuthService {
      * Solução: [Desestruturar `jwtConfig` do `require('../config/auth')` e usar `jwtConfig.secret` e `jwtConfig.accessExpiresIn`.]
      * Data: [2025-10-27]
      */
-    const token = jwt.sign({ id: user.id, role: user.role }, jwtConfig.secret, {
+    const payload = {
+      id: user.id,
+      role: user.role,
+    };
+
+    if (user.role === 'student' && user.student_id) {
+      payload.student_id = user.student_id;
+    }
+
+    const token = jwt.sign(payload, jwtConfig.secret, {
       expiresIn: jwtConfig.accessExpiresIn,
     });
 
-    return { user, token };
+    // Omit password_hash from the returned user object
+    delete userWithEnrollment.password_hash;
+
+    return { user: userWithEnrollment, token };
   }
 
   /**
