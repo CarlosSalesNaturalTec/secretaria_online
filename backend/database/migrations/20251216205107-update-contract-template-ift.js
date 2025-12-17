@@ -1,9 +1,8 @@
 /**
- * Arquivo: backend/database/seeders/20251101120000-contract-template.js
- * Descrição: Seeder para criar template HTML do contrato IFT de prestação de serviços
- * Feature: feat-050 - Criar template HTML de contrato IFT
- * Criado em: 2025-11-01
- * Atualizado em: 2025-12-16
+ * Arquivo: backend/database/migrations/20251216205107-update-contract-template-ift.js
+ * Descrição: Migration para atualizar template de contrato para o formato IFT
+ * Feature: feat-050 - Atualizar template de contrato IFT
+ * Criado em: 2025-12-16
  */
 
 'use strict';
@@ -11,24 +10,8 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    /**
-     * Cria o template padrão de contrato de matrícula
-     * Este template contém placeholders que serão substituídos com dados reais
-     * ao gerar PDFs de contratos para alunos.
-     */
-
-    // Verificar se já existe um template de contrato IFT
-    const [existingTemplate] = await queryInterface.sequelize.query(
-      `SELECT id FROM contract_templates WHERE name = 'Contrato de Prestação de Serviços IFT' LIMIT 1;`
-    );
-
-    if (existingTemplate.length > 0) {
-      console.log('⚠️  Template de contrato IFT já existe. Seeder ignorado.');
-      return;
-    }
-
-    // HTML do template com placeholders para dados dinâmicos
-    const contractHTML = `<!DOCTYPE html>
+    // Novo template HTML com formato IFT
+    const newContractHTML = `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -305,48 +288,26 @@ module.exports = {
 </body>
 </html>`;
 
-    // Inserir template de contrato
-    await queryInterface.bulkInsert(
-      'contract_templates',
-      [
-        {
-          name: 'Contrato de Prestação de Serviços IFT',
-          content: contractHTML,
-          is_active: true,
-          created_at: new Date(),
-          updated_at: new Date(),
-        },
-      ],
-      {}
+    // Atualizar o template existente
+    await queryInterface.sequelize.query(
+      `UPDATE contract_templates
+       SET name = 'Contrato de Prestação de Serviços IFT',
+           content = :content,
+           updated_at = NOW()
+       WHERE name = 'Contrato de Matrícula Padrão' OR name = 'Contrato de Prestação de Serviços IFT'`,
+      {
+        replacements: { content: newContractHTML },
+        type: queryInterface.sequelize.QueryTypes.UPDATE,
+      }
     );
 
-    console.log('✅ Template de contrato IFT criado com sucesso!');
-    console.log('   Nome: Contrato de Prestação de Serviços IFT');
-    console.log('   Status: Ativo');
-    console.log('   Placeholders disponíveis:');
-    console.log('   - {{studentName}}: Nome do aluno');
-    console.log('   - {{studentRG}}: RG do aluno');
-    console.log('   - {{studentCPF}}: CPF do aluno');
-    console.log('   - {{studentBirthDate}}: Data de nascimento do aluno');
-    console.log('   - {{studentAddress}}: Endereço completo do aluno');
-    console.log('   - {{enrollmentNumber}}: Número da matrícula');
-    console.log('   - {{courseName}}: Nome do curso');
-    console.log('   - {{currentSemester}}: Semestre atual');
-    console.log('   - {{contractDate}}: Data do contrato');
+    console.log('✅ Template de contrato atualizado para formato IFT');
   },
 
   async down(queryInterface, Sequelize) {
-    /**
-     * Remove o template de contrato IFT criado
-     */
-    await queryInterface.bulkDelete(
-      'contract_templates',
-      {
-        name: 'Contrato de Prestação de Serviços IFT',
-      },
-      {}
-    );
-
-    console.log('✅ Template de contrato IFT removido.');
+    // Reverter para template anterior não é necessário pois o template antigo
+    // não reflete mais as necessidades do sistema
+    console.log('⚠️  Rollback desta migration não restaura o template anterior.');
+    console.log('   Execute o seeder novamente se necessário: npm run db:seed');
   },
 };
