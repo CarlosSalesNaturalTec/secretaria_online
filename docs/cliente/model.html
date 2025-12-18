@@ -1,17 +1,4 @@
-/**
- * Arquivo: backend/database/migrations/20251216205107-update-contract-template-ift.js
- * Descrição: Migration para atualizar template de contrato para o formato IFT
- * Feature: feat-050 - Atualizar template de contrato IFT
- * Criado em: 2025-12-16
- */
-
-'use strict';
-
-/** @type {import('sequelize-cli').Migration} */
-module.exports = {
-  async up(queryInterface, Sequelize) {
-    // Novo template HTML com formato IFT
-    const newContractHTML = `<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -603,28 +590,4 @@ module.exports = {
 
     <p style="margin-top: 15px; text-align: center; font-size: 9pt;">O PRESENTE EDITAL ESTÁ PUBLICADO NO ÂMBITO INTERNO DA INSTITUIÇÃO.</p>
 </body>
-</html>`;
-
-    // Atualizar o template existente
-    await queryInterface.sequelize.query(
-      `UPDATE contract_templates
-       SET name = 'Contrato de Prestação de Serviços IFT',
-           content = :content,
-           updated_at = NOW()
-       WHERE name = 'Contrato de Matrícula Padrão' OR name = 'Contrato de Prestação de Serviços IFT'`,
-      {
-        replacements: { content: newContractHTML },
-        type: queryInterface.sequelize.QueryTypes.UPDATE,
-      }
-    );
-
-    console.log('✅ Template de contrato atualizado para formato IFT');
-  },
-
-  async down(queryInterface, Sequelize) {
-    // Reverter para template anterior não é necessário pois o template antigo
-    // não reflete mais as necessidades do sistema
-    console.log('⚠️  Rollback desta migration não restaura o template anterior.');
-    console.log('   Execute o seeder novamente se necessário: npm run db:seed');
-  },
-};
+</html>
