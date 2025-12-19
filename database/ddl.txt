@@ -1,0 +1,119 @@
+-- DDL das tabelas do sistema academico antigo
+
+-- academico_bo.categoria definicao
+
+CREATE TABLE `categoria` (
+  `categoria_id` int(11) NOT NULL,
+  `categoria_title` varchar(200) DEFAULT NULL,
+  `categoria_url` varchar(200) DEFAULT NULL,
+  `categoria_pos` int(11) DEFAULT 0
+) ENGINE=InnoDB;
+
+
+-- academico_bo.disciplina definicao
+
+CREATE TABLE `disciplina` (
+  `disciplina_id` int(11) NOT NULL,
+  `disciplina_nome` varchar(200) DEFAULT NULL
+) ENGINE=InnoDB;
+
+
+-- academico_bo.cliente definicao
+
+CREATE TABLE `cliente` (
+  `cliente_id` int(11) NOT NULL,
+  `cliente_nome` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
+  `cliente_cpf` varchar(20) DEFAULT NULL,
+  `cliente_datan` varchar(20) DEFAULT NULL,
+  `cliente_email` varchar(200) DEFAULT NULL,
+  `cliente_telefone` varchar(20) DEFAULT NULL,
+  `cliente_rua` varchar(300) DEFAULT NULL,
+  `cliente_uf` varchar(2) DEFAULT NULL,
+  `cliente_num` varchar(20) DEFAULT NULL,
+  `cliente_complemento` varchar(2000) DEFAULT NULL,
+  `cliente_cidade` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_swedish_ci DEFAULT NULL,
+  `cliente_bairro` varchar(200) DEFAULT NULL,
+  `cliente_sexo` int(11) DEFAULT 1 COMMENT '1 = masc\r\n2 = fem',
+  `cliente_cep` varchar(20) DEFAULT NULL,
+  `cliente_celular` varchar(20) DEFAULT NULL,
+  `cliente_sub` int(11) DEFAULT NULL,
+  `cliente_categoria` int(11) DEFAULT NULL,
+  `cliente_matricula` int(11) DEFAULT NULL,
+  `cliente_ano_matricula` int(11) DEFAULT NULL,
+  `cliente_profissao` varchar(200) DEFAULT NULL,
+  `cliente_responsavel` varchar(200) DEFAULT NULL,
+  `cliente_contrato` varchar(200) DEFAULT NULL,
+  `cliente_foto` varchar(100) DEFAULT '0',
+  `cliente_senha` varchar(100) DEFAULT NULL,
+  `cliente_mae` char(100) DEFAULT NULL,
+  `cliente_pai` char(100) DEFAULT NULL,
+  `cliente_titulo` varchar(25) DEFAULT NULL,
+  `data_rg` varchar(15) DEFAULT NULL,
+  `cliente_rg` varchar(15) DEFAULT NULL,
+  `cliente_serie` varchar(35) DEFAULT NULL,
+  `cliente_contrato_aceito` varchar(1) DEFAULT NULL,
+  `cliente_data_rg` varchar(15) NOT NULL,
+  `cliente_contrato_dia` varchar(5) NOT NULL,
+  `cliente_contrato_mes` varchar(5) NOT NULL,
+  `cliente_curso` varchar(100) NOT NULL,
+  `cliente_semestre` varchar(10) NOT NULL,
+  `chave_eletronica` varchar(255) NOT NULL,
+  `cliente_contrato_ano` int(11) NOT NULL,
+  `cliente_data_geral` varchar(20) NOT NULL
+) ENGINE=InnoDB;
+
+
+-- academico_bo.boletim_novo definicao
+
+CREATE TABLE `boletim_novo` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `matricula` int(25) NOT NULL,
+  `disciplina` varchar(75) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
+  `periodo` varchar(15) NOT NULL,
+  `teste` float NOT NULL,
+  `prova` float NOT NULL,
+  `final` varchar(16) NOT NULL,
+  `resultado` float NOT NULL,
+  `status` varchar(35) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
+  `semestre` varchar(70) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
+  `dia_hora` varchar(50) NOT NULL
+) ENGINE=InnoDB;
+
+
+-- academico_bo.professor definicao
+
+CREATE TABLE `professor` (
+  `professor_id` int(11) NOT NULL,
+  `professor_nome` varchar(200) DEFAULT NULL,
+  `professor_senha` varchar(200) DEFAULT NULL,
+  `professor_login` varchar(30) DEFAULT NULL
+) ENGINE=InnoDB;
+
+
+-- academico_bo.profmat definicao
+
+CREATE TABLE `profmat` (
+  `profmat_id` int(11) NOT NULL,
+  `profmat_mat` int(11) DEFAULT NULL,
+  `profmat_prof` int(11) DEFAULT NULL
+) ENGINE=InnoDB;
+
+
+-- academico_bo.profserie definicao
+
+CREATE TABLE `profserie` (
+  `profserie_id` int(11) NOT NULL,
+  `profserie_prof` int(11) DEFAULT NULL,
+  `profserie_sub` int(11) DEFAULT NULL
+) ENGINE=InnoDB;
+
+
+-- academico_bo.sub definicao
+
+CREATE TABLE `sub` (
+  `sub_id` int(11) NOT NULL,
+  `sub_title` varchar(200) DEFAULT NULL,
+  `sub_url` varchar(200) DEFAULT NULL,
+  `sub_pos` int(11) DEFAULT 0,
+  `sub_categoria` int(11) DEFAULT NULL
+) ENGINE=InnoDB;
