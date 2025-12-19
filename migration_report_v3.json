@@ -1,0 +1,27 @@
+{
+  "timestamp": "2025-12-19T17:31:06.670Z",
+  "professores": {
+    "total_mapeados": 4,
+    "usuarios_criados": 4
+  },
+  "alunos": {
+    "mapeados": 287,
+    "com_turma": 43
+  },
+  "turmas": {
+    "criadas_ou_mapeadas": 18
+  },
+  "avaliacoes": {
+    "total_historicas": 1383,
+    "por_professor_real": 0,
+    "por_sistema_migracao": 0
+  },
+  "notas": {
+    "total_migradas": 2459
+  },
+  "disciplinas": {
+    "total_nomes_antigos": 279,
+    "mapeadas": 273,
+    "nao_mapeadas": 6
+  }
+}
