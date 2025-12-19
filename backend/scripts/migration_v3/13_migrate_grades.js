@@ -32,6 +32,7 @@ async function migrateGrades() {
           AND mscm.class_id IS NOT NULL
           AND mms.student_id IS NOT NULL
           AND bn.teste IS NOT NULL
+        ON DUPLICATE KEY UPDATE grade = VALUES(grade), updated_at = NOW()
     `, { transaction });
 
     // Prova
@@ -60,6 +61,7 @@ async function migrateGrades() {
           AND mscm.class_id IS NOT NULL
           AND mms.student_id IS NOT NULL
           AND bn.prova IS NOT NULL
+        ON DUPLICATE KEY UPDATE grade = VALUES(grade), updated_at = NOW()
     `, { transaction });
 
     // Final
@@ -91,6 +93,7 @@ async function migrateGrades() {
           AND mscm.class_id IS NOT NULL
           AND mms.student_id IS NOT NULL
           AND bn.final IS NOT NULL AND bn.final != ''
+        ON DUPLICATE KEY UPDATE grade = VALUES(grade), updated_at = NOW()
     `, { transaction });
 
     const [count] = await db.sequelize.query('SELECT COUNT(*) as count FROM grades', { transaction });

@@ -28,14 +28,13 @@ async function createProfessorMapping() {
       if (!str) return '';
       return str
         .normalize('NFD')
-        .replace(/[
-0300-036f]/g, '')
+        .replace(/[\u0300-\u036f]/g, '')
         .toLowerCase()
         .trim();
     }
 
     // Read old professors from CSV
-    const professorsAntigos = [];
+    const professoresAntigos = [];
     const csvPath = path.join(__dirname, '../../../database/professor.csv');
     
     console.log(`Reading CSV from: ${csvPath}`);
@@ -68,7 +67,7 @@ async function createProfessorMapping() {
 
     const professorMapping = [];
 
-    for (const prof of professorsAntigos) {
+    for (const prof of professoresAntigos) {
       const normalizedOld = normalizeString(prof.professor_nome);
 
       const match = teachersNovos.find(t =>

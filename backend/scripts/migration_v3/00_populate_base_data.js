@@ -23,8 +23,8 @@ async function populateBaseData() {
         });
 
         for (const c of courses) {
-            // Check if exists by name
-            const exists = await db.Course.findOne({ where: { name: c.name }, transaction });
+            // Check if exists by name (including soft-deleted)
+            const exists = await db.Course.findOne({ where: { name: c.name }, paranoid: false, transaction });
             if (!exists) {
                 // The model expects: 'Semestres', 'Dias', 'Horas', 'Meses', 'Anos'
                 let dType = c.duration_type;
@@ -43,6 +43,12 @@ async function populateBaseData() {
                     course_type: cType || 'Superior'
                 }, { transaction });
                 console.log(`Created Course: ${c.name}`);
+            } else {
+                // Optional: Restore if deleted? Or just log.
+                if (exists.deleted_at) {
+                    console.log(`Course ${c.name} exists but is deleted. Restoring...`);
+                    await exists.restore({ transaction });
+                }
             }
         }
     } else {
@@ -76,6 +82,7 @@ async function populateBaseData() {
                         { code: d.code } // Check if code already used
                     ]
                 }, 
+                paranoid: false,
                 transaction 
             });
 

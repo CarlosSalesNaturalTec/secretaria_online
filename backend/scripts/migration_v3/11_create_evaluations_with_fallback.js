@@ -5,12 +5,22 @@ async function createEvaluations() {
 
   try {
     console.log('Fetching migration admin user ID...');
-    const migrationUser = await db.User.findOne({ where: { login: 'migracao' }, transaction });
-    if (!migrationUser) {
-      throw new Error('User "migracao" not found. Run script 03 first.');
+    // We actually need a TEACHER for the evaluations table FK, not just a USER.
+    // The previous script created a USER 'migracao'. We need a corresponding TEACHER.
+    
+    let migrationTeacher = await db.Teacher.findOne({ where: { nome: 'Sistema Migração' }, transaction });
+    
+    if (!migrationTeacher) {
+        console.log('Creating fallback Teacher "Sistema Migração"...');
+        migrationTeacher = await db.Teacher.create({
+            nome: 'Sistema Migração',
+            email: 'migracao@sistema.edu.br', // Optional if model allows
+            // Add other required fields if any. Assuming 'nome' is enough based on prev scripts.
+        }, { transaction });
     }
-    const migrationUserId = migrationUser.id;
-    console.log(`Using fallback teacher_id: ${migrationUserId}`);
+    
+    const migrationTeacherId = migrationTeacher.id;
+    console.log(`Using fallback teacher_id: ${migrationTeacherId}`);
 
     console.log('Creating Evaluations...');
 
@@ -23,7 +33,7 @@ async function createEvaluations() {
             INSERT INTO evaluations (class_id, teacher_id, discipline_id, name, date, type, created_at, updated_at)
             SELECT DISTINCT
               mscm.class_id,
-              COALESCE(u.id, :migrationUserId) AS teacher_id,
+              COALESCE(ct.teacher_id, :migrationTeacherId) AS teacher_id, -- Use class_teacher relation or fallback
               mdm.new_discipline_id,
               :name,
               :date,
@@ -35,14 +45,12 @@ async function createEvaluations() {
             JOIN migration_sub_class_mapping mscm ON mms.class_id = mscm.class_id
             JOIN migration_discipline_mapping mdm ON bn.disciplina = mdm.old_name
             LEFT JOIN class_teachers ct ON ct.class_id = mscm.class_id AND ct.discipline_id = mdm.new_discipline_id
-            LEFT JOIN teachers t ON ct.teacher_id = t.id
-            LEFT JOIN users u ON u.teacher_id = t.id AND u.role = 'teacher'
             WHERE mdm.new_discipline_id IS NOT NULL
               AND mscm.class_id IS NOT NULL
               AND mms.student_id IS NOT NULL
         `, {
             replacements: {
-                migrationUserId,
+                migrationTeacherId,
                 name,
                 date
             },
