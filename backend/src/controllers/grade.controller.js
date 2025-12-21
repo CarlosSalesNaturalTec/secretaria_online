@@ -27,6 +27,7 @@ class GradeController {
     this.getPending = this.getPending.bind(this);
     this.batchCreate = this.batchCreate.bind(this);
     this.getMyGrades = this.getMyGrades.bind(this);
+    this.getGradesByStudent = this.getGradesByStudent.bind(this);
   }
 
   /**
@@ -739,6 +740,72 @@ class GradeController {
         studentId: user.student_id,
         count: grades.length,
         filters
+      });
+
+      res.status(200).json({
+        success: true,
+        data: grades,
+        count: grades.length,
+        filters: Object.keys(filters).length > 0 ? filters : null
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Obtém todas as notas de um estudante específico (Admin Only)
+   * 
+   * GET /api/grades/student/:studentId
+   */
+  async getGradesByStudent(req, res, next) {
+    try {
+      const { id: userId, role } = req.user;
+      const { studentId } = req.params;
+      const { semester, discipline_id } = req.query;
+
+      // Validar permissão (Apenas Admin)
+      // Futuramente coordenadores/professores podem ter acesso, mas por enquanto apenas Admin
+      if (!['admin'].includes(role)) {
+        logger.warn('[GradeController.getGradesByStudent] Acesso negado', { userId, role });
+        return res.status(403).json({
+          success: false,
+          error: {
+            code: 'FORBIDDEN',
+            message: 'Apenas administradores podem acessar notas de outros alunos'
+          }
+        });
+      }
+
+      // Validar ID do estudante
+      if (!studentId || isNaN(parseInt(studentId))) {
+         return res.status(400).json({
+          success: false,
+          error: {
+            code: 'INVALID_REQUEST',
+            message: 'ID do estudante inválido'
+          }
+        });
+      }
+
+      // Construir filtros
+      const filters = {};
+      if (semester) {
+        const semesterNum = parseInt(semester, 10);
+        if (!isNaN(semesterNum) && semesterNum > 0) filters.semester = semesterNum;
+      }
+      if (discipline_id) {
+        const disciplineNum = parseInt(discipline_id, 10);
+        if (!isNaN(disciplineNum) && disciplineNum > 0) filters.discipline_id = disciplineNum;
+      }
+
+      // Reutiliza o serviço existente que já busca notas por studentId
+      const grades = await GradeService.getStudentGrades(studentId, filters);
+
+      logger.info('[GradeController.getGradesByStudent] Notas acessadas por admin', {
+        adminId: userId,
+        targetStudentId: studentId,
+        count: grades.length
       });
 
       res.status(200).json({

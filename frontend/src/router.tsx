@@ -42,6 +42,7 @@ const AdminDocuments = lazy(() => import('./pages/admin/Documents'));
 const AdminRequests = lazy(() => import('./pages/admin/Requests'));
 const AdminEvaluations = lazy(() => import('./pages/teacher/Evaluations'));
 const AdminGrades = lazy(() => import('./pages/admin/Grades'));
+const AdminStudentGrades = lazy(() => import('./pages/admin/StudentGrades'));
 const AdminReenrollment = lazy(() => import('./pages/admin/Reenrollment'));
 
 /**
@@ -141,6 +142,14 @@ const privateRoutes: RouteObject[] = [
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <AdminStudentCourses />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'students/:id/grades',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AdminStudentGrades />
           </Suspense>
         ),
       },

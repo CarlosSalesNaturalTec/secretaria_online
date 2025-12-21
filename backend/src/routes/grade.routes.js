@@ -132,4 +132,15 @@ router.get(
   GradeController.getMyGrades
 );
 
+/**
+ * GET /api/grades/student/:studentId
+ * Obtém todas as notas de um estudante específico
+ * 
+ * Requer: Autenticado (Admin)
+ */
+router.get(
+  '/student/:studentId',
+  GradeController.getGradesByStudent
+);
+
 module.exports = router;

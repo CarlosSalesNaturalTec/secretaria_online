@@ -107,6 +107,38 @@ export async function getMyGrades(filters?: { semester?: number; discipline_id?:
 }
 
 /**
+ * Busca todas as notas de um aluno específico (Admin)
+ * 
+ * @param {number} studentId - ID do aluno
+ * @param {object} filters - Filtros opcionais
+ */
+export async function getGradesByStudent(
+  studentId: number,
+  filters?: { semester?: number; discipline_id?: number }
+): Promise<IGradeWithEvaluation[]> {
+  try {
+    const params = new URLSearchParams();
+    if (filters?.semester) params.append('semester', filters.semester.toString());
+    if (filters?.discipline_id) params.append('discipline_id', filters.discipline_id.toString());
+
+    const response = await api.get<ApiResponse<IGradeWithEvaluation[]>>(
+      `/grades/student/${studentId}`,
+      { params }
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.error?.message || 'Erro ao buscar notas do aluno');
+    }
+
+    return response.data.data;
+  } catch (error) {
+    console.error(`[GradeService] Erro ao buscar notas do aluno ${studentId}:`, error);
+    if (error instanceof Error) throw error;
+    throw new Error('Falha ao buscar notas do aluno.');
+  }
+}
+
+/**
  * Busca notas de uma avaliação específica
  *
  * Retorna todas as notas lançadas para uma avaliação.
@@ -375,6 +407,7 @@ export async function updateGrade(
  */
 const GradeService = {
   getMyGrades,
+  getGradesByStudent,
   getGradesByEvaluation,
   createGrade,
   updateGrade,

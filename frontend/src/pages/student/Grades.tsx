@@ -27,12 +27,19 @@ import {
   Filter,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { getMyGrades } from '@/services/grade.service';
+import { getMyGrades, getGradesByStudent } from '@/services/grade.service';
 import type {
   IGradeWithEvaluation,
   IDiscipline,
   GradeConcept,
 } from '@/types/grade.types';
+
+/**
+ * Interface para props do componente
+ */
+interface GradesProps {
+  studentId?: number;
+}
 
 /**
  * Interface para notas agrupadas por disciplina
@@ -49,11 +56,13 @@ interface IDisciplineGrades {
  *
  * Exibe todas as notas do aluno de forma organizada, agrupadas por disciplina,
  * com informações de média, avaliações e indicadores visuais de performance.
+ * Pode ser usado pelo próprio aluno (sem props) ou por admin (com studentId).
  *
  * @example
- * <Grades />
+ * <Grades /> // Visão do aluno
+ * <Grades studentId={123} /> // Visão do admin
  */
-export default function Grades() {
+export default function Grades({ studentId }: GradesProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [allGrades, setAllGrades] = useState<IGradeWithEvaluation[]>([]);
@@ -69,7 +78,7 @@ export default function Grades() {
    */
   useEffect(() => {
     loadGrades();
-  }, []);
+  }, [studentId]); // Recarrega se studentId mudar
 
   /**
    * Obtém o semestre correto da avaliação (prioriza originalSemester se existir)
@@ -83,10 +92,14 @@ export default function Grades() {
    */
   const filterOptions = {
     semesters: Array.from(new Set(allGrades.map(g => getSemester(g)).filter((s): s is number => s !== undefined))).sort((a, b) => a - b),
-    disciplines: Array.from(new Set(allGrades.map(g => JSON.stringify({
-      id: g.evaluation.discipline.id,
-      name: g.evaluation.discipline.name
-    })))).map(s => JSON.parse(s)).sort((a: any, b: any) => a.name.localeCompare(b.name))
+    disciplines: Array.from(new Set(allGrades
+      .filter(g => g.evaluation?.discipline) // Garante que tem disciplina
+      .map(g => JSON.stringify({
+        id: g.evaluation.discipline!.id,
+        name: g.evaluation.discipline!.name
+      }))))
+      .map(s => JSON.parse(s))
+      .sort((a: any, b: any) => a.name.localeCompare(b.name))
   };
 
   /**
@@ -104,7 +117,10 @@ export default function Grades() {
     const filteredGrades = allGrades.filter(grade => {
       const semester = getSemester(grade);
       const matchSemester = semesterFilter ? semester?.toString() === semesterFilter : true;
-      const matchDiscipline = disciplineFilter ? grade.evaluation.discipline.id.toString() === disciplineFilter : true;
+      // Verifica se discipline existe antes de acessar id
+      const matchDiscipline = disciplineFilter 
+        ? grade.evaluation.discipline?.id.toString() === disciplineFilter 
+        : true;
       return matchSemester && matchDiscipline;
     });
 
@@ -192,7 +208,14 @@ export default function Grades() {
       setLoading(true);
       setError(null);
 
-      const grades = await getMyGrades();
+      let grades: IGradeWithEvaluation[];
+
+      if (studentId) {
+        grades = await getGradesByStudent(studentId);
+      } else {
+        grades = await getMyGrades();
+      }
+
       setAllGrades(grades);
 
       if (import.meta.env.DEV) {
@@ -203,7 +226,7 @@ export default function Grades() {
       setError(
         err instanceof Error
           ? err.message
-          : 'Erro ao carregar suas notas. Tente novamente.'
+          : 'Erro ao carregar as notas. Tente novamente.'
       );
     } finally {
       setLoading(false);
@@ -363,7 +386,7 @@ export default function Grades() {
           <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
           <div>
             <h3 className="font-semibold text-red-900 mb-1">
-              Erro ao carregar notas
+              {studentId ? 'Erro ao carregar notas do aluno' : 'Erro ao carregar notas'}
             </h3>
             <p className="text-sm text-red-700 mb-3">{error}</p>
             <Button size="sm" onClick={loadGrades}>
@@ -379,9 +402,14 @@ export default function Grades() {
     <div className="p-6 space-y-6">
       {/* Cabeçalho */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Minhas Notas</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          {studentId ? 'Notas do Aluno' : 'Minhas Notas'}
+        </h1>
         <p className="text-gray-600">
-          Visualize todas as suas notas organizadas por disciplina
+          {studentId 
+            ? 'Visualize as notas do aluno organizadas por disciplina'
+            : 'Visualize todas as suas notas organizadas por disciplina'
+          }
         </p>
       </div>
 
