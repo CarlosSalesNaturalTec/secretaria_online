@@ -484,8 +484,13 @@ export default function Grades() {
                           <div className="flex items-start gap-3 flex-1">
                             <Calendar className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
                             <div>
-                              <h5 className="font-medium text-gray-900">
+                              <h5 className="font-medium text-gray-900 flex items-center flex-wrap gap-2">
                                 {gradeItem.evaluation.name}
+                                {gradeItem.evaluation.originalSemesterRaw && (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                                    {gradeItem.evaluation.originalSemesterRaw}
+                                  </span>
+                                )}
                               </h5>
                               <p className="text-sm text-gray-600 mt-1">
                                 Data: {formatDate(gradeItem.evaluation.date)}

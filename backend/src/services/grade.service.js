@@ -841,7 +841,15 @@ class GradeService {
           {
             model: Evaluation,
             as: 'evaluation',
-            attributes: ['id', 'name', 'date', 'type'],
+            attributes: [
+              'id',
+              'name',
+              'date',
+              'type',
+              'original_semester',
+              'original_course_name',
+              'original_semester_raw'
+            ],
             include: [
               {
                 model: require('../models').Class,
@@ -902,6 +910,9 @@ class GradeService {
             name: gradeData.evaluation.name,
             date: gradeData.evaluation.date,
             type: gradeData.evaluation.type,
+            original_semester: gradeData.evaluation.original_semester,
+            original_course_name: gradeData.evaluation.original_course_name,
+            original_semester_raw: gradeData.evaluation.original_semester_raw,
             disciplineId: gradeData.evaluation.discipline.id,
             discipline: {
               id: gradeData.evaluation.discipline.id,

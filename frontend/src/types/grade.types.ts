@@ -40,6 +40,11 @@ export interface IEvaluation {
   createdAt: string;
   updatedAt: string;
 
+  // Campos de migração (sistema antigo)
+  originalSemester?: number;
+  originalCourseName?: string;
+  originalSemesterRaw?: string;
+
   // Relacionamentos
   discipline?: IDiscipline;
   teacher?: {
