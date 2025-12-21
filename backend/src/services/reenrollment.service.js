@@ -345,6 +345,8 @@ class ReenrollmentService {
               'id',
               'nome',
               'cpf',
+              'rg',
+              'data_nascimento',
               'email',
               'telefone',
               'celular',
@@ -456,6 +458,12 @@ class ReenrollmentService {
         studentName: student.nome || 'N/A',
         studentId: student.id || 'N/A',
         studentCPF: student.cpf ? student.cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4') : 'N/A',
+        studentRG: student.rg || 'N/A',
+        studentBirthDate: student.data_nascimento 
+          ? (student.data_nascimento.match(/^\d{4}-\d{2}-\d{2}$/) 
+              ? student.data_nascimento.split('-').reverse().join('/') 
+              : student.data_nascimento) 
+          : 'N/A',
         studentEmail: student.email || 'N/A',
         studentPhone: student.celular || student.telefone || 'N/A',
         studentAddress: studentAddress || 'N/A',
