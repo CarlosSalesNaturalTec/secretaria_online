@@ -1,0 +1,33 @@
+{
+  "timestamp": "2025-12-19T18:52:09.181Z",
+  "versao": "3.0",
+  "professores": {
+    "sistema_antigo": 4,
+    "mapeados": 4,
+    "ignorados": 0,
+    "usuarios_criados": 5
+  },
+  "alunos": {
+    "mapeados": 287,
+    "com_notas": 71
+  },
+  "turmas": {
+    "criadas": 21,
+    "com_alunos": 14
+  },
+  "avaliacoes": {
+    "total": 3042,
+    "com_professor_real": 0,
+    "com_sistema_migracao": 0
+  },
+  "notas": {
+    "total_migradas": 1745,
+    "com_valor": 1745,
+    "media_geral": "8.04"
+  },
+  "disciplinas": {
+    "total": 279,
+    "mapeadas": 277,
+    "nao_mapeadas": 2
+  }
+}

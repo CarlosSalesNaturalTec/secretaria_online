@@ -172,6 +172,45 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     /**
+     * Método auxiliar: verifica se é uma avaliação histórica migrada
+     *
+     * @returns {boolean} True se é uma avaliação histórica
+     */
+    isHistorical() {
+      return this.name && this.name.includes('(histórico)');
+    }
+
+    /**
+     * Método auxiliar: verifica se possui informação de semestre original
+     *
+     * @returns {boolean} True se possui semestre original
+     */
+    hasOriginalSemester() {
+      return this.original_semester !== null && this.original_semester !== undefined;
+    }
+
+    /**
+     * Método auxiliar: retorna o label completo do semestre original
+     *
+     * @returns {string|null} "1° Psicologia", "8° Administração", etc. ou null
+     */
+    getOriginalSemesterLabel() {
+      if (!this.hasOriginalSemester()) {
+        return null;
+      }
+
+      if (this.original_semester_raw) {
+        return this.original_semester_raw;
+      }
+
+      if (this.original_course_name) {
+        return `${this.original_semester}° ${this.original_course_name}`;
+      }
+
+      return `${this.original_semester}° semestre`;
+    }
+
+    /**
      * Método estático: busca avaliações por turma
      *
      * @param {number} classId - ID da turma
@@ -260,6 +299,40 @@ module.exports = (sequelize, DataTypes) => {
     static async countByTeacher(teacherId) {
       return await this.count({
         where: { teacher_id: teacherId }
+      });
+    }
+
+    /**
+     * Método estático: busca avaliações por semestre original do sistema antigo
+     *
+     * @param {number} originalSemester - Número do semestre original (1-12)
+     * @param {Object} options - Opções adicionais do Sequelize
+     * @returns {Promise<Array>} Lista de avaliações do semestre original
+     */
+    static async findByOriginalSemester(originalSemester, options = {}) {
+      return await this.findAll({
+        where: { original_semester: originalSemester },
+        order: [['date', 'DESC']],
+        ...options
+      });
+    }
+
+    /**
+     * Método estático: busca avaliações históricas de um curso específico
+     *
+     * @param {string} courseName - Nome do curso (ex: "Psicologia", "Administração")
+     * @param {Object} options - Opções adicionais do Sequelize
+     * @returns {Promise<Array>} Lista de avaliações do curso
+     */
+    static async findByOriginalCourse(courseName, options = {}) {
+      return await this.findAll({
+        where: {
+          original_course_name: {
+            [sequelize.Sequelize.Op.like]: `%${courseName}%`
+          }
+        },
+        order: [['original_semester', 'ASC'], ['date', 'DESC']],
+        ...options
       });
     }
   }
@@ -384,6 +457,34 @@ module.exports = (sequelize, DataTypes) => {
         },
         comment: 'Tipo de avaliação: grade (nota 0-10) ou concept (satisfatório/não satisfatório)'
       },
+      original_semester: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        validate: {
+          isInt: {
+            msg: 'O semestre original deve ser um número inteiro'
+          },
+          min: {
+            args: [1],
+            msg: 'O semestre original deve ser no mínimo 1'
+          },
+          max: {
+            args: [12],
+            msg: 'O semestre original deve ser no máximo 12'
+          }
+        },
+        comment: 'Número do semestre extraído do sistema antigo (1-12) - usado para avaliações migradas'
+      },
+      original_course_name: {
+        type: DataTypes.STRING(200),
+        allowNull: true,
+        comment: 'Nome do curso do sistema antigo - usado para avaliações migradas'
+      },
+      original_semester_raw: {
+        type: DataTypes.STRING(200),
+        allowNull: true,
+        comment: 'Valor bruto do campo "semestre" do CSV (ex: "1° Psicologia") - usado para avaliações migradas'
+      },
       created_at: {
         type: DataTypes.DATE,
         allowNull: false,
@@ -455,6 +556,10 @@ module.exports = (sequelize, DataTypes) => {
         {
           name: 'idx_evaluations_teacher_class',
           fields: ['teacher_id', 'class_id']
+        },
+        {
+          name: 'idx_evaluations_original_semester',
+          fields: ['original_semester']
         }
       ],
 
@@ -545,6 +650,60 @@ module.exports = (sequelize, DataTypes) => {
             }
           },
           order: [['date', 'DESC']]
+        },
+
+        /**
+         * Scope: historical
+         * Retorna apenas avaliações históricas migradas
+         */
+        historical: {
+          where: {
+            name: {
+              [sequelize.Sequelize.Op.like]: '%(histórico)%'
+            }
+          }
+        },
+
+        /**
+         * Scope: withOriginalSemester
+         * Retorna avaliações que possuem informação de semestre original
+         */
+        withOriginalSemester: {
+          where: {
+            original_semester: {
+              [sequelize.Sequelize.Op.ne]: null
+            }
+          }
+        },
+
+        /**
+         * Scope: byOriginalSemester
+         * Retorna avaliações de um semestre original específico
+         * @param {number} semester - Número do semestre (1-12)
+         */
+        byOriginalSemester(semester) {
+          return {
+            where: {
+              original_semester: semester
+            },
+            order: [['date', 'DESC']]
+          };
+        },
+
+        /**
+         * Scope: byOriginalCourse
+         * Retorna avaliações de um curso original específico
+         * @param {string} courseName - Nome do curso
+         */
+        byOriginalCourse(courseName) {
+          return {
+            where: {
+              original_course_name: {
+                [sequelize.Sequelize.Op.like]: `%${courseName}%`
+              }
+            },
+            order: [['original_semester', 'ASC']]
+          };
         }
       },
 
