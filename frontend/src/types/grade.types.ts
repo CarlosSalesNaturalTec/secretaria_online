@@ -74,6 +74,11 @@ export interface IGrade {
  */
 export interface IGradeWithEvaluation extends IGrade {
   evaluation: IEvaluation;
+  class?: {
+    id: number;
+    semester: number;
+    year: number;
+  };
 }
 
 /**

@@ -60,6 +60,10 @@ export default function Grades() {
   const [disciplineGrades, setDisciplineGrades] = useState<IDisciplineGrades[]>([]);
   const [expandedDisciplines, setExpandedDisciplines] = useState<Set<number>>(new Set());
 
+  // Estados para filtros
+  const [semesterFilter, setSemesterFilter] = useState<string>('');
+  const [disciplineFilter, setDisciplineFilter] = useState<string>('');
+
   /**
    * Carrega notas do aluno ao montar o componente
    */
@@ -68,7 +72,25 @@ export default function Grades() {
   }, []);
 
   /**
-   * Agrupa notas por disciplina e calcula médias
+   * Obtém o semestre correto da avaliação (prioriza originalSemester se existir)
+   */
+  const getSemester = (grade: IGradeWithEvaluation): number | undefined => {
+    return grade.evaluation.originalSemester ?? grade.class?.semester;
+  };
+
+  /**
+   * Extrai opções únicas para os filtros baseado nos dados carregados
+   */
+  const filterOptions = {
+    semesters: Array.from(new Set(allGrades.map(g => getSemester(g)).filter((s): s is number => s !== undefined))).sort((a, b) => a - b),
+    disciplines: Array.from(new Set(allGrades.map(g => JSON.stringify({
+      id: g.evaluation.discipline.id,
+      name: g.evaluation.discipline.name
+    })))).map(s => JSON.parse(s)).sort((a: any, b: any) => a.name.localeCompare(b.name))
+  };
+
+  /**
+   * Agrupa notas por disciplina e calcula médias (com suporte a filtros)
    *
    * @param {IGradeWithEvaluation[]} grades - Lista de notas do aluno
    */
@@ -78,10 +100,18 @@ export default function Grades() {
       return;
     }
 
+    // Filtrar dados antes de agrupar
+    const filteredGrades = allGrades.filter(grade => {
+      const semester = getSemester(grade);
+      const matchSemester = semesterFilter ? semester?.toString() === semesterFilter : true;
+      const matchDiscipline = disciplineFilter ? grade.evaluation.discipline.id.toString() === disciplineFilter : true;
+      return matchSemester && matchDiscipline;
+    });
+
     // Agrupar notas por disciplina
     const disciplineMap = new Map<number, IDisciplineGrades>();
 
-    allGrades.forEach((gradeItem) => {
+    filteredGrades.forEach((gradeItem) => {
       const disciplineId = gradeItem.evaluation.disciplineId;
       const discipline = gradeItem.evaluation.discipline;
 
@@ -138,11 +168,19 @@ export default function Grades() {
 
     setDisciplineGrades(disciplinesArray);
 
-    // Expandir primeira disciplina por padrão
-    if (disciplinesArray.length > 0) {
-      setExpandedDisciplines(new Set([disciplinesArray[0].discipline.id]));
+    // Expandir primeira disciplina por padrão se houver filtragem ou se for carregamento inicial
+    if (disciplinesArray.length > 0 && (semesterFilter || disciplineFilter || expandedDisciplines.size === 0)) {
+      setExpandedDisciplines(new Set(disciplinesArray.map(d => d.discipline.id)));
     }
-  }, [allGrades]);
+  }, [allGrades, semesterFilter, disciplineFilter]);
+
+  /**
+   * Limpa todos os filtros
+   */
+  const clearFilters = () => {
+    setSemesterFilter('');
+    setDisciplineFilter('');
+  };
 
   /**
    * Carrega todas as notas do aluno
@@ -345,6 +383,60 @@ export default function Grades() {
         <p className="text-gray-600">
           Visualize todas as suas notas organizadas por disciplina
         </p>
+      </div>
+
+      {/* Filtros */}
+      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1">
+            <label htmlFor="semester-filter" className="block text-sm font-medium text-gray-700 mb-1">
+              Semestre
+            </label>
+            <select
+              id="semester-filter"
+              value={semesterFilter}
+              onChange={(e) => setSemesterFilter(e.target.value)}
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+            >
+              <option value="">Todos os semestres</option>
+              {filterOptions.semesters.map((semester) => (
+                <option key={semester} value={semester}>
+                  {semester}º Semestre
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex-1">
+            <label htmlFor="discipline-filter" className="block text-sm font-medium text-gray-700 mb-1">
+              Disciplina
+            </label>
+            <select
+              id="discipline-filter"
+              value={disciplineFilter}
+              onChange={(e) => setDisciplineFilter(e.target.value)}
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+            >
+              <option value="">Todas as disciplinas</option>
+              {filterOptions.disciplines.map((discipline: any) => (
+                <option key={discipline.id} value={discipline.id}>
+                  {discipline.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-end">
+            <Button
+              variant="secondary"
+              onClick={clearFilters}
+              disabled={!semesterFilter && !disciplineFilter}
+              className="w-full md:w-auto"
+            >
+              Limpar Filtros
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Estatísticas Gerais */}

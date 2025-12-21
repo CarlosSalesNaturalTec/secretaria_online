@@ -54,25 +54,31 @@ export interface IUpdateGradeData {
  * Utiliza o token JWT para identificar o aluno.
  * Apenas alunos têm permissão para esta operação.
  *
+ * @param {object} filters - Filtros opcionais (semester, discipline_id)
  * @returns {Promise<IGradeWithEvaluation[]>} Lista de notas com avaliações
  * @throws {Error} Quando ocorre erro na comunicação com API ou não autenticado
  *
  * @example
  * try {
- *   const myGrades = await getMyGrades();
+ *   const myGrades = await getMyGrades({ semester: 1 });
  *   console.log('Total de notas:', myGrades.length);
  * } catch (error) {
  *   console.error('Erro ao buscar notas:', error);
  * }
  */
-export async function getMyGrades(): Promise<IGradeWithEvaluation[]> {
+export async function getMyGrades(filters?: { semester?: number; discipline_id?: number }): Promise<IGradeWithEvaluation[]> {
   try {
     if (import.meta.env.DEV) {
-      console.log('[GradeService] Buscando notas do aluno autenticado...');
+      console.log('[GradeService] Buscando notas do aluno autenticado...', filters);
     }
 
+    const params = new URLSearchParams();
+    if (filters?.semester) params.append('semester', filters.semester.toString());
+    if (filters?.discipline_id) params.append('discipline_id', filters.discipline_id.toString());
+
     const response = await api.get<ApiResponse<IGradeWithEvaluation[]>>(
-      '/grades/my-grades'
+      '/grades/my-grades',
+      { params }
     );
 
     if (!response.data.success || !response.data.data) {
