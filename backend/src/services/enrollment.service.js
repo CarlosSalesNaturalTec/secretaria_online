@@ -376,7 +376,7 @@ class EnrollmentService {
   /**
    * Atualiza o status de uma matrícula
    *
-   * Status válidos: pending, active, cancelled
+   * Status válidos: pending, active, cancelled, reenrollment, completed
    *
    * @param {number} enrollmentId - ID da matrícula
    * @param {string} newStatus - Novo status
@@ -390,7 +390,7 @@ class EnrollmentService {
 
     try {
       // Validar que status é válido
-      const validStatuses = ['pending', 'active', 'cancelled'];
+      const validStatuses = ['pending', 'active', 'cancelled', 'reenrollment', 'completed'];
       if (!validStatuses.includes(newStatus)) {
         throw new AppError(
           `Status inválido. Valores aceitos: ${validStatuses.join(', ')}`,

@@ -21,6 +21,8 @@ const ENROLLMENT_STATUS = {
   PENDING: 'pending',           // Aguardando confirmação (documentos não aprovados)
   ACTIVE: 'active',             // Ativa (todos documentos aprovados)
   CANCELLED: 'cancelled',       // Cancelada
+  REENROLLMENT: 'reenrollment', // Rematrícula em andamento
+  COMPLETED: 'completed',       // Concluída (aluno formado)
 };
 
 /**

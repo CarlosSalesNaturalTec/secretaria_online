@@ -145,10 +145,12 @@ router.get(
  * REGRAS DE NEGÓCIO:
  * - Mudar de 'pending' para 'active': requer documentos aprovados
  * - Mudar para 'cancelled': sempre permitido
+ * - Mudar para 'reenrollment': processo de rematrícula
+ * - Mudar para 'completed': aluno concluiu o curso
  *
  * Body:
  * {
- *   "status": "active" | "pending" | "cancelled"
+ *   "status": "active" | "pending" | "cancelled" | "reenrollment" | "completed"
  * }
  *
  * Response 200:
@@ -166,8 +168,8 @@ router.put(
       .isInt({ min: 1 })
       .withMessage('ID deve ser um inteiro positivo'),
     body('status')
-      .isIn(['pending', 'active', 'cancelled'])
-      .withMessage("status deve ser 'pending', 'active' ou 'cancelled'"),
+      .isIn(['pending', 'active', 'cancelled', 'reenrollment', 'completed'])
+      .withMessage("status deve ser 'pending', 'active', 'cancelled', 'reenrollment' ou 'completed'"),
   ],
   handleValidationErrors,
   EnrollmentController.updateStatus

@@ -169,6 +169,10 @@ export default function StudentCoursesPage() {
         return 'bg-yellow-100 text-yellow-800';
       case 'cancelled':
         return 'bg-red-100 text-red-800';
+      case 'reenrollment':
+        return 'bg-blue-100 text-blue-800';
+      case 'completed':
+        return 'bg-purple-100 text-purple-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -182,6 +186,10 @@ export default function StudentCoursesPage() {
         return 'Pendente';
       case 'cancelled':
         return 'Cancelado';
+      case 'reenrollment':
+        return 'Rematrícula';
+      case 'completed':
+        return 'Concluído';
       default:
         return 'Sem matrícula';
     }
@@ -253,7 +261,7 @@ export default function StudentCoursesPage() {
 
   const handleStatusChange = async (
     enrollmentId: number,
-    newStatus: 'pending' | 'active' | 'cancelled'
+    newStatus: 'pending' | 'active' | 'cancelled' | 'reenrollment' | 'completed'
   ) => {
     try {
       setLoading(true);
@@ -492,7 +500,7 @@ export default function StudentCoursesPage() {
                               if (enrollment && e.target.value) {
                                 handleStatusChange(
                                   enrollment.id,
-                                  e.target.value as 'pending' | 'active' | 'cancelled'
+                                  e.target.value as 'pending' | 'active' | 'cancelled' | 'reenrollment' | 'completed'
                                 );
                                 e.target.value = '';
                               }
@@ -502,6 +510,8 @@ export default function StudentCoursesPage() {
                             <option value="">-- Alterar Status --</option>
                             <option value="pending">Pendente</option>
                             <option value="cancelled">Cancelado</option>
+                            <option value="reenrollment">Rematrícula</option>
+                            <option value="completed">Concluído</option>
                           </select>
                         </div>
                       </div>
@@ -525,7 +535,7 @@ export default function StudentCoursesPage() {
                               if (enrollment && e.target.value) {
                                 handleStatusChange(
                                   enrollment.id,
-                                  e.target.value as 'pending' | 'active' | 'cancelled'
+                                  e.target.value as 'pending' | 'active' | 'cancelled' | 'reenrollment' | 'completed'
                                 );
                                 e.target.value = '';
                               }
@@ -535,6 +545,8 @@ export default function StudentCoursesPage() {
                             <option value="">-- Alterar Status --</option>
                             <option value="active">Ativo</option>
                             <option value="cancelled">Cancelado</option>
+                            <option value="reenrollment">Rematrícula</option>
+                            <option value="completed">Concluído</option>
                           </select>
                         </div>
                       </div>
@@ -557,7 +569,7 @@ export default function StudentCoursesPage() {
                               if (enrollment && e.target.value) {
                                 handleStatusChange(
                                   enrollment.id,
-                                  e.target.value as 'pending' | 'active' | 'cancelled'
+                                  e.target.value as 'pending' | 'active' | 'cancelled' | 'reenrollment' | 'canceled'
                                 );
                                 e.target.value = '';
                               }
@@ -567,6 +579,73 @@ export default function StudentCoursesPage() {
                             <option value="">-- Alterar Status --</option>
                             <option value="pending">Pendente</option>
                             <option value="active">Ativo</option>
+                            <option value="reenrollment">Rematrícula</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {status === 'reenrollment' && (
+                    <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-start justify-between gap-4">
+                        <p className="text-blue-800 text-sm">
+                          🔄 Este aluno está em processo de <strong>rematrícula</strong> neste curso.
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <label className="text-xs text-gray-600 whitespace-nowrap">
+                            Alterar para:
+                          </label>
+                          <select
+                            onChange={(e) => {
+                              const enrollment = getEnrollment(selectedCourseId);
+                              if (enrollment && e.target.value) {
+                                handleStatusChange(
+                                  enrollment.id,
+                                  e.target.value as 'pending' | 'active' | 'cancelled' | 'reenrollment' | 'completed'
+                                );
+                                e.target.value = '';
+                              }
+                            }}
+                            className="px-3 py-1 border border-blue-300 rounded-md text-xs bg-white hover:border-blue-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+                          >
+                            <option value="">-- Alterar Status --</option>
+                            <option value="pending">Pendente</option>
+                            <option value="active">Ativo</option>
+                            <option value="cancelled">Cancelado</option>
+                            <option value="completed">Concluído</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {status === 'completed' && (
+                    <div className="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                      <div className="flex items-start justify-between gap-4">
+                        <p className="text-purple-800 text-sm">
+                          🎓 O aluno <strong>concluiu</strong> este curso com sucesso!
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <label className="text-xs text-gray-600 whitespace-nowrap">
+                            Alterar para:
+                          </label>
+                          <select
+                            onChange={(e) => {
+                              const enrollment = getEnrollment(selectedCourseId);
+                              if (enrollment && e.target.value) {
+                                handleStatusChange(
+                                  enrollment.id,
+                                  e.target.value as 'pending' | 'active' | 'cancelled' | 'reenrollment' | 'completed'
+                                );
+                                e.target.value = '';
+                              }
+                            }}
+                            className="px-3 py-1 border border-purple-300 rounded-md text-xs bg-white hover:border-purple-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent cursor-pointer"
+                          >
+                            <option value="">-- Alterar Status --</option>
+                            <option value="active">Ativo</option>
+                            <option value="cancelled">Cancelado</option>
                           </select>
                         </div>
                       </div>
