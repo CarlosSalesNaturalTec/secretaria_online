@@ -163,6 +163,25 @@ module.exports = (sequelize, DataTypes) => {
           },
         },
       },
+      current_semester: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: null,
+        validate: {
+          isInt: {
+            msg: 'current_semester deve ser um número inteiro',
+          },
+          min: {
+            args: [1],
+            msg: 'current_semester deve ser no mínimo 1',
+          },
+          max: {
+            args: [12],
+            msg: 'current_semester deve ser no máximo 12',
+          },
+        },
+        comment: 'Semestre atual do aluno no curso (1, 2, 3, etc.)',
+      },
     },
     {
       sequelize,
@@ -391,6 +410,52 @@ module.exports = (sequelize, DataTypes) => {
     this.status = 'cancelled';
     await this.save();
     console.log(`[Enrollment] Matrícula ID ${this.id} cancelada com sucesso`);
+    return this;
+  };
+
+  /**
+   * Retorna o semestre atual formatado
+   *
+   * @returns {string} "1º semestre", "2º semestre", etc. ou "Não definido"
+   */
+  Enrollment.prototype.getCurrentSemesterLabel = function () {
+    if (!this.current_semester) {
+      return 'Não definido';
+    }
+    return `${this.current_semester}º semestre`;
+  };
+
+  /**
+   * Verifica se o aluno está no último semestre do curso
+   *
+   * @returns {Promise<boolean>}
+   */
+  Enrollment.prototype.isLastSemester = async function () {
+    if (!this.current_semester || !this.course) {
+      // Precisa eager load do course
+      await this.reload({ include: ['course'] });
+    }
+
+    if (!this.course || !this.course.duration || this.course.duration_type !== 'semestres') {
+      return false;
+    }
+
+    return this.current_semester >= this.course.duration;
+  };
+
+  /**
+   * Avança para o próximo semestre
+   *
+   * @returns {Promise<Enrollment>}
+   */
+  Enrollment.prototype.advanceSemester = async function () {
+    if (!this.current_semester) {
+      this.current_semester = 1;
+    } else {
+      this.current_semester += 1;
+    }
+    await this.save();
+    console.log(`[Enrollment] Matrícula ID ${this.id} avançada para o ${this.current_semester}º semestre`);
     return this;
   };
 

@@ -185,6 +185,15 @@ backend/
 - Cadastro de matrículas
 - Controle de status de matrícula
 - Validações de dupla matrícula
+- **Rastreamento de Semestre Acadêmico (2025-12-22)**:
+  - ✅ Campo `current_semester` adicionado à tabela `enrollments`
+  - ✅ Migration executada: `20251223002004-add-current-semester-to-enrollments.js`
+  - ✅ Índice criado para otimizar queries: `idx_enrollments_current_semester`
+  - ✅ Script de importação do banco antigo disponível (239 alunos importados)
+  - ✅ Métodos auxiliares no modelo Enrollment:
+    - `getCurrentSemesterLabel()` - Retorna "1º semestre", "2º semestre", etc.
+    - `isLastSemester()` - Verifica se está no último semestre do curso
+    - `advanceSemester()` - Avança para o próximo semestre
 
 ### ✅ Documentos Obrigatórios (feat-031 a feat-035)
 - Definição de tipos de documentos
@@ -1021,6 +1030,101 @@ Para documentação completa da API, veja `docs/api-documentation.md`
 - A resposta inclui o status da matrícula (pending, active, cancelled)
 - Cursos deletados são filtrados automaticamente (soft delete)
 
+### 🎓 Rastreamento de Semestre Acadêmico
+
+**Descrição:** Sistema que rastreia em qual semestre do curso cada aluno se encontra (1°, 2°, 3°, etc.).
+
+**Campo Adicionado:**
+```sql
+current_semester INTEGER NULL
+  -- Semestre atual do aluno no curso (1 a 12)
+  -- NULL para alunos sem histórico definido
+  -- Índice: idx_enrollments_current_semester
+```
+
+**Estrutura da Tabela `enrollments`:**
+```
+enrollments
+  ├── id
+  ├── student_id (FK → students.id)
+  ├── course_id (FK → courses.id)
+  ├── status (pending, active, cancelled)
+  ├── enrollment_date
+  ├── current_semester ← NOVO (INTEGER, 1-12)
+  ├── created_at
+  ├── updated_at
+  └── deleted_at
+```
+
+**Migration Executada:**
+- Arquivo: `backend/database/migrations/20251223002004-add-current-semester-to-enrollments.js`
+- Adiciona coluna `current_semester` (INTEGER, nullable)
+- Cria índice `idx_enrollments_current_semester`
+- Rollback: Remove coluna e índice
+
+**Métodos Disponíveis no Model `Enrollment`:**
+
+```javascript
+// Obter label formatado
+const enrollment = await Enrollment.findByPk(1);
+console.log(enrollment.getCurrentSemesterLabel());
+// Output: "3º semestre" ou "Não definido"
+
+// Verificar se está no último semestre do curso
+const isLast = await enrollment.isLastSemester();
+// Retorna true se current_semester >= course.duration
+
+// Avançar para o próximo semestre
+await enrollment.advanceSemester();
+// Incrementa current_semester em 1
+```
+
+**Script de Importação do Banco Antigo:**
+
+O sistema inclui um script para importar o semestre acadêmico da tabela `boletim_novo` do banco antigo:
+
+```bash
+cd backend
+node database/scripts/import-current-semester-from-boletim.js
+```
+
+**Formatos Suportados:**
+1. `"I° Semestre Psicologia"` → 1
+2. `"Bacharelado em Psicologia 9°"` → 9
+3. `"8° Psicologia"` → 8
+4. `"Técnico em Enfermagem I"` → 1
+5. `"Especialização em Docência"` → 1 (padrão)
+
+**Resultado da Importação:**
+- Total processado: 255 matrículas do banco antigo
+- Enrollments atualizados: 239 (83% de cobertura)
+- Estudantes sem histórico: 49 (17%)
+
+**Distribuição por Semestre (após importação):**
+```
+1° semestre:  180 alunos (75%)
+2° semestre:   21 alunos (9%)
+3° semestre:    5 alunos (2%)
+4° semestre:    3 alunos (1%)
+7° semestre:    1 aluno  (0.4%)
+8° semestre:   17 alunos (7%)
+9° semestre:    4 alunos (2%)
+10° semestre:   8 alunos (3%)
+```
+
+**Casos de Uso:**
+- Filtrar histórico de notas por semestre
+- Identificar alunos próximos à formatura
+- Gerar relatórios de progresso acadêmico
+- Alocar disciplinas conforme semestre do aluno
+- Calcular tempo restante para conclusão do curso
+
+**Documentação Adicional:**
+- Script de importação: `backend/database/scripts/import-current-semester-from-boletim.js`
+- Análise de dados: `backend/database/scripts/analyze-boletim.js`
+- Testes de extração: `backend/database/scripts/test-extraction.js`
+- README completo: `backend/database/scripts/README.md`
+
 ## 🧪 Testes
 
 ### Executar Todos os Testes
@@ -1205,10 +1309,30 @@ Desenvolvido seguindo as melhores práticas de:
 
 ---
 
-**Última atualização:** 2025-12-11
-**Versão:** 0.3.1
+**Última atualização:** 2025-12-22
+**Versão:** 0.3.2
 
 ## 📝 Changelog
+
+### Versão 0.3.2 (2025-12-22) - Rastreamento de Semestre Acadêmico
+- ✅ **NOVO**: Sistema de rastreamento de semestre acadêmico do aluno
+  - Adicionado campo `current_semester` (INTEGER, 1-12) à tabela `enrollments`
+  - Migration executada: `20251223002004-add-current-semester-to-enrollments.js`
+  - Criado índice `idx_enrollments_current_semester` para otimização de queries
+  - Adicionados 3 métodos auxiliares no modelo `Enrollment`:
+    - `getCurrentSemesterLabel()` - Retorna label formatado ("1º semestre", etc.)
+    - `isLastSemester()` - Verifica se aluno está no último semestre
+    - `advanceSemester()` - Incrementa semestre do aluno
+- ✅ **NOVO**: Script de importação do banco antigo
+  - Criado `backend/database/scripts/import-current-semester-from-boletim.js`
+  - Suporta 5 formatos diferentes de identificação de semestre
+  - Importados 239 alunos (83% de cobertura) do sistema antigo
+  - Documentação completa em `backend/database/scripts/README.md`
+- ✅ **NOVO**: Scripts auxiliares de análise
+  - `analyze-boletim.js` - Análise de matrículas únicas e distribuição
+  - `analyze-missing-semester.js` - Identifica registros sem semestre
+  - `test-extraction.js` - Testes unitários da lógica de extração (17/17 ✓)
+- ✅ Documentação atualizada no README principal
 
 ### Versão 0.3.1 (2025-12-11) - Correções Arquiteturais Críticas
 - 🔧 **CORREÇÃO CRÍTICA**: Corrigida FK `student_id` na tabela `grades`
