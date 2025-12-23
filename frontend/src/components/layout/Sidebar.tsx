@@ -23,7 +23,6 @@ import {
   ClipboardListIcon,
   SchoolIcon,
   ClipboardCheckIcon,
-  RefreshCcw,
 } from 'lucide-react';
 import { type UserRole } from '@/types/user.types';
 
@@ -66,7 +65,6 @@ const getNavigationItems = (role: UserRole): NavigationItem[] => {
       { name: 'Lançar Notas', href: '/admin/grades', icon: ClipboardListIcon },
       { name: 'Documentos', href: '/admin/documents', icon: FileTextIcon },
       { name: 'Solicitações', href: '/admin/requests', icon: ClipboardListIcon },
-      { name: 'Rematrícula', href: '/admin/reenrollment', icon: RefreshCcw },
     ];
   }
 
