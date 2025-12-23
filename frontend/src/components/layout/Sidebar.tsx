@@ -87,7 +87,7 @@ const getNavigationItems = (role: UserRole): NavigationItem[] => {
       { name: 'Dashboard', href: '/student/dashboard', icon: LayoutDashboardIcon },
       { name: 'Minhas Notas', href: '/student/grades', icon: ClipboardListIcon },
       { name: 'Meus Documentos', href: '/student/documents', icon: FileTextIcon },
-      // { name: 'Solicitações', href: '/student/requests', icon: FileTextIcon },
+      { name: 'Solicitações', href: '/student/requests', icon: FileTextIcon },
     ];
   }
 
@@ -154,12 +154,7 @@ export function Sidebar({ userRole, isOpen = true, onClose }: SidebarProps) {
               className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               aria-label="Fechar menu"
             >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -211,9 +206,7 @@ export function Sidebar({ userRole, isOpen = true, onClose }: SidebarProps) {
 
           {/* Footer da Sidebar (opcional) */}
           <div className="flex-shrink-0 px-4 py-4 border-t border-gray-200">
-            <p className="text-xs text-gray-500 text-center">
-              Secretaria Online v0.1.0
-            </p>
+            <p className="text-xs text-gray-500 text-center">Secretaria Online v0.1.0</p>
           </div>
         </div>
       </aside>

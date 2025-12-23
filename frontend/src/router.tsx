@@ -51,10 +51,8 @@ const AdminReenrollment = lazy(() => import('./pages/admin/Reenrollment'));
 const StudentDashboard = lazy(() => import('./pages/student/Dashboard'));
 const StudentGrades = lazy(() => import('./pages/student/Grades'));
 const StudentDocuments = lazy(() => import('./pages/student/Documents'));
-/*const StudentRequests = lazy(() => import('./pages/student/Requests'));*/
-const ReenrollmentAcceptance = lazy(
-  () => import('./pages/student/ReenrollmentAcceptance')
-);
+const StudentRequests = lazy(() => import('./pages/student/Requests'));
+const ReenrollmentAcceptance = lazy(() => import('./pages/student/ReenrollmentAcceptance'));
 
 /**
  * Páginas de Professor (Lazy Loading)
@@ -110,7 +108,11 @@ const publicRoutes: RouteObject[] = [
 const privateRoutes: RouteObject[] = [
   {
     path: '/admin',
-    element: <PrivateRoute requiredRole="admin"><DashboardLayout /></PrivateRoute>,
+    element: (
+      <PrivateRoute requiredRole="admin">
+        <DashboardLayout />
+      </PrivateRoute>
+    ),
     errorElement: <div>Erro ao carregar área administrativa</div>,
     children: [
       {
@@ -253,7 +255,11 @@ const privateRoutes: RouteObject[] = [
   },
   {
     path: '/teacher',
-    element: <PrivateRoute requiredRole="teacher"><DashboardLayout /></PrivateRoute>,
+    element: (
+      <PrivateRoute requiredRole="teacher">
+        <DashboardLayout />
+      </PrivateRoute>
+    ),
     errorElement: <div>Erro ao carregar área do professor</div>,
     children: [
       {
@@ -316,7 +322,11 @@ const privateRoutes: RouteObject[] = [
   },
   {
     path: '/student',
-    element: <PrivateRoute requiredRole="student"><DashboardLayout /></PrivateRoute>,
+    element: (
+      <PrivateRoute requiredRole="student">
+        <DashboardLayout />
+      </PrivateRoute>
+    ),
     errorElement: <div>Erro ao carregar área do aluno</div>,
     children: [
       {
@@ -343,14 +353,14 @@ const privateRoutes: RouteObject[] = [
           </Suspense>
         ),
       },
-      /* {
+      {
         path: 'requests',
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <StudentRequests />
           </Suspense>
         ),
-      }, */
+      },
       {
         path: 'reenrollment-acceptance',
         element: (
@@ -392,9 +402,7 @@ function RootRedirect() {
       throw new Error('Token inválido');
     }
 
-    const payload = JSON.parse(
-      atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))
-    );
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
     const userRole = payload.role;
 
     // Mapa de papéis para dashboards
@@ -456,12 +464,7 @@ const notFoundRoute: RouteObject[] = [
  * 3. Rotas privadas
  * 4. Rotas 404 (deve ser última)
  */
-const routes: RouteObject[] = [
-  ...rootRoute,
-  ...publicRoutes,
-  ...privateRoutes,
-  ...notFoundRoute,
-];
+const routes: RouteObject[] = [...rootRoute, ...publicRoutes, ...privateRoutes, ...notFoundRoute];
 
 /**
  * Criar e exportar router
