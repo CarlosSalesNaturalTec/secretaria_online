@@ -75,7 +75,9 @@ class ReenrollmentService {
         throw new AppError('Nenhum template de contrato ativo encontrado', 422);
       }
 
+      // Atualizar status e incrementar current_semester
       enrollment.status = 'active';
+      enrollment.current_semester = (enrollment.current_semester || 0) + 1;
       await enrollment.save({ transaction });
 
       const currentYear = new Date().getFullYear();
@@ -453,37 +455,40 @@ class ReenrollmentService {
       ].filter(Boolean); // Remove partes nulas/vazias
       const studentAddress = addressParts.join(', ');
 
+      // Calcular semestre baseado em current_semester + 1
+      const nextSemester = (enrollment.current_semester || 0) + 1;
+
       // Dados para substituição
       const placeholderData = {
         studentName: student.nome || 'N/A',
         studentId: student.id || 'N/A',
         studentCPF: student.cpf ? student.cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4') : 'N/A',
         studentRG: student.rg || 'N/A',
-        studentBirthDate: student.data_nascimento 
-          ? (student.data_nascimento.match(/^\d{4}-\d{2}-\d{2}$/) 
-              ? student.data_nascimento.split('-').reverse().join('/') 
-              : student.data_nascimento) 
+        studentBirthDate: student.data_nascimento
+          ? (student.data_nascimento.match(/^\d{4}-\d{2}-\d{2}$/)
+              ? student.data_nascimento.split('-').reverse().join('/')
+              : student.data_nascimento)
           : 'N/A',
         studentEmail: student.email || 'N/A',
         studentPhone: student.celular || student.telefone || 'N/A',
         studentAddress: studentAddress || 'N/A',
         enrollmentNumber: student.matricula || 'N/A',
-        
+
         courseName: course.name || 'N/A',
         courseDuration: `${course.duration || 'N/A'} ${course.duration_type || ''}`.trim(),
-        
+
         enrollmentDate: new Date(enrollment.enrollment_date).toLocaleDateString('pt-BR'),
         contractDate: currentDate.toLocaleDateString('pt-BR'),
-        currentSemester: 1, // Valor padrão - pode ser ajustado conforme lógica de negócio
+        currentSemester: nextSemester, // current_semester + 1
         year: currentDate.getFullYear(),
-        
+
         // Placeholders de rodapé
         contractId: 'A ser gerado após aceite',
         generatedAt: currentDate.toLocaleString('pt-BR'),
 
         // Placeholders antigos para retrocompatibilidade
         cpf: student.cpf ? student.cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4') : 'N/A',
-        semester: 1, // Valor padrão
+        semester: nextSemester, // current_semester + 1
         date: currentDate.toLocaleDateString('pt-BR'),
         institutionName: 'Secretaria Online',
       };

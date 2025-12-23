@@ -215,14 +215,6 @@ export default function ReenrollmentAcceptance() {
             Por favor, leia o contrato de rematrícula abaixo e clique em "Aceitar
             e Confirmar Rematrícula" para continuar.
           </p>
-          {preview && (
-            <div className="mt-3 flex items-center gap-2 text-sm text-gray-500">
-              <span className="font-medium">Período:</span>
-              <span>
-                {preview.semester}º Semestre de {preview.year}
-              </span>
-            </div>
-          )}
         </div>
 
         {/* Alert de atenção */}

@@ -60,10 +60,10 @@ const loginRateLimiter = rateLimit({
     });
   },
 
-  // Skip de rate limiting para ambientes de teste (opcional)
+  // Skip de rate limiting para ambientes de teste e desenvolvimento
   skip: (req) => {
-    // Em ambiente de teste, pode-se pular o rate limiting
-    return process.env.NODE_ENV === 'test';
+    // Em ambiente de teste ou desenvolvimento, pode-se pular o rate limiting
+    return process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development';
   },
 });
 
@@ -94,7 +94,7 @@ const generalRateLimiter = rateLimit({
   legacyHeaders: false,
 
   skip: (req) => {
-    return process.env.NODE_ENV === 'test';
+    return process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development';
   },
 });
 
@@ -124,7 +124,7 @@ const passwordChangeRateLimiter = rateLimit({
   legacyHeaders: false,
 
   skip: (req) => {
-    return process.env.NODE_ENV === 'test';
+    return process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development';
   },
 });
 
