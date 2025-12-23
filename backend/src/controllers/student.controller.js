@@ -41,8 +41,8 @@ class StudentController {
    */
   async getAll(req, res, next) {
     try {
-      const { page, limit, search } = req.query;
-      const result = await StudentService.getAll({ page, limit, search });
+      const { page, limit, search, matricula, status } = req.query;
+      const result = await StudentService.getAll({ page, limit, search, matricula, status });
       return res.json({ success: true, data: result });
     } catch (error) {
       next(error);

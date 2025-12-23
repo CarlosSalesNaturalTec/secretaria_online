@@ -35,6 +35,8 @@ export interface IStudentsQueryOptions {
   page?: number;
   limit?: number;
   search?: string;
+  matricula?: string;
+  status?: string;
 }
 
 /**
@@ -47,6 +49,8 @@ export async function getAll(options?: IStudentsQueryOptions): Promise<IStudents
     if (options?.page) params.append('page', options.page.toString());
     if (options?.limit) params.append('limit', options.limit.toString());
     if (options?.search) params.append('search', options.search);
+    if (options?.matricula) params.append('matricula', options.matricula);
+    if (options?.status) params.append('status', options.status);
 
     const response = await api.get<ApiResponse<IStudentsPaginatedResponse>>(
       `/students?${params.toString()}`

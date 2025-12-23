@@ -170,15 +170,27 @@ class StudentService {
    * @returns {Promise<{students: Student[], total: number, totalPages: number, currentPage: number}>}
    */
   async getAll(options = {}) {
-    const { page = 1, limit = 10, search = '' } = options;
+    const { page = 1, limit = 10, search = '', matricula = '', status = '' } = options;
     const offset = (page - 1) * limit;
+    const { Op } = require('sequelize');
 
-    // Construir condição de busca
+    // Construir condição de busca para Student
     const whereCondition = {};
     if (search && search.trim()) {
       whereCondition.nome = {
-        [require('sequelize').Op.like]: `%${search.trim()}%`,
+        [Op.like]: `%${search.trim()}%`,
       };
+    }
+    if (matricula && matricula.trim()) {
+      whereCondition.matricula = {
+        [Op.like]: `%${matricula.trim()}%`,
+      };
+    }
+
+    // Construir condição de filtro para Enrollment
+    const enrollmentWhere = {};
+    if (status && status.trim()) {
+      enrollmentWhere.status = status.trim();
     }
 
     const { count, rows } = await Student.findAndCountAll({
@@ -192,6 +204,8 @@ class StudentService {
         {
           model: Enrollment,
           as: 'enrollments',
+          where: Object.keys(enrollmentWhere).length > 0 ? enrollmentWhere : undefined,
+          required: Object.keys(enrollmentWhere).length > 0,
           include: [
             {
               model: Course,

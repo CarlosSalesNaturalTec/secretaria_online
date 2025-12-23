@@ -40,11 +40,14 @@ export default function StudentsPage() {
   const [totalItems, setTotalItems] = useState<number>(0);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [searchInput, setSearchInput] = useState<string>('');
+  const [matriculaFilter, setMatriculaFilter] = useState<string>('');
+  const [matriculaInput, setMatriculaInput] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>('');
   const itemsPerPage = 10;
 
   useEffect(() => {
     loadStudents();
-  }, [currentPage, searchTerm]);
+  }, [currentPage, searchTerm, matriculaFilter, statusFilter]);
 
   const loadStudents = async () => {
     try {
@@ -54,6 +57,8 @@ export default function StudentsPage() {
         page: currentPage,
         limit: itemsPerPage,
         search: searchTerm || undefined,
+        matricula: matriculaFilter || undefined,
+        status: statusFilter || undefined,
       });
       setStudents(data.students);
       setTotalPages(data.totalPages);
@@ -73,12 +78,16 @@ export default function StudentsPage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setSearchTerm(searchInput);
+    setMatriculaFilter(matriculaInput);
     setCurrentPage(1); // Reset para primeira página ao buscar
   };
 
   const handleClearSearch = () => {
     setSearchInput('');
     setSearchTerm('');
+    setMatriculaInput('');
+    setMatriculaFilter('');
+    setStatusFilter('');
     setCurrentPage(1);
   };
 
@@ -277,7 +286,7 @@ export default function StudentsPage() {
           'cancelled': { label: 'Cancelado', color: 'bg-red-100 text-red-800' },
           'pending': { label: 'Pendente', color: 'bg-orange-100 text-orange-800' },
           'reenrollment': { label: 'Rematrícula', color: 'bg-purple-100 text-purple-800' },
-          'completed': { label: 'Completo', color: 'bg-blue-100 text-blue-800' },
+          'completed': { label: 'Concluído', color: 'bg-blue-100 text-blue-800' },
         };
 
         const statusInfo = statusMap[status] || { label: '-', color: 'bg-gray-100 text-gray-800' };
@@ -408,27 +417,51 @@ export default function StudentsPage() {
         </Button>
       </div>
 
-      {/* Barra de busca */}
+      {/* Barra de busca e filtros */}
       <div className="mb-4">
-        <form onSubmit={handleSearch} className="flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+        <form onSubmit={handleSearch} className="space-y-3">
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                type="text"
+                placeholder="Buscar por nome..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
             <input
               type="text"
-              placeholder="Buscar por nome..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Matrícula..."
+              value={matriculaInput}
+              onChange={(e) => setMatriculaInput(e.target.value)}
+              className="w-48 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
-          </div>
-          <Button type="submit" variant="primary">
-            Buscar
-          </Button>
-          {searchTerm && (
-            <Button type="button" variant="secondary" onClick={handleClearSearch}>
-              Limpar
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-48 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">Todos os status</option>
+              <option value="pending">Pendente</option>
+              <option value="active">Ativo</option>
+              <option value="cancelled">Cancelado</option>
+              <option value="reenrollment">Rematrícula</option>
+              <option value="completed">Concluído</option>
+            </select>
+            <Button type="submit" variant="primary">
+              Buscar
             </Button>
-          )}
+            {(searchTerm || matriculaFilter || statusFilter) && (
+              <Button type="button" variant="secondary" onClick={handleClearSearch}>
+                Limpar
+              </Button>
+            )}
+          </div>
         </form>
       </div>
 
