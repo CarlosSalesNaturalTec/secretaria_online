@@ -124,7 +124,7 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       status: {
-        type: DataTypes.ENUM('pending', 'active', 'cancelled'),
+        type: DataTypes.ENUM('pending', 'active', 'cancelled', 'reenrollment', 'canceled'),
         allowNull: false,
         defaultValue: 'pending',
         validate: {
@@ -132,8 +132,8 @@ module.exports = (sequelize, DataTypes) => {
             msg: 'status é obrigatório',
           },
           isIn: {
-            args: [['pending', 'active', 'cancelled']],
-            msg: 'status deve ser: pending, active ou cancelled',
+            args: [['pending', 'active', 'cancelled', 'reenrollment', 'canceled']],
+            msg: 'status deve ser: pending, active, cancelled, reenrollment ou canceled',
           },
         },
       },
@@ -374,6 +374,8 @@ module.exports = (sequelize, DataTypes) => {
       pending: 'Aguardando Confirmação',
       active: 'Ativa',
       cancelled: 'Cancelada',
+      reenrollment: 'Rematrícula',
+      canceled: 'Cancelada',
     };
     return labels[this.status] || 'Status Desconhecido';
   };
