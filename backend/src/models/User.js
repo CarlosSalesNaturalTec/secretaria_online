@@ -425,13 +425,14 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'RESTRICT',
     });
 
-    // User tem muitos Documentos
-    User.hasMany(models.Document, {
-      foreignKey: 'user_id',
-      as: 'documents',
-      onUpdate: 'CASCADE',
-      onDelete: 'RESTRICT',
-    });
+    // REMOVIDO: User não tem relação direta com Document (agora é Student)
+    // A relação foi movida para Student.hasMany(Document)
+    // User.hasMany(models.Document, {
+    //   foreignKey: 'student_id',
+    //   as: 'documents',
+    //   onUpdate: 'CASCADE',
+    //   onDelete: 'RESTRICT',
+    // });
 
     // User (admin) pode ter revisado muitos Documentos
     User.hasMany(models.Document, {
