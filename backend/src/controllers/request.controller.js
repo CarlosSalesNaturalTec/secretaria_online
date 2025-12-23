@@ -425,12 +425,18 @@ class RequestController {
       const { observations } = req.body;
       const { user } = req;
 
-      // Buscar solicitação
+      // Buscar solicitação com o tipo de requisição
       const request = await Request.findOne({
         where: {
           id,
           deleted_at: null
-        }
+        },
+        include: [
+          {
+            association: 'requestType',
+            attributes: ['id', 'name']
+          }
+        ]
       });
 
       if (!request) {
@@ -456,6 +462,28 @@ class RequestController {
 
       // Aprovar usando método do model
       await request.approve(user.id, observations);
+
+      // Se for renovação de matrícula, atualizar o status do enrollment
+      if (request.requestType && request.requestType.name === 'Matrícula - Renovação') {
+        const { Enrollment } = require('../models');
+
+        // Buscar enrollment ativo do aluno
+        const enrollment = await Enrollment.findOne({
+          where: {
+            student_id: request.student_id,
+            deleted_at: null
+          },
+          order: [['created_at', 'DESC']]
+        });
+
+        if (enrollment) {
+          enrollment.status = 'reenrollment';
+          await enrollment.save();
+          console.log(`[RequestController] Enrollment ${enrollment.id} atualizado para status 'reenrollment'`);
+        } else {
+          console.warn(`[RequestController] Enrollment não encontrado para o aluno ${request.student_id}`);
+        }
+      }
 
       // Recarregar com relações
       const updatedRequest = await Request.scope('withRelations').findByPk(request.id);
