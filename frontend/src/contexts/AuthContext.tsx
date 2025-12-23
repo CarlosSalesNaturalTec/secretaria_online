@@ -287,7 +287,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
    */
   const hasEnrollmentPending =
     state.user?.role === 'student' &&
-    state.user?.enrollmentStatus === 'pending';
+    state.user?.enrollmentStatus === 'reenrollment';
 
   /**
    * Valor do contexto exposto aos consumers

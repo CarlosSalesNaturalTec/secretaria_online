@@ -501,7 +501,7 @@ class EnrollmentService {
       const enrollment = await Enrollment.findOne({
         where: {
           student_id: studentId,
-          status: 'pending',
+          status: 'reenrollment',
         },
         include: [
           {

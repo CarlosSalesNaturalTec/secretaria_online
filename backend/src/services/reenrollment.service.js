@@ -7,7 +7,7 @@
  * RESPONSABILIDADES:
  * - Processar rematrícula global de TODOS os estudantes do sistema em lote
  * - Validar senha do administrador antes de executar operações críticas
- * - Atualizar status de enrollments de 'active' para 'pending' em transação
+ * - Atualizar status de enrollments de 'active' para 'reenrollment' em transação
  * - Registrar logs detalhados de operações de rematrícula
  * - Garantir atomicidade das operações usando transações do Sequelize
  *
@@ -15,7 +15,7 @@
  * 1. Processar TODOS os enrollments ativos do sistema (não por curso individual)
  * 2. Apenas administradores podem executar rematrícula global
  * 3. Senha do administrador deve ser validada antes do processamento
- * 4. Status de enrollments ativos é alterado para 'pending'
+ * 4. Status de enrollments ativos é alterado para 'reenrollment'
  * 5. NÃO criar contratos durante rematrícula - contratos criados após aceite do estudante
  * 6. Usar transação para garantir atomicidade (rollback completo em caso de erro)
  * 7. Registrar log completo da operação (admin_id, total_affected, semester, year, timestamp)
@@ -66,7 +66,7 @@ class ReenrollmentService {
       if (enrollment.student_id !== user.student_id) {
         throw new AppError('Você não tem permissão para aceitar esta rematrícula', 403);
       }
-      if (enrollment.status !== 'pending') {
+      if (enrollment.status !== 'reenrollment') {
         throw new AppError(`Esta matrícula não está pendente de aceite (status atual: ${enrollment.status})`, 422);
       }
 
@@ -179,7 +179,7 @@ class ReenrollmentService {
    * 1. Busca TODOS os enrollments com status 'active' (independente do curso)
    * 2. Conta total de enrollments ativos
    * 3. Inicia transação do Sequelize
-   * 4. Atualiza status de TODOS para 'pending' em batch dentro da transação
+   * 4. Atualiza status de TODOS para 'reenrollment' em batch dentro da transação
    * 5. Faz commit da transação
    * 6. Registra log detalhado da operação
    * 7. Retorna total de estudantes afetados e lista de enrollment IDs
@@ -235,9 +235,9 @@ class ReenrollmentService {
         `[ReenrollmentService] Transação iniciada. Atualizando ${totalEnrollments} enrollments...`
       );
 
-      // 4. Atualizar status de TODOS para 'pending' em batch dentro da transação
+      // 4. Atualizar status de TODOS para 'reenrollment' em batch dentro da transação
       await Enrollment.update(
-        { status: 'pending' },
+        { status: 'reenrollment' },
         {
           where: { status: 'active' },
           transaction,
@@ -311,7 +311,7 @@ class ReenrollmentService {
    * IMPORTANTE:
    * - NÃO gera PDF, apenas HTML
    * - Valida que estudante é dono do enrollment (ownership)
-   * - Apenas enrollments com status 'pending' podem ter preview
+   * - Apenas enrollments com status 'reenrollment' podem ter preview
    * - Reutiliza sistema existente de ContractTemplate
    *
    * PLACEHOLDERS SUPORTADOS:
@@ -406,8 +406,8 @@ class ReenrollmentService {
         );
       }
 
-      // 3. Validar que enrollment.status === 'pending'
-      if (enrollment.status !== 'pending') {
+      // 3. Validar que enrollment.status === 'reenrollment'
+      if (enrollment.status !== 'reenrollment') {
         logger.warn(
           `[ReenrollmentService] Tentativa de preview em enrollment com status incorreto - Enrollment ID: ${enrollmentId}, Status: ${enrollment.status}`
         );
