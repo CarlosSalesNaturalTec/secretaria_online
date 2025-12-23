@@ -32,9 +32,9 @@ export interface IDashboardStats {
   activeEnrollments: number;
 
   /**
-   * Total de solicitações pendentes (opcional para expansão futura)
+   * Total de solicitações pendentes
    */
-  pendingRequests?: number;
+  pendingRequests: number;
 
   /**
    * Total de turmas ativas (opcional para expansão futura)

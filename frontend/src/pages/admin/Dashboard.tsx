@@ -7,7 +7,8 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Users, GraduationCap, FileText, UserCheck, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Users, GraduationCap, FileText, UserCheck, AlertCircle, Clock } from 'lucide-react';
 import { getDashboardStats } from '@/services/admin.service';
 import type { IDashboardStats } from '@/types/admin.types';
 
@@ -23,6 +24,7 @@ import type { IDashboardStats } from '@/types/admin.types';
  * @returns Página do dashboard administrativo
  */
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<IDashboardStats | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -104,39 +106,24 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Card: Total de Alunos */}
-        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500 hover:shadow-lg transition-shadow">
+        {/* Card: Solicitações Pendentes */}
+        <div
+          onClick={() => navigate('/admin/requests')}
+          className="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-500 hover:shadow-lg transition-shadow cursor-pointer"
+        >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Total de Alunos</p>
+              <p className="text-sm font-medium text-gray-600 mb-1">Solicitações Pendentes</p>
               <p className="text-3xl font-bold text-gray-900">
-                {stats?.totalStudents ?? 0}
+                {stats?.pendingRequests ?? 0}
               </p>
             </div>
-            <div className="bg-blue-100 p-3 rounded-full">
-              <GraduationCap className="text-blue-600" size={28} />
+            <div className="bg-yellow-100 p-3 rounded-full">
+              <Clock className="text-yellow-600" size={28} />
             </div>
           </div>
           <p className="text-xs text-gray-500 mt-3">
-            Alunos cadastrados no sistema
-          </p>
-        </div>
-
-        {/* Card: Total de Professores */}
-        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500 hover:shadow-lg transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Total de Professores</p>
-              <p className="text-3xl font-bold text-gray-900">
-                {stats?.totalTeachers ?? 0}
-              </p>
-            </div>
-            <div className="bg-green-100 p-3 rounded-full">
-              <Users className="text-green-600" size={28} />
-            </div>
-          </div>
-          <p className="text-xs text-gray-500 mt-3">
-            Professores cadastrados no sistema
+            Solicitações aguardando análise
           </p>
         </div>
 
@@ -173,6 +160,24 @@ export default function AdminDashboard() {
           </div>
           <p className="text-xs text-gray-500 mt-3">
             Matrículas com status ativo
+          </p>
+        </div>
+
+        {/* Card: Total de Alunos */}
+        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500 hover:shadow-lg transition-shadow">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 mb-1">Total de Alunos</p>
+              <p className="text-3xl font-bold text-gray-900">
+                {stats?.totalStudents ?? 0}
+              </p>
+            </div>
+            <div className="bg-blue-100 p-3 rounded-full">
+              <GraduationCap className="text-blue-600" size={28} />
+            </div>
+          </div>
+          <p className="text-xs text-gray-500 mt-3">
+            Alunos cadastrados no sistema
           </p>
         </div>
       </div>

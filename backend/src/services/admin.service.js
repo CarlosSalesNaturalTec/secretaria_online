@@ -11,7 +11,7 @@
  * - Aplicar lógica de negócio para dashboard
  */
 
-const { Student, Teacher, Enrollment, Document } = require('../models');
+const { Student, Teacher, Enrollment, Document, Request } = require('../models');
 const logger = require('../utils/logger');
 
 /**
@@ -26,6 +26,7 @@ class AdminService {
    * - Total de professores (da tabela teachers - dados completos)
    * - Documentos pendentes de aprovação (status = 'pending')
    * - Matrículas ativas (status = 'active')
+   * - Solicitações pendentes (status = 'pending')
    *
    * @returns {Promise<Object>} Objeto com estatísticas
    * @throws {Error} Se houver erro ao buscar dados
@@ -36,7 +37,8 @@ class AdminService {
    * //   totalStudents: 150,
    * //   totalTeachers: 12,
    * //   pendingDocuments: 5,
-   * //   activeEnrollments: 148
+   * //   activeEnrollments: 148,
+   * //   pendingRequests: 3
    * // }
    */
   async getDashboardStats() {
@@ -44,7 +46,7 @@ class AdminService {
       logger.info('[AdminService] Buscando estatísticas do dashboard...');
 
       // Buscar todas as estatísticas em paralelo para melhor performance
-      const [totalStudents, totalTeachers, pendingDocuments, activeEnrollments] =
+      const [totalStudents, totalTeachers, pendingDocuments, activeEnrollments, pendingRequests] =
         await Promise.all([
           // Total de estudantes (da tabela students, não deletados)
           // ATUALIZAÇÃO feat-064: Agora conta da tabela students ao invés de users
@@ -67,6 +69,13 @@ class AdminService {
               status: 'active',
             },
           }),
+
+          // Solicitações pendentes
+          Request.count({
+            where: {
+              status: 'pending',
+            },
+          }),
         ]);
 
       const stats = {
@@ -74,6 +83,7 @@ class AdminService {
         totalTeachers,
         pendingDocuments,
         activeEnrollments,
+        pendingRequests,
       };
 
       logger.info('[AdminService] Estatísticas carregadas com sucesso', stats);
