@@ -15,7 +15,7 @@
 const fs = require('fs').promises;
 const path = require('path');
 const logger = require('../utils/logger');
-const { Document, DocumentType, User } = require('../models');
+const { Document, DocumentType, User, Student } = require('../models');
 const { AppError } = require('../middlewares/error.middleware');
 const { UPLOAD_CONSTANTS } = require('../config/upload');
 const emailService = require('./email.service');
@@ -34,7 +34,7 @@ class DocumentService {
    * - Registrar log de upload
    *
    * @param {Object} uploadData - Dados do upload
-   * @param {number} uploadData.userId - ID do usuário que está enviando
+   * @param {number} uploadData.studentId - ID do estudante que está enviando
    * @param {number} uploadData.documentTypeId - ID do tipo de documento
    * @param {string} uploadData.filePath - Caminho do arquivo no servidor
    * @param {string} uploadData.fileName - Nome do arquivo
@@ -42,11 +42,11 @@ class DocumentService {
    * @param {string} uploadData.mimeType - Tipo MIME do arquivo
    *
    * @returns {Promise<Object>} Documento criado no banco de dados
-   * @throws {AppError} Validações falham (usuário, tipo de documento, duplicação)
+   * @throws {AppError} Validações falham (estudante, tipo de documento, duplicação)
    *
    * @example
    * const document = await DocumentService.upload({
-   *   userId: 5,
+   *   studentId: 5,
    *   documentTypeId: 2,
    *   filePath: 'uploads/documents/5/1698700200000-rg.pdf',
    *   fileName: '1698700200000-rg.pdf',
@@ -56,7 +56,7 @@ class DocumentService {
    */
   static async upload(uploadData) {
     const {
-      userId,
+      studentId,
       documentTypeId,
       filePath,
       fileName,
@@ -65,10 +65,10 @@ class DocumentService {
     } = uploadData;
 
     try {
-      // 1. Validar se usuário existe
-      const user = await User.findByPk(userId);
-      if (!user) {
-        throw new AppError('Usuário não encontrado', 404, 'USER_NOT_FOUND');
+      // 1. Validar se estudante existe
+      const student = await Student.findByPk(studentId);
+      if (!student) {
+        throw new AppError('Estudante não encontrado', 404, 'STUDENT_NOT_FOUND');
       }
 
       // 2. Validar se tipo de documento existe
@@ -81,18 +81,18 @@ class DocumentService {
         );
       }
 
-      // 3. Validar se documentType é aplicável para o tipo de usuário
-      if (!documentType.isApplicableFor(user.role)) {
+      // 3. Validar se documentType é aplicável para estudantes
+      if (!documentType.isApplicableFor('student')) {
         throw new AppError(
-          `Este tipo de documento não é aplicável para ${user.role === 'student' ? 'alunos' : 'professores'}`,
+          'Este tipo de documento não é aplicável para alunos',
           422,
           'DOCUMENT_TYPE_NOT_APPLICABLE'
         );
       }
 
       // 4. Verificar se já existe documento deste tipo (para evitar duplicação)
-      const existingDocument = await Document.findByUserAndType(
-        userId,
+      const existingDocument = await Document.findByStudentAndType(
+        studentId,
         documentTypeId
       );
 
@@ -109,7 +109,7 @@ class DocumentService {
 
       // 5. Criar registro de documento no banco
       const document = await Document.create({
-        user_id: userId,
+        student_id: studentId,
         document_type_id: documentTypeId,
         file_path: filePath,
         file_name: fileName,
@@ -121,7 +121,7 @@ class DocumentService {
       // 6. Registrar log
       logger.info('[DocumentService] Documento enviado com sucesso', {
         documentId: document.id,
-        userId,
+        studentId,
         documentTypeId,
         fileName,
         fileSize,
@@ -136,7 +136,7 @@ class DocumentService {
       }
 
       logger.error('[DocumentService] Erro ao fazer upload de documento', {
-        userId,
+        studentId,
         documentTypeId,
         error: error.message,
       });
@@ -173,7 +173,7 @@ class DocumentService {
     try {
       // 1. Buscar documento
       const document = await Document.findByPk(documentId, {
-        include: ['user', 'documentType'],
+        include: ['student', 'documentType'],
       });
 
       if (!document) {
@@ -198,7 +198,7 @@ class DocumentService {
 
       logger.info('[DocumentService] Documento aprovado', {
         documentId,
-        userId: document.user_id,
+        studentId: document.student_id,
         documentTypeId: document.document_type_id,
         reviewerId,
         observations,
@@ -206,32 +206,32 @@ class DocumentService {
 
       // 4. Enviar email de notificação (operação não-bloqueante)
       try {
-        if (document.user && document.user.email) {
+        if (document.student && document.student.email) {
           await emailService.sendDocumentApprovedEmail(
-            document.user.email,
+            document.student.email,
             document.documentType.name,
             {
-              name: document.user.name,
+              name: document.student.nome,
               observations: observations,
             }
           );
 
           logger.info('[DocumentService] Email de aprovação enviado', {
             documentId,
-            userId: document.user_id,
-            email: document.user.email,
+            studentId: document.student_id,
+            email: document.student.email,
           });
         } else {
-          logger.warn('[DocumentService] Usuário sem email cadastrado', {
+          logger.warn('[DocumentService] Estudante sem email cadastrado', {
             documentId,
-            userId: document.user_id,
+            studentId: document.student_id,
           });
         }
       } catch (emailError) {
         // Email é operação secundária, não deve falhar a aprovação
         logger.error('[DocumentService] Erro ao enviar email de aprovação', {
           documentId,
-          userId: document.user_id,
+          studentId: document.student_id,
           error: emailError.message,
         });
       }
@@ -289,7 +289,7 @@ class DocumentService {
 
       // 2. Buscar documento
       const document = await Document.findByPk(documentId, {
-        include: ['user', 'documentType'],
+        include: ['student', 'documentType'],
       });
 
       if (!document) {
@@ -314,7 +314,7 @@ class DocumentService {
 
       logger.info('[DocumentService] Documento rejeitado', {
         documentId,
-        userId: document.user_id,
+        studentId: document.student_id,
         documentTypeId: document.document_type_id,
         reviewerId,
         observations,
@@ -322,32 +322,32 @@ class DocumentService {
 
       // 5. Enviar email de notificação (operação não-bloqueante)
       try {
-        if (document.user && document.user.email) {
+        if (document.student && document.student.email) {
           await emailService.sendDocumentRejectedEmail(
-            document.user.email,
+            document.student.email,
             document.documentType.name,
             observations,
             {
-              name: document.user.name,
+              name: document.student.nome,
             }
           );
 
           logger.info('[DocumentService] Email de rejeição enviado', {
             documentId,
-            userId: document.user_id,
-            email: document.user.email,
+            studentId: document.student_id,
+            email: document.student.email,
           });
         } else {
-          logger.warn('[DocumentService] Usuário sem email cadastrado', {
+          logger.warn('[DocumentService] Estudante sem email cadastrado', {
             documentId,
-            userId: document.user_id,
+            studentId: document.student_id,
           });
         }
       } catch (emailError) {
         // Email é operação secundária, não deve falhar a rejeição
         logger.error('[DocumentService] Erro ao enviar email de rejeição', {
           documentId,
-          userId: document.user_id,
+          studentId: document.student_id,
           error: emailError.message,
         });
       }
@@ -463,7 +463,7 @@ class DocumentService {
    *
    * @param {Object} filters - Filtros aplicados
    * @param {string} filters.status - Status do documento (pending, approved, rejected)
-   * @param {number} filters.userId - ID do usuário
+   * @param {number} filters.studentId - ID do estudante
    * @param {number} filters.page - Página (padrão: 1)
    * @param {number} filters.limit - Itens por página (padrão: 20)
    * @param {string} filters.orderBy - Campo para ordenar (padrão: created_at)
@@ -482,7 +482,7 @@ class DocumentService {
     try {
       const {
         status,
-        userId,
+        studentId,
         page = 1,
         limit = 20,
         orderBy = 'created_at',
@@ -497,8 +497,8 @@ class DocumentService {
       if (status) {
         where.status = status;
       }
-      if (userId) {
-        where.user_id = userId;
+      if (studentId) {
+        where.student_id = studentId;
       }
 
       // Buscar documentos
@@ -506,8 +506,8 @@ class DocumentService {
         where,
         include: [
           {
-            association: 'user',
-            attributes: ['id', 'name', 'role', 'email'],
+            association: 'student',
+            attributes: ['id', 'nome', 'email', 'cpf'],
           },
           {
             association: 'documentType',
@@ -558,8 +558,8 @@ class DocumentService {
       const document = await Document.findByPk(documentId, {
         include: [
           {
-            association: 'user',
-            attributes: ['id', 'name', 'role', 'email'],
+            association: 'student',
+            attributes: ['id', 'nome', 'email', 'cpf'],
           },
           {
             association: 'documentType',
@@ -603,26 +603,24 @@ class DocumentService {
   /**
    * Validar se documentos obrigatórios foram aprovados
    *
-   * @param {number} userId - ID do usuário
+   * @param {number} studentId - ID do estudante
    *
    * @returns {Promise<Object>} { allApproved, pending, approved, rejected }
    */
-  static async validateRequiredDocuments(userId) {
+  static async validateRequiredDocuments(studentId) {
     try {
-      const user = await User.findByPk(userId);
-      if (!user) {
-        throw new AppError('Usuário não encontrado', 404, 'USER_NOT_FOUND');
+      const student = await Student.findByPk(studentId);
+      if (!student) {
+        throw new AppError('Estudante não encontrado', 404, 'STUDENT_NOT_FOUND');
       }
 
-      // Buscar tipos de documentos obrigatórios para o tipo de usuário
-      const requiredTypes = await DocumentType.findRequiredForUserType(
-        user.role
-      );
+      // Buscar tipos de documentos obrigatórios para estudantes
+      const requiredTypes = await DocumentType.findRequiredForUserType('student');
 
       // Para cada tipo obrigatório, verificar status
       const documentStatus = await Promise.all(
         requiredTypes.map(async (docType) => {
-          const doc = await Document.findByUserAndType(userId, docType.id);
+          const doc = await Document.findByStudentAndType(studentId, docType.id);
           return {
             documentTypeId: docType.id,
             documentTypeName: docType.name,
@@ -652,7 +650,7 @@ class DocumentService {
       logger.error(
         '[DocumentService] Erro ao validar documentos obrigatórios',
         {
-          userId,
+          studentId,
           error: error.message,
         }
       );
@@ -666,24 +664,24 @@ class DocumentService {
   }
 
   /**
-   * Listar documentos de um usuário específico
+   * Listar documentos de um estudante específico
    *
    * Responsabilidades:
-   * - Buscar todos os documentos de um usuário
+   * - Buscar todos os documentos de um estudante
    * - Incluir informações do tipo de documento
    * - Aplicar paginação
    * - Ordenar por data de criação (descendente)
    *
-   * @param {number} userId - ID do usuário cujos documentos serão listados
+   * @param {number} studentId - ID do estudante cujos documentos serão listados
    * @param {Object} options - Opções de listagem
    * @param {number} options.page - Página (padrão: 1)
    * @param {number} options.limit - Itens por página (padrão: 20)
    *
    * @returns {Promise<Object>} { documents, total, page, limit, pages }
-   * @throws {AppError} Usuário não encontrado ou erro ao buscar
+   * @throws {AppError} Estudante não encontrado ou erro ao buscar
    *
    * @example
-   * const result = await DocumentService.getDocumentsByUser(5, { page: 1, limit: 20 });
+   * const result = await DocumentService.getDocumentsByStudent(5, { page: 1, limit: 20 });
    * // Retorna:
    * // {
    * //   documents: [...],
@@ -693,26 +691,26 @@ class DocumentService {
    * //   pages: 1
    * // }
    */
-  static async getDocumentsByUser(userId, options = {}) {
+  static async getDocumentsByStudent(studentId, options = {}) {
     try {
       const { page = 1, limit = 20 } = options;
 
-      // 1. Validar se usuário existe
-      const user = await User.findByPk(userId);
-      if (!user) {
+      // 1. Validar se estudante existe
+      const student = await Student.findByPk(studentId);
+      if (!student) {
         throw new AppError(
-          'Usuário não encontrado',
+          'Estudante não encontrado',
           404,
-          'USER_NOT_FOUND'
+          'STUDENT_NOT_FOUND'
         );
       }
 
       // 2. Calcular offset para paginação
       const offset = (Math.max(1, page) - 1) * limit;
 
-      // 3. Buscar documentos do usuário
+      // 3. Buscar documentos do estudante
       const { count, rows } = await Document.findAndCountAll({
-        where: { user_id: userId },
+        where: { student_id: studentId },
         include: [
           {
             association: 'documentType',
@@ -729,8 +727,8 @@ class DocumentService {
         offset,
       });
 
-      logger.info('[DocumentService] Documentos do usuário listados', {
-        userId,
+      logger.info('[DocumentService] Documentos do estudante listados', {
+        studentId,
         total: count,
         page,
         limit,
@@ -748,15 +746,15 @@ class DocumentService {
         throw error;
       }
 
-      logger.error('[DocumentService] Erro ao listar documentos do usuário', {
-        userId,
+      logger.error('[DocumentService] Erro ao listar documentos do estudante', {
+        studentId,
         error: error.message,
       });
 
       throw new AppError(
-        'Erro ao listar documentos do usuário',
+        'Erro ao listar documentos do estudante',
         500,
-        'USER_DOCUMENTS_LIST_ERROR'
+        'STUDENT_DOCUMENTS_LIST_ERROR'
       );
     }
   }
@@ -826,12 +824,12 @@ class DocumentService {
    *
    * Responsabilidades:
    * - Validar se documento existe
-   * - Validar permissão: usuário do documento ou admin
+   * - Validar permissão: estudante do documento ou admin
    * - Validar se arquivo existe no servidor
    * - Retornar caminho do arquivo e nome para download
    *
    * @param {number} documentId - ID do documento a fazer download
-   * @param {number} userId - ID do usuário que está fazendo download
+   * @param {number} studentId - ID do estudante que está fazendo download (ou null se admin)
    * @param {string} userRole - Role do usuário (admin, teacher, student)
    *
    * @returns {Promise<Object>} { filePath, fileName }
@@ -841,7 +839,7 @@ class DocumentService {
    * const file = await DocumentService.download(10, 5, 'student');
    * // Retorna: { filePath: 'uploads/documents/5/1698700200000-rg.pdf', fileName: '1698700200000-rg.pdf' }
    */
-  static async download(documentId, userId, userRole) {
+  static async download(documentId, studentId, userRole) {
     try {
       // 1. Buscar documento
       const document = await Document.findByPk(documentId);
@@ -854,8 +852,8 @@ class DocumentService {
         );
       }
 
-      // 2. Validar permissão (próprio usuário ou admin)
-      if (document.user_id !== userId && userRole !== 'admin') {
+      // 2. Validar permissão (próprio estudante ou admin)
+      if (document.student_id !== studentId && userRole !== 'admin') {
         throw new AppError(
           'Você não tem permissão para acessar este documento',
           403,
@@ -884,8 +882,8 @@ class DocumentService {
 
       logger.info('[DocumentService] Download autorizado', {
         documentId,
-        userId,
-        documentOwnerId: document.user_id,
+        studentId,
+        documentOwnerId: document.student_id,
         fileName: document.file_name,
       });
 
@@ -901,7 +899,7 @@ class DocumentService {
 
       logger.error('[DocumentService] Erro ao preparar download', {
         documentId,
-        userId,
+        studentId,
         error: error.message,
       });
 

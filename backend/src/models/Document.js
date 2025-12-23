@@ -13,7 +13,7 @@
  * @example
  * // Criar novo documento
  * const document = await Document.create({
- *   user_id: 1,
+ *   student_id: 1,
  *   document_type_id: 2,
  *   file_path: '/uploads/documents/rg_12345.pdf',
  *   file_name: 'rg.pdf',
@@ -50,15 +50,15 @@ module.exports = (sequelize, DataTypes) => {
         autoIncrement: true,
         allowNull: false,
       },
-      user_id: {
+      student_id: {
         type: DataTypes.INTEGER.UNSIGNED,
         allowNull: false,
         validate: {
           notNull: {
-            msg: 'O ID do usuário é obrigatório',
+            msg: 'O ID do estudante é obrigatório',
           },
           isInt: {
-            msg: 'O ID do usuário deve ser um número inteiro',
+            msg: 'O ID do estudante deve ser um número inteiro',
           },
         },
       },
@@ -200,7 +200,7 @@ module.exports = (sequelize, DataTypes) => {
           limit: 50,
         },
         withRelations: {
-          include: ['user', 'documentType', 'reviewer'],
+          include: ['student', 'documentType', 'reviewer'],
         },
       },
       hooks: {
@@ -211,7 +211,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         afterCreate: (document) => {
           console.log(
-            `[Document] Novo documento enviado: ${document.file_name} (ID: ${document.id}, User ID: ${document.user_id})`,
+            `[Document] Novo documento enviado: ${document.file_name} (ID: ${document.id}, Student ID: ${document.student_id})`,
           );
         },
         afterUpdate: (document) => {
@@ -325,13 +325,13 @@ module.exports = (sequelize, DataTypes) => {
    */
 
   /**
-   * Busca documentos de um usuário específico
-   * @param {number} userId - ID do usuário
+   * Busca documentos de um estudante específico
+   * @param {number} studentId - ID do estudante
    * @returns {Promise<Document[]>}
    */
-  Document.findByUser = async function (userId) {
+  Document.findByStudent = async function (studentId) {
     return await Document.findAll({
-      where: { user_id: userId },
+      where: { student_id: studentId },
       include: ['documentType', 'reviewer'],
       order: [['created_at', 'DESC']],
     });
@@ -344,7 +344,7 @@ module.exports = (sequelize, DataTypes) => {
    */
   Document.findByStatus = async function (status) {
     return await Document.scope({ method: ['byStatus', status] }).findAll({
-      include: ['user', 'documentType', 'reviewer'],
+      include: ['student', 'documentType', 'reviewer'],
       order: [['created_at', 'DESC']],
     });
   };
@@ -355,21 +355,21 @@ module.exports = (sequelize, DataTypes) => {
    */
   Document.findPending = async function () {
     return await Document.scope('pending').findAll({
-      include: ['user', 'documentType'],
+      include: ['student', 'documentType'],
       order: [['created_at', 'ASC']],
     });
   };
 
   /**
-   * Verifica se um usuário já enviou um documento de determinado tipo
-   * @param {number} userId - ID do usuário
+   * Verifica se um estudante já enviou um documento de determinado tipo
+   * @param {number} studentId - ID do estudante
    * @param {number} documentTypeId - ID do tipo de documento
    * @returns {Promise<Document|null>}
    */
-  Document.findByUserAndType = async function (userId, documentTypeId) {
+  Document.findByStudentAndType = async function (studentId, documentTypeId) {
     return await Document.findOne({
       where: {
-        user_id: userId,
+        student_id: studentId,
         document_type_id: documentTypeId,
       },
       order: [['created_at', 'DESC']],
@@ -377,28 +377,28 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   /**
-   * Conta documentos pendentes de um usuário
-   * @param {number} userId - ID do usuário
+   * Conta documentos pendentes de um estudante
+   * @param {number} studentId - ID do estudante
    * @returns {Promise<number>}
    */
-  Document.countPendingByUser = async function (userId) {
+  Document.countPendingByStudent = async function (studentId) {
     return await Document.count({
       where: {
-        user_id: userId,
+        student_id: studentId,
         status: 'pending',
       },
     });
   };
 
   /**
-   * Conta documentos aprovados de um usuário
-   * @param {number} userId - ID do usuário
+   * Conta documentos aprovados de um estudante
+   * @param {number} studentId - ID do estudante
    * @returns {Promise<number>}
    */
-  Document.countApprovedByUser = async function (userId) {
+  Document.countApprovedByStudent = async function (studentId) {
     return await Document.count({
       where: {
-        user_id: userId,
+        student_id: studentId,
         status: 'approved',
       },
     });
@@ -411,10 +411,10 @@ module.exports = (sequelize, DataTypes) => {
    * @param {Object} models - Objeto contendo todos os models
    */
   Document.associate = function (models) {
-    // Um documento pertence a um usuário (que enviou)
-    Document.belongsTo(models.User, {
-      foreignKey: 'user_id',
-      as: 'user',
+    // Um documento pertence a um estudante (que enviou)
+    Document.belongsTo(models.Student, {
+      foreignKey: 'student_id',
+      as: 'student',
       onDelete: 'RESTRICT',
       onUpdate: 'CASCADE',
     });

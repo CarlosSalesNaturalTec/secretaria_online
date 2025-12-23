@@ -115,6 +115,14 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'RESTRICT',
       });
 
+      // Student pode ter múltiplos documentos (1:N)
+      Student.hasMany(models.Document, {
+        foreignKey: 'student_id',
+        as: 'documents',
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT',
+      });
+
       // Associações futuras com outras entidades
       // Student.hasMany(models.Grade, { ... });
     }

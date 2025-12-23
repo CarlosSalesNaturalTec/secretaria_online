@@ -89,9 +89,20 @@ class DocumentController {
         });
       }
 
+      // Validar que usuário é estudante e tem student_id
+      if (!req.user.student_id) {
+        return res.status(403).json({
+          success: false,
+          error: {
+            code: 'FORBIDDEN',
+            message: 'Apenas estudantes podem enviar documentos',
+          },
+        });
+      }
+
       // Chamar serviço para fazer upload
       const document = await DocumentService.upload({
-        userId: req.user.id,
+        studentId: req.user.student_id,
         documentTypeId: parseInt(document_type_id),
         filePath: req.file.path,
         fileName: req.file.filename,
@@ -102,6 +113,7 @@ class DocumentController {
       logger.info('[DocumentController] Upload realizado com sucesso', {
         documentId: document.id,
         userId: req.user.id,
+        studentId: req.user.student_id,
       });
 
       res.status(201).json({
@@ -156,7 +168,7 @@ class DocumentController {
     try {
       const {
         status,
-        userId,
+        studentId,
         page = 1,
         limit = 20,
         orderBy = 'created_at',
@@ -189,7 +201,7 @@ class DocumentController {
       // Chamar serviço
       const result = await DocumentService.list({
         status,
-        userId: userId ? parseInt(userId) : undefined,
+        studentId: studentId ? parseInt(studentId) : undefined,
         page: parseInt(page) || 1,
         limit: parseInt(limit) || 20,
         orderBy,
@@ -641,31 +653,31 @@ class DocumentController {
    *   }
    * }
    */
-  async getUserDocuments(req, res, next) {
+  async getStudentDocuments(req, res, next) {
     try {
-      const { userId } = req.params;
+      const { studentId } = req.params;
       const { page = 1, limit = 20 } = req.query;
 
-      // Validar ID do usuário
-      if (isNaN(userId) || parseInt(userId) <= 0) {
+      // Validar ID do estudante
+      if (isNaN(studentId) || parseInt(studentId) <= 0) {
         return res.status(400).json({
           success: false,
           error: {
             code: 'VALIDATION_ERROR',
-            message: 'ID do usuário deve ser um número inteiro positivo',
+            message: 'ID do estudante deve ser um número inteiro positivo',
           },
         });
       }
 
-      const userIdInt = parseInt(userId);
+      const studentIdInt = parseInt(studentId);
 
-      // Validar permissão: apenas admin ou o próprio usuário pode ver os documentos
-      if (req.user.role !== 'admin' && req.user.id !== userIdInt) {
+      // Validar permissão: apenas admin ou o próprio estudante pode ver os documentos
+      if (req.user.role !== 'admin' && req.user.student_id !== studentIdInt) {
         return res.status(403).json({
           success: false,
           error: {
             code: 'FORBIDDEN',
-            message: 'Você não tem permissão para visualizar os documentos deste usuário',
+            message: 'Você não tem permissão para visualizar os documentos deste estudante',
           },
         });
       }
@@ -674,14 +686,14 @@ class DocumentController {
       const pageInt = Math.max(1, parseInt(page) || 1);
       const limitInt = Math.max(1, Math.min(100, parseInt(limit) || 20)); // Limitar a 100 itens por página
 
-      // Chamar serviço para listar documentos do usuário
-      const result = await DocumentService.getDocumentsByUser(userIdInt, {
+      // Chamar serviço para listar documentos do estudante
+      const result = await DocumentService.getDocumentsByStudent(studentIdInt, {
         page: pageInt,
         limit: limitInt,
       });
 
-      logger.info('[DocumentController] Documentos do usuário listados', {
-        userId: userIdInt,
+      logger.info('[DocumentController] Documentos do estudante listados', {
+        studentId: studentIdInt,
         requestedBy: req.user.id,
         role: req.user.role,
         total: result.total,
@@ -754,18 +766,30 @@ class DocumentController {
     try {
       const { page = 1, limit = 20 } = req.query;
 
+      // Validar que usuário é estudante e tem student_id
+      if (!req.user.student_id) {
+        return res.status(403).json({
+          success: false,
+          error: {
+            code: 'FORBIDDEN',
+            message: 'Apenas estudantes podem visualizar documentos',
+          },
+        });
+      }
+
       // Validar paginação
       const pageInt = Math.max(1, parseInt(page) || 1);
       const limitInt = Math.max(1, Math.min(100, parseInt(limit) || 20)); // Limitar a 100 itens por página
 
       // Chamar serviço para listar próprios documentos
-      const result = await DocumentService.getDocumentsByUser(req.user.id, {
+      const result = await DocumentService.getDocumentsByStudent(req.user.student_id, {
         page: pageInt,
         limit: limitInt,
       });
 
-      logger.info('[DocumentController] Documentos do usuário autenticado listados', {
+      logger.info('[DocumentController] Documentos do estudante autenticado listados', {
         userId: req.user.id,
+        studentId: req.user.student_id,
         role: req.user.role,
         total: result.total,
       });
@@ -838,11 +862,14 @@ class DocumentController {
       }
 
       // Chamar serviço para fazer download com validação de permissão
-      const file = await DocumentService.download(parseInt(id), req.user.id, req.user.role);
+      // Para estudantes, passa student_id; para admin, passa null
+      const studentId = req.user.student_id || null;
+      const file = await DocumentService.download(parseInt(id), studentId, req.user.role);
 
       logger.info('[DocumentController] Download de documento realizado', {
         documentId: id,
         downloadedBy: req.user.id,
+        studentId: studentId,
         fileName: file.fileName,
       });
 
