@@ -569,7 +569,7 @@ export default function StudentCoursesPage() {
                               if (enrollment && e.target.value) {
                                 handleStatusChange(
                                   enrollment.id,
-                                  e.target.value as 'pending' | 'active' | 'cancelled' | 'reenrollment' | 'canceled'
+                                  e.target.value as 'pending' | 'active' | 'cancelled' | 'reenrollment' | 'completed'
                                 );
                                 e.target.value = '';
                               }

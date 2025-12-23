@@ -32,7 +32,7 @@ export interface ICreateEnrollmentData {
  * Interface para dados de atualização de matrícula (request)
  */
 export interface IUpdateEnrollmentData {
-  status?: 'pending' | 'active' | 'cancelled';
+  status?: 'pending' | 'active' | 'cancelled' | 'reenrollment' | 'completed';
   enrollmentDate?: string;
 }
 
@@ -366,7 +366,7 @@ async function update(
  */
 async function updateStatus(
   id: number,
-  status: 'pending' | 'active' | 'cancelled'
+  status: 'pending' | 'active' | 'cancelled' | 'reenrollment' | 'completed'
 ): Promise<IEnrollment> {
   try {
     if (import.meta.env.DEV) {
