@@ -40,9 +40,10 @@ export interface IRequest {
   // Relacionamentos
   student?: {
     id: number;
-    name: string;
+    nome: string; // Tabela students usa 'nome' ao invés de 'name'
     email: string;
     cpf?: string;
+    matricula?: number;
   };
   requestType?: {
     id: number;

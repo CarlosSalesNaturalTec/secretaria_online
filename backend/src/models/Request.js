@@ -17,7 +17,7 @@
  * - Fornecer métodos auxiliares para gestão de solicitações
  *
  * Relacionamentos:
- * - belongsTo User (student) - Aluno que fez a solicitação
+ * - belongsTo Student - Aluno que fez a solicitação
  * - belongsTo User (reviewer) - Admin que revisou a solicitação
  * - belongsTo RequestType - Tipo de solicitação
  *
@@ -45,7 +45,7 @@ module.exports = (sequelize, DataTypes) => {
             msg: 'ID do aluno deve ser um número inteiro',
           },
         },
-        comment: 'FK para users - aluno que fez a solicitação',
+        comment: 'FK para students - aluno que fez a solicitação',
       },
       request_type_id: {
         type: DataTypes.INTEGER,
@@ -202,7 +202,7 @@ module.exports = (sequelize, DataTypes) => {
           include: [
             {
               association: 'student',
-              attributes: ['id', 'name', 'email'],
+              attributes: ['id', 'nome', 'email', 'cpf', 'matricula'],
             },
             {
               association: 'reviewer',
@@ -453,8 +453,8 @@ module.exports = (sequelize, DataTypes) => {
    * @param {Object} models - Objeto contendo todos os models
    */
   Request.associate = function (models) {
-    // Solicitação pertence a um aluno (User com role='student')
-    Request.belongsTo(models.User, {
+    // Solicitação pertence a um aluno (Student)
+    Request.belongsTo(models.Student, {
       foreignKey: 'student_id',
       as: 'student',
     });

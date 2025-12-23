@@ -7,7 +7,7 @@
  * Atualizado em: 2025-11-03
  */
 
-const { Request, RequestType, User } = require('../models');
+const { Request, RequestType, User, Student } = require('../models');
 
 /**
  * Controller de Solicitações
@@ -78,10 +78,21 @@ class RequestController {
 
       if (user.role === 'student') {
         // Alunos só podem criar solicitações para si mesmos
-        finalStudentId = user.id;
+        // Usar student_id da tabela users (FK para students)
+        if (!user.student_id) {
+          return res.status(400).json({
+            success: false,
+            error: {
+              code: 'STUDENT_NOT_LINKED',
+              message: 'Usuário não está vinculado a um estudante'
+            }
+          });
+        }
+
+        finalStudentId = user.student_id;
 
         // Se tentou especificar outro aluno, retornar erro
-        if (student_id && student_id !== user.id) {
+        if (student_id && student_id !== user.student_id) {
           return res.status(403).json({
             success: false,
             error: {
@@ -108,10 +119,8 @@ class RequestController {
           });
         }
 
-        // Verificar se o aluno existe
-        const student = await User.findOne({
-          where: { id: student_id, role: 'student' }
-        });
+        // Verificar se o aluno existe na tabela students
+        const student = await Student.findByPk(student_id);
 
         if (!student) {
           return res.status(404).json({
@@ -210,10 +219,20 @@ class RequestController {
 
       // Se for aluno, só pode ver suas próprias solicitações
       if (user.role === 'student') {
-        whereConditions.student_id = user.id;
+        if (!user.student_id) {
+          return res.status(400).json({
+            success: false,
+            error: {
+              code: 'STUDENT_NOT_LINKED',
+              message: 'Usuário não está vinculado a um estudante'
+            }
+          });
+        }
+
+        whereConditions.student_id = user.student_id;
 
         // Aluno não pode filtrar por student_id diferente do seu
-        if (student_id && parseInt(student_id) !== user.id) {
+        if (student_id && parseInt(student_id) !== user.student_id) {
           return res.status(403).json({
             success: false,
             error: {
@@ -360,7 +379,7 @@ class RequestController {
       }
 
       // Verificar permissão
-      if (user.role === 'student' && request.student_id !== user.id) {
+      if (user.role === 'student' && request.student_id !== user.student_id) {
         return res.status(403).json({
           success: false,
           error: {

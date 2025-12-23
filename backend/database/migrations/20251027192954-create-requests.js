@@ -21,12 +21,12 @@ module.exports = {
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
         references: {
-          model: 'users',
+          model: 'students',
           key: 'id',
         },
         onUpdate: 'CASCADE',
         onDelete: 'RESTRICT',
-        comment: 'FK para users - aluno que fez a solicitação',
+        comment: 'FK para students - aluno que fez a solicitação',
       },
       request_type_id: {
         type: Sequelize.INTEGER,

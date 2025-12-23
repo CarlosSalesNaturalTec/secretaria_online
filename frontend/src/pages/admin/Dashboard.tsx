@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, GraduationCap, FileText, UserCheck, AlertCircle, Clock } from 'lucide-react';
+import { GraduationCap, FileText, UserCheck, AlertCircle, Clock } from 'lucide-react';
 import { getDashboardStats } from '@/services/admin.service';
 import type { IDashboardStats } from '@/types/admin.types';
 

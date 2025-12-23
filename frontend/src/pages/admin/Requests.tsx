@@ -424,7 +424,7 @@ export default function AdminRequests() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-col">
                         <span className="text-sm font-medium text-gray-900">
-                          {request.student?.name || 'N/A'}
+                          {request.student?.nome || 'N/A'}
                         </span>
                         <span className="text-xs text-gray-500">
                           {request.student?.email || 'N/A'}
@@ -538,7 +538,7 @@ export default function AdminRequests() {
               <div>
                 <p className="text-sm text-gray-500">Aluno</p>
                 <p className="text-base font-semibold text-gray-900">
-                  {selectedRequest.student?.name || 'N/A'}
+                  {selectedRequest.student?.nome || 'N/A'}
                 </p>
                 <p className="text-sm text-gray-600">
                   {selectedRequest.student?.email || 'N/A'}
@@ -636,7 +636,7 @@ export default function AdminRequests() {
         isOpen={isApproveModalOpen}
         onClose={() => setIsApproveModalOpen(false)}
         title="Aprovar Solicitação"
-        description={`Você está prestes a aprovar a solicitação de "${selectedRequest?.requestType?.name}" de ${selectedRequest?.student?.name}`}
+        description={`Você está prestes a aprovar a solicitação de "${selectedRequest?.requestType?.name}" de ${selectedRequest?.student?.nome}`}
         size="md"
         footer={
           <div className="flex justify-end gap-3">
@@ -690,7 +690,7 @@ export default function AdminRequests() {
         isOpen={isRejectModalOpen}
         onClose={() => setIsRejectModalOpen(false)}
         title="Rejeitar Solicitação"
-        description={`Você está prestes a rejeitar a solicitação de "${selectedRequest?.requestType?.name}" de ${selectedRequest?.student?.name}`}
+        description={`Você está prestes a rejeitar a solicitação de "${selectedRequest?.requestType?.name}" de ${selectedRequest?.student?.nome}`}
         size="md"
         footer={
           <div className="flex justify-end gap-3">

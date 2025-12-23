@@ -107,6 +107,14 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'RESTRICT',
       });
 
+      // Student pode ter múltiplas solicitações (1:N)
+      Student.hasMany(models.Request, {
+        foreignKey: 'student_id',
+        as: 'requests',
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT',
+      });
+
       // Associações futuras com outras entidades
       // Student.hasMany(models.Grade, { ... });
     }
