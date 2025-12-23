@@ -76,7 +76,7 @@ export default function AdminRequests() {
   const [stats, setStats] = useState<IRequestStats | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState<RequestStatus | 'all'>('all');
+  const [filterStatus, setFilterStatus] = useState<RequestStatus | 'all'>('pending');
 
   // Estados do modal de ações
   const [selectedRequest, setSelectedRequest] = useState<IRequest | null>(null);
@@ -610,6 +610,17 @@ export default function AdminRequests() {
                         {selectedRequest.reviewedAt
                           ? formatDate(selectedRequest.reviewedAt)
                           : 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {selectedRequest.observations && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-2">Observações do Revisor</p>
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <p className="text-sm text-gray-900 whitespace-pre-wrap">
+                        {selectedRequest.observations}
                       </p>
                     </div>
                   </div>

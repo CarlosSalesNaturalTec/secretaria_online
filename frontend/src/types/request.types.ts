@@ -33,6 +33,7 @@ export interface IRequest {
   status: RequestStatus;
   reviewedBy: number | null;
   reviewedAt: string | null;
+  observations: string | null;
   createdAt: string;
   updatedAt: string;
 

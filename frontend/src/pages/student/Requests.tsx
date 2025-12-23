@@ -587,7 +587,7 @@ export default function Requests() {
                         <p className="text-xs font-semibold text-gray-600 mb-2">
                           Observação do Revisor
                         </p>
-                        <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded">
+                        <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded space-y-2">
                           <p>
                             A solicitação foi{' '}
                             <span className="font-semibold">
@@ -605,6 +605,14 @@ export default function Requests() {
                             )}
                             .
                           </p>
+                          {request.observations && (
+                            <div className="mt-2 pt-2 border-t border-gray-200">
+                              <p className="text-xs font-semibold text-gray-600 mb-1">
+                                Observações:
+                              </p>
+                              <p className="whitespace-pre-wrap">{request.observations}</p>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
