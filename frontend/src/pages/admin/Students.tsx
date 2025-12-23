@@ -263,6 +263,34 @@ export default function StudentsPage() {
       align: 'center',
     },
     {
+      key: 'status',
+      header: 'Status',
+      accessor: (student) => {
+        const enrollment = student.enrollments?.find(e => e.status === 'active') || student.enrollments?.[0];
+        const status = enrollment?.status || '-';
+
+        const statusMap: Record<string, { label: string; color: string }> = {
+          'active': { label: 'Ativo', color: 'bg-green-100 text-green-800' },
+          'inactive': { label: 'Inativo', color: 'bg-gray-100 text-gray-800' },
+          'suspended': { label: 'Suspenso', color: 'bg-yellow-100 text-yellow-800' },
+          'graduated': { label: 'Concluído', color: 'bg-blue-100 text-blue-800' },
+          'cancelled': { label: 'Cancelado', color: 'bg-red-100 text-red-800' },
+          'pending': { label: 'Pendente', color: 'bg-orange-100 text-orange-800' },
+          'reenrollment': { label: 'Rematrícula', color: 'bg-purple-100 text-purple-800' },
+          'completed': { label: 'Completo', color: 'bg-blue-100 text-blue-800' },
+        };
+
+        const statusInfo = statusMap[status] || { label: '-', color: 'bg-gray-100 text-gray-800' };
+
+        return (
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color}`}>
+            {statusInfo.label}
+          </span>
+        );
+      },
+      align: 'center',
+    },
+    {
       key: 'matricula',
       header: 'Matrícula',
       accessor: (student) => student.matricula || '-',
