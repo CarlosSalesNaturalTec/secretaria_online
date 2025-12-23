@@ -8,7 +8,7 @@
  * Atualizado em: 2025-12-01
  */
 
-const { Student, User } = require('../models');
+const { Student, User, Enrollment, Course } = require('../models');
 const { AppError } = require('../middlewares/error.middleware');
 const { generateProvisionalPassword } = require('../utils/generators');
 const EmailService = require('./email.service');
@@ -189,10 +189,22 @@ class StudentService {
           as: 'user',
           attributes: ['id', 'login', 'email', 'role', 'created_at'],
         },
+        {
+          model: Enrollment,
+          as: 'enrollments',
+          include: [
+            {
+              model: Course,
+              as: 'course',
+              attributes: ['id', 'name'],
+            },
+          ],
+        },
       ],
       order: [['nome', 'ASC']],
       limit: parseInt(limit),
       offset: parseInt(offset),
+      distinct: true,
     });
 
     return {

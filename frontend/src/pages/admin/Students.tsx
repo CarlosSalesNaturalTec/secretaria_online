@@ -238,11 +238,6 @@ export default function StudentsPage() {
     }
   };
 
-  const formatCPF = (cpf: string | null): string => {
-    if (!cpf) return '-';
-    return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-  };
-
   const columns: Column<IStudent>[] = [
     {
       key: 'nome',
@@ -251,15 +246,20 @@ export default function StudentsPage() {
       sortable: true,
     },
     {
-      key: 'email',
-      header: 'Email',
-      accessor: (student) => student.email || '-',
-      sortable: true,
+      key: 'course',
+      header: 'Nome do Curso',
+      accessor: (student) => {
+        const enrollment = student.enrollments?.find(e => e.status === 'active') || student.enrollments?.[0];
+        return enrollment?.course?.name || '-';
+      },
     },
     {
-      key: 'cpf',
-      header: 'CPF',
-      accessor: (student) => formatCPF(student.cpf),
+      key: 'semester',
+      header: 'Semestre',
+      accessor: (student) => {
+        const enrollment = student.enrollments?.find(e => e.status === 'active') || student.enrollments?.[0];
+        return enrollment?.currentSemester ? `${enrollment.currentSemester}º` : '-';
+      },
       align: 'center',
     },
     {

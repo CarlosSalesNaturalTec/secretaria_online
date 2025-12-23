@@ -195,6 +195,15 @@ export interface IEnrollmentBasic {
 
   /** Data da matrícula */
   enrollmentDate: string;
+
+  /** Semestre atual */
+  currentSemester?: number | null;
+
+  /** Dados do curso */
+  course?: {
+    id: number;
+    name: string;
+  };
 }
 
 /**

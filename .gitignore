@@ -57,7 +57,7 @@ backend/uploads/temp/*
 !backend/uploads/temp/.gitkeep
 
 # Database
-*.sql
+#*.sql
 *.sqlite
 *.db
 
