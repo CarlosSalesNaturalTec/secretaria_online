@@ -8,6 +8,7 @@
  * - Processar aceite de rematrícula de estudantes
  * - Atualizar status de enrollments de 'reenrollment' para 'active'
  * - Criar contratos após aceite do estudante
+ * - Gerar PDF do contrato e salvar em disco
  * - Gerar preview de contrato HTML para estudantes
  * - Registrar logs detalhados de operações
  * - Garantir atomicidade das operações usando transações do Sequelize
@@ -17,7 +18,8 @@
  * 2. Status de enrollments é alterado de 'reenrollment' para 'active'
  * 3. Contratos são criados após aceite do estudante
  * 4. Campo current_semester é incrementado ao aceitar rematrícula
- * 5. Usar transação para garantir atomicidade (rollback completo em caso de erro)
+ * 5. PDF do contrato é gerado automaticamente e salvo em disco
+ * 6. Usar transação para garantir atomicidade (rollback completo em caso de erro)
  *
  * @example
  * // Aceitar rematrícula
@@ -31,6 +33,7 @@ const { Enrollment, User, Student, Course, ContractTemplate, Contract } = requir
 const { sequelize } = require('../models');
 const { AppError } = require('../middlewares/error.middleware');
 const logger = require('../utils/logger');
+const PDFService = require('./pdf.service');
 
 class ReenrollmentService {
   /**
@@ -54,7 +57,40 @@ class ReenrollmentService {
         throw new AppError('Usuário estudante inválido', 403);
       }
 
-      const enrollment = await Enrollment.findByPk(enrollmentId, { transaction });
+      // Buscar enrollment com dados do student e course para gerar o PDF
+      const enrollment = await Enrollment.findByPk(enrollmentId, {
+        include: [
+          {
+            model: Student,
+            as: 'student',
+            attributes: [
+              'id',
+              'nome',
+              'cpf',
+              'rg',
+              'data_nascimento',
+              'email',
+              'telefone',
+              'celular',
+              'endereco_rua',
+              'endereco_numero',
+              'endereco_complemento',
+              'endereco_bairro',
+              'endereco_cidade',
+              'endereco_uf',
+              'cep',
+              'matricula',
+            ],
+          },
+          {
+            model: Course,
+            as: 'course',
+            attributes: ['id', 'name', 'description', 'duration', 'duration_type'],
+          },
+        ],
+        transaction,
+      });
+
       if (!enrollment) {
         throw new AppError('Matrícula não encontrada', 404);
       }
@@ -91,6 +127,97 @@ class ReenrollmentService {
       }, { transaction });
 
       await transaction.commit();
+
+      // Gerar PDF do contrato após commit da transação
+      logger.info(`[ReenrollmentService] Gerando PDF do contrato - Contract ID: ${newContract.id}`);
+
+      try {
+        // Coletar dados para substituição de placeholders
+        const student = enrollment.student || {};
+        const course = enrollment.course || {};
+        const currentDate = new Date();
+
+        const addressParts = [
+          student.endereco_rua,
+          student.endereco_numero,
+          student.endereco_complemento,
+          student.endereco_bairro,
+          student.endereco_cidade,
+          student.endereco_uf,
+          student.cep,
+        ].filter(Boolean);
+        const studentAddress = addressParts.join(', ');
+
+        // Calcular semestre atual (current_semester já foi incrementado)
+        const nextSemester = enrollment.current_semester;
+
+        // Dados para substituição de placeholders
+        const placeholderData = {
+          studentName: student.nome || 'N/A',
+          studentId: student.id || 'N/A',
+          studentCPF: student.cpf ? student.cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4') : 'N/A',
+          studentRG: student.rg || 'N/A',
+          studentBirthDate: student.data_nascimento
+            ? (student.data_nascimento.match(/^\d{4}-\d{2}-\d{2}$/)
+                ? student.data_nascimento.split('-').reverse().join('/')
+                : student.data_nascimento)
+            : 'N/A',
+          studentEmail: student.email || 'N/A',
+          studentPhone: student.celular || student.telefone || 'N/A',
+          studentAddress: studentAddress || 'N/A',
+          enrollmentNumber: student.matricula || 'N/A',
+
+          courseName: course.name || 'N/A',
+          courseId: course.id || 0,
+          courseDuration: `${course.duration || 'N/A'} ${course.duration_type || ''}`.trim(),
+
+          enrollmentDate: new Date(enrollment.enrollment_date).toLocaleDateString('pt-BR'),
+          contractDate: currentDate.toLocaleDateString('pt-BR'),
+          currentSemester: nextSemester,
+          year: currentYear,
+          semester: nextSemester,
+
+          // Placeholders de rodapé
+          contractId: newContract.id,
+          generatedAt: currentDate.toLocaleString('pt-BR'),
+
+          // Placeholders antigos para retrocompatibilidade
+          cpf: student.cpf ? student.cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4') : 'N/A',
+          date: currentDate.toLocaleDateString('pt-BR'),
+          institutionName: 'Secretaria Online',
+          duration: `${course.duration || 'N/A'} ${course.duration_type || ''}`.trim(),
+        };
+
+        // Gerar conteúdo processado do template
+        const processedContent = template.replacePlaceholders(placeholderData);
+
+        // Gerar PDF usando PDFService
+        const pdfResult = await PDFService.generateContractPDF(
+          placeholderData,
+          processedContent,
+          'uploads/contracts'
+        );
+
+        // Atualizar contrato com file_path e file_name
+        newContract.file_path = pdfResult.relativePath;
+        newContract.file_name = pdfResult.fileName;
+        await newContract.save();
+
+        logger.info(
+          `[ReenrollmentService] PDF do contrato gerado com sucesso - Contract ID: ${newContract.id}, File: ${pdfResult.fileName}`
+        );
+      } catch (pdfError) {
+        // Log do erro mas não falha a operação de aceite
+        logger.error(
+          `[ReenrollmentService] Erro ao gerar PDF do contrato: ${pdfError.message}`,
+          {
+            contract_id: newContract.id,
+            enrollment_id: enrollmentId,
+            error_stack: pdfError.stack,
+          }
+        );
+        // O contrato foi criado mas sem PDF - pode ser gerado posteriormente
+      }
 
       logger.info(`[ReenrollmentService] Rematrícula aceita com sucesso - Enrollment ID: ${enrollmentId}`);
       return { enrollment, contract: newContract };

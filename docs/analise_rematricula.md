@@ -136,9 +136,11 @@ Enrollment.hasMany(models.Contract, {
 
 **Justificativa:**
 - Contratos de rematrícula serão criados APÓS aceite do estudante (Etapa 8 do backlog)
-- Contratos de rematrícula NÃO terão PDF gerado (apenas registro de aceite)
+- **ATUALIZADO (2025-12-23):** Contratos de rematrícula AGORA terão PDF gerado automaticamente após aceite
+- PDF é gerado usando PDFService após criação do contrato
+- Campos nullable permitem criar contrato primeiro e preencher file_path/file_name depois
 - Retrocompatibilidade: contratos antigos continuam com PDF
-- Flexibilidade: sistema pode ter contratos com ou sem PDF
+- Flexibilidade: sistema pode ter contratos com ou sem PDF (em caso de erro na geração)
 
 **Especificação:**
 ```javascript
@@ -463,19 +465,31 @@ if (oldContracts.length > 0) {
 }
 ```
 
-**Regra 3:** Contratos de rematrícula não devem ter PDF
+**Regra 3 (ATUALIZADA 2025-12-23):** Contratos de rematrícula devem ter PDF gerado automaticamente
 ```javascript
 // No ReenrollmentService ao criar contrato
 const contract = await Contract.create({
   user_id,
   enrollment_id,
   template_id,
-  file_path: null,     // Sem PDF
-  file_name: null,     // Sem PDF
+  file_path: null,     // Preenchido após geração do PDF
+  file_name: null,     // Preenchido após geração do PDF
   semester,
   year,
   accepted_at: new Date()  // Aceite imediato
 });
+
+// Gerar PDF automaticamente após criação
+const pdfResult = await PDFService.generateContractPDF(
+  placeholderData,
+  processedContent,
+  'uploads/contracts'
+);
+
+// Atualizar contrato com file_path e file_name
+contract.file_path = pdfResult.relativePath;
+contract.file_name = pdfResult.fileName;
+await contract.save();
 ```
 
 ---
