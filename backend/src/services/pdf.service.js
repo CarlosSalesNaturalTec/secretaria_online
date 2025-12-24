@@ -2,10 +2,12 @@
  * Arquivo: backend/src/services/pdf.service.js
  * Descrição: Serviço responsável pela geração de PDFs de contratos
  * Feature: feat-047 - Criar PDFService para geração de contratos
+ * Atualizado: 2025-12-23 - Adicionado suporte para HTML com html-pdf-node
  * Criado em: 2025-11-01
  */
 
 const PDFDocument = require('pdfkit');
+const htmlPdf = require('html-pdf-node');
 const fs = require('fs');
 const fsPromises = require('fs').promises;
 const path = require('path');
@@ -15,15 +17,28 @@ const logger = require('../utils/logger');
  * PDFService
  *
  * Responsabilidades:
- * - Gerar PDFs de contratos a partir de templates HTML/texto
+ * - Gerar PDFs de contratos a partir de templates HTML ou texto
+ * - Suporta HTML completo com CSS (via html-pdf-node)
+ * - Suporta texto simples com formatação básica (via PDFKit)
  * - Substituir placeholders dinâmicos com dados reais
  * - Salvar PDFs em diretório estruturado
  * - Gerenciar permissões de arquivo
  * - Validar dados de entrada
+ *
+ * ATUALIZAÇÃO 2025-12-23:
+ * - Adicionado suporte para renderização de HTML completo com CSS
+ * - Detecção automática de tipo de conteúdo (HTML vs texto)
+ * - Mantida retrocompatibilidade com PDFKit para texto puro
  */
 class PDFService {
   /**
    * Gera um PDF de contrato a partir de dados e template
+   *
+   * ATUALIZADO 2025-12-23: Agora suporta HTML completo com CSS
+   *
+   * Este método detecta automaticamente o tipo de conteúdo:
+   * - Se for HTML (contém <html> ou <!DOCTYPE html>): usa html-pdf-node para renderização completa
+   * - Se for texto puro: usa PDFKit com formatação básica (método legado)
    *
    * @param {Object} contractData - Dados para preencher o contrato
    * @param {string} contractData.studentName - Nome do aluno
@@ -35,7 +50,7 @@ class PDFService {
    * @param {string} [contractData.startDate] - Data de início
    * @param {string} [contractData.duration] - Duração do curso em semestres
    * @param {string} [contractData.institutionName='Secretaria Online'] - Nome da instituição
-   * @param {string} templateContent - Conteúdo do template (texto com placeholders)
+   * @param {string} templateContent - Conteúdo do template (HTML ou texto com placeholders)
    * @param {string} [outputDir='uploads/contracts'] - Diretório de saída
    *
    * @returns {Promise<Object>} Objeto com informações do PDF gerado
@@ -48,6 +63,8 @@ class PDFService {
    * @throws {Error} Se houver erro ao criar arquivo
    *
    * @example
+   * // Exemplo com HTML
+   * const htmlTemplate = '<html><body><h1>Contrato de {{studentName}}</h1></body></html>';
    * const result = await PDFService.generateContractPDF(
    *   {
    *     studentName: 'João Silva',
@@ -57,16 +74,18 @@ class PDFService {
    *     semester: 1,
    *     year: 2025
    *   },
-   *   templateContent,
+   *   htmlTemplate,
    *   'uploads/contracts'
    * );
-   * // Returns:
-   * // {
-   * //   filePath: 'C:\...\backend\uploads\contracts\contract_123_1_2025.pdf',
-   * //   fileName: 'contract_123_1_2025.pdf',
-   * //   fileSize: 2048,
-   * //   relativePath: 'contracts/contract_123_1_2025.pdf'
-   * // }
+   *
+   * @example
+   * // Exemplo com texto puro (legado)
+   * const textTemplate = 'Contrato de {{studentName}}\n\nCurso: {{courseName}}';
+   * const result = await PDFService.generateContractPDF(
+   *   contractData,
+   *   textTemplate,
+   *   'uploads/contracts'
+   * );
    */
   static async generateContractPDF(contractData, templateContent, outputDir = 'uploads/contracts') {
     try {
@@ -216,7 +235,20 @@ class PDFService {
   }
 
   /**
-   * Gera o arquivo PDF usando PDFKit
+   * Detecta se o conteúdo é HTML
+   *
+   * @param {string} content - Conteúdo a verificar
+   * @returns {boolean} true se for HTML
+   *
+   * @private
+   */
+  static _isHTML(content) {
+    const htmlPattern = /<\s*html[^>]*>|<\s*!DOCTYPE\s+html/i;
+    return htmlPattern.test(content);
+  }
+
+  /**
+   * Gera o arquivo PDF usando PDFKit ou html-pdf-node conforme o tipo de conteúdo
    *
    * @param {string} content - Conteúdo formatado para o PDF
    * @param {string} filePath - Caminho onde salvar o arquivo
@@ -224,7 +256,69 @@ class PDFService {
    *
    * @private
    */
-  static _generatePDFFile(content, filePath, contractData) {
+  static async _generatePDFFile(content, filePath, contractData) {
+    // Detectar se o conteúdo é HTML
+    if (this._isHTML(content)) {
+      logger.info('[PDFService] Detectado conteúdo HTML - usando html-pdf-node');
+      return await this._generatePDFFromHTML(content, filePath);
+    } else {
+      logger.info('[PDFService] Detectado conteúdo texto - usando PDFKit');
+      return await this._generatePDFFromText(content, filePath, contractData);
+    }
+  }
+
+  /**
+   * Gera PDF a partir de conteúdo HTML usando html-pdf-node
+   *
+   * @param {string} htmlContent - Conteúdo HTML
+   * @param {string} filePath - Caminho onde salvar o arquivo
+   *
+   * @private
+   */
+  static async _generatePDFFromHTML(htmlContent, filePath) {
+    try {
+      // Opções para geração do PDF
+      const options = {
+        format: 'A4',
+        printBackground: true,
+        margin: {
+          top: '20mm',
+          right: '20mm',
+          bottom: '20mm',
+          left: '20mm',
+        },
+      };
+
+      // Arquivo de entrada (HTML)
+      const file = { content: htmlContent };
+
+      // Gerar PDF
+      const pdfBuffer = await htmlPdf.generatePdf(file, options);
+
+      // Salvar arquivo
+      await fsPromises.writeFile(filePath, pdfBuffer);
+
+      logger.debug('[PDFService] PDF gerado com html-pdf-node', {
+        filePath,
+        size: pdfBuffer.length,
+      });
+    } catch (error) {
+      const newError = new Error(`Erro ao gerar PDF a partir de HTML: ${error.message}`);
+      newError.code = 'HTML_PDF_GENERATION_ERROR';
+      throw newError;
+    }
+  }
+
+  /**
+   * Gera PDF a partir de conteúdo texto usando PDFKit (método legado)
+   *
+   * @param {string} content - Conteúdo formatado para o PDF
+   * @param {string} filePath - Caminho onde salvar o arquivo
+   * @param {Object} contractData - Dados do contrato (para metadata)
+   *
+   * @private
+   */
+  static _generatePDFFromText(content, filePath, contractData) {
     return new Promise((resolve, reject) => {
       try {
         // Criar documento PDF
