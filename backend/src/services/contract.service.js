@@ -463,6 +463,83 @@ class ContractService {
   }
 
   /**
+   * Busca TODOS os contratos do sistema (apenas para administradores)
+   *
+   * Retorna todos os contratos com informações dos usuários associados.
+   * Usado para que administradores possam visualizar e gerenciar contratos de todos os alunos.
+   *
+   * @param {Object} filters - Filtros opcionais
+   * @param {string} [filters.status] - Filtrar por status: 'pending' ou 'accepted'
+   *
+   * @returns {Promise<Array>} Lista de todos os contratos do sistema com dados dos usuários
+   *
+   * @example
+   * // Buscar todos os contratos
+   * const allContracts = await ContractService.getAll();
+   *
+   * @example
+   * // Buscar apenas contratos pendentes
+   * const pendingContracts = await ContractService.getAll({ status: 'pending' });
+   */
+  async getAll(filters = {}) {
+    const logContext = '[ContractService.getAll]';
+    logger.debug(`${logContext} Buscando todos os contratos do sistema`, { filters });
+
+    try {
+      const where = {
+        deleted_at: null,
+      };
+
+      // Buscar todos os contratos com informações do usuário
+      const contracts = await Contract.findAll({
+        where,
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: ['id', 'name', 'email', 'role'],
+          },
+        ],
+        order: [['created_at', 'DESC']],
+      });
+
+      logger.debug(`${logContext} ${contracts.length} contrato(s) encontrado(s)`);
+
+      // Mapear e filtrar por status se necessário
+      let mappedContracts = contracts.map((contract) => ({
+        id: contract.id,
+        userId: contract.user_id,
+        templateId: contract.template_id,
+        filePath: contract.file_path,
+        fileName: contract.file_name,
+        semester: contract.semester,
+        year: contract.year,
+        acceptedAt: contract.accepted_at,
+        status: contract.accepted_at ? 'accepted' : 'pending',
+        createdAt: contract.created_at,
+        user: contract.user
+          ? {
+              id: contract.user.id,
+              name: contract.user.name,
+              email: contract.user.email,
+              role: contract.user.role,
+            }
+          : null,
+      }));
+
+      // Aplicar filtro de status se fornecido
+      if (filters.status) {
+        mappedContracts = mappedContracts.filter((c) => c.status === filters.status);
+      }
+
+      return mappedContracts;
+    } catch (error) {
+      logger.error(`${logContext} Erro ao buscar contratos: ${error.message}`);
+      throw new AppError('Erro ao buscar contratos', 500);
+    }
+  }
+
+  /**
    * Busca contratos de um período específico (semestre/ano)
    *
    * @param {number} userId - ID do usuário

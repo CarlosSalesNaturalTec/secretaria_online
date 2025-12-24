@@ -64,6 +64,7 @@ const getNavigationItems = (role: UserRole): NavigationItem[] => {
       { name: 'Avaliações', href: '/admin/evaluations', icon: ClipboardCheckIcon },
       { name: 'Lançar Notas', href: '/admin/grades', icon: ClipboardListIcon },
       { name: 'Documentos', href: '/admin/documents', icon: FileTextIcon },
+      { name: 'Contratos', href: '/admin/contracts', icon: FileTextIcon },
       { name: 'Solicitações', href: '/admin/requests', icon: ClipboardListIcon },
     ];
   }

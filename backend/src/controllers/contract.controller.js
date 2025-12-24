@@ -87,32 +87,43 @@ class ContractController {
     try {
       const { userId, status, limit = 10, offset = 0 } = req.query;
 
-      // Determinar qual usuário buscar
-      // Admin pode buscar contratos de qualquer usuário, outros apenas seus
-      let targetUserId = req.user.id;
-      if (userId && req.user.role === 'admin') {
-        targetUserId = parseInt(userId);
-      } else if (userId && req.user.role !== 'admin') {
-        // Aluno/professor tentando listar contratos de outro usuário
-        logger.warn(`${logContext} Acesso negado - usuário ${req.user.id} tentando listar contratos de ${userId}`);
-        return res.status(403).json({
-          success: false,
-          error: {
-            code: 'FORBIDDEN',
-            message: 'Você não tem permissão para listar contratos de outro usuário',
-          },
-        });
-      }
-
       // Buscar contratos
       let contracts = [];
+      let targetUserId = null;
 
-      if (status === 'pending') {
-        contracts = await ContractService.getPendingByUser(targetUserId);
-      } else if (status === 'accepted') {
-        contracts = await ContractService.getAcceptedByUser(targetUserId);
+      // Admin sem filtro de userId: busca TODOS os contratos do sistema
+      if (req.user.role === 'admin' && !userId) {
+        logger.debug(`${logContext} Admin buscando todos os contratos do sistema`);
+        contracts = await ContractService.getAll({ status });
+        targetUserId = 'all'; // Indicador de que buscou todos
       } else {
-        contracts = await ContractService.getAllByUser(targetUserId);
+        // Determinar qual usuário buscar
+        // Admin pode buscar contratos de qualquer usuário, outros apenas seus
+        targetUserId = req.user.id;
+        if (userId && req.user.role === 'admin') {
+          targetUserId = parseInt(userId);
+        } else if (userId && req.user.role !== 'admin') {
+          // Aluno/professor tentando listar contratos de outro usuário
+          logger.warn(
+            `${logContext} Acesso negado - usuário ${req.user.id} tentando listar contratos de ${userId}`
+          );
+          return res.status(403).json({
+            success: false,
+            error: {
+              code: 'FORBIDDEN',
+              message: 'Você não tem permissão para listar contratos de outro usuário',
+            },
+          });
+        }
+
+        // Buscar contratos de um usuário específico
+        if (status === 'pending') {
+          contracts = await ContractService.getPendingByUser(targetUserId);
+        } else if (status === 'accepted') {
+          contracts = await ContractService.getAcceptedByUser(targetUserId);
+        } else {
+          contracts = await ContractService.getAllByUser(targetUserId);
+        }
       }
 
       // Aplicar paginação

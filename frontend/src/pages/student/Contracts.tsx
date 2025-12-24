@@ -107,7 +107,7 @@ export default function Contracts() {
             <p className="font-medium">Erro ao carregar contratos</p>
             <p className="text-sm">{error instanceof Error ? error.message : 'Erro desconhecido'}</p>
           </div>
-          <Button onClick={() => refetch()} variant="outline" size="sm">
+          <Button onClick={() => refetch()} variant="secondary" size="sm">
             Tentar Novamente
           </Button>
         </div>
@@ -186,7 +186,7 @@ export default function Contracts() {
                       <Button
                         onClick={() => handleDownloadPdf(contract)}
                         disabled={isDownloading}
-                        variant="outline"
+                        variant="secondary"
                         size="sm"
                         className="inline-flex items-center gap-2"
                       >
