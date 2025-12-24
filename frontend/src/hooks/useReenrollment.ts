@@ -140,7 +140,8 @@ export function useContractPreview(
  *
  * IMPORTANTE:
  * - Atualiza enrollment.status de 'pending' para 'active'
- * - CRIA contrato após aceite com file_path=null e file_name=null
+ * - CRIA novo contrato com PDF gerado automaticamente
+ * - Invalida cache de contratos para exibir novo contrato imediatamente
  * - Usa transação no backend para garantir atomicidade
  * - Apenas estudante dono do enrollment pode aceitar
  *
@@ -200,6 +201,7 @@ export function useAcceptReenrollment() {
 
       // 3. Invalidar outros caches para garantir consistência
       queryClient.invalidateQueries({ queryKey: ['enrollments'] });
+      queryClient.invalidateQueries({ queryKey: ['contracts'] }); // Novo contrato foi criado
       queryClient.invalidateQueries({ queryKey: ['auth'] });
     },
     onError: (error: Error, enrollmentId) => {

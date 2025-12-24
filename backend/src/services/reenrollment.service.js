@@ -112,14 +112,14 @@ class ReenrollmentService {
       await enrollment.save({ transaction });
 
       const currentYear = new Date().getFullYear();
-      const currentMonth = new Date().getMonth();
-      const semester = currentMonth < 6 ? 1 : 2;
+      // Usar o current_semester do enrollment (já incrementado)
+      const nextSemester = enrollment.current_semester;
 
       const newContract = await Contract.create({
         user_id: studentUserId,
         enrollment_id: enrollmentId,
         template_id: template.id,
-        semester: semester,
+        semester: nextSemester,
         year: currentYear,
         accepted_at: new Date(),
         file_path: null,
@@ -147,9 +147,6 @@ class ReenrollmentService {
           student.cep,
         ].filter(Boolean);
         const studentAddress = addressParts.join(', ');
-
-        // Calcular semestre atual (current_semester já foi incrementado)
-        const nextSemester = enrollment.current_semester;
 
         // Dados para substituição de placeholders
         const placeholderData = {

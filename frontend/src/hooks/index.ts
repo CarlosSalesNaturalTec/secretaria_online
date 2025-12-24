@@ -28,3 +28,11 @@ export {
   useUpdateEnrollmentStatus,
   useDeleteEnrollment,
 } from './useEnrollments';
+
+// Hooks de contratos
+export {
+  useContracts,
+  useContractById,
+  useAcceptContract,
+  useDownloadContractPdf,
+} from './useContracts';
