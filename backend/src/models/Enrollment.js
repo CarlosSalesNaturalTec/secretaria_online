@@ -131,21 +131,21 @@ module.exports = (sequelize, DataTypes) => {
       current_semester: {
         type: DataTypes.INTEGER,
         allowNull: true,
-        defaultValue: null,
+        defaultValue: 0,
         validate: {
           isInt: {
             msg: 'current_semester deve ser um número inteiro',
           },
           min: {
-            args: [1],
-            msg: 'current_semester deve ser no mínimo 1',
+            args: [0],
+            msg: 'current_semester deve ser no mínimo 0',
           },
           max: {
             args: [12],
             msg: 'current_semester deve ser no máximo 12',
           },
         },
-        comment: 'Semestre atual do aluno no curso (1, 2, 3, etc.)',
+        comment: 'Semestre atual do aluno no curso (0 = não iniciado, 1-12 = semestres cursados)',
       },
     },
     {

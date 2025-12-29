@@ -4,7 +4,7 @@
  * Migration: Adiciona campo current_semester à tabela enrollments
  *
  * Adiciona:
- * - current_semester: INTEGER - semestre atual do aluno no curso (1, 2, 3, etc.)
+ * - current_semester: INTEGER - semestre atual do aluno no curso (0 = não iniciado, 1-12 = semestres cursados)
  *
  * Isso permite rastrear em qual semestre acadêmico o aluno está no curso,
  * similar ao campo cliente_semestre do sistema antigo.
@@ -16,8 +16,8 @@ module.exports = {
     await queryInterface.addColumn('enrollments', 'current_semester', {
       type: Sequelize.INTEGER,
       allowNull: true,
-      defaultValue: null,
-      comment: 'Semestre atual do aluno no curso (1, 2, 3, etc.)',
+      defaultValue: 0,
+      comment: 'Semestre atual do aluno no curso (0 = não iniciado, 1-12 = semestres cursados)',
       after: 'enrollment_date'
     });
 
