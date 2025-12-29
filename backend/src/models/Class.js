@@ -129,7 +129,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     isCurrentYear() {
       const currentYear = new Date().getFullYear();
-      return this.year === currentYear;
+      // Tenta converter year para número para comparação, caso seja numérico
+      const yearNum = parseInt(this.year, 10);
+      return !isNaN(yearNum) && yearNum === currentYear;
     }
 
     /**
@@ -266,7 +268,7 @@ module.exports = (sequelize, DataTypes) => {
         comment: 'Número do semestre da turma (1-12)'
       },
       year: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING(10),
         allowNull: false,
         validate: {
           notNull: {
@@ -275,19 +277,12 @@ module.exports = (sequelize, DataTypes) => {
           notEmpty: {
             msg: 'O ano é obrigatório'
           },
-          isInt: {
-            msg: 'O ano deve ser um número inteiro'
-          },
-          min: {
-            args: [2020],
-            msg: 'O ano deve ser no mínimo 2020'
-          },
-          max: {
-            args: [2100],
-            msg: 'O ano deve ser no máximo 2100'
+          len: {
+            args: [1, 10],
+            msg: 'O ano deve ter entre 1 e 10 caracteres'
           }
         },
-        comment: 'Ano da turma'
+        comment: 'Ano da turma (alfanumérico)'
       },
       created_at: {
         type: DataTypes.DATE,
@@ -369,7 +364,7 @@ module.exports = (sequelize, DataTypes) => {
          */
         currentYear: {
           where: {
-            year: new Date().getFullYear()
+            year: String(new Date().getFullYear())
           }
         },
 
@@ -437,8 +432,9 @@ module.exports = (sequelize, DataTypes) => {
           if (classInstance.semester) {
             classInstance.semester = parseInt(classInstance.semester, 10);
           }
-          if (classInstance.year) {
-            classInstance.year = parseInt(classInstance.year, 10);
+          if (classInstance.year && typeof classInstance.year !== 'string') {
+            // Converte para string se não for string
+            classInstance.year = String(classInstance.year);
           }
           if (classInstance.course_id) {
             classInstance.course_id = parseInt(classInstance.course_id, 10);

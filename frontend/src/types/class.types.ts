@@ -116,9 +116,9 @@ export interface IClass {
   semester: number;
 
   /**
-   * Ano letivo da turma
+   * Ano letivo da turma (alfanumérico)
    */
-  year: number;
+  year: string;
 
   /**
    * Dados do curso (quando incluído)
@@ -172,9 +172,9 @@ export interface IClassCreateRequest {
   semester: number;
 
   /**
-   * Ano letivo
+   * Ano letivo (alfanumérico)
    */
-  year: number;
+  year: string;
 
   /**
    * Professores a vincular (opcional)
@@ -195,9 +195,9 @@ export interface IClassUpdateRequest {
   semester?: number;
 
   /**
-   * Ano letivo (opcional)
+   * Ano letivo - alfanumérico (opcional)
    */
-  year?: number;
+  year?: string;
 }
 
 /**
@@ -285,9 +285,9 @@ export interface IClassFilters {
   semester?: number;
 
   /**
-   * Buscar por ano letivo
+   * Buscar por ano letivo (alfanumérico)
    */
-  year?: number;
+  year?: string;
 
   /**
    * Página atual

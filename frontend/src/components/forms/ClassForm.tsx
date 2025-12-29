@@ -46,10 +46,9 @@ const classFormSchema = z.object({
     .min(1, 'Semestre mínimo é 1')
     .max(20, 'Semestre máximo é 20'),
 
-  year: z.number()
-    .int('Ano deve ser um número inteiro')
-    .min(new Date().getFullYear() - 10, `Ano mínimo é ${new Date().getFullYear() - 10}`)
-    .max(new Date().getFullYear() + 10, `Ano máximo é ${new Date().getFullYear() + 10}`),
+  year: z.string()
+    .min(1, 'Ano é obrigatório')
+    .max(10, 'Ano deve ter no máximo 10 caracteres'),
 });
 
 /**
@@ -151,7 +150,7 @@ export function ClassForm({
     defaultValues: {
       courseId: 0,
       semester: 1,
-      year: new Date().getFullYear(),
+      year: String(new Date().getFullYear()),
     },
   });
 
@@ -203,7 +202,7 @@ export function ClassForm({
       reset({
         courseId: initialData.courseId || 0,
         semester: initialData.semester || 1,
-        year: initialData.year || new Date().getFullYear(),
+        year: String(initialData.year || new Date().getFullYear()),
       });
 
       // Preencher professores vinculados
@@ -421,11 +420,11 @@ export function ClassForm({
 
           <Input
             label="Ano"
-            type="number"
+            type="text"
             required
-            min={new Date().getFullYear() - 10}
-            max={new Date().getFullYear() + 10}
-            {...register('year', { valueAsNumber: true })}
+            maxLength={10}
+            placeholder="Ex: 2025, 2025/1, 2025-A"
+            {...register('year')}
             error={errors.year?.message}
             disabled={loading}
           />

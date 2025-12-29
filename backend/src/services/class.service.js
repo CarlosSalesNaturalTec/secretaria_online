@@ -244,7 +244,8 @@ class ClassService {
    * @returns {Promise<boolean>} True se o Turma foi deletado.
    */
   async delete(id) {
-    const turma = await this.getById(id);
+    // Buscar a instância do model (não usar getById que retorna JSON)
+    const turma = await Class.findByPk(id);
     if (!turma) {
       return false;
     }
