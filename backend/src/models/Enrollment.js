@@ -6,14 +6,16 @@
  *
  * RESPONSABILIDADES:
  * - Representar matrículas de alunos em cursos
- * - Validar regras de negócio (um aluno por curso, status válidos)
- * - Gerenciar status de matrícula (pending, active, cancelled)
+ * - Validar regras de negócio (status válidos)
+ * - Gerenciar status de matrícula (pending, active, cancelled, contract, reenrollment, completed)
  * - Soft delete para histórico
  * - Relacionamentos com User (aluno) e Course
  *
  * REGRAS DE NEGÓCIO:
- * - Um aluno pode ter apenas UMA matrícula ativa/pending por vez
- * - Status padrão: pending (aguardando aprovação de documentos)
+ * - Um aluno pode ter múltiplas matrículas simultâneas em diferentes cursos
+ * - Status padrão: contract (aguardando aceite de contrato)
+ * - Status contract: aguardando aceite de contrato pelo aluno
+ * - Status pending: aguardando aprovação de documentos
  * - Status ativa: todos os documentos obrigatórios aprovados
  * - Status cancelada: matrícula cancelada por solicitação
  *
@@ -69,43 +71,6 @@ module.exports = (sequelize, DataTypes) => {
           isInt: {
             msg: 'student_id deve ser um número inteiro',
           },
-          /**
-           * Validação customizada: Garante que um aluno tenha apenas UMA matrícula active/pending
-           *
-           * REGRA DE NEGÓCIO:
-           * - Um aluno pode ter apenas uma matrícula com status 'active' OU 'pending' por vez
-           * - Matrículas 'cancelled' não contam para essa restrição
-           * - Matrículas deletadas (soft delete) não contam
-           *
-           * Esta validação substitui o índice único que não funcionava corretamente no MySQL
-           */
-          async uniqueActiveEnrollment(value) {
-            // Só valida se for um novo registro ou se student_id foi modificado
-            if (!this.isNewRecord && !this.changed('student_id')) {
-              return;
-            }
-
-            // Só aplica a regra se o status for 'active' ou 'pending'
-            if (this.status !== 'active' && this.status !== 'pending') {
-              return;
-            }
-
-            // Busca matrícula ativa/pending existente para este aluno
-            const existingEnrollment = await this.constructor.findOne({
-              where: {
-                student_id: value,
-                status: ['active', 'pending'],
-                deleted_at: null,
-              },
-            });
-
-            if (existingEnrollment) {
-              throw new Error(
-                `O aluno já possui uma matrícula ${existingEnrollment.status === 'active' ? 'ativa' : 'pendente'}. ` +
-                  `Finalize ou cancele a matrícula atual antes de criar uma nova.`
-              );
-            }
-          },
         },
       },
       course_id: {
@@ -124,7 +89,7 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       status: {
-        type: DataTypes.ENUM('pending', 'active', 'cancelled', 'reenrollment', 'completed'),
+        type: DataTypes.ENUM('pending', 'active', 'cancelled', 'reenrollment', 'completed', 'contract'),
         allowNull: false,
         defaultValue: 'pending',
         validate: {
@@ -132,8 +97,8 @@ module.exports = (sequelize, DataTypes) => {
             msg: 'status é obrigatório',
           },
           isIn: {
-            args: [['pending', 'active', 'cancelled', 'reenrollment', 'completed']],
-            msg: 'status deve ser: pending, active, cancelled, reenrollment ou completed',
+            args: [['pending', 'active', 'cancelled', 'reenrollment', 'completed', 'contract']],
+            msg: 'status deve ser: pending, active, cancelled, reenrollment, completed ou contract',
           },
         },
       },
@@ -376,6 +341,7 @@ module.exports = (sequelize, DataTypes) => {
       cancelled: 'Cancelada',
       reenrollment: 'Rematrícula',
       completed: 'Concluída',
+      contract: 'Aguardando Aceite de Contrato',
     };
     return labels[this.status] || 'Status Desconhecido';
   };
@@ -532,7 +498,7 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   /**
-   * Verifica se o aluno já possui uma matrícula ativa/pending
+   * Verifica se o aluno já possui uma matrícula ativa/pending/contract
    *
    * @param {number} studentId - ID do aluno
    * @returns {Promise<Enrollment|null>}
@@ -541,7 +507,7 @@ module.exports = (sequelize, DataTypes) => {
     return this.findOne({
       where: {
         student_id: studentId,
-        status: ['active', 'pending'],
+        status: ['active', 'pending', 'contract'],
         deleted_at: null,
       },
       include: [

@@ -6,24 +6,20 @@
  *
  * RESPONSABILIDADES:
  * - Implementar validações de regras de negócio para matrículas
- * - Validar que aluno não possui matrícula ativa no mesmo curso
+ * - Permitir múltiplas matrículas simultâneas para um mesmo aluno
  * - Validar aprovação de documentos obrigatórios antes de ativar
  * - Gerenciar criação, atualização e exclusão de matrículas
  * - Consultar matrículas por aluno, curso e status
  *
  * REGRAS DE NEGÓCIO (REGRAS QUE SÃO VALIDADAS):
- * 1. Um aluno não pode ter matrícula ativa/pendente em dois cursos simultaneamente
+ * 1. Um aluno pode ter múltiplas matrículas simultâneas em diferentes cursos
  * 2. Matrícula só pode ser ativada se todos os documentos obrigatórios forem aprovados
  * 3. Não é possível ativar matrícula cancelada
  * 4. Documentos obrigatórios variam por tipo de usuário (estudante)
- * 5. Um aluno só pode estar matriculado em um curso por vez
  *
  * @example
- * // Criar nova matrícula (com status pending)
+ * // Criar nova matrícula (com status contract)
  * const enrollment = await EnrollmentService.create(studentId, courseId);
- *
- * // Verificar se aluno pode se matricular
- * const canEnroll = await EnrollmentService.canEnroll(studentId, courseId);
  *
  * // Validar se documentos estão todos aprovados
  * const docsValid = await EnrollmentService.validateDocuments(studentId);
@@ -40,19 +36,18 @@ const logger = require('../utils/logger');
 
 class EnrollmentService {
   /**
-   * Cria nova matrícula (status padrão: pending)
+   * Cria nova matrícula (status padrão: contract)
    *
    * FLUXO:
    * 1. Valida se aluno existe
    * 2. Valida se curso existe
-   * 3. Valida se aluno pode se matricular (canEnroll)
-   * 4. Cria matrícula com status 'pending'
+   * 3. Cria matrícula com status 'contract' (aguardando aceite de contrato)
    *
    * @param {number} studentId - ID do aluno
    * @param {number} courseId - ID do curso
    * @param {Object} enrollmentData - Dados opcionais da matrícula (enrollment_date)
    * @returns {Promise<Enrollment>} Matrícula criada
-   * @throws {AppError} Se aluno ou curso não existem, ou se há violação de regras
+   * @throws {AppError} Se aluno ou curso não existem
    */
   async create(studentId, courseId, enrollmentData = {}) {
     logger.info(
@@ -78,32 +73,18 @@ class EnrollmentService {
         throw new AppError('Curso não encontrado', 404);
       }
 
-      // 3. Validar regra de negócio: aluno pode se matricular?
-      const canEnroll = await this.canEnroll(studentId, courseId);
-      if (!canEnroll) {
-        const existingEnrollment = await Enrollment.findActiveByStudent(studentId);
-        logger.warn(
-          `[EnrollmentService] Aluno ${studentId} já possui matrícula ativa/pendente - Curso: ${existingEnrollment.course_id}`
-        );
-        throw new AppError(
-          `Aluno já possui uma matrícula ${existingEnrollment.status} em outro curso. ` +
-            `Finalize ou cancele a matrícula atual antes de criar uma nova.`,
-          422
-        );
-      }
-
-      // 4. Criar matrícula com status 'pending'
+      // 3. Criar matrícula com status 'contract' (aguardando aceite de contrato)
       const defaultDate = enrollmentData.enrollment_date || new Date().toISOString().split('T')[0];
 
       const enrollment = await Enrollment.create({
         student_id: studentId,
         course_id: courseId,
-        status: 'pending',
+        status: 'contract',
         enrollment_date: defaultDate,
       });
 
       logger.info(
-        `[EnrollmentService] Matrícula criada com sucesso - ID: ${enrollment.id}, Status: pending`
+        `[EnrollmentService] Matrícula criada com sucesso - ID: ${enrollment.id}, Status: contract`
       );
 
       return enrollment;
@@ -115,51 +96,6 @@ class EnrollmentService {
         `[EnrollmentService] Erro ao criar matrícula: ${error.message}`
       );
       throw new AppError('Erro ao criar matrícula', 500);
-    }
-  }
-
-  /**
-   * Verifica se aluno pode se matricular em um curso
-   *
-   * VALIDAÇÕES:
-   * 1. Aluno existe e é um estudante
-   * 2. Curso existe
-   * 3. Aluno não possui matrícula ativa/pendente em outro curso
-   *
-   * @param {number} studentId - ID do aluno
-   * @param {number} courseId - ID do curso (opcional, para validação futura)
-   * @returns {Promise<boolean>} True se pode matricular, false caso contrário
-   */
-  async canEnroll(studentId, courseId = null) {
-    try {
-      logger.debug(
-        `[EnrollmentService] Verificando se aluno ${studentId} pode se matricular`
-      );
-
-      // 1. Verificar se aluno existe (na tabela students)
-      const student = await Student.findByPk(studentId);
-      if (!student) {
-        return false;
-      }
-
-      // 2. Verificar se aluno já possui matrícula ativa/pendente
-      const existingEnrollment = await Enrollment.findActiveByStudent(studentId);
-      if (existingEnrollment) {
-        logger.warn(
-          `[EnrollmentService] Aluno ${studentId} já possui matrícula ativa/pendente`
-        );
-        return false;
-      }
-
-      logger.debug(
-        `[EnrollmentService] Aluno ${studentId} pode se matricular`
-      );
-      return true;
-    } catch (error) {
-      logger.error(
-        `[EnrollmentService] Erro ao verificar se pode matricular: ${error.message}`
-      );
-      return false;
     }
   }
 
@@ -376,7 +312,7 @@ class EnrollmentService {
   /**
    * Atualiza o status de uma matrícula
    *
-   * Status válidos: pending, active, cancelled, reenrollment, completed
+   * Status válidos: pending, active, cancelled, reenrollment, completed, contract
    *
    * @param {number} enrollmentId - ID da matrícula
    * @param {string} newStatus - Novo status
@@ -390,7 +326,7 @@ class EnrollmentService {
 
     try {
       // Validar que status é válido
-      const validStatuses = ['pending', 'active', 'cancelled', 'reenrollment', 'completed'];
+      const validStatuses = ['pending', 'active', 'cancelled', 'reenrollment', 'completed', 'contract'];
       if (!validStatuses.includes(newStatus)) {
         throw new AppError(
           `Status inválido. Valores aceitos: ${validStatuses.join(', ')}`,
