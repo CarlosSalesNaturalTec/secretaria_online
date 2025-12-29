@@ -258,16 +258,55 @@ export default function StudentsPage() {
       key: 'course',
       header: 'Nome do Curso',
       accessor: (student) => {
-        const enrollment = student.enrollments?.find(e => e.status === 'active') || student.enrollments?.[0];
-        return enrollment?.course?.name || '-';
+        const enrollments = student.enrollments || [];
+
+        if (enrollments.length === 0) {
+          return '-';
+        }
+
+        if (enrollments.length === 1) {
+          return enrollments[0].course?.name || '-';
+        }
+
+        // Múltiplas matrículas: mostrar a primeira + contador
+        const firstCourse = enrollments[0].course?.name || 'Curso';
+        const additionalCount = enrollments.length - 1;
+
+        return (
+          <div className="flex flex-col gap-1">
+            <span>{firstCourse}</span>
+            <span className="text-xs text-gray-500">
+              +{additionalCount} {additionalCount === 1 ? 'curso' : 'cursos'}
+            </span>
+          </div>
+        );
       },
     },
     {
       key: 'semester',
       header: 'Semestre',
       accessor: (student) => {
-        const enrollment = student.enrollments?.find(e => e.status === 'active') || student.enrollments?.[0];
-        return enrollment?.currentSemester ? `${enrollment.currentSemester}º` : '-';
+        const enrollments = student.enrollments || [];
+
+        if (enrollments.length === 0) {
+          return '-';
+        }
+
+        if (enrollments.length === 1) {
+          const semester = enrollments[0].currentSemester;
+          return semester ? `${semester}º` : '-';
+        }
+
+        // Múltiplas matrículas: mostrar todos os semestres
+        const semesters = enrollments
+          .map(e => e.currentSemester ? `${e.currentSemester}º` : '-')
+          .join(', ');
+
+        return (
+          <div className="text-xs">
+            {semesters}
+          </div>
+        );
       },
       align: 'center',
     },
@@ -275,8 +314,11 @@ export default function StudentsPage() {
       key: 'status',
       header: 'Status',
       accessor: (student) => {
-        const enrollment = student.enrollments?.find(e => e.status === 'active') || student.enrollments?.[0];
-        const status = enrollment?.status || '-';
+        const enrollments = student.enrollments || [];
+
+        if (enrollments.length === 0) {
+          return '-';
+        }
 
         const statusMap: Record<string, { label: string; color: string }> = {
           'active': { label: 'Ativo', color: 'bg-green-100 text-green-800' },
@@ -287,14 +329,37 @@ export default function StudentsPage() {
           'pending': { label: 'Pendente', color: 'bg-orange-100 text-orange-800' },
           'reenrollment': { label: 'Rematrícula', color: 'bg-purple-100 text-purple-800' },
           'completed': { label: 'Concluído', color: 'bg-blue-100 text-blue-800' },
+          'contract': { label: 'Aguardando Contrato', color: 'bg-indigo-100 text-indigo-800' },
         };
 
-        const statusInfo = statusMap[status] || { label: '-', color: 'bg-gray-100 text-gray-800' };
+        if (enrollments.length === 1) {
+          const status = enrollments[0].status || '-';
+          const statusInfo = statusMap[status] || { label: '-', color: 'bg-gray-100 text-gray-800' };
 
+          return (
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color}`}>
+              {statusInfo.label}
+            </span>
+          );
+        }
+
+        // Múltiplas matrículas: mostrar status como lista vertical
         return (
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color}`}>
-            {statusInfo.label}
-          </span>
+          <div className="flex flex-col gap-1">
+            {enrollments.map((enrollment, index) => {
+              const status = enrollment.status || '-';
+              const statusInfo = statusMap[status] || { label: '-', color: 'bg-gray-100 text-gray-800' };
+
+              return (
+                <span
+                  key={index}
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color}`}
+                >
+                  {statusInfo.label}
+                </span>
+              );
+            })}
+          </div>
         );
       },
       align: 'center',
