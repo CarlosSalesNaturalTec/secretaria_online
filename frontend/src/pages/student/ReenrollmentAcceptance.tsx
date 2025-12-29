@@ -43,8 +43,25 @@ export default function ReenrollmentAcceptance() {
   const authContext = useContext(AuthContext);
   const user = authContext?.user;
   const [enrollmentId, setEnrollmentId] = useState<number | null>(null);
+  const [enrollmentStatus, setEnrollmentStatus] = useState<string>('');
   const [loadingEnrollment, setLoadingEnrollment] = useState(true);
   const [enrollmentError, setEnrollmentError] = useState<string | null>(null);
+
+  // Textos dinâmicos baseados no status do enrollment
+  const isReenrollment = enrollmentStatus === 'reenrollment';
+  const pageTitle = isReenrollment ? 'Aceite de Rematrícula' : 'Aceite de Contrato';
+  const loadingMessage = isReenrollment
+    ? 'Carregando contrato de rematrícula...'
+    : 'Carregando contrato...';
+  const buttonText = isReenrollment
+    ? 'Aceitar e Confirmar Rematrícula'
+    : 'Aceitar e Confirmar Matrícula';
+  const confirmationText = isReenrollment
+    ? 'Ao clicar em "Aceitar e Confirmar Rematrícula", você concorda com todos os termos apresentados acima.'
+    : 'Ao clicar em "Aceitar e Confirmar Matrícula", você concorda com todos os termos apresentados acima.';
+  const description = isReenrollment
+    ? 'Por favor, leia o contrato de rematrícula abaixo e clique em "Aceitar e Confirmar Rematrícula" para continuar.'
+    : 'Por favor, leia o contrato abaixo e clique em "Aceitar e Confirmar Matrícula" para continuar.';
 
   // Hook para buscar preview do contrato
   const {
@@ -61,7 +78,7 @@ export default function ReenrollmentAcceptance() {
   } = useAcceptReenrollment();
 
   /**
-   * Busca enrollment ativo do estudante ao montar componente
+   * Busca enrollment pendente do estudante ao montar componente
    */
   useEffect(() => {
     const fetchEnrollment = async () => {
@@ -81,6 +98,7 @@ export default function ReenrollmentAcceptance() {
         }
 
         setEnrollmentId(pendingEnrollment.id);
+        setEnrollmentStatus(pendingEnrollment.status);
       } catch (error: any) {
         console.error('[ReenrollmentAcceptance] Erro ao buscar enrollment:', error);
         setEnrollmentError(
@@ -165,9 +183,7 @@ export default function ReenrollmentAcceptance() {
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
           <FileText className="w-12 h-12 mx-auto text-blue-600 animate-pulse" />
-          <p className="mt-4 text-lg text-gray-600">
-            Carregando contrato de rematrícula...
-          </p>
+          <p className="mt-4 text-lg text-gray-600">{loadingMessage}</p>
         </div>
       </div>
     );
@@ -207,14 +223,9 @@ export default function ReenrollmentAcceptance() {
         <div className="bg-white shadow-md rounded-lg p-6 mb-6">
           <div className="flex items-center gap-3 mb-2">
             <FileText className="w-8 h-8 text-blue-600" />
-            <h1 className="text-2xl font-bold text-gray-800">
-              Aceite de Rematrícula
-            </h1>
+            <h1 className="text-2xl font-bold text-gray-800">{pageTitle}</h1>
           </div>
-          <p className="text-gray-600">
-            Por favor, leia o contrato de rematrícula abaixo e clique em "Aceitar
-            e Confirmar Rematrícula" para continuar.
-          </p>
+          <p className="text-gray-600">{description}</p>
         </div>
 
         {/* Alert de atenção */}
@@ -277,14 +288,13 @@ export default function ReenrollmentAcceptance() {
               ) : (
                 <>
                   <CheckCircle className="w-5 h-5" />
-                  Aceitar e Confirmar Rematrícula
+                  {buttonText}
                 </>
               )}
             </Button>
           </div>
           <p className="mt-4 text-xs text-gray-500 text-center">
-            Ao clicar em "Aceitar e Confirmar Rematrícula", você concorda com todos
-            os termos apresentados acima.
+            {confirmationText}
           </p>
         </div>
       </div>

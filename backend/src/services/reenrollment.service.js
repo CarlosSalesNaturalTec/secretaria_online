@@ -1,12 +1,12 @@
 /**
  * Arquivo: backend/src/services/reenrollment.service.js
- * Descrição: Lógica de negócio para aceite de rematrícula de estudantes
+ * Descrição: Lógica de negócio para aceite de matrícula/rematrícula de estudantes
  * Feature: feat-reenrollment-etapa-3 - ReenrollmentService
  * Criado em: 2025-12-15
  *
  * RESPONSABILIDADES:
- * - Processar aceite de rematrícula de estudantes
- * - Atualizar status de enrollments de 'reenrollment' para 'active'
+ * - Processar aceite de matrícula/rematrícula de estudantes
+ * - Atualizar status de enrollments de 'contract' ou 'reenrollment' para 'active'
  * - Criar contratos após aceite do estudante
  * - Gerar PDF do contrato e salvar em disco
  * - Gerar preview de contrato HTML para estudantes
@@ -14,15 +14,15 @@
  * - Garantir atomicidade das operações usando transações do Sequelize
  *
  * REGRAS DE NEGÓCIO:
- * 1. Apenas estudantes podem aceitar suas próprias rematrículas
- * 2. Status de enrollments é alterado de 'reenrollment' para 'active'
+ * 1. Apenas estudantes podem aceitar suas próprias matrículas/rematrículas
+ * 2. Status de enrollments é alterado de 'contract' ou 'reenrollment' para 'active'
  * 3. Contratos são criados após aceite do estudante
  * 4. Campo current_semester é incrementado ao aceitar rematrícula
  * 5. PDF do contrato é gerado automaticamente e salvo em disco
  * 6. Usar transação para garantir atomicidade (rollback completo em caso de erro)
  *
  * @example
- * // Aceitar rematrícula
+ * // Aceitar matrícula/rematrícula
  * const result = await ReenrollmentService.acceptReenrollment(enrollmentId, studentUserId);
  * // Retorna: { enrollment, contract }
  */
@@ -97,7 +97,7 @@ class ReenrollmentService {
       if (enrollment.student_id !== user.student_id) {
         throw new AppError('Você não tem permissão para aceitar esta rematrícula', 403);
       }
-      if (enrollment.status !== 'reenrollment') {
+      if (enrollment.status !== 'reenrollment' && enrollment.status !== 'contract') {
         throw new AppError(`Esta matrícula não está pendente de aceite (status atual: ${enrollment.status})`, 422);
       }
 
@@ -229,12 +229,12 @@ class ReenrollmentService {
   }
 
   /**
-   * Gera preview de contrato HTML para rematrícula do estudante
+   * Gera preview de contrato HTML para matrícula/rematrícula do estudante
    *
    * FLUXO:
    * 1. Busca enrollment por ID com dados do student e course
    * 2. Valida ownership (enrollment pertence ao estudante logado)
-   * 3. Valida que enrollment.status === 'pending'
+   * 3. Valida que enrollment.status === 'contract' ou 'reenrollment'
    * 4. Busca template ativo de contrato
    * 5. Coleta dados para substituição de placeholders
    * 6. Chama template.replacePlaceholders() para gerar HTML
@@ -243,7 +243,7 @@ class ReenrollmentService {
    * IMPORTANTE:
    * - NÃO gera PDF, apenas HTML
    * - Valida que estudante é dono do enrollment (ownership)
-   * - Apenas enrollments com status 'reenrollment' podem ter preview
+   * - Apenas enrollments com status 'contract' ou 'reenrollment' podem ter preview
    * - Reutiliza sistema existente de ContractTemplate
    *
    * PLACEHOLDERS SUPORTADOS:
@@ -338,8 +338,8 @@ class ReenrollmentService {
         );
       }
 
-      // 3. Validar que enrollment.status === 'reenrollment'
-      if (enrollment.status !== 'reenrollment') {
+      // 3. Validar que enrollment.status === 'reenrollment' ou 'contract'
+      if (enrollment.status !== 'reenrollment' && enrollment.status !== 'contract') {
         logger.warn(
           `[ReenrollmentService] Tentativa de preview em enrollment com status incorreto - Enrollment ID: ${enrollmentId}, Status: ${enrollment.status}`
         );

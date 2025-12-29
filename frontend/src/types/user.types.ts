@@ -55,7 +55,7 @@ export interface IUser {
   deleted_at?: string | null;
 
   /** Status da matrícula do estudante (se aplicável) */
-  enrollmentStatus?: 'pending' | 'active' | 'cancelled' | 'reenrollment';
+  enrollmentStatus?: 'contract' | 'pending' | 'active' | 'cancelled' | 'reenrollment' | 'completed';
 }
 
 /**

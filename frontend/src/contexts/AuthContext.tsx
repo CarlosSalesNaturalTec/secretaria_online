@@ -283,11 +283,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const isAuthenticated = Boolean(state.token && state.user);
 
   /**
-   * Computed property: verifica se estudante tem rematrícula pendente
+   * Computed property: verifica se estudante tem enrollment pendente
+   * (aguardando aceite de contrato ou rematrícula)
    */
   const hasEnrollmentPending =
     state.user?.role === 'student' &&
-    state.user?.enrollmentStatus === 'reenrollment';
+    (state.user?.enrollmentStatus === 'reenrollment' ||
+      state.user?.enrollmentStatus === 'contract');
 
   /**
    * Valor do contexto exposto aos consumers

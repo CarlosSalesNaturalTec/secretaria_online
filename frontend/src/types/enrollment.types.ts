@@ -11,13 +11,14 @@ import type { ICourse } from './course.types';
 /**
  * Status possíveis de uma matrícula
  *
+ * - contract: Matrícula criada, aguardando aceite de contrato
  * - pending: Matrícula criada, aguardando aprovação de documentos obrigatórios
  * - active: Todos os documentos aprovados, aluno pode usar o sistema normalmente
  * - cancelled: Matrícula cancelada por solicitação do aluno
- * - reenrollment: Rematrícula em andamento
+ * - reenrollment: Rematrícula em andamento, aguardando aceite de contrato
  * - completed: Matrícula concluída (aluno formado)
  */
-export type EnrollmentStatus = 'pending' | 'active' | 'cancelled' | 'reenrollment' | 'completed';
+export type EnrollmentStatus = 'contract' | 'pending' | 'active' | 'cancelled' | 'reenrollment' | 'completed';
 
 /**
  * Interface para Matrícula

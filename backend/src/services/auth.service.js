@@ -10,6 +10,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { User, Enrollment } = require('../models');
 const { jwtConfig } = require('../config/auth');
+const { Op } = require('sequelize');
 
 class AuthService {
   /**
@@ -35,13 +36,19 @@ class AuthService {
     const userWithEnrollment = user.get({ plain: true });
 
     if (user.role === 'student' && user.student_id) {
-      const enrollment = await Enrollment.findOne({
-        where: { student_id: user.student_id },
+      // Busca enrollment pendente mais recente (status 'contract' ou 'reenrollment')
+      const pendingEnrollment = await Enrollment.findOne({
+        where: {
+          student_id: user.student_id,
+          status: {
+            [Op.in]: ['contract', 'reenrollment'],
+          },
+        },
         order: [['created_at', 'DESC']],
       });
 
-      if (enrollment) {
-        userWithEnrollment.enrollmentStatus = enrollment.status;
+      if (pendingEnrollment) {
+        userWithEnrollment.enrollmentStatus = pendingEnrollment.status;
       }
     }
 

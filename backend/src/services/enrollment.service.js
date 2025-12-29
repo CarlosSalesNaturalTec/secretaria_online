@@ -33,6 +33,7 @@
 const { Enrollment, User, Student, Course, Document, DocumentType } = require('../models');
 const { AppError } = require('../middlewares/error.middleware');
 const logger = require('../utils/logger');
+const { Op } = require('sequelize');
 
 class EnrollmentService {
   /**
@@ -426,6 +427,8 @@ class EnrollmentService {
 
   /**
    * Busca a matrícula pendente de um aluno
+   * Retorna enrollments com status 'contract' (aguardando aceite de contrato)
+   * ou 'reenrollment' (aguardando aceite de rematrícula)
    *
    * @param {number} studentId - ID do aluno
    * @returns {Promise<Enrollment|null>} Matrícula pendente encontrada ou null
@@ -437,7 +440,9 @@ class EnrollmentService {
       const enrollment = await Enrollment.findOne({
         where: {
           student_id: studentId,
-          status: 'reenrollment',
+          status: {
+            [Op.in]: ['contract', 'reenrollment'],
+          },
         },
         include: [
           {
@@ -445,6 +450,7 @@ class EnrollmentService {
             attributes: ['id', 'name'],
           },
         ],
+        order: [['created_at', 'DESC']], // Retorna o enrollment mais recente primeiro
       });
 
       return enrollment;
