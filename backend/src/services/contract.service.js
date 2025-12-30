@@ -42,6 +42,7 @@ const { AppError } = require('../middlewares/error.middleware');
 const PDFService = require('./pdf.service');
 const logger = require('../utils/logger');
 const path = require('path');
+const { CONTRACTS_PATH } = require('../config/pdf');
 
 class ContractService {
   /**
@@ -169,7 +170,7 @@ class ContractService {
 
       // 6. Gerar PDF
       logger.debug(`${logContext} Gerando PDF...`);
-      const outputDir = options.outputDir || 'uploads/contracts';
+      const outputDir = options.outputDir || CONTRACTS_PATH;
       const pdfResult = await PDFService.generateContractPDF(contractData, processedContent, outputDir);
 
       // 7. Salvar contrato no banco de dados
