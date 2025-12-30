@@ -28,11 +28,13 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { getMyGrades, getGradesByStudent } from '@/services/grade.service';
+import StudentService from '@/services/student.service';
 import type {
   IGradeWithEvaluation,
   IDiscipline,
   GradeConcept,
 } from '@/types/grade.types';
+import type { IStudent } from '@/types/student.types';
 
 /**
  * Interface para props do componente
@@ -66,6 +68,7 @@ export default function Grades({ studentId }: GradesProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [allGrades, setAllGrades] = useState<IGradeWithEvaluation[]>([]);
+  const [student, setStudent] = useState<IStudent | null>(null);
   const [disciplineGrades, setDisciplineGrades] = useState<IDisciplineGrades[]>([]);
   const [expandedDisciplines, setExpandedDisciplines] = useState<Set<number>>(new Set());
 
@@ -211,9 +214,16 @@ export default function Grades({ studentId }: GradesProps) {
       let grades: IGradeWithEvaluation[];
 
       if (studentId) {
-        grades = await getGradesByStudent(studentId);
+        // Buscar notas e dados do estudante em paralelo
+        const [gradesData, studentData] = await Promise.all([
+          getGradesByStudent(studentId),
+          StudentService.getById(studentId)
+        ]);
+        grades = gradesData;
+        setStudent(studentData);
       } else {
         grades = await getMyGrades();
+        setStudent(null);
       }
 
       setAllGrades(grades);
@@ -403,11 +413,11 @@ export default function Grades({ studentId }: GradesProps) {
       {/* Cabeçalho */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          {studentId ? 'Notas do Aluno' : 'Minhas Notas'}
+          {studentId ? `Notas do Aluno: ${student?.nome || 'Carregando...'}` : 'Minhas Notas'}
         </h1>
         <p className="text-gray-600">
           {studentId 
-            ? 'Visualize as notas do aluno organizadas por disciplina'
+            ? `Visualize as notas de ${student?.nome || 'estudante'} organizadas por disciplina`
             : 'Visualize todas as suas notas organizadas por disciplina'
           }
         </p>
