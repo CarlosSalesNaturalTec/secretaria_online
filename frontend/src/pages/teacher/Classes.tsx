@@ -137,10 +137,10 @@ export default function TeacherClasses() {
   /**
    * Obtém lista de semestres únicos para o filtro
    *
-   * @returns {Array<{semester: number, year: number}>} Lista de semestres disponíveis
+   * @returns {Array<{semester: number, year: string}>} Lista de semestres disponíveis
    */
-  const getUniqueSemesters = (): Array<{ semester: number; year: number }> => {
-    const semesters = new Map<string, { semester: number; year: number }>();
+  const getUniqueSemesters = (): Array<{ semester: number; year: string }> => {
+    const semesters = new Map<string, { semester: number; year: string }>();
 
     allClasses.forEach((cls) => {
       const key = `${cls.semester}-${cls.year}`;
@@ -150,7 +150,21 @@ export default function TeacherClasses() {
     });
 
     return Array.from(semesters.values()).sort(
-      (a, b) => b.year - a.year || b.semester - a.semester
+      (a, b) => {
+        // Tenta converter para número para ordenação correta
+        // Se for string complexa (ex: 2025/1), tenta extrair o primeiro número
+        const yearA = parseInt(a.year, 10) || 0;
+        const yearB = parseInt(b.year, 10) || 0;
+        
+        // Se a conversão falhar ou forem iguais, usa comparação de string
+        if (yearA === yearB) {
+           const strCompare = b.year.localeCompare(a.year);
+           if (strCompare !== 0) return strCompare;
+           return b.semester - a.semester;
+        }
+        
+        return yearB - yearA || b.semester - a.semester;
+      }
     );
   };
 

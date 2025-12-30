@@ -87,8 +87,8 @@ export interface ICreateClassData {
   courseId: number;
   /** Semestre/período da turma */
   semester: number;
-  /** Ano letivo da turma */
-  year: number;
+  /** Ano letivo da turma (alfanumérico) */
+  year: string;
   /** Lista de professores e disciplinas a serem vinculados (opcional) */
   teachers?: ITeacherDisciplineAssignment[];
   /** IDs dos alunos a serem vinculados (opcional) */
@@ -105,8 +105,8 @@ export interface IUpdateClassData {
   courseId?: number;
   /** Semestre/período da turma */
   semester?: number;
-  /** Ano letivo da turma */
-  year?: number;
+  /** Ano letivo da turma (alfanumérico) */
+  year?: string;
   /** Lista de professores e disciplinas a serem vinculados (opcional) */
   teachers?: ITeacherDisciplineAssignment[];
   /** IDs dos alunos a serem vinculados (opcional) */
@@ -231,7 +231,7 @@ export async function getById(id: number): Promise<IClass> {
  *   const newClass = await create({
  *     courseId: 1,
  *     semester: 1,
- *     year: 2025,
+ *     year: "2025",
  *     teachers: [{ teacherId: 5, disciplineId: 3 }],
  *     studentIds: [10, 11, 12]
  *   });
@@ -255,13 +255,8 @@ export async function create(data: ICreateClassData): Promise<IClass> {
       throw new Error('Semestre não pode exceder 20');
     }
 
-    if (!data.year || data.year <= 0) {
-      throw new Error('Ano é obrigatório e deve ser maior que zero');
-    }
-
-    const currentYear = new Date().getFullYear();
-    if (data.year < currentYear - 10 || data.year > currentYear + 10) {
-      throw new Error(`Ano deve estar entre ${currentYear - 10} e ${currentYear + 10}`);
+    if (!data.year || data.year.trim().length === 0) {
+      throw new Error('Ano é obrigatório');
     }
 
     // Validação de professores (se fornecidos)
@@ -384,14 +379,8 @@ export async function update(
       }
     }
 
-    if (data.year !== undefined) {
-      if (data.year <= 0) {
-        throw new Error('Ano deve ser maior que zero');
-      }
-      const currentYear = new Date().getFullYear();
-      if (data.year < currentYear - 10 || data.year > currentYear + 10) {
-        throw new Error(`Ano deve estar entre ${currentYear - 10} e ${currentYear + 10}`);
-      }
+    if (data.year !== undefined && data.year.trim().length === 0) {
+      throw new Error('Ano não pode ser vazio');
     }
 
     // Validação de professores (se fornecidos)
