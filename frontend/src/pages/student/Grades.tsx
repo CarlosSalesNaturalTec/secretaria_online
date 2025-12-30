@@ -187,8 +187,8 @@ export default function Grades({ studentId }: GradesProps) {
 
     setDisciplineGrades(disciplinesArray);
 
-    // Expandir primeira disciplina por padrão se houver filtragem ou se for carregamento inicial
-    if (disciplinesArray.length > 0 && (semesterFilter || disciplineFilter || expandedDisciplines.size === 0)) {
+    // Expandir automaticamente apenas se houver filtros ativos
+    if (disciplinesArray.length > 0 && (semesterFilter || disciplineFilter)) {
       setExpandedDisciplines(new Set(disciplinesArray.map(d => d.discipline.id)));
     }
   }, [allGrades, semesterFilter, disciplineFilter]);
