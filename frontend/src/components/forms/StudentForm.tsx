@@ -13,6 +13,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { parseDateToInput } from '@/utils/formatters';
 import type { IStudent, IStudentCreateRequest, IStudentUpdateRequest } from '@/types/student.types';
 
 /**
@@ -185,30 +186,34 @@ export function StudentForm({
 
   useEffect(() => {
     if (initialData) {
+      // Cast para any para acessar propriedades em camelCase que vêm da API
+      const student = initialData as any;
+      console.log('[StudentForm] Carregando dados do estudante:', student);
+
       reset({
-        nome: initialData.nome || '',
-        email: initialData.email || '',
-        cpf: initialData.cpf || '',
-        data_nascimento: initialData.data_nascimento || '',
-        telefone: initialData.telefone || '',
-        celular: initialData.celular || '',
-        endereco_rua: initialData.endereco_rua || '',
-        endereco_numero: initialData.endereco_numero || '',
-        endereco_complemento: initialData.endereco_complemento || '',
-        endereco_bairro: initialData.endereco_bairro || '',
-        endereco_cidade: initialData.endereco_cidade || '',
-        endereco_uf: initialData.endereco_uf || '',
-        cep: initialData.cep || '',
-        sexo: initialData.sexo || undefined,
-        mae: initialData.mae || '',
-        pai: initialData.pai || '',
-        titulo_eleitor: initialData.titulo_eleitor || '',
-        rg: initialData.rg || '',
-        rg_data: initialData.rg_data || '',
-        profissao: initialData.profissao || '',
-        responsavel: initialData.responsavel || '',
-        matricula: initialData.matricula ? String(initialData.matricula) : '',
-        ano_matricula: initialData.ano_matricula ? String(initialData.ano_matricula) : '',
+        nome: student.nome || '',
+        email: student.email || '',
+        cpf: student.cpf || '',
+        data_nascimento: parseDateToInput(student.data_nascimento || student.dataNascimento),
+        telefone: student.telefone || '',
+        celular: student.celular || '',
+        endereco_rua: student.endereco_rua || student.enderecoRua || '',
+        endereco_numero: student.endereco_numero || student.enderecoNumero || '',
+        endereco_complemento: student.endereco_complemento || student.enderecoComplemento || '',
+        endereco_bairro: student.endereco_bairro || student.enderecoBairro || '',
+        endereco_cidade: student.endereco_cidade || student.enderecoCidade || '',
+        endereco_uf: student.endereco_uf || student.enderecoUf || '',
+        cep: student.cep || '',
+        sexo: student.sexo || undefined,
+        mae: student.mae || '',
+        pai: student.pai || '',
+        titulo_eleitor: student.titulo_eleitor || student.tituloEleitor || '',
+        rg: student.rg || '',
+        rg_data: parseDateToInput(student.rg_data || student.rgData),
+        profissao: student.profissao || '',
+        responsavel: student.responsavel || '',
+        matricula: student.matricula ? String(student.matricula) : '',
+        ano_matricula: (student.ano_matricula || student.anoMatricula) ? String(student.ano_matricula || student.anoMatricula) : '',
       });
     }
   }, [initialData, reset]);

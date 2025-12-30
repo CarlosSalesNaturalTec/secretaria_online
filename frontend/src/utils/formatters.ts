@@ -211,3 +211,28 @@ export function formatDateTime(date: Date | string | number): string {
     return '';
   }
 }
+
+/**
+ * Converte data do formato brasileiro (DD/MM/YYYY) para ISO (YYYY-MM-DD)
+ * Útil para preencher inputs type="date"
+ *
+ * @param {string | null | undefined} dateStr - Data em formato DD/MM/YYYY
+ * @returns {string} Data em formato YYYY-MM-DD ou string vazia
+ */
+export function parseDateToInput(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
+
+  // Se já estiver no formato ISO, retorna como está
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    return dateStr;
+  }
+
+  // Tenta extrair dia, mês e ano de DD/MM/YYYY
+  const parts = dateStr.split('/');
+  if (parts.length === 3) {
+    const [day, month, year] = parts;
+    return `${year}-${month}-${day}`;
+  }
+
+  return '';
+}
