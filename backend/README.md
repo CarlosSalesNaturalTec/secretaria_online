@@ -21,6 +21,67 @@ Backend da aplicação Secretaria Online, desenvolvido com Node.js e Express.
 - npm 10.x (mínimo 9.x)
 - MySQL 8.0 (mínimo 5.7)
 
+#### Dependências do Sistema (Produção - Linux/Debian)
+
+Para geração de PDFs de contratos em HTML (via Puppeteer/Chromium), é necessário instalar as seguintes bibliotecas do sistema:
+
+```bash
+sudo apt-get update
+
+sudo apt-get install -y \
+    ca-certificates \
+    fonts-liberation \
+    libappindicator3-1 \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libc6 \
+    libcairo2 \
+    libcups2 \
+    libdbus-1-3 \
+    libexpat1 \
+    libfontconfig1 \
+    libgbm1 \
+    libgcc1 \
+    libglib2.0-0 \
+    libgtk-3-0 \
+    libnspr4 \
+    libnss3 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libstdc++6 \
+    libx11-6 \
+    libx11-xcb1 \
+    libxcb1 \
+    libxcomposite1 \
+    libxcursor1 \
+    libxdamage1 \
+    libxext6 \
+    libxfixes3 \
+    libxi6 \
+    libxrandr2 \
+    libxrender1 \
+    libxss1 \
+    libxtst6 \
+    lsb-release \
+    wget \
+    xdg-utils
+```
+
+**⚠️ IMPORTANTE:** Sem essas dependências, a geração de PDFs de contratos **falhará silenciosamente**, resultando em contratos com `file_path` e `file_name` NULL no banco de dados.
+
+**Verificar se foi instalado corretamente:**
+```bash
+# Verificar libnss3 (biblioteca crítica)
+dpkg -l | grep libnss3
+
+# Testar geração de PDF
+cd backend
+node scripts/diagnose-pdf-generation.js
+```
+
+**Nota:** Em ambiente de desenvolvimento (Windows/macOS), o Puppeteer geralmente instala automaticamente o Chromium necessário. Essas dependências são específicas para **servidores Linux em produção**.
+
 ### 2. Instalar Dependências
 
 ```bash
@@ -1189,6 +1250,85 @@ mkdir -p uploads/temp
 ```bash
 npm install pdfkit
 ```
+
+### Erro ao gerar PDF: "libnss3.so: cannot open shared object file"
+
+**Problema:** Dependências do sistema para Chromium/Puppeteer não estão instaladas (apenas em produção Linux)
+
+**Erro completo:**
+```
+Failed to launch the browser process!
+chrome: error while loading shared libraries: libnss3.so: cannot open shared object file: No such file or directory
+```
+
+**Impacto:** PDFs de contratos não são gerados, resultando em registros com `file_path` e `file_name` NULL no banco de dados.
+
+**Solução:**
+```bash
+# Instalar dependências do Chromium
+sudo apt-get update
+
+sudo apt-get install -y \
+    ca-certificates \
+    fonts-liberation \
+    libappindicator3-1 \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libc6 \
+    libcairo2 \
+    libcups2 \
+    libdbus-1-3 \
+    libexpat1 \
+    libfontconfig1 \
+    libgbm1 \
+    libgcc1 \
+    libglib2.0-0 \
+    libgtk-3-0 \
+    libnspr4 \
+    libnss3 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libstdc++6 \
+    libx11-6 \
+    libx11-xcb1 \
+    libxcb1 \
+    libxcomposite1 \
+    libxcursor1 \
+    libxdamage1 \
+    libxext6 \
+    libxfixes3 \
+    libxi6 \
+    libxrandr2 \
+    libxrender1 \
+    libxss1 \
+    libxtst6 \
+    lsb-release \
+    wget \
+    xdg-utils
+
+# Verificar instalação
+dpkg -l | grep libnss3
+
+# Reiniciar servidor
+npm run pm2:restart
+
+# Testar geração de PDF
+node scripts/diagnose-pdf-generation.js
+```
+
+**Verificar contratos sem PDF no banco:**
+```bash
+# Executar script de diagnóstico
+node scripts/check-contract-creation-flow.js
+
+# Ou verificar diretamente no MySQL
+mysql -u user -p -e "SELECT id, file_path, file_name FROM contracts WHERE file_path IS NULL;"
+```
+
+**Referências:**
+- Documentação completa: `backend/docs/TROUBLESHOOTING_CONTRACTS_PDF.md`
+- Fix aplicado: `backend/docs/FIX_CONTRACT_PDF_NULL.md`
 
 ### Porta 3000 já em uso
 
