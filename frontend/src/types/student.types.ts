@@ -88,7 +88,7 @@ export interface IStudent {
   matricula: number | null;
 
   /** Ano da matrícula */
-  ano_matricula: number | null;
+  ano_matricula: string | null;
 
   /** Profissão do estudante */
   profissao: string | null;
@@ -315,7 +315,7 @@ export interface IStudentCreateRequest {
   matricula?: number;
 
   /** Ano da matrícula */
-  ano_matricula?: number;
+  ano_matricula?: string;
 
   /** Profissão */
   profissao?: string;

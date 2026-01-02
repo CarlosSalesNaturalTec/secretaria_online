@@ -330,7 +330,7 @@ module.exports = (sequelize, DataTypes) => {
         comment: 'N�mero de matr�cula',
       },
       ano_matricula: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.STRING(20),
         allowNull: true,
         comment: 'Ano da matr�cula',
       },

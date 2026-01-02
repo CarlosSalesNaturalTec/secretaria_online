@@ -230,7 +230,7 @@ export function StudentForm({
             cleanedData[key] = String(value).replace(/\D/g, '');
           }
           // Converte campos numéricos de string para number
-          else if (key === 'matricula' || key === 'ano_matricula' || key === 'sexo') {
+          else if (key === 'matricula' || key === 'sexo') {
             const numValue = Number(value);
             if (!isNaN(numValue)) {
               cleanedData[key] = numValue;
@@ -466,7 +466,7 @@ export function StudentForm({
 
           <Input
             {...register('ano_matricula')}
-            type="number"
+            type="text"
             label="Ano da Matrícula"
             placeholder="2025"
             error={errors.ano_matricula?.message}
