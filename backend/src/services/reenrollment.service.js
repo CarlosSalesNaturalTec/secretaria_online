@@ -34,6 +34,7 @@ const { sequelize } = require('../models');
 const { AppError } = require('../middlewares/error.middleware');
 const logger = require('../utils/logger');
 const PDFService = require('./pdf.service');
+const { CONTRACTS_PATH } = require('../config/pdf');
 
 class ReenrollmentService {
   /**
@@ -192,7 +193,7 @@ class ReenrollmentService {
         const pdfResult = await PDFService.generateContractPDF(
           placeholderData,
           processedContent,
-          'uploads/contracts'
+          CONTRACTS_PATH
         );
 
         // Atualizar contrato com file_path e file_name
