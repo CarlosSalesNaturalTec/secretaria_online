@@ -36,19 +36,19 @@ class AuthService {
     const userWithEnrollment = user.get({ plain: true });
 
     if (user.role === 'student' && user.student_id) {
-      // Busca enrollment pendente mais recente (status 'contract' ou 'reenrollment')
-      const pendingEnrollment = await Enrollment.findOne({
+      // Busca enrollment mais recente do estudante (qualquer status, exceto cancelled e completed)
+      const enrollment = await Enrollment.findOne({
         where: {
           student_id: user.student_id,
           status: {
-            [Op.in]: ['contract', 'reenrollment'],
+            [Op.notIn]: ['cancelled', 'completed'],
           },
         },
         order: [['created_at', 'DESC']],
       });
 
-      if (pendingEnrollment) {
-        userWithEnrollment.enrollmentStatus = pendingEnrollment.status;
+      if (enrollment) {
+        userWithEnrollment.enrollmentStatus = enrollment.status;
       }
     }
 

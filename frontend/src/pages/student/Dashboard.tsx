@@ -17,7 +17,6 @@ import { Link } from 'react-router-dom';
 import {
   BookOpen,
   FileText,
-  ClipboardList,
   AlertCircle,
   Calendar,
   CheckCircle,
@@ -29,6 +28,7 @@ import EvaluationService from '@/services/evaluation.service';
 import type { IGradeWithEvaluation } from '@/types/grade.types';
 import type { IEvaluation } from '@/types/evaluation.types';
 import type { IDocument } from '@/types/document.types';
+import { useAuth } from '@/hooks/useAuth';
 
 /**
  * StudentDashboard - Dashboard do aluno
@@ -44,6 +44,7 @@ import type { IDocument } from '@/types/document.types';
  * <StudentDashboard />
  */
 export default function StudentDashboard() {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -330,61 +331,41 @@ export default function StudentDashboard() {
         </div>
       )}
 
-      {/* Links Rápidos */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Acesso Rápido</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Link
-            to="/student/grades"
-            className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors"
-          >
-            <BookOpen className="w-6 h-6 text-blue-600" />
-            <div>
-              <h3 className="font-medium text-gray-900">Minhas Notas</h3>
-              <p className="text-sm text-gray-600">Ver todas as notas</p>
+      {/* Mensagem de Status da Matrícula */}
+      {pendingDocuments.length === 0 && user && (
+        <>
+          {user.enrollmentStatus === 'active' && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-semibold text-green-900 mb-1">
+                    Matrícula ativa
+                  </h3>
+                  <p className="text-sm text-green-700">
+                    Sua matrícula está ativa e todos os documentos foram aprovados. Você tem acesso
+                    completo ao sistema.
+                  </p>
+                </div>
+              </div>
             </div>
-          </Link>
-
-          <Link
-            to="/student/documents"
-            className="flex items-center gap-3 p-4 bg-green-50 rounded-lg border border-green-200 hover:bg-green-100 transition-colors"
-          >
-            <FileText className="w-6 h-6 text-green-600" />
-            <div>
-              <h3 className="font-medium text-gray-900">Documentos</h3>
-              <p className="text-sm text-gray-600">Enviar documentos</p>
+          )}
+          {user.enrollmentStatus === 'pending' && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+              <div className="flex items-start gap-3">
+                <Clock className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-semibold text-yellow-900 mb-1">
+                    Matrícula pendente
+                  </h3>
+                  <p className="text-sm text-yellow-700">
+                    Sua matrícula está em análise. Aguarde a aprovação dos documentos e a confirmação pela secretaria.
+                  </p>
+                </div>
+              </div>
             </div>
-          </Link>
-
-          <Link
-            to="/student/requests"
-            className="flex items-center gap-3 p-4 bg-purple-50 rounded-lg border border-purple-200 hover:bg-purple-100 transition-colors"
-          >
-            <ClipboardList className="w-6 h-6 text-purple-600" />
-            <div>
-              <h3 className="font-medium text-gray-900">Solicitações</h3>
-              <p className="text-sm text-gray-600">Fazer solicitações</p>
-            </div>
-          </Link>
-        </div>
-      </div>
-
-      {/* Mensagem de Boas-vindas para Matrículas Ativas */}
-      {pendingDocuments.length === 0 && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-          <div className="flex items-start gap-3">
-            <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-semibold text-green-900 mb-1">
-                Matrícula ativa
-              </h3>
-              <p className="text-sm text-green-700">
-                Sua matrícula está ativa e todos os documentos foram aprovados. Você tem acesso
-                completo ao sistema.
-              </p>
-            </div>
-          </div>
-        </div>
+          )}
+        </>
       )}
     </div>
   );
