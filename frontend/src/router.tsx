@@ -53,6 +53,7 @@ const StudentGrades = lazy(() => import('./pages/student/Grades'));
 const StudentDocuments = lazy(() => import('./pages/student/Documents'));
 const StudentRequests = lazy(() => import('./pages/student/Requests'));
 const StudentContracts = lazy(() => import('./pages/student/Contracts'));
+const StudentMyData = lazy(() => import('./pages/student/MyData'));
 const ReenrollmentAcceptance = lazy(() => import('./pages/student/ReenrollmentAcceptance'));
 
 /**
@@ -343,6 +344,14 @@ const privateRoutes: RouteObject[] = [
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <StudentGrades />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'my-data',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <StudentMyData />
           </Suspense>
         ),
       },

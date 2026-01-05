@@ -56,6 +56,14 @@ export interface IUser {
 
   /** Status da matrícula do estudante (se aplicável) */
   enrollmentStatus?: 'contract' | 'pending' | 'active' | 'cancelled' | 'reenrollment' | 'completed';
+
+  /** ID do estudante na tabela students (se role === 'student') */
+  studentId?: number;
+  student_id?: number;
+
+  /** ID do professor na tabela teachers (se role === 'teacher') */
+  teacherId?: number;
+  teacher_id?: number;
 }
 
 /**

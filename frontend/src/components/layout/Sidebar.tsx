@@ -23,6 +23,7 @@ import {
   ClipboardListIcon,
   SchoolIcon,
   ClipboardCheckIcon,
+  UserIcon,
 } from 'lucide-react';
 import { type UserRole } from '@/types/user.types';
 
@@ -84,6 +85,7 @@ const getNavigationItems = (role: UserRole): NavigationItem[] => {
   if (role === 'student') {
     return [
       { name: 'Dashboard', href: '/student/dashboard', icon: LayoutDashboardIcon },
+      { name: 'Meus Dados', href: '/student/my-data', icon: UserIcon },
       { name: 'Minhas Notas', href: '/student/grades', icon: ClipboardListIcon },
       { name: 'Meus Documentos', href: '/student/documents', icon: FileTextIcon },
       { name: 'Meus Contratos', href: '/student/contracts', icon: FileTextIcon },
