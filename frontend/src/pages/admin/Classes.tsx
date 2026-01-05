@@ -13,7 +13,7 @@
  * - Gerenciar estados de loading e erro
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Plus, Pencil, Trash2, AlertCircle, Users, GraduationCap } from 'lucide-react';
 import { Table, type Column } from '@/components/ui/Table';
 import { Button } from '@/components/ui/Button';
@@ -44,6 +44,9 @@ export default function ClassesPage() {
   const [classes, setClasses] = useState<IClass[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Estado do filtro de curso
+  const [courseFilter, setCourseFilter] = useState<string>('');
 
   // Estado dos modais
   const [activeModal, setActiveModal] = useState<ModalType>(null);
@@ -256,6 +259,21 @@ export default function ClassesPage() {
   };
 
   /**
+   * Filtra turmas por nome de curso (busca parcial)
+   */
+  const filteredClasses = useMemo(() => {
+    if (!courseFilter.trim()) {
+      return classes;
+    }
+
+    const filterLower = courseFilter.toLowerCase().trim();
+    return classes.filter((classData) => {
+      const courseName = classData.course?.name?.toLowerCase() || '';
+      return courseName.includes(filterLower);
+    });
+  }, [classes, courseFilter]);
+
+  /**
    * Definição das colunas da tabela
    */
   const columns: Column<IClass>[] = [
@@ -399,12 +417,27 @@ export default function ClassesPage() {
         </div>
       )}
 
+      {/* Filtro de curso */}
+      <div className="mb-4">
+        <label htmlFor="courseFilter" className="block text-sm font-medium text-gray-700 mb-2">
+          Filtrar por curso
+        </label>
+        <input
+          id="courseFilter"
+          type="text"
+          value={courseFilter}
+          onChange={(e) => setCourseFilter(e.target.value)}
+          placeholder="Digite o nome do curso..."
+          className="w-full max-w-md px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+        />
+      </div>
+
       {/* Tabela de turmas */}
       <Table
-        data={classes}
+        data={filteredClasses}
         columns={columns}
         loading={loading}
-        emptyMessage="Nenhuma turma cadastrada"
+        emptyMessage={courseFilter ? "Nenhuma turma encontrada para este filtro" : "Nenhuma turma cadastrada"}
         getRowKey={(classData) => classData.id}
         hoverable
       />
