@@ -21,7 +21,6 @@ import type { IClass } from '@/types/class.types';
 type ModalType = 'create' | 'edit' | 'delete' | null;
 
 export default function EvaluationsPage() {
-  const [evaluations, setEvaluations] = useState<IEvaluation[]>([]);
   const [filteredEvaluations, setFilteredEvaluations] = useState<IEvaluation[]>([]);
   const [classes, setClasses] = useState<IClass[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -39,7 +38,6 @@ export default function EvaluationsPage() {
   useEffect(() => {
     if (selectedClassFilter === '') {
       setFilteredEvaluations([]);
-      setEvaluations([]);
     } else {
       loadEvaluationsByClass(Number(selectedClassFilter));
     }
@@ -50,7 +48,6 @@ export default function EvaluationsPage() {
       setLoading(true);
       setError(null);
       const data = await EvaluationService.getAll();
-      setEvaluations(data);
       setFilteredEvaluations(data);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar lista de avaliações';
@@ -67,7 +64,6 @@ export default function EvaluationsPage() {
       setError(null);
       const data = await EvaluationService.getAll();
       const filtered = data.filter(e => e.classId === classId);
-      setEvaluations(filtered);
       setFilteredEvaluations(filtered);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar lista de avaliações';

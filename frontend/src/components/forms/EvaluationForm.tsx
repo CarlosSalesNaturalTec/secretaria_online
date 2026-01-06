@@ -42,7 +42,6 @@ export function EvaluationForm({ initialData, onSubmit, onCancel, loading = fals
   const { listTeachers } = useTeachers();
 
   const [classes, setClasses] = useState<IClass[]>([]);
-  const [disciplines, setDisciplines] = useState<IDiscipline[]>([]);
   const [loadingClasses, setLoadingClasses] = useState(true);
   const [loadingDisciplines, setLoadingDisciplines] = useState(true);
   const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
@@ -104,8 +103,7 @@ export function EvaluationForm({ initialData, onSubmit, onCancel, loading = fals
   const loadDisciplines = async () => {
     try {
       setLoadingDisciplines(true);
-      const result = await DisciplineService.getAll();
-      setDisciplines(result.data);
+      await DisciplineService.getAll();
     } catch (error) {
       console.error('[EvaluationForm] Erro ao carregar disciplinas:', error);
     } finally {
