@@ -114,15 +114,21 @@ export function EvaluationForm({ initialData, onSubmit, onCancel, loading = fals
   };
 
   const getFilteredDisciplines = (): IDiscipline[] => {
-    if (!selectedClassId) return disciplines;
+    if (!selectedClassId) return [];
 
     const selectedClass = classes.find((c) => c.id === selectedClassId);
-    if (!selectedClass || !selectedClass.disciplines || selectedClass.disciplines.length === 0) {
-      return disciplines;
+
+    if (import.meta.env.DEV) {
+      console.log('[EvaluationForm] Selected class:', selectedClass);
+      console.log('[EvaluationForm] Class disciplines:', selectedClass?.disciplines);
     }
 
-    const classDisciplineIds = selectedClass.disciplines.map((d) => d.id);
-    return disciplines.filter((d) => classDisciplineIds.includes(d.id));
+    if (!selectedClass || !selectedClass.disciplines || selectedClass.disciplines.length === 0) {
+      return [];
+    }
+
+    // Retornar diretamente as disciplinas da turma selecionada
+    return selectedClass.disciplines;
   };
 
   const handleFormSubmit = async (data: EvaluationFormData) => {

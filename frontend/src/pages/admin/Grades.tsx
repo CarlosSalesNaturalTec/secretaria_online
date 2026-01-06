@@ -186,18 +186,9 @@ export default function AdminGrades() {
           }));
           setStudents(classStudents);
         }
-      } else if (classes.length > 0) {
-        // Caso contrário, seleciona primeira turma
-        setSelectedClass(classes[0]);
-        // Converte IUser[] para IClassStudent[]
-        const classStudents = (classes[0].students || []).map((user, index) => ({
-          id: index,
-          classId: classes[0].id,
-          studentId: user.id,
-          student: user,
-        }));
-        setStudents(classStudents);
       }
+      // Removido: não selecionar automaticamente a primeira turma
+      // As avaliações só devem ser carregadas quando o usuário selecionar uma turma
 
       if (import.meta.env.DEV) {
         console.log('[AdminGrades] Dados iniciais carregados:', classes.length);
@@ -584,7 +575,7 @@ export default function AdminGrades() {
           }}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
         >
-          <option value="">Escolha uma turma...</option>
+          <option value="">Selecione uma turma para visualizar avaliações</option>
           {allClasses.map((cls) => (
             <option key={cls.id} value={cls.id}>
               {cls.course?.name} - {cls.semester}º Semestre {cls.year}

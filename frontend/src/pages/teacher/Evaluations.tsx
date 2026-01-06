@@ -24,7 +24,7 @@ export default function EvaluationsPage() {
   const [evaluations, setEvaluations] = useState<IEvaluation[]>([]);
   const [filteredEvaluations, setFilteredEvaluations] = useState<IEvaluation[]>([]);
   const [classes, setClasses] = useState<IClass[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [selectedEvaluation, setSelectedEvaluation] = useState<IEvaluation | null>(null);
@@ -33,17 +33,17 @@ export default function EvaluationsPage() {
   const [selectedClassFilter, setSelectedClassFilter] = useState<string>('');
 
   useEffect(() => {
-    loadEvaluations();
     loadClasses();
   }, []);
 
   useEffect(() => {
     if (selectedClassFilter === '') {
-      setFilteredEvaluations(evaluations);
+      setFilteredEvaluations([]);
+      setEvaluations([]);
     } else {
-      setFilteredEvaluations(evaluations.filter(e => e.classId === Number(selectedClassFilter)));
+      loadEvaluationsByClass(Number(selectedClassFilter));
     }
-  }, [selectedClassFilter, evaluations]);
+  }, [selectedClassFilter]);
 
   const loadEvaluations = async () => {
     try {
@@ -52,6 +52,23 @@ export default function EvaluationsPage() {
       const data = await EvaluationService.getAll();
       setEvaluations(data);
       setFilteredEvaluations(data);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar lista de avaliações';
+      setError(errorMessage);
+      console.error('[EvaluationsPage] Erro ao carregar avaliações:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadEvaluationsByClass = async (classId: number) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await EvaluationService.getAll();
+      const filtered = data.filter(e => e.classId === classId);
+      setEvaluations(filtered);
+      setFilteredEvaluations(filtered);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar lista de avaliações';
       setError(errorMessage);
@@ -96,7 +113,9 @@ export default function EvaluationsPage() {
       await EvaluationService.create(data as ICreateEvaluationData);
       setToast({ message: 'Avaliação cadastrada com sucesso!', type: 'success' });
       handleCloseModal();
-      await loadEvaluations();
+      if (selectedClassFilter) {
+        await loadEvaluationsByClass(Number(selectedClassFilter));
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao cadastrar avaliação';
       setToast({ message: errorMessage, type: 'error' });
@@ -114,7 +133,9 @@ export default function EvaluationsPage() {
       await EvaluationService.update(selectedEvaluation.id, data);
       setToast({ message: 'Avaliação atualizada com sucesso!', type: 'success' });
       handleCloseModal();
-      await loadEvaluations();
+      if (selectedClassFilter) {
+        await loadEvaluationsByClass(Number(selectedClassFilter));
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao atualizar avaliação';
       setToast({ message: errorMessage, type: 'error' });
@@ -132,7 +153,9 @@ export default function EvaluationsPage() {
       await EvaluationService.delete(selectedEvaluation.id);
       setToast({ message: 'Avaliação removida com sucesso!', type: 'success' });
       handleCloseModal();
-      await loadEvaluations();
+      if (selectedClassFilter) {
+        await loadEvaluationsByClass(Number(selectedClassFilter));
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao remover avaliação';
       setToast({ message: errorMessage, type: 'error' });
@@ -238,7 +261,7 @@ export default function EvaluationsPage() {
       <div className="mb-4 flex items-center gap-3">
         <Filter size={20} className="text-gray-500" />
         <select value={selectedClassFilter} onChange={(e) => setSelectedClassFilter(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-          <option value="">Todas as turmas</option>
+          <option value="">Selecione uma turma</option>
           {classes.map((classItem) => (
             <option key={classItem.id} value={classItem.id}>
               {classItem.course?.name} - Semestre {classItem.semester}/{classItem.year}
@@ -247,7 +270,7 @@ export default function EvaluationsPage() {
         </select>
         {selectedClassFilter && (
           <Button size="sm" variant="secondary" onClick={() => setSelectedClassFilter('')}>
-            Limpar Filtro
+            Limpar Seleção
           </Button>
         )}
       </div>
@@ -256,7 +279,7 @@ export default function EvaluationsPage() {
         data={filteredEvaluations}
         columns={columns}
         loading={loading}
-        emptyMessage={selectedClassFilter ? 'Nenhuma avaliação encontrada para esta turma' : 'Nenhuma avaliação cadastrada'}
+        emptyMessage={selectedClassFilter ? 'Nenhuma avaliação encontrada para esta turma' : 'Selecione uma turma para visualizar as avaliações'}
         getRowKey={(evaluation) => evaluation.id}
         hoverable
       />
