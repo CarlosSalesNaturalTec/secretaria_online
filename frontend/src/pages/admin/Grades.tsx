@@ -108,6 +108,7 @@ export default function AdminGrades() {
   const [selectedEvaluation, setSelectedEvaluation] = useState<IEvaluation | null>(
     null
   );
+  const [selectedDisciplineId, setSelectedDisciplineId] = useState<string>('');
   const [grades, setGrades] = useState<IGrade[]>([]);
   const [students, setStudents] = useState<IClassStudent[]>([]);
 
@@ -276,6 +277,7 @@ export default function AdminGrades() {
    */
   const handleSelectClass = (classItem: IClass) => {
     setSelectedClass(classItem);
+    setSelectedDisciplineId('');
     setSelectedEvaluation(null);
     setGrades([]);
     // Converte IUser[] para IClassStudent[]
@@ -299,9 +301,12 @@ export default function AdminGrades() {
     }
 
     try {
-      // Encontra primeira disciplina da turma para usar como disciplineId
-      const discipline = selectedClass.disciplines?.[0];
-      if (!discipline) {
+      // Encontra disciplina selecionada ou primeira disciplina da turma
+      const disciplineId = selectedDisciplineId 
+        ? parseInt(selectedDisciplineId) 
+        : selectedClass.disciplines?.[0]?.id;
+
+      if (!disciplineId) {
         setError(
           'Turma não possui disciplinas atribuídas. Configure as disciplinas primeiro.'
         );
@@ -310,7 +315,7 @@ export default function AdminGrades() {
 
       const newEvaluation = await createEvaluation({
         classId: selectedClass.id,
-        disciplineId: discipline.id,
+        disciplineId: disciplineId,
         name: data.name,
         date: data.date,
         type: data.type,
@@ -513,6 +518,11 @@ export default function AdminGrades() {
     return type === EVALUATION_TYPES.GRADE ? 'Nota (0-10)' : 'Conceito';
   };
 
+  const filteredEvaluations = evaluations.filter(e => {
+    if (!selectedDisciplineId) return true;
+    return e.disciplineId === parseInt(selectedDisciplineId);
+  });
+
   // Estado de carregamento
   if (loading) {
     return (
@@ -562,26 +572,51 @@ export default function AdminGrades() {
         </p>
       </div>
 
-      {/* Seleção de turma */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Selecionar Turma
-        </label>
-        <select
-          value={selectedClass?.id || ''}
-          onChange={(e) => {
-            const cls = allClasses.find((c) => c.id === parseInt(e.target.value));
-            if (cls) handleSelectClass(cls);
-          }}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-        >
-          <option value="">Selecione uma turma para visualizar avaliações</option>
-          {allClasses.map((cls) => (
-            <option key={cls.id} value={cls.id}>
-              {cls.course?.name} - {cls.semester}º Semestre {cls.year}
-            </option>
-          ))}
-        </select>
+      {/* Seleção de turma e disciplina */}
+      <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Selecionar Turma
+          </label>
+          <select
+            value={selectedClass?.id || ''}
+            onChange={(e) => {
+              const cls = allClasses.find((c) => c.id === parseInt(e.target.value));
+              if (cls) handleSelectClass(cls);
+            }}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          >
+            <option value="">Selecione uma turma para visualizar avaliações</option>
+            {allClasses.map((cls) => (
+              <option key={cls.id} value={cls.id}>
+                {cls.course?.name} - {cls.semester}º Semestre {cls.year}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Filtrar por Disciplina
+          </label>
+          <select
+            value={selectedDisciplineId}
+            disabled={!selectedClass}
+            onChange={(e) => {
+              setSelectedDisciplineId(e.target.value);
+              setSelectedEvaluation(null);
+              setGrades([]);
+            }}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-400"
+          >
+            <option value="">Todas as disciplinas</option>
+            {selectedClass?.disciplines?.map((discipline) => (
+              <option key={discipline.id} value={discipline.id}>
+                {discipline.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Seção de avaliações */}
@@ -685,15 +720,15 @@ export default function AdminGrades() {
 
               {/* Lista de avaliações */}
               <div className="space-y-2 max-h-96 overflow-y-auto">
-                {evaluations.length === 0 ? (
+                {filteredEvaluations.length === 0 ? (
                   <div className="text-center py-6">
                     <AlertTriangle className="w-8 h-8 mx-auto text-gray-300 mb-2" />
                     <p className="text-sm text-gray-600">
-                      Nenhuma avaliação criada
+                      {selectedDisciplineId ? 'Nenhuma avaliação para esta disciplina' : 'Nenhuma avaliação criada'}
                     </p>
                   </div>
                 ) : (
-                  evaluations.map((evaluation) => (
+                  filteredEvaluations.map((evaluation) => (
                     <button
                       key={evaluation.id}
                       onClick={() => setSelectedEvaluation(evaluation)}
