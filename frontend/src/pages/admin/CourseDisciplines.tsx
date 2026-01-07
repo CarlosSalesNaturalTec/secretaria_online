@@ -86,14 +86,27 @@ export default function CourseDisciplinesPage() {
     }
 
     // Extrai dados da tabela pivot (relacionamento many-to-many)
-    const pivotData = discipline.CourseDiscipline || discipline.course_disciplines || {};
+    // Tenta várias variações de nome para garantir compatibilidade
+    const pivotData = 
+      discipline.CourseDiscipline || 
+      discipline.course_disciplines || 
+      discipline.CourseDisciplines || 
+      discipline.courseDisciplines || 
+      {};
+
+    if (import.meta.env.DEV) {
+      console.log('[CourseDisciplinesPage] Dados pivot encontrados:', pivotData);
+    }
+
+    // Tenta encontrar o semestre no pivotData ou diretamente no objeto (fallback)
+    const semester = pivotData.semester || discipline.semester || 0;
 
     // Converte a estrutura do backend para o tipo ICourseDiscipline esperado
     const normalized: ICourseDiscipline = {
       id: pivotData.id || 0, // ID da relação curso-disciplina (se disponível)
       courseId: Number(courseId) || 0,
       disciplineId: discipline.id,
-      semester: pivotData.semester || 0,
+      semester: semester,
       discipline: {
         id: discipline.id,
         name: discipline.name,
