@@ -53,7 +53,7 @@ function mapClassData(classData: any): IClass {
       class_teachers: t.class_teachers,
     })),
     // Mapear disciplinas - converte snake_case para camelCase se necessário
-    disciplines: classData.disciplines?.map((d: any) => ({
+    disciplines: classData.disciplines?.filter((d: any) => d !== null).map((d: any) => ({
       id: d.id,
       name: d.name,
       code: d.code,
