@@ -901,46 +901,52 @@ class GradeService {
       const grades = await Grade.findAll(query);
 
       // 5. Estruturar resposta com agrupamento opcional por disciplina
-      return grades.map(g => {
-        const gradeData = g.toJSON();
-        return {
-          id: gradeData.id,
-          evaluation: {
-            id: gradeData.evaluation.id,
-            name: gradeData.evaluation.name,
-            date: gradeData.evaluation.date,
-            type: gradeData.evaluation.type,
-            original_semester: gradeData.evaluation.original_semester,
-            original_course_name: gradeData.evaluation.original_course_name,
-            original_semester_raw: gradeData.evaluation.original_semester_raw,
-            disciplineId: gradeData.evaluation.discipline.id,
+      return grades
+        .filter(g => {
+          // Filtrar notas com avaliações que têm disciplina válida
+          const gradeData = g.toJSON();
+          return gradeData.evaluation && gradeData.evaluation.discipline;
+        })
+        .map(g => {
+          const gradeData = g.toJSON();
+          return {
+            id: gradeData.id,
+            evaluation: {
+              id: gradeData.evaluation.id,
+              name: gradeData.evaluation.name,
+              date: gradeData.evaluation.date,
+              type: gradeData.evaluation.type,
+              original_semester: gradeData.evaluation.original_semester,
+              original_course_name: gradeData.evaluation.original_course_name,
+              original_semester_raw: gradeData.evaluation.original_semester_raw,
+              disciplineId: gradeData.evaluation.discipline.id,
+              discipline: {
+                id: gradeData.evaluation.discipline.id,
+                name: gradeData.evaluation.discipline.name,
+                code: gradeData.evaluation.discipline.code,
+                workloadHours: gradeData.evaluation.discipline.workload_hours
+              },
+              teacher: gradeData.evaluation.teacher ? {
+                id: gradeData.evaluation.teacher.id,
+                name: gradeData.evaluation.teacher.nome
+              } : null
+            },
+            class: gradeData.evaluation.class ? {
+              id: gradeData.evaluation.class.id,
+              semester: gradeData.evaluation.class.semester,
+              year: gradeData.evaluation.class.year
+            } : null,
             discipline: {
               id: gradeData.evaluation.discipline.id,
               name: gradeData.evaluation.discipline.name,
-              code: gradeData.evaluation.discipline.code,
-              workloadHours: gradeData.evaluation.discipline.workload_hours
+              code: gradeData.evaluation.discipline.code
             },
-            teacher: gradeData.evaluation.teacher ? {
-              id: gradeData.evaluation.teacher.id,
-              name: gradeData.evaluation.teacher.nome
-            } : null
-          },
-          class: {
-            id: gradeData.evaluation.class.id,
-            semester: gradeData.evaluation.class.semester,
-            year: gradeData.evaluation.class.year
-          },
-          discipline: {
-            id: gradeData.evaluation.discipline.id,
-            name: gradeData.evaluation.discipline.name,
-            code: gradeData.evaluation.discipline.code
-          },
-          grade: gradeData.grade,
-          concept: gradeData.concept,
-          created_at: gradeData.created_at,
-          updated_at: gradeData.updated_at
-        };
-      });
+            grade: gradeData.grade,
+            concept: gradeData.concept,
+            created_at: gradeData.created_at,
+            updated_at: gradeData.updated_at
+          };
+        });
     } catch (error) {
       if (error.isOperational) throw error;
       throw new AppError(
