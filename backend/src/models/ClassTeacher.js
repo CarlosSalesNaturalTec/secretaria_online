@@ -73,6 +73,17 @@ module.exports = (sequelize, DataTypes) => {
         onUpdate: 'CASCADE',
         onDelete: 'RESTRICT'
       });
+
+      /**
+       * Associação 1:N com ClassDisciplineSchedule
+       * Um registro pode ter vários horários
+       */
+      ClassTeacher.hasMany(models.ClassDisciplineSchedule, {
+        foreignKey: 'class_teacher_id',
+        as: 'schedules',
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+      });
     }
   }
 

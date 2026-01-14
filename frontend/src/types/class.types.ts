@@ -309,3 +309,133 @@ export interface IClassFilters {
    */
   sortOrder?: 'ASC' | 'DESC';
 }
+
+/**
+ * Dia da semana para horários
+ */
+export type DayOfWeek = 'segunda' | 'terca' | 'quarta' | 'quinta' | 'sexta' | 'sabado' | 'domingo';
+
+/**
+ * Interface para horário de disciplina da turma
+ */
+export interface IClassDisciplineSchedule {
+  /**
+   * ID único do horário
+   */
+  id: number;
+
+  /**
+   * ID da relação turma-professor-disciplina
+   */
+  classTeacherId: number;
+
+  /**
+   * Dia da semana
+   */
+  dayOfWeek: DayOfWeek;
+
+  /**
+   * Horário de início (HH:MM ou HH:MM:SS)
+   */
+  startTime: string;
+
+  /**
+   * Horário de término (HH:MM ou HH:MM:SS)
+   */
+  endTime: string;
+
+  /**
+   * Dados da relação turma-professor-disciplina (quando incluído)
+   */
+  classTeacher?: IClassTeacher;
+
+  /**
+   * Data de criação
+   */
+  createdAt?: string;
+
+  /**
+   * Data de última atualização
+   */
+  updatedAt?: string;
+}
+
+/**
+ * Dados para criar novo horário
+ */
+export interface IClassDisciplineScheduleCreateRequest {
+  /**
+   * ID da relação turma-professor-disciplina
+   */
+  classTeacherId: number;
+
+  /**
+   * Dia da semana
+   */
+  dayOfWeek: DayOfWeek;
+
+  /**
+   * Horário de início (HH:MM)
+   */
+  startTime: string;
+
+  /**
+   * Horário de término (HH:MM)
+   */
+  endTime: string;
+}
+
+/**
+ * Dados para atualizar horário
+ */
+export interface IClassDisciplineScheduleUpdateRequest {
+  /**
+   * Dia da semana (opcional)
+   */
+  dayOfWeek?: DayOfWeek;
+
+  /**
+   * Horário de início (opcional)
+   */
+  startTime?: string;
+
+  /**
+   * Horário de término (opcional)
+   */
+  endTime?: string;
+}
+
+/**
+ * Resposta ao listar horários
+ */
+export interface IClassDisciplineScheduleListResponse {
+  /**
+   * Indica sucesso da operação
+   */
+  success: boolean;
+
+  /**
+   * Array de horários
+   */
+  data: IClassDisciplineSchedule[];
+}
+
+/**
+ * Resposta ao consultar horário específico
+ */
+export interface IClassDisciplineScheduleResponse {
+  /**
+   * Indica sucesso da operação
+   */
+  success: boolean;
+
+  /**
+   * Dados do horário
+   */
+  data: IClassDisciplineSchedule;
+
+  /**
+   * Mensagem de sucesso (opcional)
+   */
+  message?: string;
+}

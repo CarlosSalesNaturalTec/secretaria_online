@@ -50,7 +50,8 @@ function mapClassData(classData: any): IClass {
       id: t.id,
       name: t.nome || t.name, // Campo 'nome' na tabela teachers
       email: t.email,
-      class_teachers: t.class_teachers,
+      // Axios converte automaticamente snake_case para camelCase em alguns casos
+      class_teachers: t.class_teachers || t.classTeachers,
     })),
     // Mapear disciplinas - converte snake_case para camelCase se necessário
     disciplines: classData.disciplines?.filter((d: any) => d !== null).map((d: any) => ({
@@ -200,6 +201,10 @@ export async function getById(id: number): Promise<IClass> {
 
     if (import.meta.env.DEV) {
       console.log('[ClassService] Turma encontrada:', response.data.data.id);
+      console.log('[ClassService] Dados RAW da API:', response.data.data);
+      if (response.data.data.teachers && response.data.data.teachers.length > 0) {
+        console.log('[ClassService] Primeiro professor RAW da API:', response.data.data.teachers[0]);
+      }
     }
 
     // Mapear dados da API (snake_case) para camelCase

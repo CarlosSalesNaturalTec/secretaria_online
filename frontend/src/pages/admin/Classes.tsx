@@ -14,11 +14,12 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
-import { Plus, Pencil, Trash2, AlertCircle, Users, GraduationCap } from 'lucide-react';
+import { Plus, Pencil, Trash2, AlertCircle, Users, GraduationCap, Calendar } from 'lucide-react';
 import { Table, type Column } from '@/components/ui/Table';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { ClassForm } from '@/components/forms/ClassForm';
+import { ClassScheduleModal } from '@/components/forms/ClassScheduleModal';
 import ClassService from '@/services/class.service';
 import type { IClass } from '@/types/class.types';
 import type { ICreateClassData, IUpdateClassData } from '@/services/class.service';
@@ -26,7 +27,7 @@ import type { ICreateClassData, IUpdateClassData } from '@/services/class.servic
 /**
  * Tipo de modal ativo
  */
-type ModalType = 'create' | 'edit' | 'delete' | 'viewDetails' | null;
+type ModalType = 'create' | 'edit' | 'delete' | 'viewDetails' | 'schedules' | null;
 
 /**
  * ClassesPage - Página de gerenciamento de turmas
@@ -129,6 +130,21 @@ export default function ClassesPage() {
   const handleOpenDetailsModal = (classData: IClass) => {
     setSelectedClass(classData);
     setActiveModal('viewDetails');
+  };
+
+  /**
+   * Abre modal de horários
+   */
+  const handleOpenSchedulesModal = async (classData: IClass) => {
+    try {
+      // Buscar dados completos da turma antes de abrir o modal
+      const fullClassData = await ClassService.getById(classData.id);
+      setSelectedClass(fullClassData);
+      setActiveModal('schedules');
+    } catch (error) {
+      console.error('[ClassesPage] Erro ao carregar dados da turma:', error);
+      alert('Erro ao carregar dados da turma');
+    }
   };
 
   /**
@@ -320,6 +336,15 @@ export default function ClassesPage() {
           <Button
             size="sm"
             variant="secondary"
+            onClick={() => handleOpenSchedulesModal(classData)}
+            title="Gerenciar horários"
+          >
+            <Calendar size={16} />
+          </Button>
+
+          <Button
+            size="sm"
+            variant="secondary"
             onClick={() => handleOpenDetailsModal(classData)}
             title="Ver detalhes"
           >
@@ -346,7 +371,7 @@ export default function ClassesPage() {
         </div>
       ),
       align: 'right',
-      cellClassName: 'w-48',
+      cellClassName: 'w-64',
     },
   ];
 
@@ -606,6 +631,15 @@ export default function ClassesPage() {
           </div>
         )}
       </Modal>
+
+      {/* Modal de horários */}
+      {selectedClass && activeModal === 'schedules' && (
+        <ClassScheduleModal
+          classData={selectedClass}
+          onClose={handleCloseModal}
+          onSuccess={loadClasses}
+        />
+      )}
     </div>
   );
 }

@@ -45,6 +45,9 @@ const disciplineRoutes = require('./discipline.routes');
 // Gerenciamento de Turmas (feat-035)
 const classRoutes = require('./class.routes');
 
+// Gerenciamento de Horários das Disciplinas da Turma (feat-grade-dias-horarios)
+const classDisciplineScheduleRoutes = require('./classDisciplineSchedule.routes');
+
 // Gerenciamento de Matrículas (feat-039)
 const enrollmentRoutes = require('./enrollment.routes');
 
@@ -184,10 +187,26 @@ router.use('/disciplines', disciplineRoutes);
  * - POST /classes/:id/students - Vincular alunos à turma
  * - GET /classes/:id/teachers - Listar professores da turma
  * - POST /classes/:id/teachers - Vincular professores à turma
+ * - GET /classes/:classId/schedules - Listar horários da turma
  *
  * Permissões: Admin (CRUD), Professor (visualização de suas turmas)
  */
 router.use('/classes', classRoutes);
+
+/**
+ * Rotas de Gerenciamento de Horários das Disciplinas da Turma
+ * Base: /api/v1/class-schedules
+ *
+ * Endpoints:
+ * - POST /class-schedules - Criar novo horário
+ * - POST /class-schedules/bulk - Criar múltiplos horários
+ * - PUT /class-schedules/:id - Atualizar horário
+ * - DELETE /class-schedules/:id - Deletar horário
+ * - GET /class-schedules/class-teacher/:classTeacherId - Listar horários por professor-disciplina
+ *
+ * Permissões: Admin (CRUD), Professor (visualização)
+ */
+router.use('/class-schedules', classDisciplineScheduleRoutes);
 
 /**
  * Rotas de Gerenciamento de Matrículas

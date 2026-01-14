@@ -32,7 +32,7 @@ class ClassService {
     const teachersInclude = {
       association: 'teachers',
       attributes: ['id', 'nome', 'email'],
-      through: { attributes: ['discipline_id'] }
+      through: { attributes: ['id', 'discipline_id'] }
     };
 
     // Se teacherId for fornecido, filtrar turmas desse professor
@@ -127,7 +127,7 @@ class ClassService {
         {
           association: 'teachers',
           attributes: ['id', 'nome', 'email'],
-          through: { attributes: ['discipline_id'] }
+          through: { attributes: ['id', 'discipline_id'] }
         }
       ]
     });

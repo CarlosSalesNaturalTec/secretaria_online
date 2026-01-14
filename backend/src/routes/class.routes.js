@@ -8,6 +8,7 @@
 const express = require('express');
 const router = express.Router();
 const ClassController = require('../controllers/class.controller');
+const ClassDisciplineScheduleController = require('../controllers/classDisciplineSchedule.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 const { authorizeAdmin, authorizeTeacher } = require('../middlewares/rbac.middleware');
 
@@ -16,6 +17,9 @@ router.use(authMiddleware);
 // Rotas de listagem: Admin e Professor
 router.get('/', authorizeTeacher, ClassController.list);
 router.get('/:id', authorizeTeacher, ClassController.getById);
+
+// Rotas de horários (schedules)
+router.get('/:classId/schedules', authorizeTeacher, ClassDisciplineScheduleController.getSchedulesByClass);
 
 // Rotas de CRUD: Apenas Admin
 router.post('/', authorizeAdmin, ClassController.create);
