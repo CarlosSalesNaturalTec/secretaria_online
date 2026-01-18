@@ -1,0 +1,1820 @@
+{
+  "projeto": "Secretaria Online - Grade de Horários e Disciplinas Extras",
+  "versao": "1.0",
+  "data_criacao": "2026-01-18",
+  "descricao": "Plano detalhado para implementação de grade de horários por turma, cadastro de disciplinas extras para alunos e visualização da grade completa pelo aluno",
+
+  "funcionalidades": [
+    {
+      "id": "feat-001",
+      "nome": "Grade de Horários por Turma",
+      "descricao": "Criação de grade de horários com dias da semana, horários e links de aulas online para cada turma"
+    },
+    {
+      "id": "feat-002",
+      "nome": "Disciplinas Extras para Alunos",
+      "descricao": "Vínculo de disciplinas avulsas/extras para alunos que precisam cursar disciplinas de semestres anteriores (dependências, recuperações)"
+    },
+    {
+      "id": "feat-003",
+      "nome": "Visualização da Grade pelo Aluno",
+      "descricao": "Tela para aluno visualizar sua grade completa de horários incluindo disciplinas da turma principal e disciplinas extras"
+    }
+  ],
+
+  "analise_banco_dados": {
+    "tabelas_existentes": {
+      "classes": {
+        "descricao": "Turmas do sistema",
+        "campos_principais": ["id", "course_id", "semester", "year", "created_at", "updated_at", "deleted_at"]
+      },
+      "disciplines": {
+        "descricao": "Disciplinas cadastradas",
+        "campos_principais": ["id", "name", "code", "workload_hours", "created_at", "updated_at", "deleted_at"]
+      },
+      "course_disciplines": {
+        "descricao": "Relacionamento entre cursos e disciplinas",
+        "campos_principais": ["course_id", "discipline_id", "semester"]
+      },
+      "class_teachers": {
+        "descricao": "Professores e disciplinas que lecionam em cada turma",
+        "campos_principais": ["id", "class_id", "teacher_id", "discipline_id"]
+      },
+      "class_students": {
+        "descricao": "Alunos matriculados em cada turma",
+        "campos_principais": ["id", "class_id", "student_id"]
+      },
+      "students": {
+        "descricao": "Dados dos alunos",
+        "campos_principais": ["id", "nome", "cpf", "email", "matricula", "created_at", "updated_at", "deleted_at"]
+      }
+    },
+    "lacunas_identificadas": [
+      "Não existe estrutura para armazenar horários (dia da semana, hora início/fim)",
+      "Não existe estrutura para links de aulas online",
+      "Não existe matrícula em disciplinas extras/avulsas para alunos",
+      "Não existe controle de status para disciplinas extras"
+    ],
+    "novas_tabelas_necessarias": [
+      {
+        "nome": "class_schedules",
+        "proposito": "Armazenar grade de horários das turmas (dias, horários, links de aula)"
+      },
+      {
+        "nome": "student_extra_disciplines",
+        "proposito": "Vincular disciplinas extras aos alunos (dependências, recuperações, adiantamentos)"
+      }
+    ]
+  },
+
+  "etapas_implementacao": [
+    {
+      "fase": "1 - Database",
+      "ordem": 1,
+      "descricao": "Criação de estruturas de banco de dados",
+      "tarefas": [
+        {
+          "id": "db-001",
+          "tipo": "migration",
+          "arquivo": "backend/database/migrations/20260118000001-create-class-schedules.js",
+          "descricao": "Criar tabela class_schedules para armazenar grade de horários das turmas",
+          "sql_estrutura": {
+            "tabela": "class_schedules",
+            "campos": [
+              {
+                "nome": "id",
+                "tipo": "INTEGER",
+                "restricoes": "PRIMARY KEY AUTO_INCREMENT",
+                "descricao": "Identificador único do horário"
+              },
+              {
+                "nome": "class_id",
+                "tipo": "INTEGER",
+                "restricoes": "NOT NULL",
+                "fk": "classes(id) ON DELETE CASCADE",
+                "descricao": "Turma associada ao horário"
+              },
+              {
+                "nome": "discipline_id",
+                "tipo": "INTEGER",
+                "restricoes": "NOT NULL",
+                "fk": "disciplines(id) ON DELETE RESTRICT",
+                "descricao": "Disciplina ministrada neste horário"
+              },
+              {
+                "nome": "teacher_id",
+                "tipo": "INTEGER UNSIGNED",
+                "restricoes": "NULL",
+                "fk": "teachers(id) ON DELETE SET NULL",
+                "descricao": "Professor que ministra a aula (opcional)"
+              },
+              {
+                "nome": "day_of_week",
+                "tipo": "TINYINT",
+                "restricoes": "NOT NULL, CHECK (day_of_week BETWEEN 1 AND 7)",
+                "descricao": "Dia da semana: 1=Segunda, 2=Terça, 3=Quarta, 4=Quinta, 5=Sexta, 6=Sábado, 7=Domingo"
+              },
+              {
+                "nome": "start_time",
+                "tipo": "TIME",
+                "restricoes": "NOT NULL",
+                "descricao": "Horário de início da aula (formato HH:MM:SS, exemplo: 08:00:00)"
+              },
+              {
+                "nome": "end_time",
+                "tipo": "TIME",
+                "restricoes": "NOT NULL, CHECK (end_time > start_time)",
+                "descricao": "Horário de término da aula (formato HH:MM:SS, exemplo: 10:00:00)"
+              },
+              {
+                "nome": "online_link",
+                "tipo": "VARCHAR(500)",
+                "restricoes": "NULL",
+                "descricao": "URL da aula online (Google Meet, Zoom, Teams, etc) - campo opcional"
+              },
+              {
+                "nome": "created_at",
+                "tipo": "TIMESTAMP",
+                "restricoes": "DEFAULT CURRENT_TIMESTAMP",
+                "descricao": "Data e hora de criação do registro"
+              },
+              {
+                "nome": "updated_at",
+                "tipo": "TIMESTAMP",
+                "restricoes": "DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+                "descricao": "Data e hora da última atualização"
+              },
+              {
+                "nome": "deleted_at",
+                "tipo": "TIMESTAMP",
+                "restricoes": "NULL",
+                "descricao": "Data e hora da exclusão lógica (soft delete)"
+              }
+            ],
+            "indices": [
+              {
+                "nome": "idx_class_schedules_class_id",
+                "tipo": "INDEX",
+                "colunas": ["class_id"],
+                "descricao": "Otimiza buscas por turma"
+              },
+              {
+                "nome": "idx_class_schedules_discipline_id",
+                "tipo": "INDEX",
+                "colunas": ["discipline_id"],
+                "descricao": "Otimiza buscas por disciplina"
+              },
+              {
+                "nome": "idx_class_schedules_day_of_week",
+                "tipo": "INDEX",
+                "colunas": ["day_of_week"],
+                "descricao": "Otimiza filtros por dia da semana"
+              },
+              {
+                "nome": "idx_class_schedules_class_day",
+                "tipo": "INDEX",
+                "colunas": ["class_id", "day_of_week"],
+                "descricao": "Otimiza buscas por turma e dia"
+              },
+              {
+                "nome": "idx_class_schedules_deleted_at",
+                "tipo": "INDEX",
+                "colunas": ["deleted_at"],
+                "descricao": "Otimiza queries de soft delete"
+              },
+              {
+                "nome": "idx_class_schedules_unique",
+                "tipo": "UNIQUE",
+                "colunas": ["class_id", "discipline_id", "day_of_week", "start_time"],
+                "condicao": "WHERE deleted_at IS NULL",
+                "descricao": "Garante que não haja horários duplicados (mesma turma, disciplina, dia e horário)"
+              }
+            ],
+            "validacoes": [
+              "day_of_week deve estar entre 1 e 7",
+              "start_time deve ser menor que end_time",
+              "Validar conflitos de horário: mesma turma, mesmo dia, horários sobrepostos",
+              "Validar formato de URL no campo online_link"
+            ]
+          }
+        },
+        {
+          "id": "db-002",
+          "tipo": "migration",
+          "arquivo": "backend/database/migrations/20260118000002-create-student-extra-disciplines.js",
+          "descricao": "Criar tabela student_extra_disciplines para vincular disciplinas extras aos alunos",
+          "sql_estrutura": {
+            "tabela": "student_extra_disciplines",
+            "campos": [
+              {
+                "nome": "id",
+                "tipo": "INTEGER",
+                "restricoes": "PRIMARY KEY AUTO_INCREMENT",
+                "descricao": "Identificador único da disciplina extra"
+              },
+              {
+                "nome": "student_id",
+                "tipo": "INTEGER UNSIGNED",
+                "restricoes": "NOT NULL",
+                "fk": "students(id) ON DELETE CASCADE",
+                "descricao": "Aluno matriculado na disciplina extra"
+              },
+              {
+                "nome": "discipline_id",
+                "tipo": "INTEGER",
+                "restricoes": "NOT NULL",
+                "fk": "disciplines(id) ON DELETE RESTRICT",
+                "descricao": "Disciplina extra/avulsa"
+              },
+              {
+                "nome": "class_id",
+                "tipo": "INTEGER",
+                "restricoes": "NULL",
+                "fk": "classes(id) ON DELETE SET NULL",
+                "descricao": "Turma de origem onde a disciplina extra está sendo oferecida (opcional)"
+              },
+              {
+                "nome": "enrollment_date",
+                "tipo": "DATE",
+                "restricoes": "NOT NULL",
+                "descricao": "Data de matrícula na disciplina extra"
+              },
+              {
+                "nome": "reason",
+                "tipo": "ENUM('dependency', 'recovery', 'advancement', 'other')",
+                "restricoes": "DEFAULT 'dependency'",
+                "descricao": "Motivo da disciplina extra: dependency=Dependência, recovery=Recuperação, advancement=Adiantamento, other=Outro"
+              },
+              {
+                "nome": "notes",
+                "tipo": "TEXT",
+                "restricoes": "NULL",
+                "descricao": "Observações sobre a disciplina extra (opcional)"
+              },
+              {
+                "nome": "status",
+                "tipo": "ENUM('active', 'completed', 'cancelled')",
+                "restricoes": "DEFAULT 'active'",
+                "descricao": "Status da disciplina extra: active=Ativa, completed=Concluída, cancelled=Cancelada"
+              },
+              {
+                "nome": "created_at",
+                "tipo": "TIMESTAMP",
+                "restricoes": "DEFAULT CURRENT_TIMESTAMP",
+                "descricao": "Data e hora de criação"
+              },
+              {
+                "nome": "updated_at",
+                "tipo": "TIMESTAMP",
+                "restricoes": "DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+                "descricao": "Data e hora da última atualização"
+              },
+              {
+                "nome": "deleted_at",
+                "tipo": "TIMESTAMP",
+                "restricoes": "NULL",
+                "descricao": "Data e hora da exclusão lógica (soft delete)"
+              }
+            ],
+            "indices": [
+              {
+                "nome": "idx_student_extra_disciplines_student_id",
+                "tipo": "INDEX",
+                "colunas": ["student_id"],
+                "descricao": "Otimiza buscas por aluno"
+              },
+              {
+                "nome": "idx_student_extra_disciplines_discipline_id",
+                "tipo": "INDEX",
+                "colunas": ["discipline_id"],
+                "descricao": "Otimiza buscas por disciplina"
+              },
+              {
+                "nome": "idx_student_extra_disciplines_class_id",
+                "tipo": "INDEX",
+                "colunas": ["class_id"],
+                "descricao": "Otimiza buscas por turma"
+              },
+              {
+                "nome": "idx_student_extra_disciplines_status",
+                "tipo": "INDEX",
+                "colunas": ["status"],
+                "descricao": "Otimiza filtros por status"
+              },
+              {
+                "nome": "idx_student_extra_disciplines_deleted_at",
+                "tipo": "INDEX",
+                "colunas": ["deleted_at"],
+                "descricao": "Otimiza queries de soft delete"
+              },
+              {
+                "nome": "idx_student_extra_disciplines_unique",
+                "tipo": "UNIQUE",
+                "colunas": ["student_id", "discipline_id"],
+                "condicao": "WHERE deleted_at IS NULL",
+                "descricao": "Garante que um aluno não tenha a mesma disciplina extra duplicada"
+              }
+            ],
+            "validacoes": [
+              "Verificar se disciplina extra não está na turma principal do aluno (evitar duplicação)",
+              "Validar unicidade: um aluno não pode ter a mesma disciplina extra mais de uma vez"
+            ]
+          }
+        },
+        {
+          "id": "db-003",
+          "tipo": "comando",
+          "comando": "npm run db:migrate",
+          "diretorio": "backend",
+          "descricao": "Executar migrations para criar as novas tabelas no banco de dados",
+          "observacao": "Executar após criar os arquivos de migration acima"
+        }
+      ]
+    },
+    {
+      "fase": "2 - Backend Models",
+      "ordem": 2,
+      "descricao": "Criação de models Sequelize para as novas tabelas",
+      "tarefas": [
+        {
+          "id": "model-001",
+          "tipo": "model",
+          "arquivo": "backend/src/models/ClassSchedule.js",
+          "descricao": "Criar model ClassSchedule para representar horários da grade",
+          "estrutura": {
+            "nome_model": "ClassSchedule",
+            "nome_tabela": "class_schedules",
+            "associacoes": [
+              {
+                "tipo": "belongsTo",
+                "model": "Class",
+                "foreign_key": "class_id",
+                "as": "class",
+                "descricao": "Horário pertence a uma turma"
+              },
+              {
+                "tipo": "belongsTo",
+                "model": "Discipline",
+                "foreign_key": "discipline_id",
+                "as": "discipline",
+                "descricao": "Horário está associado a uma disciplina"
+              },
+              {
+                "tipo": "belongsTo",
+                "model": "Teacher",
+                "foreign_key": "teacher_id",
+                "as": "teacher",
+                "descricao": "Horário tem um professor (opcional)"
+              }
+            ],
+            "metodos_estaticos": [
+              {
+                "nome": "findByClass",
+                "parametros": ["classId"],
+                "retorno": "Array<ClassSchedule>",
+                "descricao": "Buscar todos os horários de uma turma"
+              },
+              {
+                "nome": "findByDayOfWeek",
+                "parametros": ["classId", "dayOfWeek"],
+                "retorno": "Array<ClassSchedule>",
+                "descricao": "Buscar horários de uma turma em um dia específico"
+              },
+              {
+                "nome": "validateTimeConflict",
+                "parametros": ["classId", "dayOfWeek", "startTime", "endTime", "excludeId"],
+                "retorno": "boolean",
+                "descricao": "Validar se há conflito de horário na turma (horários sobrepostos)"
+              }
+            ],
+            "metodos_instancia": [
+              {
+                "nome": "getFormattedTime",
+                "retorno": "string",
+                "descricao": "Retornar horário formatado (ex: '08:00 - 10:00')"
+              },
+              {
+                "nome": "getDayName",
+                "retorno": "string",
+                "descricao": "Retornar nome do dia da semana (ex: 'Segunda-feira')"
+              },
+              {
+                "nome": "hasOnlineLink",
+                "retorno": "boolean",
+                "descricao": "Verificar se possui link de aula online"
+              }
+            ],
+            "scopes": [
+              {
+                "nome": "active",
+                "descricao": "Retornar apenas horários não deletados (deleted_at IS NULL)"
+              },
+              {
+                "nome": "withRelations",
+                "descricao": "Incluir class, discipline e teacher nas consultas"
+              },
+              {
+                "nome": "byDay",
+                "descricao": "Ordenar por day_of_week e start_time"
+              }
+            ],
+            "hooks": [
+              {
+                "nome": "beforeCreate",
+                "descricao": "Validar conflitos de horário antes de criar"
+              },
+              {
+                "nome": "beforeUpdate",
+                "descricao": "Validar conflitos de horário antes de atualizar"
+              }
+            ]
+          }
+        },
+        {
+          "id": "model-002",
+          "tipo": "model",
+          "arquivo": "backend/src/models/StudentExtraDiscipline.js",
+          "descricao": "Criar model StudentExtraDiscipline para disciplinas extras de alunos",
+          "estrutura": {
+            "nome_model": "StudentExtraDiscipline",
+            "nome_tabela": "student_extra_disciplines",
+            "associacoes": [
+              {
+                "tipo": "belongsTo",
+                "model": "Student",
+                "foreign_key": "student_id",
+                "as": "student",
+                "descricao": "Disciplina extra pertence a um aluno"
+              },
+              {
+                "tipo": "belongsTo",
+                "model": "Discipline",
+                "foreign_key": "discipline_id",
+                "as": "discipline",
+                "descricao": "Referência à disciplina"
+              },
+              {
+                "tipo": "belongsTo",
+                "model": "Class",
+                "foreign_key": "class_id",
+                "as": "class",
+                "descricao": "Turma de origem (opcional)"
+              }
+            ],
+            "metodos_estaticos": [
+              {
+                "nome": "findByStudent",
+                "parametros": ["studentId"],
+                "retorno": "Array<StudentExtraDiscipline>",
+                "descricao": "Buscar todas as disciplinas extras de um aluno"
+              },
+              {
+                "nome": "findActiveByStudent",
+                "parametros": ["studentId"],
+                "retorno": "Array<StudentExtraDiscipline>",
+                "descricao": "Buscar apenas disciplinas extras ativas de um aluno"
+              },
+              {
+                "nome": "findByDiscipline",
+                "parametros": ["disciplineId"],
+                "retorno": "Array<StudentExtraDiscipline>",
+                "descricao": "Buscar alunos matriculados em uma disciplina extra"
+              }
+            ],
+            "metodos_instancia": [
+              {
+                "nome": "isActive",
+                "retorno": "boolean",
+                "descricao": "Verificar se status é 'active'"
+              },
+              {
+                "nome": "getReasonLabel",
+                "retorno": "string",
+                "descricao": "Retornar label traduzida do motivo (dependency → 'Dependência', etc)"
+              }
+            ],
+            "scopes": [
+              {
+                "nome": "active",
+                "descricao": "Retornar apenas disciplinas extras ativas e não deletadas"
+              },
+              {
+                "nome": "withRelations",
+                "descricao": "Incluir student, discipline e class nas consultas"
+              },
+              {
+                "nome": "byReason",
+                "parametro": "reason",
+                "descricao": "Filtrar por motivo (dependency, recovery, etc)"
+              }
+            ],
+            "hooks": [
+              {
+                "nome": "beforeCreate",
+                "descricao": "Verificar se aluno já tem a disciplina na turma principal antes de criar"
+              }
+            ]
+          }
+        },
+        {
+          "id": "model-003",
+          "tipo": "atualizacao",
+          "arquivo": "backend/src/models/Class.js",
+          "descricao": "Adicionar associação hasMany para ClassSchedule no model Class",
+          "codigo_adicionar": "Class.hasMany(models.ClassSchedule, { foreignKey: 'class_id', as: 'schedules' });"
+        },
+        {
+          "id": "model-004",
+          "tipo": "atualizacao",
+          "arquivo": "backend/src/models/Student.js",
+          "descricao": "Adicionar associação hasMany para StudentExtraDiscipline no model Student",
+          "codigo_adicionar": "Student.hasMany(models.StudentExtraDiscipline, { foreignKey: 'student_id', as: 'extraDisciplines' });"
+        },
+        {
+          "id": "model-005",
+          "tipo": "atualizacao",
+          "arquivo": "backend/src/models/Discipline.js",
+          "descricao": "Adicionar associações hasMany para ClassSchedule e StudentExtraDiscipline no model Discipline",
+          "codigo_adicionar": [
+            "Discipline.hasMany(models.ClassSchedule, { foreignKey: 'discipline_id', as: 'schedules' });",
+            "Discipline.hasMany(models.StudentExtraDiscipline, { foreignKey: 'discipline_id', as: 'extraEnrollments' });"
+          ]
+        }
+      ]
+    },
+    {
+      "fase": "3 - Backend Services",
+      "ordem": 3,
+      "descricao": "Criação de services com lógica de negócio",
+      "tarefas": [
+        {
+          "id": "service-001",
+          "tipo": "service",
+          "arquivo": "backend/src/services/classSchedule.service.js",
+          "descricao": "Criar service para gerenciar horários da grade",
+          "metodos": [
+            {
+              "nome": "create",
+              "parametros": ["scheduleData"],
+              "retorno": "Promise<ClassSchedule>",
+              "descricao": "Criar novo horário na grade",
+              "validacoes": [
+                "Validar que class_id existe",
+                "Validar que discipline_id existe",
+                "Validar teacher_id se fornecido",
+                "Validar day_of_week está entre 1 e 7",
+                "Validar start_time < end_time",
+                "Validar conflito de horário usando validateTimeConflict",
+                "Validar formato de URL no online_link se fornecido"
+              ],
+              "logica": "Após validações, criar registro no banco"
+            },
+            {
+              "nome": "getByClass",
+              "parametros": ["classId", "options"],
+              "retorno": "Promise<Array<ClassSchedule>>",
+              "descricao": "Listar horários de uma turma com filtros opcionais",
+              "options": [
+                "dayOfWeek - filtrar por dia da semana",
+                "disciplineId - filtrar por disciplina",
+                "includeTeacher - incluir dados do professor"
+              ],
+              "logica": "Buscar horários com scope active, aplicar filtros, ordenar por dia e horário"
+            },
+            {
+              "nome": "update",
+              "parametros": ["scheduleId", "updateData"],
+              "retorno": "Promise<ClassSchedule>",
+              "descricao": "Atualizar horário existente",
+              "validacoes": "Mesmas validações do método create",
+              "logica": "Validar e atualizar registro"
+            },
+            {
+              "nome": "delete",
+              "parametros": ["scheduleId"],
+              "retorno": "Promise<boolean>",
+              "descricao": "Deletar horário (soft delete)",
+              "logica": "Setar deleted_at com timestamp atual"
+            },
+            {
+              "nome": "validateTimeConflict",
+              "parametros": ["classId", "dayOfWeek", "startTime", "endTime", "excludeId"],
+              "retorno": "Promise<boolean>",
+              "descricao": "Validar se há conflito de horário na turma",
+              "logica": "Buscar horários da turma no mesmo dia. Verificar sobreposição: (start1 < end2 AND start2 < end1). Excluir scheduleId do check (para updates). Retornar true se houver conflito",
+              "observacao": "excludeId é opcional, usado ao atualizar para não comparar com o próprio registro"
+            },
+            {
+              "nome": "getWeekSchedule",
+              "parametros": ["classId"],
+              "retorno": "Promise<Object>",
+              "descricao": "Obter grade completa da semana organizada",
+              "logica": "Buscar todos os horários da turma, agrupar por day_of_week, ordenar por start_time",
+              "formato_retorno": "{ 1: [horarios segunda], 2: [horarios terca], ..., 7: [horarios domingo] }"
+            },
+            {
+              "nome": "bulkCreate",
+              "parametros": ["classId", "schedulesArray"],
+              "retorno": "Promise<Object>",
+              "descricao": "Criar múltiplos horários em lote usando transação",
+              "logica": "Iniciar transação. Para cada horário: validar. Se todos válidos, inserir em lote. Commit. Se erro, rollback",
+              "formato_retorno": "{ success: true, created: [horarios criados], errors: [] }"
+            }
+          ]
+        },
+        {
+          "id": "service-002",
+          "tipo": "service",
+          "arquivo": "backend/src/services/studentExtraDiscipline.service.js",
+          "descricao": "Criar service para gerenciar disciplinas extras de alunos",
+          "metodos": [
+            {
+              "nome": "create",
+              "parametros": ["extraDisciplineData"],
+              "retorno": "Promise<StudentExtraDiscipline>",
+              "descricao": "Vincular disciplina extra a um aluno",
+              "validacoes": [
+                "Validar que student_id existe",
+                "Validar que discipline_id existe",
+                "Validar class_id se fornecido",
+                "Verificar se disciplina já está na turma principal do aluno (via ClassStudent + ClassTeacher)",
+                "Verificar unicidade: aluno não pode ter mesma disciplina extra duplicada"
+              ],
+              "logica": "Após validações, criar registro"
+            },
+            {
+              "nome": "getByStudent",
+              "parametros": ["studentId", "options"],
+              "retorno": "Promise<Array<StudentExtraDiscipline>>",
+              "descricao": "Listar disciplinas extras de um aluno",
+              "options": [
+                "status - filtrar por status (active, completed, cancelled)",
+                "reason - filtrar por motivo",
+                "includeSchedules - incluir horários da disciplina extra"
+              ],
+              "logica": "Buscar disciplinas extras, aplicar filtros, incluir relações conforme options"
+            },
+            {
+              "nome": "update",
+              "parametros": ["extraDisciplineId", "updateData"],
+              "retorno": "Promise<StudentExtraDiscipline>",
+              "descricao": "Atualizar disciplina extra",
+              "campos_permitidos": ["class_id", "status", "notes"],
+              "logica": "Validar campos, atualizar registro"
+            },
+            {
+              "nome": "delete",
+              "parametros": ["extraDisciplineId"],
+              "retorno": "Promise<boolean>",
+              "descricao": "Remover disciplina extra (soft delete)",
+              "logica": "Setar deleted_at com timestamp atual"
+            },
+            {
+              "nome": "getStudentFullSchedule",
+              "parametros": ["studentId"],
+              "retorno": "Promise<Object>",
+              "descricao": "Obter grade completa do aluno (turma principal + disciplinas extras)",
+              "logica": [
+                "1. Buscar turmas do aluno via ClassStudent (class_id)",
+                "2. Buscar horários das turmas via ClassSchedule",
+                "3. Buscar disciplinas extras ativas via StudentExtraDiscipline",
+                "4. Para cada disciplina extra, buscar horários via class_id",
+                "5. Mesclar horários e organizar por dia da semana"
+              ],
+              "formato_retorno": {
+                "mainClassSchedules": "Array com horários da turma principal",
+                "extraDisciplineSchedules": "Array com horários das disciplinas extras",
+                "weekSchedule": "Objeto { 1: [...], 2: [...], ..., 7: [...] } consolidado"
+              }
+            },
+            {
+              "nome": "checkDisciplineInMainClass",
+              "parametros": ["studentId", "disciplineId"],
+              "retorno": "Promise<boolean>",
+              "descricao": "Verificar se disciplina já está na turma principal do aluno",
+              "logica": "Buscar turmas do aluno (ClassStudent). Para cada turma, verificar se tem a disciplina (ClassTeacher). Retornar true se encontrar",
+              "observacao": "Usado para evitar que aluno tenha disciplina extra duplicada com a turma principal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "fase": "4 - Backend Controllers",
+      "ordem": 4,
+      "descricao": "Criação de controllers para endpoints HTTP",
+      "tarefas": [
+        {
+          "id": "controller-001",
+          "tipo": "controller",
+          "arquivo": "backend/src/controllers/classSchedule.controller.js",
+          "descricao": "Criar controller para gerenciar endpoints de horários",
+          "endpoints": [
+            {
+              "metodo": "POST",
+              "rota": "/api/v1/classes/:classId/schedules",
+              "handler": "create",
+              "autorizacao": "admin",
+              "descricao": "Criar novo horário na grade de uma turma",
+              "request_body": {
+                "discipline_id": "number (obrigatório)",
+                "teacher_id": "number (opcional)",
+                "day_of_week": "number 1-7 (obrigatório)",
+                "start_time": "string HH:MM:SS (obrigatório)",
+                "end_time": "string HH:MM:SS (obrigatório)",
+                "online_link": "string URL (opcional)"
+              },
+              "response_success": {
+                "status": 201,
+                "body": "{ success: true, data: ClassSchedule }"
+              },
+              "response_error": {
+                "status": 400,
+                "body": "{ success: false, error: { code, message } }"
+              }
+            },
+            {
+              "metodo": "GET",
+              "rota": "/api/v1/classes/:classId/schedules",
+              "handler": "getByClass",
+              "autorizacao": "admin, teacher, student",
+              "descricao": "Listar horários de uma turma",
+              "query_params": {
+                "dayOfWeek": "number 1-7 (opcional)",
+                "disciplineId": "number (opcional)"
+              },
+              "response": {
+                "status": 200,
+                "body": "{ success: true, data: Array<ClassSchedule> }"
+              }
+            },
+            {
+              "metodo": "GET",
+              "rota": "/api/v1/schedules/:id",
+              "handler": "getById",
+              "autorizacao": "admin, teacher",
+              "descricao": "Obter horário específico por ID",
+              "response": {
+                "status": 200,
+                "body": "{ success: true, data: ClassSchedule }"
+              }
+            },
+            {
+              "metodo": "PUT",
+              "rota": "/api/v1/schedules/:id",
+              "handler": "update",
+              "autorizacao": "admin",
+              "descricao": "Atualizar horário existente",
+              "request_body": "Mesmos campos do POST (todos opcionais)"
+            },
+            {
+              "metodo": "DELETE",
+              "rota": "/api/v1/schedules/:id",
+              "handler": "delete",
+              "autorizacao": "admin",
+              "descricao": "Deletar horário (soft delete)",
+              "response": {
+                "status": 200,
+                "body": "{ success: true, message: 'Horário removido com sucesso' }"
+              }
+            },
+            {
+              "metodo": "POST",
+              "rota": "/api/v1/classes/:classId/schedules/bulk",
+              "handler": "bulkCreate",
+              "autorizacao": "admin",
+              "descricao": "Criar múltiplos horários em lote",
+              "request_body": {
+                "schedules": "Array de objetos com campos do POST"
+              },
+              "response": {
+                "status": 201,
+                "body": "{ success: true, data: { created: Array<ClassSchedule>, errors: Array } }"
+              }
+            },
+            {
+              "metodo": "GET",
+              "rota": "/api/v1/classes/:classId/schedules/week",
+              "handler": "getWeekSchedule",
+              "autorizacao": "admin, teacher, student",
+              "descricao": "Obter grade completa da semana",
+              "response": {
+                "status": 200,
+                "body": "{ success: true, data: { 1: [...], 2: [...], ..., 7: [...] } }"
+              }
+            }
+          ]
+        },
+        {
+          "id": "controller-002",
+          "tipo": "controller",
+          "arquivo": "backend/src/controllers/studentExtraDiscipline.controller.js",
+          "descricao": "Criar controller para gerenciar endpoints de disciplinas extras",
+          "endpoints": [
+            {
+              "metodo": "POST",
+              "rota": "/api/v1/students/:studentId/extra-disciplines",
+              "handler": "create",
+              "autorizacao": "admin",
+              "descricao": "Vincular disciplina extra a um aluno",
+              "request_body": {
+                "discipline_id": "number (obrigatório)",
+                "class_id": "number (opcional)",
+                "enrollment_date": "string YYYY-MM-DD (obrigatório)",
+                "reason": "string enum (obrigatório): dependency, recovery, advancement, other",
+                "notes": "string (opcional)"
+              },
+              "response_success": {
+                "status": 201,
+                "body": "{ success: true, data: StudentExtraDiscipline }"
+              }
+            },
+            {
+              "metodo": "GET",
+              "rota": "/api/v1/students/:studentId/extra-disciplines",
+              "handler": "getByStudent",
+              "autorizacao": "admin, student (somente próprio)",
+              "descricao": "Listar disciplinas extras de um aluno",
+              "query_params": {
+                "status": "string enum (opcional): active, completed, cancelled",
+                "reason": "string enum (opcional)"
+              },
+              "response": {
+                "status": 200,
+                "body": "{ success: true, data: Array<StudentExtraDiscipline> }"
+              },
+              "observacao": "Student só pode acessar suas próprias disciplinas extras"
+            },
+            {
+              "metodo": "PUT",
+              "rota": "/api/v1/extra-disciplines/:id",
+              "handler": "update",
+              "autorizacao": "admin",
+              "descricao": "Atualizar disciplina extra",
+              "request_body": {
+                "class_id": "number (opcional)",
+                "status": "string enum (opcional)",
+                "notes": "string (opcional)"
+              }
+            },
+            {
+              "metodo": "DELETE",
+              "rota": "/api/v1/extra-disciplines/:id",
+              "handler": "delete",
+              "autorizacao": "admin",
+              "descricao": "Remover disciplina extra (soft delete)"
+            },
+            {
+              "metodo": "GET",
+              "rota": "/api/v1/students/:studentId/full-schedule",
+              "handler": "getFullSchedule",
+              "autorizacao": "admin, student (somente próprio)",
+              "descricao": "Obter grade completa do aluno (turma + extras)",
+              "response": {
+                "status": 200,
+                "body": "{ success: true, data: { mainClassSchedules: [], extraDisciplineSchedules: [], weekSchedule: {} } }"
+              },
+              "observacao": "Student só pode acessar sua própria grade"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "fase": "5 - Backend Routes",
+      "ordem": 5,
+      "descricao": "Registro de rotas no Express",
+      "tarefas": [
+        {
+          "id": "routes-001",
+          "tipo": "routes",
+          "arquivo": "backend/src/routes/classSchedule.routes.js",
+          "descricao": "Criar arquivo de rotas para horários",
+          "estrutura": {
+            "imports": [
+              "express.Router",
+              "classScheduleController",
+              "authenticate middleware",
+              "rbac middleware"
+            ],
+            "rotas": "Mapear todos os endpoints do controller com autenticação e autorização apropriadas",
+            "exemplo": "router.post('/classes/:classId/schedules', authenticate, rbac(['admin']), classScheduleController.create)"
+          }
+        },
+        {
+          "id": "routes-002",
+          "tipo": "routes",
+          "arquivo": "backend/src/routes/studentExtraDiscipline.routes.js",
+          "descricao": "Criar arquivo de rotas para disciplinas extras",
+          "estrutura": {
+            "imports": [
+              "express.Router",
+              "studentExtraDisciplineController",
+              "authenticate middleware",
+              "rbac middleware"
+            ],
+            "rotas": "Mapear todos os endpoints do controller",
+            "observacao": "Rotas de GET do aluno devem verificar se userId == studentId (próprio aluno)"
+          }
+        },
+        {
+          "id": "routes-003",
+          "tipo": "atualizacao",
+          "arquivo": "backend/src/routes/index.js",
+          "descricao": "Registrar as novas rotas no index principal",
+          "codigo_adicionar": [
+            "const classScheduleRoutes = require('./classSchedule.routes');",
+            "const studentExtraDisciplineRoutes = require('./studentExtraDiscipline.routes');",
+            "router.use('/api/v1', classScheduleRoutes);",
+            "router.use('/api/v1', studentExtraDisciplineRoutes);"
+          ]
+        }
+      ]
+    },
+    {
+      "fase": "6 - Frontend Types",
+      "ordem": 6,
+      "descricao": "Definições de tipos TypeScript",
+      "tarefas": [
+        {
+          "id": "types-001",
+          "tipo": "types",
+          "arquivo": "frontend/src/types/classSchedule.types.ts",
+          "descricao": "Criar definições de tipos para horários",
+          "interfaces": [
+            {
+              "nome": "ClassSchedule",
+              "campos": {
+                "id": "number",
+                "class_id": "number",
+                "discipline_id": "number",
+                "teacher_id": "number | null",
+                "day_of_week": "1 | 2 | 3 | 4 | 5 | 6 | 7",
+                "start_time": "string (formato HH:MM:SS)",
+                "end_time": "string (formato HH:MM:SS)",
+                "online_link": "string | null",
+                "created_at": "string",
+                "updated_at": "string",
+                "class": "IClass (opcional)",
+                "discipline": "IDiscipline (opcional)",
+                "teacher": "ITeacher (opcional)"
+              }
+            },
+            {
+              "nome": "ClassScheduleFormData",
+              "campos": {
+                "discipline_id": "number",
+                "teacher_id": "number (opcional)",
+                "day_of_week": "1 | 2 | 3 | 4 | 5 | 6 | 7",
+                "start_time": "string",
+                "end_time": "string",
+                "online_link": "string (opcional)"
+              }
+            },
+            {
+              "nome": "WeekSchedule",
+              "tipo": "Record<number, ClassSchedule[]>",
+              "descricao": "Objeto indexado por dia da semana (1-7)"
+            }
+          ],
+          "constantes": {
+            "DAY_NAMES": {
+              "tipo": "Record<number, string>",
+              "valores": {
+                "1": "Segunda-feira",
+                "2": "Terça-feira",
+                "3": "Quarta-feira",
+                "4": "Quinta-feira",
+                "5": "Sexta-feira",
+                "6": "Sábado",
+                "7": "Domingo"
+              }
+            }
+          }
+        },
+        {
+          "id": "types-002",
+          "tipo": "types",
+          "arquivo": "frontend/src/types/studentExtraDiscipline.types.ts",
+          "descricao": "Criar definições de tipos para disciplinas extras",
+          "tipos": [
+            {
+              "nome": "ExtraDisciplineReason",
+              "tipo": "type",
+              "valores": "'dependency' | 'recovery' | 'advancement' | 'other'"
+            },
+            {
+              "nome": "ExtraDisciplineStatus",
+              "tipo": "type",
+              "valores": "'active' | 'completed' | 'cancelled'"
+            }
+          ],
+          "interfaces": [
+            {
+              "nome": "StudentExtraDiscipline",
+              "campos": {
+                "id": "number",
+                "student_id": "number",
+                "discipline_id": "number",
+                "class_id": "number | null",
+                "enrollment_date": "string",
+                "reason": "ExtraDisciplineReason",
+                "notes": "string | null",
+                "status": "ExtraDisciplineStatus",
+                "created_at": "string",
+                "updated_at": "string",
+                "student": "IStudent (opcional)",
+                "discipline": "IDiscipline (opcional)",
+                "class": "IClass (opcional)"
+              }
+            },
+            {
+              "nome": "StudentExtraDisciplineFormData",
+              "campos": {
+                "discipline_id": "number",
+                "class_id": "number (opcional)",
+                "enrollment_date": "string",
+                "reason": "ExtraDisciplineReason",
+                "notes": "string (opcional)"
+              }
+            },
+            {
+              "nome": "StudentFullSchedule",
+              "campos": {
+                "mainClassSchedules": "ClassSchedule[]",
+                "extraDisciplineSchedules": "ClassSchedule[]",
+                "weekSchedule": "WeekSchedule"
+              }
+            }
+          ],
+          "constantes": {
+            "REASON_LABELS": {
+              "tipo": "Record<ExtraDisciplineReason, string>",
+              "valores": {
+                "dependency": "Dependência",
+                "recovery": "Recuperação",
+                "advancement": "Adiantamento",
+                "other": "Outro"
+              }
+            },
+            "STATUS_LABELS": {
+              "tipo": "Record<ExtraDisciplineStatus, string>",
+              "valores": {
+                "active": "Ativa",
+                "completed": "Concluída",
+                "cancelled": "Cancelada"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "fase": "7 - Frontend Services",
+      "ordem": 7,
+      "descricao": "Serviços de comunicação com API",
+      "tarefas": [
+        {
+          "id": "service-fe-001",
+          "tipo": "service",
+          "arquivo": "frontend/src/services/classSchedule.service.ts",
+          "descricao": "Criar service para comunicação com API de horários",
+          "metodos": [
+            {
+              "nome": "create",
+              "params": "(classId: number, data: ClassScheduleFormData)",
+              "retorno": "Promise<ClassSchedule>",
+              "endpoint": "POST /classes/{classId}/schedules"
+            },
+            {
+              "nome": "getByClass",
+              "params": "(classId: number, filters?: object)",
+              "retorno": "Promise<ClassSchedule[]>",
+              "endpoint": "GET /classes/{classId}/schedules"
+            },
+            {
+              "nome": "getById",
+              "params": "(id: number)",
+              "retorno": "Promise<ClassSchedule>",
+              "endpoint": "GET /schedules/{id}"
+            },
+            {
+              "nome": "update",
+              "params": "(id: number, data: Partial<ClassScheduleFormData>)",
+              "retorno": "Promise<ClassSchedule>",
+              "endpoint": "PUT /schedules/{id}"
+            },
+            {
+              "nome": "delete",
+              "params": "(id: number)",
+              "retorno": "Promise<void>",
+              "endpoint": "DELETE /schedules/{id}"
+            },
+            {
+              "nome": "bulkCreate",
+              "params": "(classId: number, schedules: ClassScheduleFormData[])",
+              "retorno": "Promise<Object>",
+              "endpoint": "POST /classes/{classId}/schedules/bulk"
+            },
+            {
+              "nome": "getWeekSchedule",
+              "params": "(classId: number)",
+              "retorno": "Promise<WeekSchedule>",
+              "endpoint": "GET /classes/{classId}/schedules/week"
+            }
+          ],
+          "base_url": "/api/v1"
+        },
+        {
+          "id": "service-fe-002",
+          "tipo": "service",
+          "arquivo": "frontend/src/services/studentExtraDiscipline.service.ts",
+          "descricao": "Criar service para comunicação com API de disciplinas extras",
+          "metodos": [
+            {
+              "nome": "create",
+              "params": "(studentId: number, data: StudentExtraDisciplineFormData)",
+              "retorno": "Promise<StudentExtraDiscipline>",
+              "endpoint": "POST /students/{studentId}/extra-disciplines"
+            },
+            {
+              "nome": "getByStudent",
+              "params": "(studentId: number, filters?: object)",
+              "retorno": "Promise<StudentExtraDiscipline[]>",
+              "endpoint": "GET /students/{studentId}/extra-disciplines"
+            },
+            {
+              "nome": "update",
+              "params": "(id: number, data: Partial<StudentExtraDisciplineFormData>)",
+              "retorno": "Promise<StudentExtraDiscipline>",
+              "endpoint": "PUT /extra-disciplines/{id}"
+            },
+            {
+              "nome": "delete",
+              "params": "(id: number)",
+              "retorno": "Promise<void>",
+              "endpoint": "DELETE /extra-disciplines/{id}"
+            },
+            {
+              "nome": "getFullSchedule",
+              "params": "(studentId: number)",
+              "retorno": "Promise<StudentFullSchedule>",
+              "endpoint": "GET /students/{studentId}/full-schedule"
+            }
+          ],
+          "base_url": "/api/v1"
+        }
+      ]
+    },
+    {
+      "fase": "8 - Frontend Hooks",
+      "ordem": 8,
+      "descricao": "Custom hooks com TanStack Query",
+      "tarefas": [
+        {
+          "id": "hooks-001",
+          "tipo": "hooks",
+          "arquivo": "frontend/src/hooks/useClassSchedule.ts",
+          "descricao": "Criar hooks para gerenciar estado de horários com TanStack Query",
+          "hooks": [
+            {
+              "nome": "useClassSchedules",
+              "params": "(classId: number)",
+              "tipo": "query",
+              "queryKey": "['classSchedules', classId]",
+              "queryFn": "classScheduleService.getByClass(classId)"
+            },
+            {
+              "nome": "useWeekSchedule",
+              "params": "(classId: number)",
+              "tipo": "query",
+              "queryKey": "['weekSchedule', classId]",
+              "queryFn": "classScheduleService.getWeekSchedule(classId)"
+            },
+            {
+              "nome": "useCreateClassSchedule",
+              "tipo": "mutation",
+              "mutationFn": "classScheduleService.create",
+              "onSuccess": "Invalidar queries: ['classSchedules', classId], ['weekSchedule', classId]"
+            },
+            {
+              "nome": "useUpdateClassSchedule",
+              "tipo": "mutation",
+              "mutationFn": "classScheduleService.update",
+              "onSuccess": "Invalidar todas queries de classSchedules e weekSchedule"
+            },
+            {
+              "nome": "useDeleteClassSchedule",
+              "tipo": "mutation",
+              "mutationFn": "classScheduleService.delete",
+              "onSuccess": "Invalidar todas queries de classSchedules e weekSchedule"
+            }
+          ]
+        },
+        {
+          "id": "hooks-002",
+          "tipo": "hooks",
+          "arquivo": "frontend/src/hooks/useStudentExtraDiscipline.ts",
+          "descricao": "Criar hooks para gerenciar estado de disciplinas extras",
+          "hooks": [
+            {
+              "nome": "useStudentExtraDisciplines",
+              "params": "(studentId: number)",
+              "tipo": "query",
+              "queryKey": "['studentExtraDisciplines', studentId]",
+              "queryFn": "studentExtraDisciplineService.getByStudent(studentId)"
+            },
+            {
+              "nome": "useStudentFullSchedule",
+              "params": "(studentId: number)",
+              "tipo": "query",
+              "queryKey": "['studentFullSchedule', studentId]",
+              "queryFn": "studentExtraDisciplineService.getFullSchedule(studentId)"
+            },
+            {
+              "nome": "useCreateStudentExtraDiscipline",
+              "tipo": "mutation",
+              "mutationFn": "studentExtraDisciplineService.create",
+              "onSuccess": "Invalidar queries: ['studentExtraDisciplines', studentId], ['studentFullSchedule', studentId]"
+            },
+            {
+              "nome": "useUpdateStudentExtraDiscipline",
+              "tipo": "mutation",
+              "mutationFn": "studentExtraDisciplineService.update",
+              "onSuccess": "Invalidar queries de studentExtraDisciplines e studentFullSchedule"
+            },
+            {
+              "nome": "useDeleteStudentExtraDiscipline",
+              "tipo": "mutation",
+              "mutationFn": "studentExtraDisciplineService.delete",
+              "onSuccess": "Invalidar queries de studentExtraDisciplines e studentFullSchedule"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "fase": "9 - Frontend Components",
+      "ordem": 9,
+      "descricao": "Componentes reutilizáveis",
+      "tarefas": [
+        {
+          "id": "component-001",
+          "tipo": "component",
+          "arquivo": "frontend/src/components/forms/ClassScheduleForm.tsx",
+          "descricao": "Formulário para criar/editar horário da grade",
+          "props": {
+            "classId": "number",
+            "disciplines": "IDiscipline[]",
+            "teachers": "ITeacher[]",
+            "onSuccess": "() => void",
+            "editingSchedule": "ClassSchedule (opcional)"
+          },
+          "campos": [
+            {
+              "nome": "discipline_id",
+              "tipo": "select",
+              "opcoes": "Lista de disciplinas",
+              "obrigatorio": true
+            },
+            {
+              "nome": "teacher_id",
+              "tipo": "select",
+              "opcoes": "Lista de professores",
+              "obrigatorio": false
+            },
+            {
+              "nome": "day_of_week",
+              "tipo": "select",
+              "opcoes": "1-Segunda, 2-Terça, ..., 7-Domingo",
+              "obrigatorio": true
+            },
+            {
+              "nome": "start_time",
+              "tipo": "input time",
+              "obrigatorio": true
+            },
+            {
+              "nome": "end_time",
+              "tipo": "input time",
+              "obrigatorio": true
+            },
+            {
+              "nome": "online_link",
+              "tipo": "input text",
+              "placeholder": "https://meet.google.com/...",
+              "obrigatorio": false
+            }
+          ],
+          "validacoes": {
+            "biblioteca": "Zod",
+            "regras": [
+              "discipline_id obrigatório",
+              "day_of_week obrigatório (1-7)",
+              "start_time obrigatório",
+              "end_time obrigatório",
+              "start_time < end_time",
+              "online_link: validar formato URL se preenchido"
+            ]
+          },
+          "bibliotecas": ["React Hook Form", "Zod"]
+        },
+        {
+          "id": "component-002",
+          "tipo": "component",
+          "arquivo": "frontend/src/components/forms/StudentExtraDisciplineForm.tsx",
+          "descricao": "Formulário para vincular disciplina extra a aluno",
+          "props": {
+            "studentId": "number",
+            "disciplines": "IDiscipline[]",
+            "classes": "IClass[]",
+            "onSuccess": "() => void"
+          },
+          "campos": [
+            {
+              "nome": "discipline_id",
+              "tipo": "select",
+              "opcoes": "Lista de disciplinas",
+              "obrigatorio": true
+            },
+            {
+              "nome": "class_id",
+              "tipo": "select",
+              "opcoes": "Lista de turmas (opcional)",
+              "obrigatorio": false
+            },
+            {
+              "nome": "enrollment_date",
+              "tipo": "date picker",
+              "obrigatorio": true
+            },
+            {
+              "nome": "reason",
+              "tipo": "select",
+              "opcoes": "Dependência, Recuperação, Adiantamento, Outro",
+              "obrigatorio": true
+            },
+            {
+              "nome": "notes",
+              "tipo": "textarea",
+              "placeholder": "Observações adicionais",
+              "obrigatorio": false
+            }
+          ],
+          "validacoes": {
+            "biblioteca": "Zod",
+            "regras": [
+              "discipline_id obrigatório",
+              "enrollment_date obrigatório",
+              "reason obrigatório"
+            ]
+          }
+        },
+        {
+          "id": "component-003",
+          "tipo": "component",
+          "arquivo": "frontend/src/components/schedules/WeekScheduleGrid.tsx",
+          "descricao": "Grade visual da semana tipo calendário",
+          "props": {
+            "schedules": "ClassSchedule[]",
+            "editable": "boolean (default: false)",
+            "showOnlineLinks": "boolean (default: true)",
+            "highlightExtra": "boolean (default: false)"
+          },
+          "layout": {
+            "tipo": "Grid",
+            "colunas": "7 colunas (dias da semana)",
+            "linhas": "Organizadas por horário",
+            "celulas": "Disciplina, professor, horário"
+          },
+          "features": [
+            "Cores diferentes por disciplina (geradas via hash do ID)",
+            "Ícone de link quando online_link disponível",
+            "Destaque visual para disciplinas extras (se highlightExtra=true)",
+            "Tooltip com informações completas ao hover",
+            "Click para editar (se editable=true)",
+            "Responsivo: grid em desktop, lista em mobile"
+          ],
+          "styling": "Tailwind CSS"
+        },
+        {
+          "id": "component-004",
+          "tipo": "component",
+          "arquivo": "frontend/src/components/students/ExtraDisciplinesList.tsx",
+          "descricao": "Lista de disciplinas extras de um aluno",
+          "props": {
+            "studentId": "number",
+            "editable": "boolean (default: false)"
+          },
+          "layout": {
+            "tipo": "Tabela",
+            "colunas": ["Disciplina", "Turma", "Motivo", "Status", "Data Matrícula", "Ações"]
+          },
+          "features": [
+            "Badge colorido para status (ativa: verde, concluída: azul, cancelada: vermelho)",
+            "Filtro por status",
+            "Botão 'Adicionar' (se editable=true)",
+            "Botão 'Remover' por linha (se editable=true)",
+            "Modal com StudentExtraDisciplineForm",
+            "Confirmação antes de remover"
+          ]
+        }
+      ]
+    },
+    {
+      "fase": "10 - Frontend Pages",
+      "ordem": 10,
+      "descricao": "Páginas da aplicação",
+      "tarefas": [
+        {
+          "id": "page-001",
+          "tipo": "page",
+          "arquivo": "frontend/src/pages/admin/ClassSchedules.tsx",
+          "descricao": "Página admin para gerenciar grade de horários de uma turma",
+          "rota": "/admin/classes/:classId/schedules",
+          "permissoes": "admin only",
+          "secoes": [
+            {
+              "nome": "Header",
+              "conteudo": "Breadcrumb com nome da turma/curso, semestre, ano"
+            },
+            {
+              "nome": "Filtros",
+              "conteudo": "Select para dia da semana, select para disciplina"
+            },
+            {
+              "nome": "Ações",
+              "conteudo": "Botão 'Adicionar Horário' (abre modal)"
+            },
+            {
+              "nome": "Grade",
+              "conteudo": "WeekScheduleGrid com editable=true"
+            },
+            {
+              "nome": "Modal",
+              "conteudo": "ClassScheduleForm para criar/editar horário"
+            }
+          ],
+          "features": [
+            "CRUD completo de horários",
+            "Validação de conflitos exibida ao usuário",
+            "Toast de feedback (sucesso/erro)",
+            "Loading states"
+          ]
+        },
+        {
+          "id": "page-002",
+          "tipo": "page",
+          "arquivo": "frontend/src/pages/admin/StudentExtraDisciplines.tsx",
+          "descricao": "Página admin para gerenciar disciplinas extras de um aluno",
+          "rota": "/admin/students/:studentId/extra-disciplines",
+          "permissoes": "admin only",
+          "secoes": [
+            {
+              "nome": "Header",
+              "conteudo": "Breadcrumb com nome do aluno, matrícula"
+            },
+            {
+              "nome": "Ações",
+              "conteudo": "Botão 'Adicionar Disciplina Extra'"
+            },
+            {
+              "nome": "Lista",
+              "conteudo": "ExtraDisciplinesList com editable=true"
+            },
+            {
+              "nome": "Modal",
+              "conteudo": "StudentExtraDisciplineForm"
+            }
+          ],
+          "features": [
+            "CRUD de disciplinas extras",
+            "Filtro por status",
+            "Alerta se disciplina já está na turma principal",
+            "Toast de feedback"
+          ]
+        },
+        {
+          "id": "page-003",
+          "tipo": "page",
+          "arquivo": "frontend/src/pages/student/Schedule.tsx",
+          "descricao": "Página para aluno visualizar sua grade de horários completa",
+          "rota": "/student/schedule",
+          "permissoes": "student only (próprio)",
+          "secoes": [
+            {
+              "nome": "Header",
+              "conteudo": "Título 'Minha Grade de Horários'"
+            },
+            {
+              "nome": "Tabs",
+              "conteudo": "Três abas: 'Grade Completa', 'Turma Principal', 'Disciplinas Extras'"
+            },
+            {
+              "nome": "Grade",
+              "conteudo": "WeekScheduleGrid (readonly, highlightExtra=true)"
+            },
+            {
+              "nome": "Lista Extras",
+              "conteudo": "Lista de disciplinas extras abaixo da grade"
+            },
+            {
+              "nome": "Links Online",
+              "conteudo": "Botões com ícone que abrem aulas online em nova aba"
+            }
+          ],
+          "features": [
+            "Visualização consolidada (turma + extras)",
+            "Disciplinas extras destacadas visualmente (borda/cor diferente)",
+            "Click em link online abre em nova aba",
+            "Filtro por dia da semana",
+            "Responsivo (mobile: lista ao invés de grid)"
+          ]
+        },
+        {
+          "id": "page-004",
+          "tipo": "atualizacao",
+          "arquivo": "frontend/src/pages/admin/Students.tsx",
+          "descricao": "Adicionar botão 'Disciplinas Extras' na tabela de alunos",
+          "mudancas": [
+            "Adicionar botão com ícone BookMarked na coluna de ações",
+            "Link para /admin/students/:studentId/extra-disciplines",
+            "Tooltip 'Gerenciar Disciplinas Extras'"
+          ]
+        },
+        {
+          "id": "page-005",
+          "tipo": "atualizacao",
+          "arquivo": "frontend/src/pages/admin/Classes.tsx",
+          "descricao": "Adicionar botão 'Grade de Horários' na tabela de turmas",
+          "mudancas": [
+            "Adicionar botão com ícone Calendar na coluna de ações",
+            "Link para /admin/classes/:classId/schedules",
+            "Tooltip 'Gerenciar Grade de Horários'"
+          ]
+        }
+      ]
+    },
+    {
+      "fase": "11 - Frontend Routes",
+      "ordem": 11,
+      "descricao": "Atualização do router com novas rotas",
+      "tarefas": [
+        {
+          "id": "routes-fe-001",
+          "tipo": "atualizacao",
+          "arquivo": "frontend/src/router.tsx",
+          "descricao": "Adicionar rotas admin e student",
+          "mudancas": {
+            "admin_routes": [
+              {
+                "path": "classes/:classId/schedules",
+                "element": "ClassSchedules (lazy load)",
+                "descricao": "Gerenciar grade de horários da turma"
+              },
+              {
+                "path": "students/:studentId/extra-disciplines",
+                "element": "StudentExtraDisciplines (lazy load)",
+                "descricao": "Gerenciar disciplinas extras do aluno"
+              }
+            ],
+            "student_routes": [
+              {
+                "path": "schedule",
+                "element": "Schedule (lazy load)",
+                "descricao": "Visualizar grade de horários"
+              }
+            ]
+          }
+        },
+        {
+          "id": "routes-fe-002",
+          "tipo": "atualizacao",
+          "arquivo": "frontend/src/components/layout/Sidebar.tsx",
+          "descricao": "Adicionar item de menu 'Minha Grade' na sidebar do student",
+          "mudancas": [
+            "Adicionar item no array de menu items para role='student'",
+            "Label: 'Minha Grade'",
+            "Path: /student/schedule",
+            "Ícone: Calendar ou CalendarDays (lucide-react)"
+          ]
+        }
+      ]
+    },
+    {
+      "fase": "12 - Testing",
+      "ordem": 12,
+      "descricao": "Testes e validações",
+      "tarefas": [
+        {
+          "id": "test-001",
+          "tipo": "teste_backend",
+          "descricao": "Testar migrations e estrutura de banco",
+          "checklist": [
+            "Migrations executam sem erros",
+            "Tabelas criadas com estrutura correta",
+            "Índices criados corretamente",
+            "Foreign keys funcionando",
+            "Soft delete funcionando"
+          ]
+        },
+        {
+          "id": "test-002",
+          "tipo": "teste_backend",
+          "descricao": "Testar validações e lógica de negócio",
+          "checklist": [
+            "Validação de conflitos de horário funciona",
+            "Validação start_time < end_time funciona",
+            "Validação de unicidade em student_extra_disciplines funciona",
+            "Verificação de disciplina na turma principal funciona",
+            "Soft deletes funcionam em todos os models"
+          ]
+        },
+        {
+          "id": "test-003",
+          "tipo": "teste_backend",
+          "descricao": "Testar endpoints com diferentes roles",
+          "ferramentas": ["Postman", "Insomnia"],
+          "checklist": [
+            "Admin pode fazer CRUD completo de horários",
+            "Teacher pode visualizar horários",
+            "Student pode visualizar apenas própria grade",
+            "Endpoints retornam erros apropriados (401, 403, 400, 404)",
+            "Response format é consistente"
+          ]
+        },
+        {
+          "id": "test-004",
+          "tipo": "teste_frontend",
+          "descricao": "Testar formulários e validações",
+          "checklist": [
+            "ClassScheduleForm valida corretamente",
+            "StudentExtraDisciplineForm valida corretamente",
+            "Validação de URL funciona",
+            "Validação de horários funciona",
+            "Feedback visual de erros aparece"
+          ]
+        },
+        {
+          "id": "test-005",
+          "tipo": "teste_frontend",
+          "descricao": "Testar componentes visuais",
+          "checklist": [
+            "WeekScheduleGrid renderiza corretamente",
+            "Cores das disciplinas são consistentes",
+            "Tooltips funcionam",
+            "Responsividade funciona (desktop/tablet/mobile)",
+            "Loading states aparecem corretamente"
+          ]
+        },
+        {
+          "id": "test-006",
+          "tipo": "teste_integracao",
+          "descricao": "Testar fluxos completos",
+          "cenarios": [
+            {
+              "nome": "Fluxo 1: Admin cria horário",
+              "passos": [
+                "Admin faz login",
+                "Navega para página de turmas",
+                "Clica em 'Grade de Horários'",
+                "Adiciona novo horário",
+                "Verifica que horário aparece na grade",
+                "Aluno faz login",
+                "Navega para 'Minha Grade'",
+                "Verifica que horário aparece"
+              ]
+            },
+            {
+              "nome": "Fluxo 2: Admin vincula disciplina extra",
+              "passos": [
+                "Admin navega para aluno",
+                "Clica em 'Disciplinas Extras'",
+                "Adiciona disciplina extra com turma",
+                "Verifica que aparece na lista",
+                "Aluno faz login",
+                "Navega para 'Minha Grade'",
+                "Verifica que disciplina extra aparece destacada"
+              ]
+            },
+            {
+              "nome": "Fluxo 3: Conflito de horário",
+              "passos": [
+                "Admin cria horário 08:00-10:00",
+                "Tenta criar horário 09:00-11:00 (mesmo dia/turma)",
+                "Verifica que sistema detecta conflito",
+                "Erro é exibido ao usuário"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "ordem_implementacao_resumida": [
+    "1. Criar migrations (class_schedules, student_extra_disciplines)",
+    "2. Executar npm run db:migrate",
+    "3. Criar models (ClassSchedule, StudentExtraDiscipline)",
+    "4. Atualizar models existentes (Class, Student, Discipline)",
+    "5. Criar services backend (classSchedule, studentExtraDiscipline)",
+    "6. Criar controllers backend",
+    "7. Criar routes backend e registrar em index.js",
+    "8. Testar endpoints com Postman/Insomnia",
+    "9. Criar types TypeScript (frontend)",
+    "10. Criar services frontend",
+    "11. Criar hooks TanStack Query",
+    "12. Criar componentes (forms, WeekScheduleGrid, ExtraDisciplinesList)",
+    "13. Criar páginas (admin: ClassSchedules, StudentExtraDisciplines; student: Schedule)",
+    "14. Atualizar router.tsx e páginas existentes",
+    "15. Testar fluxos completos (E2E manual)",
+    "16. Ajustes de UX/UI",
+    "17. Documentação"
+  ],
+
+  "arquivos_criticos": {
+    "backend": [
+      "backend/database/migrations/20260118000001-create-class-schedules.js",
+      "backend/database/migrations/20260118000002-create-student-extra-disciplines.js",
+      "backend/src/models/ClassSchedule.js",
+      "backend/src/models/StudentExtraDiscipline.js",
+      "backend/src/services/classSchedule.service.js",
+      "backend/src/services/studentExtraDiscipline.service.js",
+      "backend/src/controllers/classSchedule.controller.js",
+      "backend/src/controllers/studentExtraDiscipline.controller.js",
+      "backend/src/routes/classSchedule.routes.js",
+      "backend/src/routes/studentExtraDiscipline.routes.js"
+    ],
+    "frontend": [
+      "frontend/src/types/classSchedule.types.ts",
+      "frontend/src/types/studentExtraDiscipline.types.ts",
+      "frontend/src/services/classSchedule.service.ts",
+      "frontend/src/services/studentExtraDiscipline.service.ts",
+      "frontend/src/hooks/useClassSchedule.ts",
+      "frontend/src/hooks/useStudentExtraDiscipline.ts",
+      "frontend/src/components/forms/ClassScheduleForm.tsx",
+      "frontend/src/components/forms/StudentExtraDisciplineForm.tsx",
+      "frontend/src/components/schedules/WeekScheduleGrid.tsx",
+      "frontend/src/components/students/ExtraDisciplinesList.tsx",
+      "frontend/src/pages/admin/ClassSchedules.tsx",
+      "frontend/src/pages/admin/StudentExtraDisciplines.tsx",
+      "frontend/src/pages/student/Schedule.tsx"
+    ],
+    "atualizacoes": [
+      "backend/src/models/Class.js",
+      "backend/src/models/Student.js",
+      "backend/src/models/Discipline.js",
+      "backend/src/routes/index.js",
+      "frontend/src/router.tsx",
+      "frontend/src/pages/admin/Students.tsx",
+      "frontend/src/pages/admin/Classes.tsx",
+      "frontend/src/components/layout/Sidebar.tsx"
+    ]
+  },
+
+  "consideracoes_tecnicas": {
+    "validacoes_criticas": [
+      "Conflito de horário: mesma turma, mesmo dia, horários sobrepostos",
+      "start_time deve ser menor que end_time",
+      "day_of_week deve estar entre 1 e 7",
+      "URL válida para online_link",
+      "Disciplina extra não pode duplicar disciplina da turma principal",
+      "Unicidade de student_id + discipline_id em extras"
+    ],
+    "rbac": {
+      "admin": "CRUD completo de horários e disciplinas extras",
+      "teacher": "Visualizar horários de suas turmas",
+      "student": "Visualizar apenas própria grade (turma + extras)"
+    },
+    "ux_ui": [
+      "Grade visual tipo calendário semanal",
+      "Cores diferentes por disciplina (hash do ID)",
+      "Ícone de link quando aula online disponível",
+      "Badge de status colorido para disciplinas extras",
+      "Tooltip com informações detalhadas",
+      "Confirmação antes de deletar",
+      "Toast de feedback (sucesso/erro)",
+      "Loading states",
+      "Responsivo: grid (desktop) → lista (mobile)"
+    ],
+    "performance": [
+      "Índices de banco otimizados",
+      "TanStack Query caching",
+      "Lazy loading de páginas",
+      "Queries específicas (evitar overfetching)"
+    ],
+    "seguranca": [
+      "Validação de permissões no backend",
+      "Sanitização de online_link (XSS)",
+      "Rate limiting em endpoints de criação",
+      "Logs de auditoria (opcional)"
+    ]
+  },
+
+  "total_arquivos": {
+    "backend_novos": 10,
+    "frontend_novos": 13,
+    "atualizacoes": 8,
+    "total": 31
+  }
+}
