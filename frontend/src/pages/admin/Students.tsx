@@ -8,7 +8,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, KeyRound, AlertCircle, UserPlus, Search, BookOpen, GraduationCap } from 'lucide-react';
+import { Plus, Pencil, Trash2, KeyRound, AlertCircle, UserPlus, Search, BookOpen, GraduationCap, BookMarked } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Table, type Column } from '@/components/ui/Table';
 import { Button } from '@/components/ui/Button';
@@ -393,6 +393,16 @@ export default function StudentsPage() {
             title="Ver notas do estudante"
           >
             <GraduationCap size={16} />
+          </Button>
+
+          {/* Botão Disciplinas Extras */}
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => navigate(`/admin/students/${student.id}/extra-disciplines`)}
+            title="Gerenciar Disciplinas Extras"
+          >
+            <BookMarked size={16} />
           </Button>
 
           {/* Botão Criar Usuário - só aparece se não tiver usuário */}

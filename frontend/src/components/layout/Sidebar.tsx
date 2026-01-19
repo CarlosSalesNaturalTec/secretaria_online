@@ -86,6 +86,7 @@ const getNavigationItems = (role: UserRole): NavigationItem[] => {
     return [
       { name: 'Dashboard', href: '/student/dashboard', icon: LayoutDashboardIcon },
       { name: 'Meus Dados', href: '/student/my-data', icon: UserIcon },
+      { name: 'Minha Grade', href: '/student/schedule', icon: CalendarIcon },
       { name: 'Minhas Notas', href: '/student/grades', icon: ClipboardListIcon },
       { name: 'Meus Documentos', href: '/student/documents', icon: FileTextIcon },
       { name: 'Meus Contratos', href: '/student/contracts', icon: FileTextIcon },

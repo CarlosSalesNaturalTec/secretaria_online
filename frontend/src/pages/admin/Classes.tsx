@@ -14,7 +14,8 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
-import { Plus, Pencil, Trash2, AlertCircle, Users, GraduationCap } from 'lucide-react';
+import { Plus, Pencil, Trash2, AlertCircle, Users, GraduationCap, Calendar } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Table, type Column } from '@/components/ui/Table';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
@@ -40,6 +41,8 @@ type ModalType = 'create' | 'edit' | 'delete' | 'viewDetails' | null;
  * @returns Página de gerenciamento de turmas
  */
 export default function ClassesPage() {
+  const navigate = useNavigate();
+
   // Estado da lista de turmas
   const [classes, setClasses] = useState<IClass[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -317,6 +320,15 @@ export default function ClassesPage() {
       header: 'Ações',
       accessor: (classData) => (
         <div className="flex items-center justify-end gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => navigate(`/admin/classes/${classData.id}/schedules`)}
+            title="Grade de Horários"
+          >
+            <Calendar size={16} />
+          </Button>
+
           <Button
             size="sm"
             variant="secondary"

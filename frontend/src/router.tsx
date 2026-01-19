@@ -44,6 +44,8 @@ const AdminContracts = lazy(() => import('./pages/admin/Contracts'));
 const AdminEvaluations = lazy(() => import('./pages/teacher/Evaluations'));
 const AdminGrades = lazy(() => import('./pages/admin/Grades'));
 const AdminStudentGrades = lazy(() => import('./pages/admin/StudentGrades'));
+const AdminClassSchedules = lazy(() => import('./pages/admin/ClassSchedules'));
+const AdminStudentExtraDisciplines = lazy(() => import('./pages/admin/StudentExtraDisciplines'));
 
 /**
  * Páginas de Aluno (Lazy Loading)
@@ -55,6 +57,7 @@ const StudentRequests = lazy(() => import('./pages/student/Requests'));
 const StudentContracts = lazy(() => import('./pages/student/Contracts'));
 const StudentMyData = lazy(() => import('./pages/student/MyData'));
 const ReenrollmentAcceptance = lazy(() => import('./pages/student/ReenrollmentAcceptance'));
+const StudentSchedule = lazy(() => import('./pages/student/Schedule'));
 
 /**
  * Páginas de Professor (Lazy Loading)
@@ -194,6 +197,22 @@ const privateRoutes: RouteObject[] = [
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <AdminClasses />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'classes/:classId/schedules',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AdminClassSchedules />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'students/:studentId/extra-disciplines',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AdminStudentExtraDisciplines />
           </Suspense>
         ),
       },
@@ -344,6 +363,14 @@ const privateRoutes: RouteObject[] = [
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <StudentGrades />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'schedule',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <StudentSchedule />
           </Suspense>
         ),
       },
