@@ -34,3 +34,38 @@ export type { RequestStatus, RequestType, IRequest, IRequestListResponse, IReque
 
 // API types
 export type { } from './api.types';
+
+// Class Schedule types
+export type {
+  DayOfWeek,
+  IClassSchedule,
+  IClassScheduleFormData,
+  IClassScheduleCreateRequest,
+  IClassScheduleUpdateRequest,
+  IClassScheduleBulkCreateRequest,
+  WeekSchedule,
+  IClassScheduleListResponse,
+  IClassScheduleResponse,
+  IWeekScheduleResponse,
+  IClassScheduleBulkCreateResponse,
+  IClassScheduleFilters,
+  IClassScheduleDeleteResponse
+} from './classSchedule.types';
+export { DAY_NAMES, DAY_NAMES_SHORT } from './classSchedule.types';
+
+// Student Extra Discipline types
+export type {
+  ExtraDisciplineReason,
+  ExtraDisciplineStatus,
+  IStudentExtraDiscipline,
+  IStudentExtraDisciplineFormData,
+  IStudentExtraDisciplineCreateRequest,
+  IStudentExtraDisciplineUpdateRequest,
+  IStudentFullSchedule,
+  IStudentExtraDisciplineListResponse,
+  IStudentExtraDisciplineResponse,
+  IStudentFullScheduleResponse,
+  IStudentExtraDisciplineFilters,
+  IStudentExtraDisciplineDeleteResponse
+} from './studentExtraDiscipline.types';
+export { REASON_LABELS, STATUS_LABELS, STATUS_COLORS, REASON_OPTIONS, STATUS_OPTIONS } from './studentExtraDiscipline.types';

@@ -123,6 +123,17 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'RESTRICT',
       });
 
+      /**
+       * Associação 1:N com StudentExtraDiscipline
+       * Um aluno pode ter múltiplas disciplinas extras
+       */
+      Student.hasMany(models.StudentExtraDiscipline, {
+        foreignKey: 'student_id',
+        as: 'extraDisciplines',
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
+      });
+
       // Associações futuras com outras entidades
       // Student.hasMany(models.Grade, { ... });
     }

@@ -71,6 +71,8 @@
     {
       "fase": "1 - Database",
       "ordem": 1,
+      "status": "concluido",
+      "data_conclusao": "2026-01-18",
       "descricao": "Criação de estruturas de banco de dados",
       "tarefas": [
         {
@@ -334,6 +336,8 @@
     {
       "fase": "2 - Backend Models",
       "ordem": 2,
+      "status": "concluido",
+      "data_conclusao": "2026-01-18",
       "descricao": "Criação de models Sequelize para as novas tabelas",
       "tarefas": [
         {
@@ -545,6 +549,8 @@
     {
       "fase": "3 - Backend Services",
       "ordem": 3,
+      "status": "concluido",
+      "data_conclusao": "2026-01-18",
       "descricao": "Criação de services com lógica de negócio",
       "tarefas": [
         {
@@ -702,6 +708,8 @@
     {
       "fase": "4 - Backend Controllers",
       "ordem": 4,
+      "status": "concluido",
+      "data_conclusao": "2026-01-18",
       "descricao": "Criação de controllers para endpoints HTTP",
       "tarefas": [
         {
@@ -883,6 +891,8 @@
     {
       "fase": "5 - Backend Routes",
       "ordem": 5,
+      "status": "concluido",
+      "data_conclusao": "2026-01-18",
       "descricao": "Registro de rotas no Express",
       "tarefas": [
         {
@@ -934,6 +944,8 @@
     {
       "fase": "6 - Frontend Types",
       "ordem": 6,
+      "status": "concluido",
+      "data_conclusao": "2026-01-18",
       "descricao": "Definições de tipos TypeScript",
       "tarefas": [
         {
@@ -1072,6 +1084,8 @@
     {
       "fase": "7 - Frontend Services",
       "ordem": 7,
+      "status": "concluido",
+      "data_conclusao": "2026-01-18",
       "descricao": "Serviços de comunicação com API",
       "tarefas": [
         {

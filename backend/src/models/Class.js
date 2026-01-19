@@ -102,6 +102,28 @@ module.exports = (sequelize, DataTypes) => {
         onUpdate: 'CASCADE',
         onDelete: 'RESTRICT'
       });
+
+      /**
+       * Associação 1:N com ClassSchedule
+       * Uma turma possui múltiplos horários na grade
+       */
+      Class.hasMany(models.ClassSchedule, {
+        foreignKey: 'class_id',
+        as: 'schedules',
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+      });
+
+      /**
+       * Associação 1:N com StudentExtraDiscipline
+       * Uma turma pode ser origem de disciplinas extras
+       */
+      Class.hasMany(models.StudentExtraDiscipline, {
+        foreignKey: 'class_id',
+        as: 'extraDisciplines',
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL'
+      });
     }
 
     /**

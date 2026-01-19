@@ -85,6 +85,28 @@ module.exports = (sequelize, DataTypes) => {
       //   otherKey: 'teacher_id',
       //   as: 'teachers'
       // });
+
+      /**
+       * Associação 1:N com ClassSchedule
+       * Uma disciplina pode ter múltiplos horários em diferentes turmas
+       */
+      Discipline.hasMany(models.ClassSchedule, {
+        foreignKey: 'discipline_id',
+        as: 'schedules',
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT'
+      });
+
+      /**
+       * Associação 1:N com StudentExtraDiscipline
+       * Uma disciplina pode ser cursada como extra por múltiplos alunos
+       */
+      Discipline.hasMany(models.StudentExtraDiscipline, {
+        foreignKey: 'discipline_id',
+        as: 'extraEnrollments',
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT'
+      });
     }
 
     /**

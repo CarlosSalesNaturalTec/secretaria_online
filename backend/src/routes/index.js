@@ -69,6 +69,12 @@ const adminRoutes = require('./admin.routes');
 // Rematrícula Global de Estudantes (feat-reenrollment-etapa-4)
 const reenrollmentRoutes = require('./reenrollment.routes');
 
+// Grade de Horários das Turmas (feat-001)
+const classScheduleRoutes = require('./classSchedule.routes');
+
+// Disciplinas Extras de Alunos (feat-002)
+const studentExtraDisciplineRoutes = require('./studentExtraDiscipline.routes');
+
 // ============================================================================
 // INICIALIZAÇÃO DO ROUTER
 // ============================================================================
@@ -326,6 +332,40 @@ router.use('/admin', adminRoutes);
  * - NÃO cria contratos (criados após aceite do estudante)
  */
 router.use('/reenrollments', reenrollmentRoutes);
+
+/**
+ * Rotas de Grade de Horários das Turmas
+ * Base: /api/v1 (rotas já incluem prefixos /classes, /schedules)
+ *
+ * Endpoints:
+ * - GET /classes/:classId/schedules - Listar horários de uma turma
+ * - GET /classes/:classId/schedules/week - Obter grade completa da semana
+ * - POST /classes/:classId/schedules - Criar novo horário
+ * - POST /classes/:classId/schedules/bulk - Criar múltiplos horários em lote
+ * - GET /schedules/:id - Obter horário por ID
+ * - PUT /schedules/:id - Atualizar horário
+ * - DELETE /schedules/:id - Deletar horário (soft delete)
+ *
+ * Permissões: Admin (CRUD), Teacher/Student (visualização)
+ */
+router.use('/', classScheduleRoutes);
+
+/**
+ * Rotas de Disciplinas Extras de Alunos
+ * Base: /api/v1 (rotas já incluem prefixos /students, /extra-disciplines)
+ *
+ * Endpoints:
+ * - GET /students/:studentId/extra-disciplines - Listar disciplinas extras de um aluno
+ * - POST /students/:studentId/extra-disciplines - Vincular disciplina extra a um aluno
+ * - GET /students/:studentId/full-schedule - Obter grade completa do aluno
+ * - GET /extra-disciplines/:id - Obter disciplina extra por ID
+ * - PUT /extra-disciplines/:id - Atualizar disciplina extra
+ * - DELETE /extra-disciplines/:id - Remover disciplina extra (soft delete)
+ * - GET /disciplines/:disciplineId/extra-students - Listar alunos com disciplina extra
+ *
+ * Permissões: Admin (CRUD), Student (própria grade e disciplinas extras)
+ */
+router.use('/', studentExtraDisciplineRoutes);
 
 // ============================================================================
 // EXPORTAÇÃO
