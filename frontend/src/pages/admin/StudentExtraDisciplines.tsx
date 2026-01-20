@@ -54,13 +54,13 @@ export default function StudentExtraDisciplinesPage() {
 
   const loadInitialData = async () => {
     try {
-      const [studentData, disciplinesData, classesData] = await Promise.all([
+      const [studentData, disciplinesResponse, classesData] = await Promise.all([
         StudentService.getById(numericStudentId),
         DisciplineService.getAll(),
         ClassService.getAll(),
       ]);
       setStudentInfo(studentData);
-      setDisciplines(disciplinesData);
+      setDisciplines(disciplinesResponse.data);
       setClasses(classesData);
     } catch (err) {
       console.error('[StudentExtraDisciplinesPage] Erro ao carregar dados iniciais:', err);
@@ -133,7 +133,7 @@ export default function StudentExtraDisciplinesPage() {
       {/* Header */}
       <div className="mb-6">
         <Button
-          variant="ghost"
+          variant="secondary"
           size="sm"
           onClick={() => navigate('/admin/students')}
           className="mb-4"

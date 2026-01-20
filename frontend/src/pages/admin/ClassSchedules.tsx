@@ -19,7 +19,7 @@ import {
   useUpdateClassSchedule,
   useDeleteClassSchedule,
 } from '@/hooks/useClassSchedule';
-import type { IClassSchedule, IClassScheduleFormData, DayOfWeek } from '@/types/classSchedule.types';
+import type { IClassSchedule, IClassScheduleFormData } from '@/types/classSchedule.types';
 import ClassService from '@/services/class.service';
 import DisciplineService from '@/services/discipline.service';
 import TeacherService from '@/services/teacher.service';
@@ -59,13 +59,13 @@ export default function ClassSchedulesPage() {
 
   const loadInitialData = async () => {
     try {
-      const [classData, disciplinesData, teachersData] = await Promise.all([
+      const [classData, disciplinesResponse, teachersData] = await Promise.all([
         ClassService.getById(numericClassId),
         DisciplineService.getAll(),
         TeacherService.getAll(),
       ]);
       setClassInfo(classData);
-      setDisciplines(disciplinesData);
+      setDisciplines(disciplinesResponse.data);
       setTeachers(teachersData);
     } catch (err) {
       console.error('[ClassSchedulesPage] Erro ao carregar dados iniciais:', err);
@@ -158,6 +158,12 @@ export default function ClassSchedulesPage() {
     ? Object.values(weekSchedule).flat()
     : [];
 
+  // Debug: log para verificar dados
+  if (import.meta.env.DEV) {
+    console.log('[ClassSchedulesPage] weekSchedule:', weekSchedule);
+    console.log('[ClassSchedulesPage] schedulesArray:', schedulesArray);
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -181,7 +187,7 @@ export default function ClassSchedulesPage() {
       {/* Header */}
       <div className="mb-6">
         <Button
-          variant="ghost"
+          variant="secondary"
           size="sm"
           onClick={() => navigate('/admin/classes')}
           className="mb-4"

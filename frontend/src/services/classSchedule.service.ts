@@ -17,16 +17,9 @@ import api from './api';
 import type {
   IClassSchedule,
   IClassScheduleFormData,
-  IClassScheduleCreateRequest,
   IClassScheduleUpdateRequest,
-  IClassScheduleBulkCreateRequest,
   WeekSchedule,
-  IClassScheduleListResponse,
-  IClassScheduleResponse,
-  IWeekScheduleResponse,
   IClassScheduleBulkCreateResponse,
-  IClassScheduleDeleteResponse,
-  DayOfWeek,
 } from '@/types/classSchedule.types';
 import type { ApiResponse } from '@/types/api.types';
 

@@ -120,8 +120,19 @@ export function WeekScheduleGrid({
       7: [],
     };
 
+    // Debug: log para verificar dados recebidos
+    if (import.meta.env.DEV) {
+      console.log('[WeekScheduleGrid] Schedules recebidos:', schedules);
+    }
+
     schedules.forEach((schedule) => {
-      organized[schedule.day_of_week].push(schedule);
+      // Converter para número caso venha como string da API
+      const day = Number(schedule.day_of_week) as DayOfWeek;
+      if (day >= 1 && day <= 7) {
+        organized[day].push(schedule);
+      } else if (import.meta.env.DEV) {
+        console.warn('[WeekScheduleGrid] Schedule com day_of_week inválido:', schedule);
+      }
     });
 
     // Ordenar por horário de início
@@ -199,7 +210,7 @@ export function WeekScheduleGrid({
         {editable && (
           <div className="flex space-x-2 mt-2 pt-2 border-t border-current/20">
             <Button
-              variant="ghost"
+              variant="secondary"
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
@@ -211,13 +222,13 @@ export function WeekScheduleGrid({
               Editar
             </Button>
             <Button
-              variant="ghost"
+              variant="danger"
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete?.(schedule);
               }}
-              className="flex-1 text-xs text-red-600 hover:text-red-700"
+              className="flex-1 text-xs"
             >
               <Trash2 size={14} className="mr-1" />
               Remover

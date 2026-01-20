@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instruções Candidatas - Rainha e Princesas</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f0f0;
+            color: #000;
+        }
+
+        .page {
+            width: 21cm;
+            height: 29.7cm;
+            background: white;
+            margin: 0 auto;
+            position: relative;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Cada metade da folha (A5) */
+        .flyer {
+            height: 50%;
+            padding: 1.0cm;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            text-transform: uppercase;
+            margin: 0;
+            font-weight: 900;
+        }
+
+        h2 {
+            font-size: 0.9rem;
+            font-weight: 400;
+            margin: 2px 0 0 0;
+            text-transform: uppercase;
+        }
+
+        .content {
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .categories-box {
+            background-color: #f4f4f4;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-around;
+            font-weight: bold;
+            font-size: 0.8rem;
+            border: 1px solid #ddd;
+        }
+
+        .info-block {
+            margin-bottom: 10px;
+        }
+
+        .info-title {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 3px;
+        }
+
+        ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .highlight-box {
+            border: 2px solid #000;
+            padding: 8px;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .highlight-date {
+            font-size: 1.2rem;
+            font-weight: 900;
+        }
+
+        /* Linha de Corte */
+        .cut-line {
+            border-top: 2px dashed #999;
+            width: 100%;
+            position: relative;
+            margin: 0;
+        }
+        .cut-icon {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 0 10px;
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        @media print {
+            body { background: none; }
+            .page { width: 100%; height: 100vh; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page">
+        
+        <!-- FOLHETO SUPERIOR -->
+        <div class="flyer">
+            <header>
+                <h2>Bloco Amigos da Guerreira - Carnaval 2026</h2>
+                <h1><i class="fas fa-crown"></i> Regulamento Simplificado</h1>
+                <p style="margin:0; font-size: 0.8rem;">Concurso Rainha e Princesas</p>
+            </header>
+
+            <div class="content">
+                <div class="categories-box">
+                    <span><i class="fas fa-child"></i> Mirim (01-08)</span>
+                    <span><i class="fas fa-star"></i> Jovem (09-17)</span>
+                    <span><i class="fas fa-chess-queen"></i> Rainha (18+)</span>
+                </div>
+
+                <div class="info-block">
+                    <div class="info-title"><i class="fas fa-clipboard-check"></i> Critérios de Avaliação</div>
+                    <ul>
+                        <li><strong>Simpatia e Carisma:</strong> Interação com o público e sorriso.</li>
+                        <li><strong>Fantasia/Traje:</strong> Criatividade e capricho no visual.</li>
+                        <li><strong>Desenvoltura:</strong> Postura e samba no pé (ou dança carnavalesca).</li>
+                    </ul>
+                </div>
+
+                <div class="info-block">
+                    <div class="info-title"><i class="fas fa-tshirt"></i> Sobre o Traje (Roupa)</div>
+                    <p style="margin:0;">As candidatas podem se apresentar com roupa de sua preferência OU Fantasia de Carnaval. O uso de adereços (coroas, plumas, brilhos) é encorajado!</p>
+                </div>
+
+                <div class="highlight-box">
+                    <div>A GRANDE FINAL SERÁ NO DIA:</div>
+                    <div class="highlight-date">07 DE FEVEREIRO (SÁBADO)</div>
+                    <div style="font-size: 0.8rem;">Concentração às 15:30h | Local: Comunidade Guerreira Zeferina</div>
+                </div>
+
+                <p style="text-align: center; font-size: 0.7rem; margin-top: 10px;">
+                    <em>Dúvidas? Procure a organização: (71) 99341-6896 (Carlos Antonio)</em>
+                </p>
+            </div>
+        </div>
+
+        <!-- LINHA DE CORTE -->
+        <div class="cut-line">
+            <span class="cut-icon">✂ Corte Aqui</span>
+        </div>
+
+        <!-- FOLHETO INFERIOR (Cópia exata) -->
+        <div class="flyer">
+            <header>
+                <h2>Bloco Amigos da Guerreira - Carnaval 2026</h2>
+                <h1><i class="fas fa-crown"></i> Regulamento Simplificado</h1>
+                <p style="margin:0; font-size: 0.8rem;">Concurso Rainha e Princesas</p>
+            </header>
+
+            <div class="content">
+                <div class="categories-box">
+                    <span><i class="fas fa-child"></i> Mirim (01-08)</span>
+                    <span><i class="fas fa-star"></i> Jovem (09-17)</span>
+                    <span><i class="fas fa-chess-queen"></i> Rainha (18+)</span>
+                </div>
+
+                <div class="info-block">
+                    <div class="info-title"><i class="fas fa-clipboard-check"></i> Critérios de Avaliação</div>
+                    <ul>
+                        <li><strong>Simpatia e Carisma:</strong> Interação com o público e sorriso.</li>
+                        <li><strong>Fantasia/Traje:</strong> Criatividade e capricho no visual.</li>
+                        <li><strong>Desenvoltura:</strong> Postura e samba no pé (ou dança carnavalesca).</li>
+                    </ul>
+                </div>
+
+                <div class="info-block">
+                    <div class="info-title"><i class="fas fa-tshirt"></i> Sobre o Traje (Roupa)</div>
+                    <p style="margin:0;">As candidatas podem se apresentar com roupa de sua preferência OU Fantasia de Carnaval. O uso de adereços (coroas, plumas, brilhos) é encorajado!</p>
+                </div>
+
+                <div class="highlight-box">
+                    <div>A GRANDE FINAL SERÁ NO DIA:</div>
+                    <div class="highlight-date">07 DE FEVEREIRO (SÁBADO)</div>
+                    <div style="font-size: 0.8rem;">Concentração às 15:30h | Local: Comunidade Guerreira Zeferina</div>
+                </div>
+
+                <p style="text-align: center; font-size: 0.7rem; margin-top: 10px;">
+                    <em>Dúvidas? Procure a organização: (71) 99341-6896 (Carlos Antonio)</em>
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

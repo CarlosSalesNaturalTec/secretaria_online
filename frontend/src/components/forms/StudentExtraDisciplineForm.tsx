@@ -11,7 +11,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { parseDateToInput } from '@/utils/formatters';
 import {
   REASON_LABELS,
   type ExtraDisciplineReason,
@@ -25,21 +24,21 @@ import type { IClass } from '@/types/class.types';
  * Schema de validação para formulário de disciplina extra
  */
 const studentExtraDisciplineFormSchema = z.object({
-  discipline_id: z.coerce.number({
-    required_error: 'Disciplina é obrigatória',
-    invalid_type_error: 'Disciplina é obrigatória',
-  }).int().positive('Disciplina é obrigatória'),
+  discipline_id: z.number()
+    .int()
+    .positive('Disciplina é obrigatória'),
 
-  class_id: z.coerce.number().int().positive().optional().nullable(),
+  class_id: z.number()
+    .int()
+    .positive()
+    .nullable()
+    .optional(),
 
   enrollment_date: z.string()
     .min(1, 'Data de matrícula é obrigatória')
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de data inválido'),
 
-  reason: z.enum(['dependency', 'recovery', 'advancement', 'other'], {
-    required_error: 'Motivo é obrigatório',
-    invalid_type_error: 'Motivo inválido',
-  }) as z.ZodType<ExtraDisciplineReason>,
+  reason: z.enum(['dependency', 'recovery', 'advancement', 'other']),
 
   notes: z.string()
     .max(2000, 'Observações devem ter no máximo 2000 caracteres')
@@ -108,7 +107,7 @@ interface StudentExtraDisciplineFormProps {
  * - Textarea para observações
  */
 export function StudentExtraDisciplineForm({
-  studentId,
+  studentId: _studentId,
   disciplines,
   classes,
   onSuccess,
@@ -152,8 +151,10 @@ export function StudentExtraDisciplineForm({
   const handleFormSubmit = async (data: StudentExtraDisciplineFormData) => {
     try {
       const formData: IStudentExtraDisciplineFormData = {
-        ...data,
+        discipline_id: data.discipline_id,
         class_id: data.class_id || undefined,
+        enrollment_date: data.enrollment_date,
+        reason: data.reason as ExtraDisciplineReason,
         notes: data.notes || undefined,
       };
 
@@ -173,7 +174,7 @@ export function StudentExtraDisciplineForm({
         </label>
         <select
           id="discipline_id"
-          {...register('discipline_id')}
+          {...register('discipline_id', { valueAsNumber: true })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           disabled={!!editingExtraDiscipline}
         >
@@ -201,7 +202,7 @@ export function StudentExtraDisciplineForm({
         </label>
         <select
           id="class_id"
-          {...register('class_id')}
+          {...register('class_id', { setValueAs: (v) => v === '' ? null : Number(v) })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
         >
           <option value="">Nenhuma</option>
@@ -275,7 +276,7 @@ export function StudentExtraDisciplineForm({
         {onCancel && (
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             onClick={onCancel}
             disabled={isSubmitting}
           >

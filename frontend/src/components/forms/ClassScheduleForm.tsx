@@ -8,8 +8,7 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'z od';
-import { Input } from '@/components/ui/Input';
+import { z } from 'zod';
 import { Button } from '@/components/ui/Button';
 import { DAY_NAMES, type DayOfWeek, type IClassSchedule, type IClassScheduleFormData } from '@/types/classSchedule.types';
 import type { IDiscipline } from '@/types/course.types';
@@ -19,17 +18,20 @@ import type { ITeacher } from '@/types/teacher.types';
  * Schema de validação para formulário de horário
  */
 const classScheduleFormSchema = z.object({
-  discipline_id: z.coerce.number({
-    required_error: 'Disciplina é obrigatória',
-    invalid_type_error: 'Disciplina é obrigatória',
-  }).int().positive('Disciplina é obrigatória'),
+  discipline_id: z.number()
+    .int()
+    .positive('Disciplina é obrigatória'),
 
-  teacher_id: z.coerce.number().int().positive().optional().nullable(),
+  teacher_id: z.number()
+    .int()
+    .positive()
+    .nullable()
+    .optional(),
 
-  day_of_week: z.coerce.number({
-    required_error: 'Dia da semana é obrigatório',
-    invalid_type_error: 'Dia da semana é obrigatório',
-  }).int().min(1, 'Dia da semana deve estar entre 1 e 7').max(7, 'Dia da semana deve estar entre 1 e 7') as z.ZodType<DayOfWeek>,
+  day_of_week: z.number()
+    .int()
+    .min(1, 'Dia da semana deve estar entre 1 e 7')
+    .max(7, 'Dia da semana deve estar entre 1 e 7'),
 
   start_time: z.string()
     .min(1, 'Horário de início é obrigatório')
@@ -120,7 +122,7 @@ interface ClassScheduleFormProps {
  * - Validação de start_time < end_time
  */
 export function ClassScheduleForm({
-  classId,
+  classId: _classId,
   disciplines,
   teachers,
   onSuccess,
@@ -167,7 +169,9 @@ export function ClassScheduleForm({
     try {
       // Garantir formato HH:MM:SS
       const formData: IClassScheduleFormData = {
-        ...data,
+        discipline_id: data.discipline_id,
+        teacher_id: data.teacher_id,
+        day_of_week: data.day_of_week as DayOfWeek,
         start_time: data.start_time.length === 5 ? `${data.start_time}:00` : data.start_time,
         end_time: data.end_time.length === 5 ? `${data.end_time}:00` : data.end_time,
         online_link: data.online_link || undefined,
@@ -189,7 +193,7 @@ export function ClassScheduleForm({
         </label>
         <select
           id="discipline_id"
-          {...register('discipline_id')}
+          {...register('discipline_id', { valueAsNumber: true })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
         >
           <option value="">Selecione uma disciplina</option>
@@ -211,7 +215,7 @@ export function ClassScheduleForm({
         </label>
         <select
           id="teacher_id"
-          {...register('teacher_id')}
+          {...register('teacher_id', { setValueAs: (v) => v === '' ? null : Number(v) })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
         >
           <option value="">Nenhum</option>
@@ -233,7 +237,7 @@ export function ClassScheduleForm({
         </label>
         <select
           id="day_of_week"
-          {...register('day_of_week')}
+          {...register('day_of_week', { valueAsNumber: true })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
         >
           {Object.entries(DAY_NAMES).map(([value, label]) => (
@@ -253,23 +257,33 @@ export function ClassScheduleForm({
           <label htmlFor="start_time" className="block text-sm font-medium text-gray-700 mb-1">
             Horário de Início <span className="text-red-500">*</span>
           </label>
-          <Input
+          <input
             id="start_time"
             type="time"
             {...register('start_time')}
-            error={errors.start_time?.message}
+            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+              errors.start_time ? 'border-red-500' : 'border-gray-300'
+            }`}
           />
+          {errors.start_time && (
+            <p className="mt-1 text-sm text-red-600">{errors.start_time.message}</p>
+          )}
         </div>
         <div>
           <label htmlFor="end_time" className="block text-sm font-medium text-gray-700 mb-1">
             Horário de Término <span className="text-red-500">*</span>
           </label>
-          <Input
+          <input
             id="end_time"
             type="time"
             {...register('end_time')}
-            error={errors.end_time?.message}
+            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+              errors.end_time ? 'border-red-500' : 'border-gray-300'
+            }`}
           />
+          {errors.end_time && (
+            <p className="mt-1 text-sm text-red-600">{errors.end_time.message}</p>
+          )}
         </div>
       </div>
 
@@ -278,13 +292,18 @@ export function ClassScheduleForm({
         <label htmlFor="online_link" className="block text-sm font-medium text-gray-700 mb-1">
           Link da Aula Online (opcional)
         </label>
-        <Input
+        <input
           id="online_link"
           type="url"
           placeholder="https://meet.google.com/..."
           {...register('online_link')}
-          error={errors.online_link?.message}
+          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+            errors.online_link ? 'border-red-500' : 'border-gray-300'
+          }`}
         />
+        {errors.online_link && (
+          <p className="mt-1 text-sm text-red-600">{errors.online_link.message}</p>
+        )}
         <p className="mt-1 text-xs text-gray-500">
           URL completa para aula online (Google Meet, Zoom, Teams, etc.)
         </p>
@@ -295,7 +314,7 @@ export function ClassScheduleForm({
         {onCancel && (
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             onClick={onCancel}
             disabled={isSubmitting}
           >

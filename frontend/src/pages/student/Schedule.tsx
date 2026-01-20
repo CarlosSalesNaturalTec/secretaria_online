@@ -5,9 +5,9 @@
  * Criado em: 2026-01-19
  */
 
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { Calendar, BookOpen, Info } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { AuthContext } from '@/contexts/AuthContext';
 import { WeekScheduleGrid } from '@/components/schedules/WeekScheduleGrid';
 import { useStudentFullSchedule } from '@/hooks/useStudentExtraDiscipline';
 import type { IClassSchedule } from '@/types/classSchedule.types';
@@ -15,8 +15,8 @@ import type { IClassSchedule } from '@/types/classSchedule.types';
 type TabType = 'all' | 'main' | 'extra';
 
 export default function SchedulePage() {
-  const { user } = useAuth();
-  const studentId = user?.id;
+  const authContext = useContext(AuthContext);
+  const studentId = authContext?.user?.id;
   const [activeTab, setActiveTab] = useState<TabType>('all');
 
   // Hook para buscar grade completa

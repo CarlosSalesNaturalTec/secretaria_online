@@ -87,7 +87,7 @@ function StatusBadge({ status }: { status: ExtraDisciplineStatus }) {
  * - Confirmação antes de remover
  */
 export function ExtraDisciplinesList({
-  studentId,
+  studentId: _studentId,
   extraDisciplines,
   editable = false,
   onAdd,
@@ -125,9 +125,9 @@ export function ExtraDisciplinesList({
    */
   const columns = [
     {
+      key: 'discipline',
       header: 'Disciplina',
-      accessor: 'discipline',
-      render: (row: IStudentExtraDiscipline) => (
+      accessor: (row: IStudentExtraDiscipline) => (
         <div>
           <p className="font-medium text-gray-900">
             {row.discipline?.name || 'Disciplina'}
@@ -139,9 +139,9 @@ export function ExtraDisciplinesList({
       ),
     },
     {
+      key: 'class',
       header: 'Turma',
-      accessor: 'class',
-      render: (row: IStudentExtraDiscipline) => (
+      accessor: (row: IStudentExtraDiscipline) => (
         row.class ? (
           <div className="text-sm">
             <p className="font-medium">{row.class.course?.name}</p>
@@ -155,41 +155,37 @@ export function ExtraDisciplinesList({
       ),
     },
     {
+      key: 'reason',
       header: 'Motivo',
-      accessor: 'reason',
-      render: (row: IStudentExtraDiscipline) => (
+      accessor: (row: IStudentExtraDiscipline) => (
         <span className="text-sm text-gray-700">
           {REASON_LABELS[row.reason]}
         </span>
       ),
     },
     {
+      key: 'status',
       header: 'Status',
-      accessor: 'status',
-      render: (row: IStudentExtraDiscipline) => (
+      accessor: (row: IStudentExtraDiscipline) => (
         <StatusBadge status={row.status} />
       ),
     },
     {
+      key: 'enrollment_date',
       header: 'Data Matrícula',
-      accessor: 'enrollment_date',
-      render: (row: IStudentExtraDiscipline) => (
+      accessor: (row: IStudentExtraDiscipline) => (
         <div className="flex items-center text-sm text-gray-700">
           <Calendar size={14} className="mr-1 text-gray-400" />
           {formatDate(row.enrollment_date)}
         </div>
       ),
     },
-  ];
-
-  // Adicionar coluna de ações se editable
-  if (editable) {
-    columns.push({
+    ...(editable ? [{
+      key: 'actions',
       header: 'Ações',
-      accessor: 'actions',
-      render: (row: IStudentExtraDiscipline) => (
+      accessor: (row: IStudentExtraDiscipline) => (
         <Button
-          variant="ghost"
+          variant="danger"
           size="sm"
           onClick={() => handleDelete(row)}
           disabled={deletingId === row.id}
@@ -199,8 +195,8 @@ export function ExtraDisciplinesList({
           Remover
         </Button>
       ),
-    } as any);
-  }
+    }] : []),
+  ];
 
   if (isLoading) {
     return (
