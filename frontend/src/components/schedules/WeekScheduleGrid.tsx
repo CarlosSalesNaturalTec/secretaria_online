@@ -126,8 +126,9 @@ export function WeekScheduleGrid({
     }
 
     schedules.forEach((schedule) => {
-      // Converter para número caso venha como string da API
-      const day = Number(schedule.day_of_week) as DayOfWeek;
+      // Suporta tanto snake_case (day_of_week) quanto camelCase (dayOfWeek)
+      const dayValue = schedule.day_of_week ?? (schedule as any).dayOfWeek;
+      const day = Number(dayValue) as DayOfWeek;
       if (day >= 1 && day <= 7) {
         organized[day].push(schedule);
       } else if (import.meta.env.DEV) {
@@ -135,10 +136,12 @@ export function WeekScheduleGrid({
       }
     });
 
-    // Ordenar por horário de início
+    // Ordenar por horário de início (suporta snake_case e camelCase)
     Object.keys(organized).forEach((day) => {
       organized[day as unknown as DayOfWeek].sort((a, b) => {
-        return a.start_time.localeCompare(b.start_time);
+        const aTime = a.start_time ?? (a as any).startTime ?? '';
+        const bTime = b.start_time ?? (b as any).startTime ?? '';
+        return aTime.localeCompare(bTime);
       });
     });
 
@@ -146,11 +149,26 @@ export function WeekScheduleGrid({
   }, [schedules]);
 
   /**
+   * Helper para acessar propriedades com suporte a snake_case e camelCase
+   */
+  const getScheduleValue = (schedule: IClassSchedule, snakeKey: keyof IClassSchedule, camelKey: string) => {
+    return schedule[snakeKey] ?? (schedule as any)[camelKey];
+  };
+
+  /**
    * Renderiza um card de horário
    */
   const renderScheduleCard = (schedule: IClassSchedule) => {
-    const colorClass = getDisciplineColor(schedule.discipline_id);
-    const isExtra = highlightExtra && schedule.is_extra;
+    // Suporta tanto snake_case quanto camelCase
+    const disciplineId = getScheduleValue(schedule, 'discipline_id', 'disciplineId');
+    const startTime = getScheduleValue(schedule, 'start_time', 'startTime') || '';
+    const endTime = getScheduleValue(schedule, 'end_time', 'endTime') || '';
+    const onlineLink = getScheduleValue(schedule, 'online_link', 'onlineLink');
+    const isExtraValue = getScheduleValue(schedule, 'is_extra', 'isExtra');
+    const extraReason = getScheduleValue(schedule, 'extra_reason', 'extraReason');
+
+    const colorClass = getDisciplineColor(disciplineId);
+    const isExtra = highlightExtra && isExtraValue;
 
     return (
       <div
@@ -163,7 +181,7 @@ export function WeekScheduleGrid({
         title={`
           ${schedule.discipline?.name || 'Disciplina'}
           ${schedule.teacher?.nome ? `\nProfessor: ${schedule.teacher.nome}` : ''}
-          ${schedule.is_extra ? `\n⚠️ Disciplina Extra (${schedule.extra_reason})` : ''}
+          ${isExtraValue ? `\n⚠️ Disciplina Extra (${extraReason})` : ''}
         `}
       >
         {/* Cabeçalho */}
@@ -173,14 +191,14 @@ export function WeekScheduleGrid({
               {schedule.discipline?.name || 'Disciplina'}
             </p>
             <p className="text-xs opacity-75">
-              {formatTime(schedule.start_time)} - {formatTime(schedule.end_time)}
+              {formatTime(startTime)} - {formatTime(endTime)}
             </p>
           </div>
 
           {/* Ícone de link online */}
-          {showOnlineLinks && schedule.online_link && (
+          {showOnlineLinks && onlineLink && (
             <a
-              href={schedule.online_link}
+              href={onlineLink}
               target="_blank"
               rel="noopener noreferrer"
               className="ml-2 text-blue-600 hover:text-blue-800"
@@ -202,7 +220,7 @@ export function WeekScheduleGrid({
         {/* Badge de disciplina extra */}
         {isExtra && (
           <div className="flex items-center text-xs text-orange-700 bg-orange-50 px-2 py-1 rounded mb-2">
-            <span className="font-medium">Extra: {schedule.extra_reason}</span>
+            <span className="font-medium">Extra: {extraReason}</span>
           </div>
         )}
 
