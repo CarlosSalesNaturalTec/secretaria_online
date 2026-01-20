@@ -30,7 +30,6 @@ const studentExtraDisciplineFormSchema = z.object({
 
   class_id: z.number()
     .int()
-    .positive()
     .nullable()
     .optional(),
 
