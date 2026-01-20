@@ -5,88 +5,27 @@
  * Criado em: 2026-01-19
  */
 
-import { useState, useContext } from 'react';
-import { Calendar, BookOpen, Info } from 'lucide-react';
+import { useContext } from 'react';
+import { Calendar, BookOpen } from 'lucide-react';
 import { AuthContext } from '@/contexts/AuthContext';
 import { WeekScheduleGrid } from '@/components/schedules/WeekScheduleGrid';
+import { ExtraDisciplinesList } from '@/components/students/ExtraDisciplinesList';
 import { useStudentFullSchedule } from '@/hooks/useStudentExtraDiscipline';
-import type { IClassSchedule } from '@/types/classSchedule.types';
-
-type TabType = 'all' | 'main' | 'extra';
 
 export default function SchedulePage() {
   const authContext = useContext(AuthContext);
   // FIX: Usar o ID do estudante (student_id), não o ID do usuário (id)
   const studentId = authContext?.user?.student_id || authContext?.user?.studentId || 0;
-  const [activeTab, setActiveTab] = useState<TabType>('all');
 
   // Hook para buscar grade completa
   const { data: fullSchedule, isLoading, error } = useStudentFullSchedule(studentId || 0);
 
-  // Organizar horários por aba
-  const getSchedulesForTab = (): IClassSchedule[] => {
-    if (!fullSchedule) return [];
+  const schedulesArray = fullSchedule ? [
+    ...(fullSchedule.mainClassSchedules || []),
+    ...(fullSchedule.extraDisciplineSchedules || []),
+  ] : [];
 
-    switch (activeTab) {
-      case 'all':
-        return [
-          ...(fullSchedule.mainClassSchedules || []),
-          ...(fullSchedule.extraDisciplineSchedules || []),
-        ];
-      case 'main':
-        return fullSchedule.mainClassSchedules || [];
-      case 'extra':
-        return fullSchedule.extraDisciplineSchedules || [];
-      default:
-        return [];
-    }
-  };
-
-  const schedulesArray = getSchedulesForTab();
-
-  // Renderizar tabs
-  const renderTabs = () => (
-    <div className="flex border-b border-gray-200 mb-6">
-      <button
-        onClick={() => setActiveTab('all')}
-        className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${
-          activeTab === 'all'
-            ? 'border-blue-600 text-blue-600'
-            : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
-        }`}
-      >
-        <Calendar size={16} className="inline mr-2" />
-        Grade Completa
-      </button>
-      <button
-        onClick={() => setActiveTab('main')}
-        className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${
-          activeTab === 'main'
-            ? 'border-blue-600 text-blue-600'
-            : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
-        }`}
-      >
-        <BookOpen size={16} className="inline mr-2" />
-        Turma Principal
-      </button>
-      <button
-        onClick={() => setActiveTab('extra')}
-        className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${
-          activeTab === 'extra'
-            ? 'border-blue-600 text-blue-600'
-            : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
-        }`}
-      >
-        <BookOpen size={16} className="inline mr-2" />
-        Disciplinas Extras
-        {fullSchedule?.extraDisciplineSchedules && fullSchedule.extraDisciplineSchedules.length > 0 && (
-          <span className="ml-2 bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full text-xs font-semibold">
-            {fullSchedule.extraDisciplineSchedules.length}
-          </span>
-        )}
-      </button>
-    </div>
-  );
+  const hasExtraDisciplines = fullSchedule?.extraDisciplines && fullSchedule.extraDisciplines.length > 0;
 
   if (isLoading) {
     return (
@@ -120,25 +59,8 @@ export default function SchedulePage() {
         </p>
       </div>
 
-      {/* Info Alert (se houver disciplinas extras) */}
-      {fullSchedule?.extraDisciplineSchedules && fullSchedule.extraDisciplineSchedules.length > 0 && (
-        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6 flex items-start">
-          <Info size={20} className="text-orange-600 mr-3 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-orange-800">
-            <p className="font-semibold">Você possui disciplinas extras</p>
-            <p className="mt-1">
-              As disciplinas extras aparecerão destacadas na grade completa.
-              Use as abas acima para filtrar a visualização.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Tabs */}
-      {renderTabs()}
-
       {/* Grade de Horários */}
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-white rounded-lg shadow p-6 mb-8">
         {schedulesArray.length > 0 ? (
           <>
             {/* Desktop View */}
@@ -147,7 +69,7 @@ export default function SchedulePage() {
                 schedules={schedulesArray}
                 editable={false}
                 showOnlineLinks={true}
-                highlightExtra={activeTab === 'all'}
+                highlightExtra={true}
                 variant="desktop"
               />
             </div>
@@ -157,7 +79,7 @@ export default function SchedulePage() {
                 schedules={schedulesArray}
                 editable={false}
                 showOnlineLinks={true}
-                highlightExtra={activeTab === 'all'}
+                highlightExtra={true}
                 variant="mobile"
               />
             </div>
@@ -167,16 +89,32 @@ export default function SchedulePage() {
             <Calendar size={48} className="mx-auto mb-4 text-gray-400" />
             <p className="text-lg font-medium">Nenhum horário encontrado</p>
             <p className="text-sm mt-2">
-              {activeTab === 'main' && 'Você não possui horários na turma principal'}
-              {activeTab === 'extra' && 'Você não possui disciplinas extras'}
-              {activeTab === 'all' && 'Nenhum horário cadastrado'}
+              Nenhum horário cadastrado
             </p>
           </div>
         )}
       </div>
 
-      {/* Legenda (se houver disciplinas extras) */}
-      {activeTab === 'all' && fullSchedule?.extraDisciplineSchedules && fullSchedule.extraDisciplineSchedules.length > 0 && (
+      {/* Lista de Disciplinas Extras (Detalhes) */}
+      {hasExtraDisciplines && (
+        <div className="mt-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+            <BookOpen size={24} className="mr-2 text-orange-600" />
+            Minhas Disciplinas Extras
+          </h2>
+          <div className="bg-white rounded-lg shadow p-6">
+            <ExtraDisciplinesList
+              studentId={studentId}
+              extraDisciplines={fullSchedule.extraDisciplines}
+              editable={false}
+              isLoading={isLoading}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Legenda (se houver disciplinas extras e horários) */}
+      {hasExtraDisciplines && schedulesArray.length > 0 && (
         <div className="mt-6 bg-gray-50 rounded-lg p-4">
           <h3 className="font-semibold text-gray-900 mb-2">Legenda:</h3>
           <div className="flex items-center space-x-6 text-sm">

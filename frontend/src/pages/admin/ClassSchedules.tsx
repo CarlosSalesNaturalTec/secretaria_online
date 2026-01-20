@@ -21,7 +21,7 @@ import {
 } from '@/hooks/useClassSchedule';
 import type { IClassSchedule, IClassScheduleFormData } from '@/types/classSchedule.types';
 import ClassService from '@/services/class.service';
-import DisciplineService from '@/services/discipline.service';
+import CourseService from '@/services/course.service';
 import TeacherService from '@/services/teacher.service';
 import type { IClass } from '@/types/class.types';
 import type { IDiscipline } from '@/types/course.types';
@@ -59,13 +59,25 @@ export default function ClassSchedulesPage() {
 
   const loadInitialData = async () => {
     try {
-      const [classData, disciplinesResponse, teachersData] = await Promise.all([
-        ClassService.getById(numericClassId),
-        DisciplineService.getAll(),
+      // Carregar informações da turma primeiro para obter o courseId
+      const classData = await ClassService.getById(numericClassId);
+      setClassInfo(classData);
+
+      // Carregar disciplinas do curso e professores em paralelo
+      const [courseDisciplines, teachersData] = await Promise.all([
+        CourseService.getCourseDisciplines(classData.courseId),
         TeacherService.getAll(),
       ]);
-      setClassInfo(classData);
-      setDisciplines(disciplinesResponse.data);
+
+      // Mapear disciplinas do curso para o formato IDiscipline
+      const mappedDisciplines: IDiscipline[] = courseDisciplines.map((d: any) => ({
+        id: d.id,
+        name: d.name,
+        code: d.code,
+        workloadHours: d.workload_hours || d.workloadHours,
+      }));
+
+      setDisciplines(mappedDisciplines);
       setTeachers(teachersData);
     } catch (err) {
       console.error('[ClassSchedulesPage] Erro ao carregar dados iniciais:', err);
