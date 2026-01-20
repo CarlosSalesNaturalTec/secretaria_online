@@ -13,6 +13,7 @@ const {
   ClassStudent,
   ClassTeacher,
   ClassSchedule,
+  Teacher,
   sequelize
 } = require('../models');
 const { Op } = require('sequelize');

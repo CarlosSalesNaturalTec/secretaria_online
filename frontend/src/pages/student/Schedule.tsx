@@ -16,7 +16,8 @@ type TabType = 'all' | 'main' | 'extra';
 
 export default function SchedulePage() {
   const authContext = useContext(AuthContext);
-  const studentId = authContext?.user?.id;
+  // FIX: Usar o ID do estudante (student_id), não o ID do usuário (id)
+  const studentId = authContext?.user?.student_id || authContext?.user?.studentId || 0;
   const [activeTab, setActiveTab] = useState<TabType>('all');
 
   // Hook para buscar grade completa
