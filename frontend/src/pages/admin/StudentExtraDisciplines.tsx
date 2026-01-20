@@ -56,7 +56,7 @@ export default function StudentExtraDisciplinesPage() {
     try {
       const [studentData, disciplinesResponse, classesData] = await Promise.all([
         StudentService.getById(numericStudentId),
-        DisciplineService.getAll(),
+        DisciplineService.getAll({ limit: 1000 }), // Carrega todas as disciplinas sem paginação
         ClassService.getAll(),
       ]);
       setStudentInfo(studentData);
