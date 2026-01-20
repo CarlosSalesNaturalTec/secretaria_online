@@ -113,22 +113,6 @@ export default function SchedulePage() {
         </div>
       )}
 
-      {/* Legenda (se houver disciplinas extras e horários) */}
-      {hasExtraDisciplines && schedulesArray.length > 0 && (
-        <div className="mt-6 bg-gray-50 rounded-lg p-4">
-          <h3 className="font-semibold text-gray-900 mb-2">Legenda:</h3>
-          <div className="flex items-center space-x-6 text-sm">
-            <div className="flex items-center">
-              <div className="w-4 h-4 border-2 border-gray-300 rounded mr-2"></div>
-              <span className="text-gray-700">Turma Principal</span>
-            </div>
-            <div className="flex items-center">
-              <div className="w-4 h-4 border-2 border-orange-500 rounded mr-2 ring-2 ring-orange-500 ring-offset-2"></div>
-              <span className="text-gray-700">Disciplina Extra</span>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
