@@ -6,7 +6,7 @@
  */
 
 import { useState, useMemo } from 'react';
-import { Plus, Trash2, Calendar } from 'lucide-react';
+import { Plus, Trash2, Calendar, Clock, Link as LinkIcon } from 'lucide-react';
 import { formatDate } from '@/utils/formatters';
 import {
   STATUS_LABELS,
@@ -79,7 +79,8 @@ function StatusBadge({ status }: { status: ExtraDisciplineStatus }) {
  * Lista de disciplinas extras de um aluno em formato de tabela.
  *
  * Features:
- * - Tabela com colunas: Disciplina, Turma, Motivo, Status, Data Matrícula, Ações
+ * - Tabela com colunas: Disciplina, Horário, Turma, Motivo, Status, Data Matrícula, Ações
+ * - Exibição de horários individuais (dia, hora início/fim, link online)
  * - Badge colorido para status
  * - Filtro por status
  * - Botão "Adicionar" (se editable=true)
@@ -136,6 +137,38 @@ export function ExtraDisciplinesList({
             <p className="text-xs text-gray-500">{row.discipline.code}</p>
           )}
         </div>
+      ),
+    },
+    {
+      key: 'schedule',
+      header: 'Horário',
+      accessor: (row: IStudentExtraDiscipline) => (
+        row.has_schedule ? (
+          <div className="text-sm">
+            <div className="flex items-center text-gray-900">
+              <Calendar size={14} className="mr-1 text-blue-600" />
+              <span className="font-medium">{row.day_name}</span>
+            </div>
+            <div className="flex items-center text-gray-600 mt-1">
+              <Clock size={14} className="mr-1" />
+              <span>{row.formatted_time}</span>
+            </div>
+            {row.has_online_link && (
+              <a
+                href={row.online_link || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center text-blue-600 hover:text-blue-700 mt-1"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <LinkIcon size={14} className="mr-1" />
+                <span className="text-xs underline">Aula online</span>
+              </a>
+            )}
+          </div>
+        ) : (
+          <span className="text-gray-400 text-sm italic">Sem horário definido</span>
+        )
       ),
     },
     {

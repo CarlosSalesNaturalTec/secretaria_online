@@ -84,7 +84,7 @@ class StudentExtraDisciplineService {
    * @returns {Promise<StudentExtraDiscipline[]>} Lista de disciplinas extras
    */
   async getByStudent(studentId, options = {}) {
-    const { status, reason, includeSchedules = false } = options;
+    const { status, reason } = options;
 
     // Verificar se o aluno existe
     const student = await Student.findByPk(studentId);
@@ -120,31 +120,6 @@ class StudentExtraDisciplineService {
       include,
       order: [['enrollment_date', 'DESC']]
     });
-
-    // Se solicitar horários, buscar para cada disciplina extra
-    if (includeSchedules) {
-      return Promise.all(
-        extraDisciplines.map(async (ed) => {
-          const json = this.formatExtraDiscipline(ed);
-
-          // Buscar horários se tiver turma associada
-          if (ed.class_id) {
-            const schedules = await ClassSchedule.findAll({
-              where: {
-                class_id: ed.class_id,
-                discipline_id: ed.discipline_id
-              },
-              order: [['day_of_week', 'ASC'], ['start_time', 'ASC']]
-            });
-            json.schedules = schedules;
-          } else {
-            json.schedules = [];
-          }
-
-          return json;
-        })
-      );
-    }
 
     return extraDisciplines.map(ed => this.formatExtraDiscipline(ed));
   }
@@ -290,7 +265,7 @@ class StudentExtraDisciplineService {
       });
     }
 
-    // 3. Buscar disciplinas extras ativas
+    // 3. Buscar disciplinas extras ativas com horários
     const extraDisciplines = await StudentExtraDiscipline.findAll({
       where: {
         student_id: studentId,
@@ -311,44 +286,23 @@ class StudentExtraDisciplineService {
       ]
     });
 
-    // 4. Buscar horários das disciplinas extras
-    let extraDisciplineSchedules = [];
-    for (const extra of extraDisciplines) {
-      if (extra.class_id) {
-        const schedules = await ClassSchedule.findAll({
-          where: {
-            class_id: extra.class_id,
-            discipline_id: extra.discipline_id
-          },
-          include: [
-            {
-              model: Class,
-              as: 'class',
-              attributes: ['id', 'course_id', 'semester', 'year']
-            },
-            {
-              model: Discipline,
-              as: 'discipline',
-              attributes: ['id', 'name', 'code']
-            },
-            {
-              model: Teacher,
-              as: 'teacher',
-              attributes: ['id', 'nome', 'email']
-            }
-          ],
-          order: [['day_of_week', 'ASC'], ['start_time', 'ASC']]
-        });
-
-        // Marcar como extra
-        schedules.forEach(s => {
-          s.dataValues.is_extra = true;
-          s.dataValues.extra_reason = extra.reason;
-        });
-
-        extraDisciplineSchedules = [...extraDisciplineSchedules, ...schedules];
-      }
-    }
+    // 4. Converter disciplinas extras em formato de schedule
+    const extraDisciplineSchedules = extraDisciplines
+      .filter(extra => extra.day_of_week && extra.start_time && extra.end_time) // Apenas com horário definido
+      .map(extra => ({
+        id: `extra_${extra.id}`,
+        discipline_id: extra.discipline_id,
+        day_of_week: extra.day_of_week,
+        start_time: extra.start_time,
+        end_time: extra.end_time,
+        online_link: extra.online_link,
+        is_extra: true,
+        extra_reason: extra.reason,
+        extra_id: extra.id,
+        discipline: extra.discipline,
+        class: extra.class,
+        teacher: null
+      }));
 
     // 5. Mesclar e organizar por dia da semana
     const allSchedules = [...mainClassSchedules, ...extraDisciplineSchedules];
@@ -457,6 +411,33 @@ class StudentExtraDisciplineService {
     json.reason_label = StudentExtraDiscipline.REASON_LABELS[json.reason] || json.reason;
     json.status_label = StudentExtraDiscipline.STATUS_LABELS[json.status] || json.status;
     json.is_active = json.status === 'active' && json.deleted_at === null;
+
+    // Adicionar informações de horário formatadas
+    if (json.start_time && json.end_time) {
+      const startTime = json.start_time.substring(0, 5);
+      const endTime = json.end_time.substring(0, 5);
+      json.formatted_time = `${startTime} - ${endTime}`;
+    } else {
+      json.formatted_time = '';
+    }
+
+    if (json.day_of_week) {
+      const DAY_NAMES = {
+        1: 'Segunda-feira',
+        2: 'Terça-feira',
+        3: 'Quarta-feira',
+        4: 'Quinta-feira',
+        5: 'Sexta-feira',
+        6: 'Sábado',
+        7: 'Domingo'
+      };
+      json.day_name = DAY_NAMES[json.day_of_week] || '';
+    } else {
+      json.day_name = '';
+    }
+
+    json.has_schedule = !!(json.day_of_week && json.start_time && json.end_time);
+    json.has_online_link = !!(json.online_link && json.online_link.trim() !== '');
 
     // Normalizar nome do aluno
     if (json.student && json.student.nome) {

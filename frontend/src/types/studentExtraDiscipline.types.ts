@@ -8,7 +8,7 @@
 import type { IClass } from './class.types';
 import type { IDiscipline } from './course.types';
 import type { IStudent } from './student.types';
-import type { IClassSchedule, WeekSchedule } from './classSchedule.types';
+import type { IClassSchedule, WeekSchedule, DayOfWeek } from './classSchedule.types';
 
 /**
  * Motivo da disciplina extra
@@ -95,6 +95,26 @@ export interface IStudentExtraDiscipline {
   status: ExtraDisciplineStatus;
 
   /**
+   * Dia da semana (1-7: 1=Segunda, 7=Domingo)
+   */
+  day_of_week?: number | null;
+
+  /**
+   * Horário de início (formato HH:MM:SS)
+   */
+  start_time?: string | null;
+
+  /**
+   * Horário de término (formato HH:MM:SS)
+   */
+  end_time?: string | null;
+
+  /**
+   * Link da aula online (opcional)
+   */
+  online_link?: string | null;
+
+  /**
    * Data de criação
    */
   created_at: string;
@@ -135,9 +155,24 @@ export interface IStudentExtraDiscipline {
   is_active?: boolean;
 
   /**
-   * Horários da disciplina extra (quando incluído)
+   * Horário formatado (campo calculado pelo backend)
    */
-  schedules?: IClassSchedule[];
+  formatted_time?: string;
+
+  /**
+   * Nome do dia da semana (campo calculado pelo backend)
+   */
+  day_name?: string;
+
+  /**
+   * Indica se possui horário definido (campo calculado pelo backend)
+   */
+  has_schedule?: boolean;
+
+  /**
+   * Indica se possui link online (campo calculado pelo backend)
+   */
+  has_online_link?: boolean;
 }
 
 /**
@@ -168,6 +203,26 @@ export interface IStudentExtraDisciplineFormData {
    * Observações (opcional)
    */
   notes?: string;
+
+  /**
+   * Dia da semana (1-7: 1=Segunda, 7=Domingo)
+   */
+  day_of_week?: number | null;
+
+  /**
+   * Horário de início (formato HH:MM)
+   */
+  start_time?: string | null;
+
+  /**
+   * Horário de término (formato HH:MM)
+   */
+  end_time?: string | null;
+
+  /**
+   * Link da aula online (opcional)
+   */
+  online_link?: string | null;
 }
 
 /**
@@ -327,4 +382,17 @@ export const STATUS_OPTIONS: Array<{ value: ExtraDisciplineStatus; label: string
   { value: 'active', label: 'Ativa' },
   { value: 'completed', label: 'Concluída' },
   { value: 'cancelled', label: 'Cancelada' }
+];
+
+/**
+ * Opções para seleção de dia da semana
+ */
+export const DAY_OF_WEEK_OPTIONS: Array<{ value: DayOfWeek; label: string }> = [
+  { value: 1, label: 'Segunda-feira' },
+  { value: 2, label: 'Terça-feira' },
+  { value: 3, label: 'Quarta-feira' },
+  { value: 4, label: 'Quinta-feira' },
+  { value: 5, label: 'Sexta-feira' },
+  { value: 6, label: 'Sábado' },
+  { value: 7, label: 'Domingo' }
 ];

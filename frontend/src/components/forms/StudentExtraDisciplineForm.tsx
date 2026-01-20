@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import {
   REASON_LABELS,
+  DAY_OF_WEEK_OPTIONS,
   type ExtraDisciplineReason,
   type IStudentExtraDiscipline,
   type IStudentExtraDisciplineFormData,
@@ -43,7 +44,63 @@ const studentExtraDisciplineFormSchema = z.object({
     .max(2000, 'Observações devem ter no máximo 2000 caracteres')
     .optional()
     .or(z.literal('')),
-});
+
+  day_of_week: z.number()
+    .int()
+    .min(1, 'Dia inválido')
+    .max(7, 'Dia inválido')
+    .nullable()
+    .optional(),
+
+  start_time: z.string()
+    .regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Formato de horário inválido (HH:MM)')
+    .nullable()
+    .optional()
+    .or(z.literal('')),
+
+  end_time: z.string()
+    .regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Formato de horário inválido (HH:MM)')
+    .nullable()
+    .optional()
+    .or(z.literal('')),
+
+  online_link: z.string()
+    .url('URL inválida')
+    .nullable()
+    .optional()
+    .or(z.literal('')),
+}).refine(
+  (data) => {
+    // Se tiver algum campo de horário preenchido, todos devem estar
+    const hasDay = !!data.day_of_week;
+    const hasStart = !!data.start_time && data.start_time !== '';
+    const hasEnd = !!data.end_time && data.end_time !== '';
+
+    // Se algum está preenchido, todos devem estar
+    if (hasDay || hasStart || hasEnd) {
+      return hasDay && hasStart && hasEnd;
+    }
+
+    // Se nenhum está preenchido, tudo bem
+    return true;
+  },
+  {
+    message: 'Para definir horário, preencha dia da semana, horário de início e horário de término',
+    path: ['day_of_week']
+  }
+).refine(
+  (data) => {
+    // Se tiver horário de início e fim, validar que fim > início
+    if (data.start_time && data.end_time && data.start_time !== '' && data.end_time !== '') {
+      return data.end_time > data.start_time;
+    }
+    return true;
+  },
+  {
+    message: 'Horário de término deve ser maior que horário de início',
+    path: ['end_time']
+  }
+);
 
 type StudentExtraDisciplineFormData = z.infer<typeof studentExtraDisciplineFormSchema>;
 
@@ -128,6 +185,10 @@ export function StudentExtraDisciplineForm({
       enrollment_date: editingExtraDiscipline?.enrollment_date || new Date().toISOString().split('T')[0],
       reason: editingExtraDiscipline?.reason || 'dependency',
       notes: editingExtraDiscipline?.notes || '',
+      day_of_week: editingExtraDiscipline?.day_of_week || null,
+      start_time: editingExtraDiscipline?.start_time?.substring(0, 5) || '',
+      end_time: editingExtraDiscipline?.end_time?.substring(0, 5) || '',
+      online_link: editingExtraDiscipline?.online_link || '',
     },
   });
 
@@ -140,6 +201,10 @@ export function StudentExtraDisciplineForm({
         enrollment_date: editingExtraDiscipline.enrollment_date,
         reason: editingExtraDiscipline.reason,
         notes: editingExtraDiscipline.notes || '',
+        day_of_week: editingExtraDiscipline.day_of_week || null,
+        start_time: editingExtraDiscipline.start_time?.substring(0, 5) || '',
+        end_time: editingExtraDiscipline.end_time?.substring(0, 5) || '',
+        online_link: editingExtraDiscipline.online_link || '',
       });
     }
   }, [editingExtraDiscipline, reset]);
@@ -155,6 +220,10 @@ export function StudentExtraDisciplineForm({
         enrollment_date: data.enrollment_date,
         reason: data.reason as ExtraDisciplineReason,
         notes: data.notes || undefined,
+        day_of_week: data.day_of_week || undefined,
+        start_time: data.start_time && data.start_time !== '' ? data.start_time : undefined,
+        end_time: data.end_time && data.end_time !== '' ? data.end_time : undefined,
+        online_link: data.online_link && data.online_link !== '' ? data.online_link : undefined,
       };
 
       await onSubmit(formData);
@@ -268,6 +337,85 @@ export function StudentExtraDisciplineForm({
         {errors.notes && (
           <p className="mt-1 text-sm text-red-600">{errors.notes.message}</p>
         )}
+      </div>
+
+      {/* Seção de Horário */}
+      <div className="border-t pt-4">
+        <h3 className="text-sm font-semibold text-gray-900 mb-3">
+          Horário da Aula (opcional)
+        </h3>
+        <p className="text-xs text-gray-500 mb-4">
+          Preencha todos os campos abaixo para definir o horário da disciplina extra
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Dia da Semana */}
+          <div>
+            <label htmlFor="day_of_week" className="block text-sm font-medium text-gray-700 mb-1">
+              Dia da Semana
+            </label>
+            <select
+              id="day_of_week"
+              {...register('day_of_week', { setValueAs: (v) => v === '' ? null : Number(v) })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Selecione</option>
+              {DAY_OF_WEEK_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            {errors.day_of_week && (
+              <p className="mt-1 text-sm text-red-600">{errors.day_of_week.message}</p>
+            )}
+          </div>
+
+          {/* Horário de Início */}
+          <div>
+            <label htmlFor="start_time" className="block text-sm font-medium text-gray-700 mb-1">
+              Horário de Início
+            </label>
+            <Input
+              id="start_time"
+              type="time"
+              {...register('start_time')}
+              error={errors.start_time?.message}
+              placeholder="08:00"
+            />
+          </div>
+
+          {/* Horário de Término */}
+          <div>
+            <label htmlFor="end_time" className="block text-sm font-medium text-gray-700 mb-1">
+              Horário de Término
+            </label>
+            <Input
+              id="end_time"
+              type="time"
+              {...register('end_time')}
+              error={errors.end_time?.message}
+              placeholder="10:00"
+            />
+          </div>
+        </div>
+
+        {/* Link Online */}
+        <div className="mt-4">
+          <label htmlFor="online_link" className="block text-sm font-medium text-gray-700 mb-1">
+            Link da Aula Online (opcional)
+          </label>
+          <Input
+            id="online_link"
+            type="url"
+            {...register('online_link')}
+            error={errors.online_link?.message}
+            placeholder="https://meet.google.com/..."
+          />
+          <p className="mt-1 text-xs text-gray-500">
+            Link para aulas remotas (Google Meet, Zoom, Teams, etc.)
+          </p>
+        </div>
       </div>
 
       {/* Botões */}

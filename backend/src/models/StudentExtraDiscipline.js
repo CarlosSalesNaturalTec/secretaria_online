@@ -110,6 +110,59 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     /**
+     * Método de instância: retorna horário formatado
+     *
+     * @returns {string} Formato: "08:00 - 10:00" ou string vazia se não houver horário
+     */
+    getFormattedTime() {
+      if (!this.start_time || !this.end_time) {
+        return '';
+      }
+      const startTime = this.start_time.substring(0, 5);
+      const endTime = this.end_time.substring(0, 5);
+      return `${startTime} - ${endTime}`;
+    }
+
+    /**
+     * Método de instância: retorna nome do dia da semana
+     *
+     * @returns {string} Nome do dia (ex: "Segunda-feira") ou string vazia
+     */
+    getDayName() {
+      if (!this.day_of_week) {
+        return '';
+      }
+      const DAY_NAMES = {
+        1: 'Segunda-feira',
+        2: 'Terça-feira',
+        3: 'Quarta-feira',
+        4: 'Quinta-feira',
+        5: 'Sexta-feira',
+        6: 'Sábado',
+        7: 'Domingo'
+      };
+      return DAY_NAMES[this.day_of_week] || '';
+    }
+
+    /**
+     * Método de instância: verifica se possui horário definido
+     *
+     * @returns {boolean} True se possui dia, hora início e fim
+     */
+    hasSchedule() {
+      return !!(this.day_of_week && this.start_time && this.end_time);
+    }
+
+    /**
+     * Método de instância: verifica se possui link de aula online
+     *
+     * @returns {boolean} True se possui link online
+     */
+    hasOnlineLink() {
+      return !!(this.online_link && this.online_link.trim() !== '');
+    }
+
+    /**
      * Método estático: buscar disciplinas extras por aluno
      *
      * @param {number} studentId - ID do aluno
@@ -302,6 +355,41 @@ module.exports = (sequelize, DataTypes) => {
         },
         comment: 'Status da disciplina extra: active=Ativa, completed=Concluída, cancelled=Cancelada'
       },
+      day_of_week: {
+        type: DataTypes.TINYINT,
+        allowNull: true,
+        validate: {
+          isInt: { msg: 'O dia da semana deve ser um número inteiro' },
+          min: { args: [1], msg: 'O dia da semana deve ser entre 1 (Segunda) e 7 (Domingo)' },
+          max: { args: [7], msg: 'O dia da semana deve ser entre 1 (Segunda) e 7 (Domingo)' }
+        },
+        comment: 'Dia da semana: 1=Segunda, 2=Terça, 3=Quarta, 4=Quinta, 5=Sexta, 6=Sábado, 7=Domingo'
+      },
+      start_time: {
+        type: DataTypes.TIME,
+        allowNull: true,
+        comment: 'Horário de início da aula (formato HH:MM:SS)'
+      },
+      end_time: {
+        type: DataTypes.TIME,
+        allowNull: true,
+        validate: {
+          isAfterStartTime(value) {
+            if (this.start_time && value && value <= this.start_time) {
+              throw new Error('O horário de término deve ser maior que o horário de início');
+            }
+          }
+        },
+        comment: 'Horário de término da aula (formato HH:MM:SS)'
+      },
+      online_link: {
+        type: DataTypes.STRING(500),
+        allowNull: true,
+        validate: {
+          isUrl: { msg: 'O link online deve ser uma URL válida' }
+        },
+        comment: 'URL da aula online (Google Meet, Zoom, Teams, etc) - campo opcional'
+      },
       created_at: {
         type: DataTypes.DATE,
         allowNull: false,
@@ -415,9 +503,15 @@ module.exports = (sequelize, DataTypes) => {
           if (extraDiscipline.class_id && extraDiscipline.class_id !== null) {
             extraDiscipline.class_id = parseInt(extraDiscipline.class_id, 10);
           }
-          // Limpar notes vazia
+          if (extraDiscipline.day_of_week && extraDiscipline.day_of_week !== null) {
+            extraDiscipline.day_of_week = parseInt(extraDiscipline.day_of_week, 10);
+          }
+          // Limpar campos vazios
           if (extraDiscipline.notes === '') {
             extraDiscipline.notes = null;
+          }
+          if (extraDiscipline.online_link === '') {
+            extraDiscipline.online_link = null;
           }
         },
 
