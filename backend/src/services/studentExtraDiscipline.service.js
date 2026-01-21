@@ -449,11 +449,12 @@ class StudentExtraDisciplineService {
 
   /**
    * Formata um horário para resposta.
-   * @param {ClassSchedule} schedule - Horário a formatar
+   * @param {ClassSchedule|Object} schedule - Horário a formatar (instância Sequelize ou objeto simples)
    * @returns {Object} Horário formatado
    */
   formatSchedule(schedule) {
-    const json = schedule.toJSON();
+    // Verificar se é instância Sequelize ou objeto simples
+    const json = typeof schedule.toJSON === 'function' ? schedule.toJSON() : { ...schedule };
 
     // Adicionar campos calculados
     const startTime = json.start_time ? json.start_time.substring(0, 5) : '';

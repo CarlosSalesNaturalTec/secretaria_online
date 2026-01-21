@@ -95,24 +95,44 @@ export interface IStudentExtraDiscipline {
   status: ExtraDisciplineStatus;
 
   /**
-   * Dia da semana (1-7: 1=Segunda, 7=Domingo)
+   * Dia da semana (1-7: 1=Segunda, 7=Domingo) - snake_case do banco
    */
   day_of_week?: number | null;
 
   /**
-   * Horário de início (formato HH:MM:SS)
+   * Dia da semana (1-7: 1=Segunda, 7=Domingo) - camelCase da API
+   */
+  dayOfWeek?: number | null;
+
+  /**
+   * Horário de início (formato HH:MM:SS) - snake_case do banco
    */
   start_time?: string | null;
 
   /**
-   * Horário de término (formato HH:MM:SS)
+   * Horário de início (formato HH:MM:SS) - camelCase da API
+   */
+  startTime?: string | null;
+
+  /**
+   * Horário de término (formato HH:MM:SS) - snake_case do banco
    */
   end_time?: string | null;
 
   /**
-   * Link da aula online (opcional)
+   * Horário de término (formato HH:MM:SS) - camelCase da API
+   */
+  endTime?: string | null;
+
+  /**
+   * Link da aula online (opcional) - snake_case do banco
    */
   online_link?: string | null;
+
+  /**
+   * Link da aula online (opcional) - camelCase da API
+   */
+  onlineLink?: string | null;
 
   /**
    * Data de criação
@@ -155,24 +175,44 @@ export interface IStudentExtraDiscipline {
   is_active?: boolean;
 
   /**
-   * Horário formatado (campo calculado pelo backend)
+   * Horário formatado (campo calculado pelo backend) - snake_case
    */
   formatted_time?: string;
 
   /**
-   * Nome do dia da semana (campo calculado pelo backend)
+   * Horário formatado (campo calculado pelo backend) - camelCase
+   */
+  formattedTime?: string;
+
+  /**
+   * Nome do dia da semana (campo calculado pelo backend) - snake_case
    */
   day_name?: string;
 
   /**
-   * Indica se possui horário definido (campo calculado pelo backend)
+   * Nome do dia da semana (campo calculado pelo backend) - camelCase
+   */
+  dayName?: string;
+
+  /**
+   * Indica se possui horário definido (campo calculado pelo backend) - snake_case
    */
   has_schedule?: boolean;
 
   /**
-   * Indica se possui link online (campo calculado pelo backend)
+   * Indica se possui horário definido (campo calculado pelo backend) - camelCase
+   */
+  hasSchedule?: boolean;
+
+  /**
+   * Indica se possui link online (campo calculado pelo backend) - snake_case
    */
   has_online_link?: boolean;
+
+  /**
+   * Indica se possui link online (campo calculado pelo backend) - camelCase
+   */
+  hasOnlineLink?: boolean;
 }
 
 /**

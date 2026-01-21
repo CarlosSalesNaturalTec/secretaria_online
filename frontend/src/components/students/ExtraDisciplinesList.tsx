@@ -7,7 +7,6 @@
 
 import { useState, useMemo } from 'react';
 import { Plus, Trash2, Calendar, Clock, Link as LinkIcon } from 'lucide-react';
-import { formatDate } from '@/utils/formatters';
 import {
   STATUS_LABELS,
   STATUS_COLORS,
@@ -140,22 +139,32 @@ export function ExtraDisciplinesList({
       ),
     },
     {
+      key: 'day_of_week',
+      header: 'Dia da Semana',
+      accessor: (row: IStudentExtraDiscipline) => (
+        row.dayOfWeek ? (
+          <div className="flex items-center text-sm text-gray-900">
+            <Calendar size={14} className="mr-1 text-blue-600" />
+            <span className="font-medium">{row.dayName}</span>
+          </div>
+        ) : (
+          <span className="text-gray-400 text-sm italic">-</span>
+        )
+      ),
+    },
+    {
       key: 'schedule',
       header: 'Horário',
       accessor: (row: IStudentExtraDiscipline) => (
-        row.has_schedule ? (
+        row.startTime && row.endTime ? (
           <div className="text-sm">
-            <div className="flex items-center text-gray-900">
-              <Calendar size={14} className="mr-1 text-blue-600" />
-              <span className="font-medium">{row.day_name}</span>
-            </div>
-            <div className="flex items-center text-gray-600 mt-1">
+            <div className="flex items-center text-gray-600">
               <Clock size={14} className="mr-1" />
-              <span>{row.formatted_time}</span>
+              <span>{row.formattedTime}</span>
             </div>
-            {row.has_online_link && (
+            {row.hasOnlineLink && (
               <a
-                href={row.online_link || '#'}
+                href={row.onlineLink || '#'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center text-blue-600 hover:text-blue-700 mt-1"
@@ -167,7 +176,7 @@ export function ExtraDisciplinesList({
             )}
           </div>
         ) : (
-          <span className="text-gray-400 text-sm italic">Sem horário definido</span>
+          <span className="text-gray-400 text-sm italic">-</span>
         )
       ),
     },
@@ -201,16 +210,6 @@ export function ExtraDisciplinesList({
       header: 'Status',
       accessor: (row: IStudentExtraDiscipline) => (
         <StatusBadge status={row.status} />
-      ),
-    },
-    {
-      key: 'enrollment_date',
-      header: 'Data Matrícula',
-      accessor: (row: IStudentExtraDiscipline) => (
-        <div className="flex items-center text-sm text-gray-700">
-          <Calendar size={14} className="mr-1 text-gray-400" />
-          {formatDate(row.enrollment_date)}
-        </div>
       ),
     },
     ...(editable ? [{

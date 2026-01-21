@@ -39,6 +39,10 @@ function toSnakeCase(
     enrollment_date: data.enrollment_date,
     reason: data.reason,
     notes: data.notes ?? null,
+    day_of_week: data.day_of_week ?? null,
+    start_time: data.start_time ?? null,
+    end_time: data.end_time ?? null,
+    online_link: data.online_link ?? null,
   };
 }
 
