@@ -17,6 +17,16 @@ import {
 import { Button } from '@/components/ui/Button';
 
 /**
+ * Labels para os motivos de disciplina extra em português
+ */
+const EXTRA_REASON_LABELS: Record<string, string> = {
+  dependency: 'Dependência',
+  recovery: 'Recuperação',
+  advancement: 'Adiantamento',
+  other: 'Outro',
+};
+
+/**
  * Props do WeekScheduleGrid
  */
 interface WeekScheduleGridProps {
@@ -181,7 +191,7 @@ export function WeekScheduleGrid({
         title={`
           ${schedule.discipline?.name || 'Disciplina'}
           ${schedule.teacher?.nome ? `\nProfessor: ${schedule.teacher.nome}` : ''}
-          ${isExtraValue ? `\n⚠️ Disciplina Extra (${extraReason})` : ''}
+          ${isExtraValue ? `\n⚠️ Disciplina Extra (${EXTRA_REASON_LABELS[extraReason] || extraReason})` : ''}
         `}
       >
         {/* Cabeçalho */}
@@ -220,7 +230,7 @@ export function WeekScheduleGrid({
         {/* Badge de disciplina extra */}
         {isExtra && (
           <div className="flex items-center text-xs text-orange-700 bg-orange-50 px-2 py-1 rounded mb-2">
-            <span className="font-medium">Extra: {extraReason}</span>
+            <span className="font-medium">Extra: {EXTRA_REASON_LABELS[extraReason] || extraReason}</span>
           </div>
         )}
 

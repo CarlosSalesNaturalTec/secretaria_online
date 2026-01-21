@@ -11,7 +11,7 @@ import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 /**
  * Tipos de input disponíveis
  */
-type InputType = 'text' | 'email' | 'password' | 'tel' | 'number' | 'date';
+type InputType = 'text' | 'email' | 'password' | 'tel' | 'number' | 'date' | 'time' | 'url';
 
 /**
  * Máscaras disponíveis para formatação automática
