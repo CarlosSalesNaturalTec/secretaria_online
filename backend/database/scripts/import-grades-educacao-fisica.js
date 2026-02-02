@@ -1,51 +1,53 @@
 /**
- * Script: import-grades-agronegocio.js
- * Descrição: Importa notas de avaliações do curso Gestão em Agronegócio
+ * Script: import-grades-educacao-fisica.js
+ * Descrição: Importa notas de avaliações do curso Licenciatura em Educação Física
  *            da tabela boletim_novo do banco legado
  *
  * Origem: database/academico_bo.sql
  * Tabela: boletim_novo
- * Filtro: semestre IN ('Superior em Gestão em Agronegócio 01',
- *                      'Superior em Gestão em Agronegócio 02',
- *                      'Superior em Gestão em Agronegócio 03')
+ * Filtro: semestre LIKE 'Licenciatura em Educação Física %°'
+ *         onde % = 1, 2, 3, 4, 5, 6, 7, 8 (semestres 1 ao 8)
  *
  * Mapeamento:
- * - boletim_novo.matricula -> students.registration_number
+ * - boletim_novo.matricula -> students.matricula
  * - boletim_novo.disciplina -> disciplines.name
  * - boletim_novo.teste -> grade (teste)
  * - boletim_novo.prova -> grade (prova)
  * - boletim_novo.resultado -> grade final
- * - boletim_novo.periodo -> evaluation.date (período acadêmico)
- * - boletim_novo.semestre -> extraction semester (01, 02, 03)
+ * - boletim_novo.periodo -> evaluation.date
+ * - boletim_novo.semestre -> extraction semester (1°-8°)
  *
  * Como executar:
  * cd backend
- * node database/scripts/import-grades-agronegocio.js
+ * node database/scripts/import-grades-educacao-fisica.js
  */
 
 const fs = require('fs');
 const path = require('path');
 const db = require('../../src/models');
 
-// ID do curso Gestão em Agronegócio
-const COURSE_ID = 19;
-const COURSE_NAME = 'Gestão em Agronegócio';
+// ID do curso Licenciatura em Educação Física
+const COURSE_ID = 8;
+const COURSE_NAME = 'Licenciatura em Educação Física';
 
 /**
  * Extrai o número do semestre do campo "semestre" do banco legado
- * Exemplo: "Superior em Gestão em Agronegócio 01" -> 1
- *          "Superior em Gestão em Agronegócio 02" -> 2
- *          "Superior em Gestão em Agronegócio 03" -> 3
+ * Exemplo: "Licenciatura em Educação Física 1°" -> 1
+ *          "Licenciatura em Educação Física 7°" -> 7
+ *          "Licenciatura em Educação Física 8°" -> 8
  *
  * @param {string} semestre - Campo semestre do banco legado
- * @returns {number|null} Número do semestre (1-3) ou null
+ * @returns {number|null} Número do semestre (1-8) ou null
  */
 function extractSemester(semestre) {
   if (!semestre) return null;
 
-  const match = semestre.match(/Superior em Gestão em Agronegócio 0?(\d+)/i);
+  const match = semestre.match(/Licenciatura em Educação Física\s+(\d+)°/i);
   if (match) {
-    return parseInt(match[1], 10);
+    const semester = parseInt(match[1], 10);
+    if (semester >= 1 && semester <= 8) {
+      return semester;
+    }
   }
 
   return null;
@@ -122,9 +124,12 @@ function parseBoletimNovoInserts(sqlContent) {
         record[col] = value;
       });
 
-      // Filtra apenas registros do curso Gestão em Agronegócio
-      if (record.semestre && record.semestre.includes('Superior em Gestão em Agronegócio')) {
-        records.push(record);
+      // Filtra apenas registros do curso Licenciatura em Educação Física
+      if (record.semestre && /Licenciatura em Educação Física\s+\d+°/i.test(record.semestre)) {
+        const semester = extractSemester(record.semestre);
+        if (semester >= 1 && semester <= 8) {
+          records.push(record);
+        }
       }
     }
   }
@@ -249,7 +254,7 @@ async function createDiscipline(disciplineName, courseId) {
 /**
  * Cria ou busca turma default para o curso
  *
- * @param {number} semester - Semestre (1, 2, 3)
+ * @param {number} semester - Semestre (1-8)
  * @returns {Promise<Object>} Turma criada ou encontrada
  */
 async function getOrCreateDefaultClass(semester) {
@@ -307,7 +312,7 @@ async function getOrCreateDefaultTeacher() {
  * @param {Object} params - Parâmetros
  * @returns {Promise<Object>} Avaliação criada
  */
-async function createEvaluation({ classId, teacherId, disciplineId, name, date, semester, courseName }) {
+async function createEvaluation({ classId, teacherId, disciplineId, name, date, semester, courseName, semesterRaw }) {
   const evaluation = await db.Evaluation.create({
     class_id: classId,
     teacher_id: teacherId,
@@ -317,7 +322,7 @@ async function createEvaluation({ classId, teacherId, disciplineId, name, date, 
     type: 'grade',
     original_semester: semester,
     original_course_name: courseName,
-    original_semester_raw: `Superior em Gestão em Agronegócio 0${semester}`
+    original_semester_raw: semesterRaw
   });
 
   return evaluation;
@@ -328,7 +333,7 @@ async function createEvaluation({ classId, teacherId, disciplineId, name, date, 
  */
 async function importGrades() {
   console.log('\n========================================');
-  console.log('IMPORTAÇÃO DE NOTAS - GESTÃO EM AGRONEGÓCIO');
+  console.log('IMPORTAÇÃO DE NOTAS - LICENCIATURA EM EDUCAÇÃO FÍSICA');
   console.log('========================================\n');
 
   try {
@@ -368,14 +373,10 @@ async function importGrades() {
     );
     console.log(`   ✓ ${courseDisciplines.length} disciplinas encontradas\n`);
 
-    if (courseDisciplines.length === 0) {
-      throw new Error('Nenhuma disciplina encontrada para o curso Gestão em Agronegócio (id: 19).');
-    }
-
     // 4. Busca professor default
     console.log('4. Buscando professor para importação...');
     const defaultTeacher = await getOrCreateDefaultTeacher();
-    console.log(`   ✓ Professor: ${defaultTeacher.name} (ID: ${defaultTeacher.id})\n`);
+    console.log(`   ✓ Professor: ${defaultTeacher.nome} (ID: ${defaultTeacher.id})\n`);
 
     // 5. Agrupa registros por semestre, disciplina e período
     console.log('5. Agrupando registros...');
@@ -395,6 +396,7 @@ async function importGrades() {
           semester,
           disciplineName,
           periodo,
+          semesterRaw: record.semestre,
           students: []
         };
       }
@@ -461,7 +463,8 @@ async function importGrades() {
           name: 'Teste',
           date: evalDate,
           semester: group.semester,
-          courseName: COURSE_NAME
+          courseName: COURSE_NAME,
+          semesterRaw: group.semesterRaw
         }),
         prova: await createEvaluation({
           classId: classRecord.id,
@@ -470,7 +473,8 @@ async function importGrades() {
           name: 'Prova',
           date: evalDate,
           semester: group.semester,
-          courseName: COURSE_NAME
+          courseName: COURSE_NAME,
+          semesterRaw: group.semesterRaw
         }),
         resultado: await createEvaluation({
           classId: classRecord.id,
@@ -479,7 +483,8 @@ async function importGrades() {
           name: 'Resultado Final',
           date: evalDate,
           semester: group.semester,
-          courseName: COURSE_NAME
+          courseName: COURSE_NAME,
+          semesterRaw: group.semesterRaw
         })
       };
 
