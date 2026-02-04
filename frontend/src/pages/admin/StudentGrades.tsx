@@ -36,7 +36,7 @@ export default function StudentGrades() {
           Voltar para Lista de Alunos
         </Button>
       </div>
-      <Grades studentId={studentId} />
+      <Grades studentId={studentId} isEditable={true} />
     </div>
   );
 }

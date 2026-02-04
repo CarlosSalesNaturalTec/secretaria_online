@@ -25,9 +25,11 @@ import {
   ChevronDown,
   ChevronUp,
   Filter,
+  Edit2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { getMyGrades, getGradesByStudent } from '@/services/grade.service';
+import { Modal } from '@/components/ui/Modal';
+import { getMyGrades, getGradesByStudent, updateGrade } from '@/services/grade.service';
 import StudentService from '@/services/student.service';
 import type {
   IGradeWithEvaluation,
@@ -41,6 +43,7 @@ import type { IStudent } from '@/types/student.types';
  */
 interface GradesProps {
   studentId?: number;
+  isEditable?: boolean;
 }
 
 /**
@@ -64,13 +67,19 @@ interface IDisciplineGrades {
  * <Grades /> // Visão do aluno
  * <Grades studentId={123} /> // Visão do admin
  */
-export default function Grades({ studentId }: GradesProps) {
+export default function Grades({ studentId, isEditable = false }: GradesProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [allGrades, setAllGrades] = useState<IGradeWithEvaluation[]>([]);
   const [student, setStudent] = useState<IStudent | null>(null);
   const [disciplineGrades, setDisciplineGrades] = useState<IDisciplineGrades[]>([]);
   const [expandedDisciplines, setExpandedDisciplines] = useState<Set<number>>(new Set());
+
+  // Estados para edição
+  const [editingGrade, setEditingGrade] = useState<IGradeWithEvaluation | null>(null);
+  const [newGradeValue, setNewGradeValue] = useState<string>('');
+  const [newConceptValue, setNewConceptValue] = useState<GradeConcept | ''>('');
+  const [isSaving, setIsSaving] = useState(false);
 
   // Estados para filtros
   const [semesterFilter, setSemesterFilter] = useState<string>('');
@@ -240,6 +249,74 @@ export default function Grades({ studentId }: GradesProps) {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  /**
+   * Inicia edição de uma nota
+   */
+  const handleEditClick = (grade: IGradeWithEvaluation) => {
+    if (!isEditable) return;
+    
+    setEditingGrade(grade);
+    if (grade.grade !== null) {
+      setNewGradeValue(grade.grade.toString());
+      setNewConceptValue('');
+    } else if (grade.concept !== null) {
+      setNewConceptValue(grade.concept);
+      setNewGradeValue('');
+    } else {
+      setNewGradeValue('');
+      setNewConceptValue('');
+    }
+  };
+
+  /**
+   * Salva as alterações da nota
+   */
+  const handleSaveGrade = async () => {
+    if (!editingGrade) return;
+
+    try {
+      setIsSaving(true);
+      
+      const payload: any = {};
+      if (editingGrade.evaluation.type === 'grade') {
+        const gradeVal = parseFloat(newGradeValue);
+        if (isNaN(gradeVal) || gradeVal < 0 || gradeVal > 10) {
+          alert('Por favor, insira uma nota válida entre 0 e 10.');
+          return;
+        }
+        payload.grade = gradeVal;
+      } else {
+         if (!newConceptValue) {
+           alert('Por favor, selecione um conceito.');
+           return;
+         }
+        payload.concept = newConceptValue;
+      }
+
+      const response = await updateGrade(editingGrade.id, payload);
+      
+      // Atualizar estado local
+      setAllGrades(prev => prev.map(g => {
+        if (g.id === editingGrade.id) {
+          // Atualiza apenas os campos alterados, mantendo referências
+          return {
+            ...g,
+            grade: payload.grade !== undefined ? payload.grade : null,
+            concept: payload.concept !== undefined ? payload.concept : null
+          };
+        }
+        return g;
+      }));
+
+      setEditingGrade(null);
+    } catch (err) {
+      console.error('Erro ao salvar nota:', err);
+      alert('Erro ao salvar nota. Tente novamente.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -609,7 +686,12 @@ export default function Grades({ studentId }: GradesProps) {
                       {disciplineData.grades.map((gradeItem) => (
                         <div
                           key={gradeItem.id}
-                          className="bg-white rounded-lg p-4 border border-gray-200 flex items-center justify-between"
+                          className={`bg-white rounded-lg p-4 border border-gray-200 flex items-center justify-between ${
+                            isEditable ? 'cursor-pointer hover:border-blue-400 hover:shadow-sm transition-all' : ''
+                          }`}
+                          onClick={() => handleEditClick(gradeItem)}
+                          role={isEditable ? "button" : undefined}
+                          title={isEditable ? "Clique para editar" : undefined}
                         >
                           <div className="flex items-start gap-3 flex-1">
                             <Calendar className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
@@ -634,7 +716,11 @@ export default function Grades({ studentId }: GradesProps) {
                           </div>
 
                           {/* Nota ou Conceito */}
-                          <div>
+                          <div className="flex items-center gap-3">
+                            {isEditable && (
+                              <Edit2 className="w-4 h-4 text-gray-400" />
+                            )}
+                            
                             {gradeItem.grade !== null ? (
                               <div
                                 className={`px-4 py-2 rounded-lg border font-bold text-xl ${getGradeColorClass(
@@ -667,6 +753,70 @@ export default function Grades({ studentId }: GradesProps) {
           })}
         </div>
       )}
+
+      {/* Modal de Edição */}
+      <Modal
+        isOpen={!!editingGrade}
+        onClose={() => setEditingGrade(null)}
+        title={`Editar Nota: ${editingGrade?.evaluation.name}`}
+        description="Alterar a nota lançada para este aluno."
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => setEditingGrade(null)}
+              disabled={isSaving}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={handleSaveGrade} isLoading={isSaving}>
+              Salvar Alterações
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Avaliação
+            </label>
+            <p className="text-gray-900 bg-gray-50 p-2 rounded border border-gray-200">
+              {editingGrade?.evaluation.name}
+            </p>
+          </div>
+
+          <div>
+            <label htmlFor="grade-input" className="block text-sm font-medium text-gray-700 mb-1">
+              {editingGrade?.evaluation.type === 'grade' ? 'Nota (0-10)' : 'Conceito'}
+            </label>
+            
+            {editingGrade?.evaluation.type === 'grade' ? (
+              <input
+                id="grade-input"
+                type="number"
+                min="0"
+                max="10"
+                step="0.1"
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                value={newGradeValue}
+                onChange={(e) => setNewGradeValue(e.target.value)}
+                placeholder="Ex: 8.5"
+              />
+            ) : (
+              <select
+                id="concept-input"
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                value={newConceptValue}
+                onChange={(e) => setNewConceptValue(e.target.value as GradeConcept)}
+              >
+                <option value="">Selecione...</option>
+                <option value="satisfactory">Satisfatório</option>
+                <option value="unsatisfactory">Não Satisfatório</option>
+              </select>
+            )}
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
