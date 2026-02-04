@@ -296,7 +296,7 @@ export default function Grades({ studentId, isEditable = false }: GradesProps) {
         payload.concept = newConceptValue;
       }
 
-      const response = await updateGrade(editingGrade.id, payload);
+      await updateGrade(editingGrade.id, payload);
       
       // Atualizar estado local
       setAllGrades(prev => prev.map(g => {
@@ -769,7 +769,7 @@ export default function Grades({ studentId, isEditable = false }: GradesProps) {
             >
               Cancelar
             </Button>
-            <Button onClick={handleSaveGrade} isLoading={isSaving}>
+            <Button onClick={handleSaveGrade} loading={isSaving}>
               Salvar Alterações
             </Button>
           </div>
