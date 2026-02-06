@@ -33,7 +33,9 @@ import {
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { getAll as getAllClasses } from '@/services/class.service';
+import { getAll as getAllTeachers } from '@/services/teacher.service';
 import type { IEvaluation, EvaluationType } from '@/types/evaluation.types';
+import type { ITeacher } from '@/types/teacher.types';
 import * as EvaluationService from '@/services/evaluation.service';
 import {
   getGradesByEvaluation,
@@ -76,6 +78,9 @@ const createEvaluationSchema = z.object({
       return regex.test(date);
     }, 'Data deve estar no formato YYYY-MM-DD'),
   type: z.enum([EVALUATION_TYPES.GRADE, EVALUATION_TYPES.CONCEPT]),
+  teacherId: z
+    .string()
+    .min(1, 'Professor é obrigatório'),
 });
 
 type CreateEvaluationFormData = z.infer<typeof createEvaluationSchema>;
@@ -104,6 +109,7 @@ export default function AdminGrades() {
   // Estados de dados
   const [selectedClass, setSelectedClass] = useState<IClass | null>(null);
   const [allClasses, setAllClasses] = useState<IClass[]>([]);
+  const [allTeachers, setAllTeachers] = useState<ITeacher[]>([]);
   const [evaluations, setEvaluations] = useState<IEvaluation[]>([]);
   const [selectedEvaluation, setSelectedEvaluation] = useState<IEvaluation | null>(
     null
@@ -170,8 +176,13 @@ export default function AdminGrades() {
       setLoading(true);
       setError(null);
 
-      const classes = await getAllClasses();
+      const [classes, teachers] = await Promise.all([
+        getAllClasses(),
+        getAllTeachers()
+      ]);
+
       setAllClasses(classes);
+      setAllTeachers(teachers);
 
       // Se URL contém classId, seleciona aquela turma
       if (classId) {
@@ -192,7 +203,7 @@ export default function AdminGrades() {
       // As avaliações só devem ser carregadas quando o usuário selecionar uma turma
 
       if (import.meta.env.DEV) {
-        console.log('[AdminGrades] Dados iniciais carregados:', classes.length);
+        console.log('[AdminGrades] Dados iniciais carregados:', classes.length, 'turmas,', teachers.length, 'professores');
       }
     } catch (err) {
       console.error('[AdminGrades] Erro ao carregar dados iniciais:', err);
@@ -302,8 +313,8 @@ export default function AdminGrades() {
 
     try {
       // Encontra disciplina selecionada ou primeira disciplina da turma
-      const disciplineId = selectedDisciplineId 
-        ? parseInt(selectedDisciplineId) 
+      const disciplineId = selectedDisciplineId
+        ? parseInt(selectedDisciplineId)
         : selectedClass.disciplines?.[0]?.id;
 
       if (!disciplineId) {
@@ -316,6 +327,7 @@ export default function AdminGrades() {
       const newEvaluation = await createEvaluation({
         classId: selectedClass.id,
         disciplineId: disciplineId,
+        teacherId: parseInt(data.teacherId, 10),
         name: data.name,
         date: data.date,
         type: data.type,
@@ -674,6 +686,28 @@ export default function AdminGrades() {
                     {formErrors.date && (
                       <p className="text-xs text-red-600 mt-1">
                         {formErrors.date.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Professor
+                    </label>
+                    <select
+                      {...register('teacherId')}
+                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    >
+                      <option value="">Selecione o professor</option>
+                      {allTeachers.map(teacher => (
+                        <option key={teacher.id} value={teacher.id}>
+                          {teacher.nome}
+                        </option>
+                      ))}
+                    </select>
+                    {formErrors.teacherId && (
+                      <p className="text-xs text-red-600 mt-1">
+                        {formErrors.teacherId.message}
                       </p>
                     )}
                   </div>
