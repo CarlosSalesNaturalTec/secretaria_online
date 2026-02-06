@@ -87,11 +87,20 @@ export async function getAll(): Promise<IEvaluation[]> {
     }
 
     return mapped;
-  } catch (error) {
+  } catch (error: any) {
     console.error('[EvaluationService] Erro ao buscar avaliações:', error);
+
+    // Se é erro do Axios com resposta do servidor
+    if (error.response?.data?.error?.message) {
+      throw new Error(error.response.data.error.message);
+    }
+
+    // Se é instância de Error
     if (error instanceof Error) {
       throw error;
     }
+
+    // Erro genérico
     throw new Error('Falha ao buscar avaliações. Tente novamente.');
   }
 }
@@ -117,11 +126,20 @@ export async function getById(id: number): Promise<IEvaluation> {
     }
 
     return mapEvaluationData(response.data.data);
-  } catch (error) {
+  } catch (error: any) {
     console.error('[EvaluationService] Erro ao buscar avaliação:', error);
+
+    // Se é erro do Axios com resposta do servidor
+    if (error.response?.data?.error?.message) {
+      throw new Error(error.response.data.error.message);
+    }
+
+    // Se é instância de Error
     if (error instanceof Error) {
       throw error;
     }
+
+    // Erro genérico
     throw new Error('Falha ao buscar avaliação. Tente novamente.');
   }
 }
@@ -177,11 +195,20 @@ export async function create(data: ICreateEvaluationData): Promise<IEvaluation> 
     }
 
     return mapEvaluationData(response.data.data);
-  } catch (error) {
+  } catch (error: any) {
     console.error('[EvaluationService] Erro ao criar avaliação:', error);
+
+    // Se é erro do Axios com resposta do servidor
+    if (error.response?.data?.error?.message) {
+      throw new Error(error.response.data.error.message);
+    }
+
+    // Se é instância de Error (erros de validação local)
     if (error instanceof Error) {
       throw error;
     }
+
+    // Erro genérico
     throw new Error('Falha ao criar avaliação. Tente novamente.');
   }
 }
@@ -232,11 +259,20 @@ export async function update(id: number, data: IUpdateEvaluationData): Promise<I
     }
 
     return mapEvaluationData(response.data.data);
-  } catch (error) {
+  } catch (error: any) {
     console.error('[EvaluationService] Erro ao atualizar avaliação:', error);
+
+    // Se é erro do Axios com resposta do servidor
+    if (error.response?.data?.error?.message) {
+      throw new Error(error.response.data.error.message);
+    }
+
+    // Se é instância de Error (erros de validação local)
     if (error instanceof Error) {
       throw error;
     }
+
+    // Erro genérico
     throw new Error('Falha ao atualizar avaliação. Tente novamente.');
   }
 }
@@ -262,11 +298,20 @@ export async function deleteEvaluation(id: number): Promise<void> {
     if (import.meta.env.DEV) {
       console.log('[EvaluationService] Avaliação removida com sucesso');
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('[EvaluationService] Erro ao remover avaliação:', error);
+
+    // Se é erro do Axios com resposta do servidor
+    if (error.response?.data?.error?.message) {
+      throw new Error(error.response.data.error.message);
+    }
+
+    // Se é instância de Error (erros de validação local)
     if (error instanceof Error) {
       throw error;
     }
+
+    // Erro genérico
     throw new Error('Falha ao remover avaliação. Tente novamente.');
   }
 }
@@ -294,11 +339,20 @@ export async function getMyUpcomingEvaluations(): Promise<IEvaluation[]> {
     }
 
     return response.data.data.map(mapEvaluationData);
-  } catch (error) {
+  } catch (error: any) {
     console.error('[EvaluationService] Erro ao buscar avaliações futuras:', error);
+
+    // Se é erro do Axios com resposta do servidor
+    if (error.response?.data?.error?.message) {
+      throw new Error(error.response.data.error.message);
+    }
+
+    // Se é instância de Error
     if (error instanceof Error) {
       throw error;
     }
+
+    // Erro genérico
     throw new Error('Falha ao buscar avaliações futuras. Tente novamente.');
   }
 }
