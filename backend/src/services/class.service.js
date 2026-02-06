@@ -27,7 +27,8 @@ class ClassService {
    * @returns {Promise<Class[]>} Uma lista de Turmas com curso, alunos e professores.
    */
   async list(teacherId = null) {
-    const { Course, Discipline, CourseDiscipline } = require('../models');
+    const { Course, Discipline, CourseDiscipline, Enrollment } = require('../models');
+    const { Op } = require('sequelize');
 
     const teachersInclude = {
       association: 'teachers',
@@ -63,8 +64,31 @@ class ClassService {
       classes.map(async (cls) => {
         const clsJSON = cls.toJSON();
 
-        // Converter 'nome' para 'name' nos alunos
-        if (clsJSON.students) {
+        // Filtrar alunos com matrícula ativa no curso da turma
+        if (clsJSON.students && clsJSON.course?.id) {
+          const studentIds = clsJSON.students.map(s => s.id);
+
+          // Buscar matrículas ativas dos alunos neste curso
+          const activeEnrollments = await Enrollment.findAll({
+            where: {
+              student_id: { [Op.in]: studentIds },
+              course_id: clsJSON.course.id,
+              status: { [Op.notIn]: ['cancelled'] }
+            },
+            attributes: ['student_id']
+          });
+
+          const activeStudentIds = activeEnrollments.map(e => e.student_id);
+
+          // Filtrar apenas alunos com matrícula ativa
+          clsJSON.students = clsJSON.students.filter(student =>
+            activeStudentIds.includes(student.id)
+          ).map(student => ({
+            ...student,
+            name: student.nome
+          }));
+        } else if (clsJSON.students) {
+          // Converter 'nome' para 'name' nos alunos
           clsJSON.students = clsJSON.students.map(student => ({
             ...student,
             name: student.nome
@@ -110,7 +134,8 @@ class ClassService {
    * @returns {Promise<Class>} O Turma encontrado com curso, alunos e professores.
    */
   async getById(id) {
-    const { Course, Discipline, CourseDiscipline } = require('../models');
+    const { Course, Discipline, CourseDiscipline, Enrollment } = require('../models');
+    const { Op } = require('sequelize');
 
     const cls = await Class.findOne({
       where: { id },
@@ -137,8 +162,31 @@ class ClassService {
     // Converter para JSON e mapear 'nome' para 'name'
     const clsJSON = cls.toJSON();
 
-    // Converter 'nome' para 'name' nos alunos
-    if (clsJSON.students) {
+    // Filtrar alunos com matrícula ativa no curso da turma
+    if (clsJSON.students && clsJSON.course?.id) {
+      const studentIds = clsJSON.students.map(s => s.id);
+
+      // Buscar matrículas ativas dos alunos neste curso
+      const activeEnrollments = await Enrollment.findAll({
+        where: {
+          student_id: { [Op.in]: studentIds },
+          course_id: clsJSON.course.id,
+          status: { [Op.notIn]: ['cancelled'] }
+        },
+        attributes: ['student_id']
+      });
+
+      const activeStudentIds = activeEnrollments.map(e => e.student_id);
+
+      // Filtrar apenas alunos com matrícula ativa
+      clsJSON.students = clsJSON.students.filter(student =>
+        activeStudentIds.includes(student.id)
+      ).map(student => ({
+        ...student,
+        name: student.nome
+      }));
+    } else if (clsJSON.students) {
+      // Converter 'nome' para 'name' nos alunos
       clsJSON.students = clsJSON.students.map(student => ({
         ...student,
         name: student.nome
