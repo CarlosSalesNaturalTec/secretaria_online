@@ -367,6 +367,52 @@ class EnrollmentService {
   }
 
   /**
+   * Atualiza o semestre atual de uma matrícula
+   *
+   * @param {number} enrollmentId - ID da matrícula
+   * @param {number} currentSemester - Novo semestre (0-12)
+   * @returns {Promise<Enrollment>} Matrícula atualizada
+   * @throws {AppError} Se matrícula não existe ou semestre inválido
+   */
+  async updateCurrentSemester(enrollmentId, currentSemester) {
+    logger.info(
+      `[EnrollmentService] Atualizando semestre atual da matrícula - ID: ${enrollmentId}, Semestre: ${currentSemester}`
+    );
+
+    try {
+      // Validar que semestre é válido (número de 0 a 12)
+      const semester = parseInt(currentSemester, 10);
+      if (isNaN(semester) || semester < 0 || semester > 12) {
+        throw new AppError('Semestre deve ser um número entre 0 e 12', 400);
+      }
+
+      // Buscar matrícula
+      const enrollment = await Enrollment.findByPk(enrollmentId);
+      if (!enrollment) {
+        throw new AppError('Matrícula não encontrada', 404);
+      }
+
+      // Atualizar semestre
+      enrollment.current_semester = semester;
+      await enrollment.save();
+
+      logger.info(
+        `[EnrollmentService] Semestre da matrícula ${enrollmentId} atualizado para: ${semester}`
+      );
+
+      return enrollment;
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      logger.error(
+        `[EnrollmentService] Erro ao atualizar semestre: ${error.message}`
+      );
+      throw new AppError('Erro ao atualizar semestre da matrícula', 500);
+    }
+  }
+
+  /**
    * Busca matrícula por ID com relacionamentos
    *
    * @param {number} enrollmentId - ID da matrícula

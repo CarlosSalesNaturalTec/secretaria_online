@@ -49,6 +49,7 @@ function transformEnrollmentData(enrollment: any): IEnrollment {
     courseId: enrollment.course_id ?? enrollment.courseId,
     status: enrollment.status,
     enrollmentDate: enrollment.enrollment_date ?? enrollment.enrollmentDate,
+    currentSemester: enrollment.current_semester ?? enrollment.currentSemester,
     createdAt: enrollment.created_at ?? enrollment.createdAt,
     updatedAt: enrollment.updated_at ?? enrollment.updatedAt,
     deletedAt: enrollment.deleted_at ?? enrollment.deletedAt,
@@ -405,6 +406,57 @@ async function updateStatus(
 }
 
 /**
+ * Atualiza o semestre atual de uma matrícula
+ *
+ * @param id - ID da matrícula
+ * @param currentSemester - Novo semestre (0-12)
+ * @returns Matrícula atualizada
+ * @throws Error se falhar a atualização
+ *
+ * @example
+ * await enrollmentService.updateCurrentSemester(1, 3);
+ */
+async function updateCurrentSemester(
+  id: number,
+  currentSemester: number
+): Promise<IEnrollment> {
+  try {
+    if (import.meta.env.DEV) {
+      console.log('[EnrollmentService] Atualizando semestre:', id, currentSemester);
+    }
+
+    const response = await api.put<ApiResponse<IEnrollment>>(
+      `/enrollments/${id}/semester`,
+      { currentSemester }
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(
+        response.data.error?.message || 'Erro ao atualizar semestre'
+      );
+    }
+
+    if (import.meta.env.DEV) {
+      console.log('[EnrollmentService] Semestre atualizado:', response.data.data);
+    }
+
+    return transformEnrollmentData(response.data.data);
+  } catch (error: any) {
+    console.error('[EnrollmentService] Erro ao atualizar semestre:', error);
+
+    if (error instanceof Error && error.message) {
+      throw error;
+    }
+
+    if (error.response?.data?.error?.message) {
+      throw new Error(error.response.data.error.message);
+    }
+
+    throw new Error('Falha ao atualizar semestre. Tente novamente.');
+  }
+}
+
+/**
  * Deleta uma matrícula
  *
  * @param id - ID da matrícula a deletar
@@ -465,6 +517,7 @@ const EnrollmentService = {
   create,
   update,
   updateStatus,
+  updateCurrentSemester,
   delete: deleteEnrollment,
   getMyPendingEnrollment,
 };

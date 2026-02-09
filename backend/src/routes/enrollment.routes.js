@@ -176,6 +176,37 @@ router.put(
 );
 
 /**
+ * PUT /enrollments/:id/semester
+ * Atualizar o semestre atual de uma matrícula (admin only)
+ *
+ * Body:
+ * {
+ *   "currentSemester": 3
+ * }
+ *
+ * Response 200:
+ * {
+ *   "success": true,
+ *   "message": "Semestre atual atualizado para 3",
+ *   "data": { ... }
+ * }
+ */
+router.put(
+  '/:id/semester',
+  authorizeAdmin,
+  [
+    param('id')
+      .isInt({ min: 1 })
+      .withMessage('ID deve ser um inteiro positivo'),
+    body('currentSemester')
+      .isInt({ min: 0, max: 12 })
+      .withMessage('currentSemester deve ser um número entre 0 e 12'),
+  ],
+  handleValidationErrors,
+  EnrollmentController.updateCurrentSemester
+);
+
+/**
  * DELETE /enrollments/:id
  * Deletar (soft delete) uma matrícula (admin only)
  *

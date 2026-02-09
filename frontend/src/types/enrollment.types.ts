@@ -56,6 +56,9 @@ export interface IEnrollment {
   /** Data da matrícula */
   enrollmentDate: string;
 
+  /** Semestre atual do aluno no curso (0 = não iniciado, 1-12 = semestres cursados) */
+  currentSemester?: number;
+
   /** Data de criação */
   createdAt: string;
 

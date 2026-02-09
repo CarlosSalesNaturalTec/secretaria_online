@@ -292,6 +292,35 @@ export default function StudentCoursesPage() {
     }
   };
 
+  const handleSemesterChange = async (
+    enrollmentId: number,
+    newSemester: number
+  ) => {
+    try {
+      setLoading(true);
+
+      await EnrollmentService.updateCurrentSemester(enrollmentId, newSemester);
+
+      setToast({
+        message: `Semestre atualizado para ${newSemester} com sucesso!`,
+        type: 'success',
+      });
+
+      // Recarregar dados para refletir a mudança
+      await loadData();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Erro ao atualizar semestre da matrícula';
+      setToast({
+        message: errorMessage,
+        type: 'error',
+      });
+      console.error('[StudentCoursesPage] Erro ao atualizar semestre:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-6">
@@ -464,7 +493,7 @@ export default function StudentCoursesPage() {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4">
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <p className="text-sm text-gray-600 mb-1">Duração</p>
                       <p className="text-lg font-semibold text-gray-900">
@@ -485,6 +514,28 @@ export default function StudentCoursesPage() {
                         </p>
                       </div>
                     )}
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <p className="text-sm text-gray-600 mb-1">Semestre Atual</p>
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={getEnrollment(selectedCourseId)?.currentSemester ?? 0}
+                          onChange={(e) => {
+                            const enrollment = getEnrollment(selectedCourseId);
+                            if (enrollment) {
+                              handleSemesterChange(enrollment.id, Number(e.target.value));
+                            }
+                          }}
+                          className="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white hover:border-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+                        >
+                          <option value="0">Não iniciado</option>
+                          {Array.from({ length: 12 }, (_, i) => i + 1).map((sem) => (
+                            <option key={sem} value={sem}>
+                              {sem}º semestre
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
                   </div>
 
                   {status === 'active' && (

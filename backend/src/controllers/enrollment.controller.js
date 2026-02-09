@@ -359,6 +359,78 @@ class EnrollmentController {
   }
 
   /**
+   * Atualiza o semestre atual de uma matrícula (PUT /enrollments/:id/semester)
+   *
+   * FLUXO:
+   * 1. Valida entrada
+   * 2. Chama EnrollmentService.updateCurrentSemester(id, currentSemester)
+   * 3. Retorna matrícula atualizada
+   *
+   * @param {import('express').Request} req - Requisição HTTP
+   * @param {import('express').Response} res - Resposta HTTP
+   * @param {import('express').NextFunction} next - Próximo middleware
+   *
+   * @example
+   * PUT /api/enrollments/1/semester
+   * {
+   *   "currentSemester": 3
+   * }
+   *
+   * Response 200:
+   * {
+   *   "success": true,
+   *   "message": "Semestre atual atualizado para 3",
+   *   "data": {
+   *     "id": 1,
+   *     "current_semester": 3,
+   *     ...
+   *   }
+   * }
+   */
+  async updateCurrentSemester(req, res, next) {
+    try {
+      // 1. Validar entrada
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        logger.warn(
+          `[EnrollmentController] Validação falhou ao atualizar semestre: ${JSON.stringify(errors.array())}`
+        );
+        return res.status(400).json({
+          success: false,
+          error: 'Dados inválidos',
+          details: errors.array()
+        });
+      }
+
+      const { id } = req.params;
+      const { currentSemester } = req.body;
+
+      logger.info(
+        `[EnrollmentController] Atualizando semestre da matrícula - ID: ${id}, Novo Semestre: ${currentSemester}`
+      );
+
+      // 2. Chamar service
+      const enrollment = await EnrollmentService.updateCurrentSemester(id, currentSemester);
+
+      logger.info(
+        `[EnrollmentController] Semestre atualizado com sucesso - ID: ${id}, Novo Semestre: ${currentSemester}`
+      );
+
+      // 3. Retornar resposta
+      return res.json({
+        success: true,
+        message: `Semestre atual atualizado para ${currentSemester}`,
+        data: enrollment,
+      });
+    } catch (error) {
+      logger.error(
+        `[EnrollmentController] Erro ao atualizar semestre: ${error.message}`
+      );
+      next(error);
+    }
+  }
+
+  /**
    * Busca a matrícula pendente do aluno autenticado (GET /enrollments/my-pending)
    *
    * @param {import('express').Request} req - Requisição HTTP
