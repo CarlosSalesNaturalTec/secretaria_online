@@ -218,26 +218,18 @@ class CourseService {
   }
 
   /**
-   * Lista estudantes matriculados em um curso que NÃO estão vinculados a NENHUMA turma.
+   * Lista estudantes matriculados em um curso (independente de vínculos com turmas).
+   * Permite que um estudante seja vinculado a múltiplas turmas para registro histórico.
    * @param {number} courseId - O ID do curso.
-   * @returns {Promise<Student[]>} Lista de estudantes disponíveis (sem turma).
+   * @returns {Promise<Student[]>} Lista de estudantes matriculados com status ativo ou pendente.
    */
   async getAvailableStudents(courseId) {
-    const { ClassStudent } = require('../models');
     const { Op } = require('sequelize');
 
     const course = await Course.findByPk(courseId);
     if (!course) {
       throw new Error('Curso não encontrado');
     }
-
-    // Buscar IDs de todos os estudantes que estão em alguma turma
-    const studentsInClasses = await ClassStudent.findAll({
-      attributes: ['student_id'],
-      raw: true,
-    });
-
-    const studentsInClassesIds = studentsInClasses.map(s => s.student_id);
 
     // Construir condições de busca
     const whereEnrollment = {
@@ -248,7 +240,8 @@ class CourseService {
       },
     };
 
-    // Buscar matrículas com dados dos estudantes, EXCLUINDO os que já estão em turmas
+    // Buscar matrículas com dados dos estudantes
+    // Não filtra por vínculo com turmas, permitindo múltiplos vínculos
     const enrollments = await Enrollment.findAll({
       where: whereEnrollment,
       include: [
@@ -256,11 +249,6 @@ class CourseService {
           model: Student,
           as: 'student',
           attributes: ['id', 'nome', 'email', 'cpf'],
-          where: {
-            id: {
-              [Op.notIn]: studentsInClassesIds.length > 0 ? studentsInClassesIds : [-1], // -1 para evitar erro se lista vazia
-            },
-          },
         },
       ],
       order: [['enrollment_date', 'DESC']],
