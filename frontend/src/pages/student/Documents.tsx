@@ -22,7 +22,6 @@ import {
   Clock,
   XCircle,
   Download,
-  RefreshCw,
   Filter,
   Eye,
 } from 'lucide-react';
@@ -670,19 +669,6 @@ export default function Documents() {
                     >
                       <Download className="w-5 h-5 text-gray-600" />
                     </button>
-                    {document.status === 'rejected' && (
-                      <button
-                        onClick={() => {
-                          setSelectedDocTypeId(document.documentTypeId);
-                          // Focar no formulário de upload
-                          globalThis.document.getElementById('file-input')?.focus();
-                        }}
-                        className="p-2 hover:bg-red-100 rounded-lg transition-colors"
-                        title="Reenviar"
-                      >
-                        <RefreshCw className="w-5 h-5 text-red-600" />
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>
