@@ -51,6 +51,9 @@ const enrollmentRoutes = require('./enrollment.routes');
 // Gerenciamento de Documentos (feat-043)
 const documentRoutes = require('./document.routes');
 
+// Gerenciamento de Tipos de Documentos (feat-XXX)
+const documentTypeRoutes = require('./documentType.routes');
+
 // Gerenciamento de Contratos (feat-049)
 const contractRoutes = require('./contract.routes');
 
@@ -224,13 +227,25 @@ router.use('/enrollments', enrollmentRoutes);
  * - PUT /documents/:id/reject - Rejeitar documento (admin only)
  * - DELETE /documents/:id - Deletar documento
  * - GET /documents/:id/download - Download do arquivo
- * - GET /documents/types - Listar tipos de documentos obrigatórios
- * - POST /documents/types - Criar tipo de documento (admin only)
  * - GET /documents/pending - Documentos pendentes de aprovação (admin)
  *
  * Permissões: Admin (full access), Student/Teacher (próprios documentos)
  */
 router.use('/documents', documentRoutes);
+
+/**
+ * Rotas de Gerenciamento de Tipos de Documentos
+ * Base: /api/v1/document-types
+ *
+ * Endpoints:
+ * - GET /document-types - Listar tipos de documentos obrigatórios
+ * - GET /document-types/required/students - Tipos obrigatórios para alunos
+ * - GET /document-types/required/teachers - Tipos obrigatórios para professores
+ * - GET /document-types/:id - Buscar tipo de documento por ID
+ *
+ * Permissões: Autenticado (todos os usuários logados)
+ */
+router.use('/document-types', documentTypeRoutes);
 
 /**
  * Rotas de Gerenciamento de Contratos

@@ -28,7 +28,9 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { getAll, downloadFile, getFileUrl } from '@/services/document.service';
+import { getAll as getAllDocumentTypes } from '@/services/documentType.service';
 import type { IDocument, DocumentStatus } from '@/types/document.types';
+import type { IDocumentType } from '@/services/documentType.service';
 
 /**
  * Estados para filtro de documentos
@@ -49,16 +51,19 @@ export default function Documents() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [documents, setDocuments] = useState<IDocument[]>([]);
+  const [documentTypes, setDocumentTypes] = useState<IDocumentType[]>([]);
+  const [loadingTypes, setLoadingTypes] = useState(true);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [uploadingId, setUploadingId] = useState<number | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedDocTypeId, setSelectedDocTypeId] = useState<number | null>(null);
 
   /**
-   * Carrega documentos do aluno ao montar o componente
+   * Carrega documentos e tipos de documentos ao montar o componente
    */
   useEffect(() => {
     loadDocuments();
+    loadDocumentTypes();
   }, []);
 
   /**
@@ -97,6 +102,30 @@ export default function Documents() {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  /**
+   * Carrega tipos de documentos para alunos
+   *
+   * @throws {Error} Quando ocorre erro ao carregar tipos de documentos
+   */
+  const loadDocumentTypes = async () => {
+    try {
+      setLoadingTypes(true);
+
+      // Buscar tipos de documentos para alunos
+      const response = await getAllDocumentTypes({ userType: 'student' });
+      setDocumentTypes(response.data.documentTypes);
+
+      if (import.meta.env.DEV) {
+        console.log('[Documents] Tipos de documentos carregados:', response.data.documentTypes.length);
+      }
+    } catch (err) {
+      console.error('[Documents] Erro ao carregar tipos de documentos:', err);
+      // Não exibe erro na interface, apenas log
+    } finally {
+      setLoadingTypes(false);
     }
   };
 
@@ -382,16 +411,24 @@ export default function Documents() {
             <select
               value={selectedDocTypeId || ''}
               onChange={(e) => setSelectedDocTypeId(Number(e.target.value) || null)}
-              disabled={uploadingId !== null}
+              disabled={uploadingId !== null || loadingTypes}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
             >
-              <option value="">Selecione um tipo de documento</option>
-              {/* TODO: Carregar tipos de documentos da API quando disponível */}
-              <option value="1">RG (Cópia)</option>
-              <option value="2">CPF (Cópia)</option>
-              <option value="3">Comprovante de Residência</option>
-              <option value="4">Certidão de Nascimento</option>
+              <option value="">
+                {loadingTypes ? 'Carregando tipos...' : 'Selecione um tipo de documento'}
+              </option>
+              {documentTypes.map((docType) => (
+                <option key={docType.id} value={docType.id}>
+                  {docType.name}
+                  {docType.is_required ? ' (Obrigatório)' : ''}
+                </option>
+              ))}
             </select>
+            {selectedDocTypeId && documentTypes.find(dt => dt.id === selectedDocTypeId)?.description && (
+              <p className="mt-2 text-sm text-gray-600">
+                {documentTypes.find(dt => dt.id === selectedDocTypeId)?.description}
+              </p>
+            )}
           </div>
 
           {/* Input de Arquivo */}
