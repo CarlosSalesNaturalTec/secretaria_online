@@ -30,7 +30,7 @@ import { Button } from '@/components/ui/Button';
 import {
   getAll,
   downloadFile,
-  getFileUrl,
+  viewFile,
   upload
 } from '@/services/document.service';
 import { getAll as getAllDocumentTypes } from '@/services/documentType.service';
@@ -250,6 +250,32 @@ export default function Documents() {
     } catch (err) {
       console.error('[Documents] Erro ao baixar documento:', err);
       setError('Erro ao baixar o documento. Tente novamente');
+    }
+  };
+
+  /**
+   * Trata visualização de documento
+   *
+   * @param {IDocument} document - Documento a visualizar
+   */
+  const handleView = async (document: IDocument) => {
+    try {
+      setError(null);
+
+      // Buscar arquivo com autenticação
+      const blob = await viewFile(document.id);
+
+      // Criar URL temporária para o blob
+      const url = window.URL.createObjectURL(blob);
+
+      // Abrir em nova aba
+      window.open(url, '_blank');
+
+      // Liberar URL após um tempo
+      setTimeout(() => window.URL.revokeObjectURL(url), 100);
+    } catch (err) {
+      console.error('[Documents] Erro ao visualizar documento:', err);
+      setError('Erro ao visualizar o documento. Tente novamente');
     }
   };
 
@@ -631,21 +657,19 @@ export default function Documents() {
                   {/* Ações */}
                   <div className="flex flex-col gap-2">
                     <button
+                      onClick={() => handleView(document)}
+                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                      title="Visualizar"
+                    >
+                      <Eye className="w-5 h-5 text-gray-600" />
+                    </button>
+                    <button
                       onClick={() => handleDownload(document)}
                       className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                       title="Download"
                     >
                       <Download className="w-5 h-5 text-gray-600" />
                     </button>
-                    <a
-                      href={getFileUrl(document.id)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                      title="Visualizar"
-                    >
-                      <Eye className="w-5 h-5 text-gray-600" />
-                    </a>
                     {document.status === 'rejected' && (
                       <button
                         onClick={() => {
