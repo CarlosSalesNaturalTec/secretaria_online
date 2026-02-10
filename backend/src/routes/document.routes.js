@@ -289,6 +289,34 @@ router.get('/student/:studentId', authenticate, DocumentController.getStudentDoc
 router.get('/:id/validate', authenticate, DocumentController.validate);
 
 /**
+ * GET /api/v1/documents/:id/file
+ * Visualizar ou baixar um documento
+ *
+ * Autenticação: Requerida
+ * Parâmetros: id (ID do documento, inteiro positivo)
+ * Permissão: Próprio usuário ou admin
+ *
+ * Status de resposta:
+ * - 200 OK: Arquivo enviado (inline para visualização ou download)
+ * - 400 Bad Request: ID inválido
+ * - 401 Unauthorized: Não autenticado
+ * - 403 Forbidden: Sem permissão para acessar o documento
+ * - 404 Not Found: Documento ou arquivo não encontrado
+ * - 500 Internal Server Error: Erro no servidor
+ *
+ * Response Headers:
+ * - Content-Type: application/pdf (ou image/jpeg, image/png, etc.)
+ * - Content-Disposition: inline (permite visualização no navegador)
+ *
+ * @example
+ * GET /api/v1/documents/10/file
+ * Authorization: Bearer <token>
+ *
+ * Resposta: [arquivo binário para visualização ou download]
+ */
+router.get('/:id/file', authenticate, DocumentController.getFile);
+
+/**
  * GET /api/v1/documents/:id/download
  * Download de um documento
  *

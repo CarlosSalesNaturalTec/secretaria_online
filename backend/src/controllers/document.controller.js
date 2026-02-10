@@ -804,6 +804,69 @@ class DocumentController {
   }
 
   /**
+   * GET /api/v1/documents/:id/file
+   * Visualizar ou baixar um documento
+   *
+   * Requisitos:
+   * - Usuário autenticado
+   * - ID válido na URL
+   * - Permissão: próprio usuário ou admin
+   * - Documento deve existir
+   * - Arquivo deve existir no servidor
+   *
+   * @param {Object} req - Request do Express
+   * @param {Object} req.user - Usuário autenticado (injetado pelo auth.middleware)
+   * @param {Object} req.params.id - ID do documento
+   * @param {Object} res - Response do Express
+   * @param {Function} next - Próximo middleware/handler
+   *
+   * @returns {void} Stream do arquivo ou erro
+   *
+   * @example
+   * // Request
+   * GET /api/v1/documents/10/file
+   * Authorization: Bearer <token>
+   *
+   * // Response (200 OK com arquivo)
+   * Content-Type: application/pdf (ou image/jpeg, etc.)
+   * Content-Disposition: inline; filename="documento.pdf"
+   * [arquivo binário]
+   */
+  async getFile(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      // Validar ID
+      if (isNaN(id) || parseInt(id) <= 0) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'ID deve ser um número inteiro positivo',
+          },
+        });
+      }
+
+      // Chamar serviço para fazer download com validação de permissão
+      // Para estudantes, passa student_id; para admin, passa null
+      const studentId = req.user.student_id || null;
+      const file = await DocumentService.download(parseInt(id), studentId, req.user.role);
+
+      logger.info('[DocumentController] Visualização de documento realizada', {
+        documentId: id,
+        viewedBy: req.user.id,
+        studentId: studentId,
+        fileName: file.fileName,
+      });
+
+      // Enviar arquivo para visualização (inline)
+      res.sendFile(file.filePath);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * GET /api/v1/documents/:id/download
    * Download de um documento
    *

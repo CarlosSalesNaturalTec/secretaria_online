@@ -42,7 +42,7 @@ const DOCUMENTS_PATH = path.join(UPLOAD_BASE_PATH, 'documents');
 const storage = multer.diskStorage({
   /**
    * Define o diretório de destino dos arquivos
-   * Estrutura: uploads/documents/[userId]/[timestamp]-[filename]
+   * Estrutura: uploads/documents/[studentId]/[timestamp]-[filename]
    *
    * @param {Object} req - Objeto da requisição Express
    * @param {Object} file - Informações do arquivo
@@ -54,11 +54,12 @@ const storage = multer.diskStorage({
       fs.mkdirSync(DOCUMENTS_PATH, { recursive: true });
     }
 
-    // Usar ID do usuário autenticado para organizar uploads
-    const userId = req.user ? req.user.id : 'unknown';
-    const userUploadDir = path.join(DOCUMENTS_PATH, String(userId));
+    // Usar student_id do usuário autenticado para organizar uploads
+    // Se não for estudante, usar user_id como fallback
+    const uploadId = req.user?.student_id || req.user?.id || 'unknown';
+    const userUploadDir = path.join(DOCUMENTS_PATH, String(uploadId));
 
-    // Criar diretório específico do usuário se não existir
+    // Criar diretório específico do estudante se não existir
     if (!fs.existsSync(userUploadDir)) {
       fs.mkdirSync(userUploadDir, { recursive: true });
     }
