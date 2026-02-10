@@ -27,7 +27,12 @@ import {
   Eye,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { getAll, downloadFile, getFileUrl } from '@/services/document.service';
+import {
+  getAll,
+  downloadFile,
+  getFileUrl,
+  upload
+} from '@/services/document.service';
 import { getAll as getAllDocumentTypes } from '@/services/documentType.service';
 import type { IDocument, DocumentStatus } from '@/types/document.types';
 import type { IDocumentType } from '@/services/documentType.service';
@@ -197,24 +202,29 @@ export default function Documents() {
 
       // Criar FormData com arquivo
       const formData = new FormData();
-      formData.append('documentTypeId', selectedDocTypeId.toString());
-      formData.append('file', selectedFile);
+      formData.append('document_type_id', selectedDocTypeId.toString());
+      formData.append('document', selectedFile);
 
-      // TODO: Implementar endpoint de upload quando estiver disponível
-      // const response = await api.post('/documents/upload', formData, {
-      //   headers: { 'Content-Type': 'multipart/form-data' }
-      // });
+      if (import.meta.env.DEV) {
+        console.log('[Documents] Enviando arquivo:', {
+          fileName: selectedFile.name,
+          fileSize: selectedFile.size,
+          documentTypeId: selectedDocTypeId,
+        });
+      }
 
-      // Mock para demonstração
-      console.log('[Documents] Upload de arquivo:', {
-        fileName: selectedFile.name,
-        fileSize: selectedFile.size,
-        documentTypeId: selectedDocTypeId,
-      });
+      // Fazer upload do documento
+      await upload(formData);
 
       setSuccess(`Documento "${selectedFile.name}" enviado com sucesso!`);
       setSelectedFile(null);
       setSelectedDocTypeId(null);
+
+      // Resetar input de arquivo
+      const fileInput = document.getElementById('file-input') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
 
       // Recarregar documentos
       await loadDocuments();

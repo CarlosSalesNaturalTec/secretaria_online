@@ -25,6 +25,34 @@ import type {
 } from '@/types/document.types';
 
 /**
+ * Faz upload de um documento
+ *
+ * @param {FormData} formData - FormData contendo o arquivo e document_type_id
+ * @returns {Promise<IDocument>} Documento criado
+ * @throws {Error} Quando ocorre erro no upload
+ *
+ * @example
+ * const formData = new FormData();
+ * formData.append('file', file);
+ * formData.append('document_type_id', '1');
+ * const document = await upload(formData);
+ */
+export async function upload(formData: FormData): Promise<IDocument> {
+  try {
+    const response = await api.post<IDocumentResponse>('/documents', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return response.data.data;
+  } catch (error) {
+    console.error('[DocumentService] Erro ao fazer upload de documento:', error);
+    throw error;
+  }
+}
+
+/**
  * Lista todos os documentos com filtros opcionais
  *
  * @param {IDocumentFilters} filters - Filtros opcionais (status, userType, etc.)
