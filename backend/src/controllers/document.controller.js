@@ -100,11 +100,16 @@ class DocumentController {
         });
       }
 
+      // Converter caminho absoluto para relativo (a partir de backend/)
+      const path = require('path');
+      const backendDir = path.join(__dirname, '../../');
+      const relativePath = path.relative(backendDir, req.file.path);
+
       // Chamar serviço para fazer upload
       const document = await DocumentService.upload({
         studentId: req.user.student_id,
         documentTypeId: parseInt(document_type_id),
-        filePath: req.file.path,
+        filePath: relativePath,
         fileName: req.file.filename,
         fileSize: req.file.size,
         mimeType: req.file.mimetype,
@@ -859,6 +864,10 @@ class DocumentController {
         fileName: file.fileName,
       });
 
+      // Configurar headers para visualização inline
+      res.setHeader('Content-Type', file.mimeType);
+      res.setHeader('Content-Disposition', `inline; filename="${file.fileName}"`);
+
       // Enviar arquivo para visualização (inline)
       res.sendFile(file.filePath);
     } catch (error) {
@@ -936,8 +945,12 @@ class DocumentController {
         fileName: file.fileName,
       });
 
+      // Configurar headers para download
+      res.setHeader('Content-Type', file.mimeType);
+      res.setHeader('Content-Disposition', `attachment; filename="${file.fileName}"`);
+
       // Enviar arquivo como download
-      res.download(file.filePath, file.fileName);
+      res.sendFile(file.filePath);
     } catch (error) {
       next(error);
     }

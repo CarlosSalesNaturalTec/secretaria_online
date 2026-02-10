@@ -236,6 +236,33 @@ export function getFileUrl(id: number): string {
 }
 
 /**
+ * Visualiza um documento (retorna blob para exibição)
+ *
+ * @param {number} id - ID do documento
+ * @returns {Promise<Blob>} Blob do arquivo
+ * @throws {Error} Quando ocorre erro na visualização
+ *
+ * @example
+ * const blob = await viewFile(123);
+ * const url = window.URL.createObjectURL(blob);
+ * window.open(url, '_blank');
+ */
+export async function viewFile(id: number): Promise<Blob> {
+  try {
+    const response = await api.get(`/documents/${id}/file`, {
+      responseType: 'blob',
+    });
+
+    // Preservar o tipo MIME do arquivo da resposta
+    const contentType = response.headers['content-type'] || 'application/octet-stream';
+    return new Blob([response.data], { type: contentType });
+  } catch (error) {
+    console.error(`[DocumentService] Erro ao visualizar documento ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
  * Faz download de um documento
  *
  * @param {number} id - ID do documento

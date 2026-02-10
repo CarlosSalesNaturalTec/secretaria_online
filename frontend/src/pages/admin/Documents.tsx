@@ -211,9 +211,23 @@ export default function AdminDocuments() {
   /**
    * Visualiza documento em nova aba
    */
-  function handleView(document: IDocument) {
-    const url = documentService.getFileUrl(document.id);
-    window.open(url, '_blank');
+  async function handleView(document: IDocument) {
+    try {
+      // Buscar arquivo com autenticação
+      const blob = await documentService.viewFile(document.id);
+
+      // Criar URL temporária para o blob
+      const url = window.URL.createObjectURL(blob);
+
+      // Abrir em nova aba
+      window.open(url, '_blank');
+
+      // Liberar URL após um tempo
+      setTimeout(() => window.URL.revokeObjectURL(url), 100);
+    } catch (err) {
+      console.error('[AdminDocuments] Erro ao visualizar documento:', err);
+      alert('Erro ao visualizar documento. Tente novamente.');
+    }
   }
 
   /**

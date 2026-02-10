@@ -891,6 +891,7 @@ class DocumentService {
       return {
         filePath: fullPath,
         fileName: document.file_name,
+        mimeType: document.mime_type,
       };
     } catch (error) {
       if (error.isOperational) {
