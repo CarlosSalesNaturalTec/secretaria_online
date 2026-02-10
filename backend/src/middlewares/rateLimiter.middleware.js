@@ -34,7 +34,7 @@ const rateLimit = require('express-rate-limit');
  */
 const loginRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos em milissegundos
-  max: 5, // Limite de 5 requisições por windowMs
+  max: 20, // Limite de 20 requisições por windowMs
 
   message: {
     success: false,
@@ -80,7 +80,7 @@ const loginRateLimiter = rateLimit({
  */
 const generalRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100, // 100 requisições por windowMs
+  max: 300, // 300 requisições por windowMs
 
   message: {
     success: false,
@@ -110,7 +110,7 @@ const generalRateLimiter = rateLimit({
  */
 const passwordChangeRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 60 minutos
-  max: 3, // 3 requisições por windowMs
+  max: 10, // 10 requisições por windowMs
 
   message: {
     success: false,
