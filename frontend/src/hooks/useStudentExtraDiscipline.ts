@@ -20,6 +20,7 @@ import {
 import type {
   UseQueryResult,
   UseMutationResult,
+  QueryKey,
 } from '@tanstack/react-query';
 import StudentExtraDisciplineService from '@/services/studentExtraDiscipline.service';
 import type {
@@ -40,10 +41,10 @@ import type {
 export const studentExtraDisciplineKeys = {
   all: ['studentExtraDisciplines'] as const,
   byStudent: (studentId: number) => ['studentExtraDisciplines', 'student', studentId] as const,
-  fullSchedule: (studentId: number, courseId?: number | null) =>
+  fullSchedule: (studentId: number, courseId?: number | null): QueryKey =>
     courseId
-      ? ['studentExtraDisciplines', 'fullSchedule', studentId, courseId] as const
-      : ['studentExtraDisciplines', 'fullSchedule', studentId] as const,
+      ? ['studentExtraDisciplines', 'fullSchedule', studentId, courseId]
+      : ['studentExtraDisciplines', 'fullSchedule', studentId],
   byId: (id: number) => ['studentExtraDisciplines', 'detail', id] as const,
   byDiscipline: (disciplineId: number) => ['studentExtraDisciplines', 'discipline', disciplineId] as const,
 };
