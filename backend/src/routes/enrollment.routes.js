@@ -168,8 +168,8 @@ router.put(
       .isInt({ min: 1 })
       .withMessage('ID deve ser um inteiro positivo'),
     body('status')
-      .isIn(['pending', 'active', 'cancelled', 'reenrollment', 'completed'])
-      .withMessage("status deve ser 'pending', 'active', 'cancelled', 'reenrollment' ou 'completed'"),
+      .isIn(['pending', 'active', 'cancelled', 'reenrollment', 'completed', 'contract'])
+      .withMessage("status deve ser 'pending', 'active', 'cancelled', 'reenrollment', 'completed' ou 'contract'"),
   ],
   handleValidationErrors,
   EnrollmentController.updateStatus
