@@ -40,7 +40,10 @@ import type {
 export const studentExtraDisciplineKeys = {
   all: ['studentExtraDisciplines'] as const,
   byStudent: (studentId: number) => ['studentExtraDisciplines', 'student', studentId] as const,
-  fullSchedule: (studentId: number) => ['studentExtraDisciplines', 'fullSchedule', studentId] as const,
+  fullSchedule: (studentId: number, courseId?: number | null) =>
+    courseId
+      ? ['studentExtraDisciplines', 'fullSchedule', studentId, courseId] as const
+      : ['studentExtraDisciplines', 'fullSchedule', studentId] as const,
   byId: (id: number) => ['studentExtraDisciplines', 'detail', id] as const,
   byDiscipline: (disciplineId: number) => ['studentExtraDisciplines', 'discipline', disciplineId] as const,
 };
@@ -90,15 +93,16 @@ export function useStudentExtraDisciplines(
  * console.log(fullSchedule?.extraDisciplineSchedules);
  */
 export function useStudentFullSchedule(
-  studentId: number
+  studentId: number,
+  courseId?: number | null
 ): UseQueryResult<IStudentFullSchedule, Error> {
   return useQuery<IStudentFullSchedule, Error>({
-    queryKey: studentExtraDisciplineKeys.fullSchedule(studentId),
+    queryKey: studentExtraDisciplineKeys.fullSchedule(studentId, courseId),
     queryFn: async () => {
       if (import.meta.env.DEV) {
-        console.log('[useStudentExtraDiscipline] Buscando grade completa do aluno:', studentId);
+        console.log('[useStudentExtraDiscipline] Buscando grade completa do aluno:', studentId, courseId ?? 'todos');
       }
-      return StudentExtraDisciplineService.getFullSchedule(studentId);
+      return StudentExtraDisciplineService.getFullSchedule(studentId, courseId);
     },
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
@@ -317,7 +321,7 @@ export interface IUseStudentExtraDisciplineReturn {
     filters?: IStudentExtraDisciplineFilters
   ) => UseQueryResult<IStudentExtraDiscipline[], Error>;
   /** Query para grade completa do aluno */
-  getFullSchedule: (studentId: number) => UseQueryResult<IStudentFullSchedule, Error>;
+  getFullSchedule: (studentId: number, courseId?: number | null) => UseQueryResult<IStudentFullSchedule, Error>;
   /** Query para disciplina extra específica */
   getExtraDisciplineById: (id: number) => UseQueryResult<IStudentExtraDiscipline, Error>;
   /** Query para alunos com uma disciplina extra */

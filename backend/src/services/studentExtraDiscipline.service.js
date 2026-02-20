@@ -14,6 +14,7 @@ const {
   ClassTeacher,
   ClassSchedule,
   Teacher,
+  Course,
   sequelize
 } = require('../models');
 const { Op } = require('sequelize');
@@ -224,7 +225,9 @@ class StudentExtraDisciplineService {
    * @param {number} studentId - ID do aluno
    * @returns {Promise<Object>} Grade completa organizada
    */
-  async getStudentFullSchedule(studentId) {
+  async getStudentFullSchedule(studentId, options = {}) {
+    const { courseId } = options;
+
     // Verificar se o aluno existe
     const student = await Student.findByPk(studentId);
     if (!student) {
@@ -237,7 +240,42 @@ class StudentExtraDisciplineService {
       attributes: ['class_id']
     });
 
-    const classIds = studentClasses.map(sc => sc.class_id);
+    const allClassIds = studentClasses.map(sc => sc.class_id);
+
+    // 2. Buscar cursos únicos do aluno (via turmas)
+    let courses = [];
+    if (allClassIds.length > 0) {
+      const classesWithCourse = await Class.findAll({
+        where: { id: { [Op.in]: allClassIds } },
+        attributes: ['id', 'course_id'],
+        include: [
+          {
+            model: Course,
+            as: 'course',
+            attributes: ['id', 'name']
+          }
+        ]
+      });
+
+      const coursesMap = new Map();
+      classesWithCourse.forEach(cls => {
+        if (cls.course && !coursesMap.has(cls.course.id)) {
+          coursesMap.set(cls.course.id, { id: cls.course.id, name: cls.course.name });
+        }
+      });
+      courses = Array.from(coursesMap.values());
+    }
+
+    // Filtrar turmas pelo curso selecionado, se fornecido
+    let classIds = allClassIds;
+    if (courseId) {
+      const courseIdNum = parseInt(courseId, 10);
+      const filteredClasses = await Class.findAll({
+        where: { id: { [Op.in]: allClassIds }, course_id: courseIdNum },
+        attributes: ['id']
+      });
+      classIds = filteredClasses.map(cls => cls.id);
+    }
 
     // 2. Buscar horários das turmas principais
     let mainClassSchedules = [];
@@ -327,6 +365,7 @@ class StudentExtraDisciplineService {
     }
 
     return {
+      courses,
       mainClassSchedules: mainClassSchedules.map(s => this.formatSchedule(s)),
       extraDisciplineSchedules: extraDisciplineSchedules.map(s => this.formatSchedule(s)),
       extraDisciplines: extraDisciplines.map(ed => this.formatExtraDiscipline(ed)),

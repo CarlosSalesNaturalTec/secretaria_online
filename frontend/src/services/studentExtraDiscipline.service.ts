@@ -182,19 +182,22 @@ export async function getById(id: number): Promise<IStudentExtraDiscipline> {
  *   console.error('Erro ao buscar grade completa:', error);
  * }
  */
-export async function getFullSchedule(studentId: number): Promise<IStudentFullSchedule> {
+export async function getFullSchedule(studentId: number, courseId?: number | null): Promise<IStudentFullSchedule> {
   try {
     if (!studentId || studentId <= 0) {
       throw new Error('ID do aluno é obrigatório e deve ser maior que zero');
     }
 
     if (import.meta.env.DEV) {
-      console.log('[StudentExtraDisciplineService] Buscando grade completa do aluno:', studentId);
+      console.log('[StudentExtraDisciplineService] Buscando grade completa do aluno:', studentId, courseId ?? 'todos');
     }
 
-    const response = await api.get<ApiResponse<IStudentFullSchedule>>(
-      `/students/${studentId}/full-schedule`
-    );
+    const params = new URLSearchParams();
+    if (courseId) params.append('courseId', String(courseId));
+    const queryString = params.toString();
+    const url = `/students/${studentId}/full-schedule${queryString ? `?${queryString}` : ''}`;
+
+    const response = await api.get<ApiResponse<IStudentFullSchedule>>(url);
 
     if (!response.data.success || !response.data.data) {
       throw new Error(
@@ -518,7 +521,7 @@ export async function getByDiscipline(
 const StudentExtraDisciplineService = {
   getByStudent,
   getById,
-  getFullSchedule,
+  getFullSchedule: (studentId: number, courseId?: number | null) => getFullSchedule(studentId, courseId),
   create,
   update,
   delete: deleteExtraDiscipline,

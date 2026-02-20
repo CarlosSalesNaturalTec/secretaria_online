@@ -170,7 +170,11 @@ class StudentExtraDisciplineController {
         }
       }
 
-      const fullSchedule = await studentExtraDisciplineService.getStudentFullSchedule(parseInt(studentId, 10));
+      const { courseId } = req.query;
+      const fullSchedule = await studentExtraDisciplineService.getStudentFullSchedule(
+        parseInt(studentId, 10),
+        { courseId: courseId ? parseInt(courseId, 10) : null }
+      );
       res.status(200).json({ success: true, data: fullSchedule });
     } catch (error) {
       if (error.message.includes('não encontrado')) {

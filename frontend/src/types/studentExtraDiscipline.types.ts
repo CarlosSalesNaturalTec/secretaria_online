@@ -305,6 +305,11 @@ export interface IStudentExtraDisciplineUpdateRequest {
  */
 export interface IStudentFullSchedule {
   /**
+   * Cursos ativos do aluno
+   */
+  courses: Array<{ id: number; name: string }>;
+
+  /**
    * Horários da turma principal
    */
   mainClassSchedules: IClassSchedule[];
