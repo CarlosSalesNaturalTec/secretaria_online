@@ -7,7 +7,7 @@
  * Atualizado em: 2025-11-03
  */
 
-const { Request, RequestType, User, Student, Enrollment, Course } = require('../models');
+const { Request, RequestType, User, Student, Enrollment, Course, Class, ClassStudent, ClassSchedule } = require('../models');
 const AtestadoMatriculaService = require('../services/atestadoMatricula.service');
 
 /**
@@ -870,6 +870,36 @@ async function handleAtestadoGeneration(request) {
 
     console.log(`[AtestadoGeneration] Aluno encontrado: ${student.nome}`);
 
+    // Buscar IDs das turmas do aluno via tabela pivot ClassStudent
+    const studentClassLinks = await ClassStudent.findAll({
+      where: { student_id: request.student_id },
+      attributes: ['class_id'],
+    });
+    const allClassIds = studentClassLinks.map((sc) => sc.class_id);
+
+    // Filtrar apenas as turmas que pertencem ao curso ativo do aluno
+    let schedules = [];
+    if (allClassIds.length > 0) {
+      const courseClasses = await Class.findAll({
+        where: { id: allClassIds, course_id: enrollment.course_id },
+        attributes: ['id'],
+      });
+      const courseClassIds = courseClasses.map((cls) => cls.id);
+
+      if (courseClassIds.length > 0) {
+        schedules = await ClassSchedule.findAll({
+          where: { class_id: courseClassIds },
+          include: [
+            { association: 'discipline', attributes: ['id', 'name', 'code'] },
+            { association: 'teacher', attributes: ['id', 'nome'] },
+          ],
+          order: [['day_of_week', 'ASC'], ['start_time', 'ASC']],
+        });
+      }
+    }
+
+    console.log(`[AtestadoGeneration] Grade de horários: ${schedules.length} entrada(s)`);
+
     // Gerar hash único de 16 chars
     const signatureHash = await AtestadoMatriculaService.generateUniqueHash();
     console.log(`[AtestadoGeneration] Hash gerado: ${signatureHash}`);
@@ -884,6 +914,7 @@ async function handleAtestadoGeneration(request) {
       enrollmentDate: enrollment.enrollment_date,
       currentSemester: enrollment.current_semester,
       signatureHash,
+      schedules,
     });
 
     console.log(`[AtestadoGeneration] PDF gerado: ${pdfResult.relativePath}`);

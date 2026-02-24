@@ -342,6 +342,9 @@ class AtestadoMatriculaService {
         { align: 'justify', width: contentWidth, lineGap: 4 }
       );
 
+    // ── GRADE DE HORÁRIOS ─────────────────────────────────────────────────
+    this._addScheduleSection(doc, data.schedules || [], marginLeft, contentWidth);
+
     doc.moveDown(2.5);
 
     // ── LOCAL E DATA ──────────────────────────────────────────────────────
@@ -423,6 +426,134 @@ class AtestadoMatriculaService {
         footerY + 32,
         { align: 'center', width: contentWidth }
       );
+  }
+
+  /**
+   * Adiciona a grade de horários da turma ao documento PDF.
+   * Desenha uma tabela com colunas: Dia | Horário | Disciplina | Professor.
+   * Não renderiza nada se schedules estiver vazio.
+   *
+   * @param {PDFDocument} doc          - Instância do documento PDFKit
+   * @param {Array}       schedules    - Lista de ClassSchedule (com discipline e teacher incluídos)
+   * @param {number}      marginLeft   - Margem esquerda em pontos
+   * @param {number}      contentWidth - Largura disponível para conteúdo
+   * @private
+   */
+  static _addScheduleSection(doc, schedules, marginLeft, contentWidth) {
+    if (!schedules || schedules.length === 0) return;
+
+    const DAY_NAMES = {
+      1: 'Segunda-feira',
+      2: 'Terça-feira',
+      3: 'Quarta-feira',
+      4: 'Quinta-feira',
+      5: 'Sexta-feira',
+      6: 'Sábado',
+      7: 'Domingo',
+    };
+
+    doc.moveDown(1.5);
+
+    // Título da seção
+    doc
+      .font('Helvetica-Bold')
+      .fontSize(11)
+      .fillColor('#003580')
+      .text('GRADE DE HORÁRIOS', marginLeft, doc.y, {
+        align: 'center',
+        width: contentWidth,
+      });
+
+    doc.moveDown(0.5);
+
+    // Definição das colunas: Dia | Horário | Disciplina | Professor
+    const colWidths = [120, 90, 185, 100];
+    const headers = ['Dia', 'Horário', 'Disciplina', 'Professor'];
+    const headerHeight = 20;
+    const rowHeight = 18;
+    const padX = 4;
+    const padY = 4;
+
+    let tableY = doc.y;
+    const tableStartY = tableY;
+
+    // ── Cabeçalho da tabela ────────────────────────────────────────────────
+    doc.rect(marginLeft, tableY, contentWidth, headerHeight).fill('#003580');
+
+    doc.font('Helvetica-Bold').fontSize(8).fillColor('#ffffff');
+    let colX = marginLeft;
+    headers.forEach((h, i) => {
+      doc.text(h, colX + padX, tableY + padY, {
+        width: colWidths[i] - padX * 2,
+        lineBreak: false,
+      });
+      colX += colWidths[i];
+    });
+
+    tableY += headerHeight;
+
+    // ── Linhas de dados ────────────────────────────────────────────────────
+    schedules.forEach((schedule, index) => {
+      const rowBg = index % 2 === 0 ? '#eef2ff' : '#ffffff';
+
+      doc.rect(marginLeft, tableY, contentWidth, rowHeight).fill(rowBg);
+
+      colX = marginLeft;
+      doc.font('Helvetica').fontSize(8).fillColor('#111111');
+
+      // Dia da semana
+      doc.text(DAY_NAMES[schedule.day_of_week] || '', colX + padX, tableY + padY, {
+        width: colWidths[0] - padX * 2,
+        lineBreak: false,
+      });
+      colX += colWidths[0];
+
+      // Horário (HH:MM – HH:MM)
+      const start = (schedule.start_time || '').substring(0, 5);
+      const end = (schedule.end_time || '').substring(0, 5);
+      doc.text(`${start} – ${end}`, colX + padX, tableY + padY, {
+        width: colWidths[1] - padX * 2,
+        lineBreak: false,
+      });
+      colX += colWidths[1];
+
+      // Disciplina
+      doc.text(schedule.discipline?.name || '', colX + padX, tableY + padY, {
+        width: colWidths[2] - padX * 2,
+        lineBreak: false,
+      });
+      colX += colWidths[2];
+
+      // Professor
+      doc.text(schedule.teacher?.nome || '–', colX + padX, tableY + padY, {
+        width: colWidths[3] - padX * 2,
+        lineBreak: false,
+      });
+
+      tableY += rowHeight;
+    });
+
+    // ── Borda externa da tabela ────────────────────────────────────────────
+    doc
+      .rect(marginLeft, tableStartY, contentWidth, tableY - tableStartY)
+      .lineWidth(0.5)
+      .strokeColor('#003580')
+      .stroke();
+
+    // ── Divisórias verticais entre colunas ────────────────────────────────
+    colX = marginLeft;
+    [colWidths[0], colWidths[1], colWidths[2]].forEach((w) => {
+      colX += w;
+      doc
+        .moveTo(colX, tableStartY)
+        .lineTo(colX, tableY)
+        .lineWidth(0.3)
+        .strokeColor('#aaaaaa')
+        .stroke();
+    });
+
+    // Avança o cursor para abaixo da tabela
+    doc.y = tableY;
   }
 
   /**
