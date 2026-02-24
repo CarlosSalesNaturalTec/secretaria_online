@@ -236,8 +236,33 @@ class AtestadoMatriculaService {
       });
     }
 
-    // Linha separadora abaixo dos logos
-    const headerBottom = 110;
+    // ── DADOS INSTITUCIONAIS (centralizados abaixo das logos) ─────────────
+    const institutionTop = 40 + logoHeight + 8;
+
+    doc
+      .font('Helvetica-Bold')
+      .fontSize(9)
+      .fillColor('#003580')
+      .text(
+        'INSTITUTO DE RESPONSABILIDADE SOCIAL - FILHOS DA TERRA',
+        marginLeft,
+        institutionTop,
+        { align: 'center', width: contentWidth }
+      );
+
+    doc
+      .font('Helvetica')
+      .fontSize(8)
+      .fillColor('#444444');
+
+    doc.text('Rua Irênio Marques da Silva 280 Alto da Jacobina Queimadas-Bahia – Cep 48860-000', { align: 'center', width: contentWidth });
+    doc.text('Contato: 71 92003 7114 / 71 99915 7754', { align: 'center', width: contentWidth });
+    doc.text('E-mail.: atendimento@ifterra.org.br', { align: 'center', width: contentWidth });
+    doc.text('Cnpj: 56.194.857/0001-44', { align: 'center', width: contentWidth });
+    doc.text('Site.: www.ifterra.org.br', { align: 'center', width: contentWidth });
+
+    // Linha separadora abaixo dos dados institucionais
+    const headerBottom = doc.y + 8;
     doc
       .moveTo(marginLeft, headerBottom)
       .lineTo(pageWidth - marginRight, headerBottom)
