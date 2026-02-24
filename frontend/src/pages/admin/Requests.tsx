@@ -24,6 +24,7 @@ import {
   User,
   Calendar,
   AlertTriangle,
+  Download,
 } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import * as requestService from '@/services/request.service';
@@ -32,6 +33,17 @@ import type {
   RequestStatus,
   IRequestStats,
 } from '@/types/request.types';
+
+/**
+ * Verifica se a solicitação é do tipo "Pedido de Atestado" e possui PDF gerado
+ */
+function hasAtestadoPDF(request: IRequest): boolean {
+  return (
+    request.status === 'approved' &&
+    !!request.signatureHash &&
+    !!request.pdfPath
+  );
+}
 
 /**
  * Cores de status para badges
@@ -85,6 +97,7 @@ export default function AdminRequests() {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState<boolean>(false);
   const [observations, setObservations] = useState<string>('');
   const [actionLoading, setActionLoading] = useState<boolean>(false);
+  const [downloadingId, setDownloadingId] = useState<number | null>(null);
 
   /**
    * Carrega solicitações e estatísticas ao montar o componente ou mudar filtro
@@ -205,6 +218,21 @@ export default function AdminRequests() {
       alert('Erro ao rejeitar solicitação. Tente novamente.');
     } finally {
       setActionLoading(false);
+    }
+  }
+
+  /**
+   * Realiza o download do PDF do atestado de matrícula
+   */
+  async function handleDownloadAtestado(request: IRequest) {
+    try {
+      setDownloadingId(request.id);
+      await requestService.downloadAtestado(request.id);
+    } catch (err) {
+      console.error('[AdminRequests] Erro ao baixar atestado:', err);
+      alert('Erro ao baixar o atestado. Tente novamente.');
+    } finally {
+      setDownloadingId(null);
     }
   }
 
@@ -504,6 +532,20 @@ export default function AdminRequests() {
                             </button>
                           </>
                         )}
+                        {hasAtestadoPDF(request) && (
+                          <button
+                            onClick={() => handleDownloadAtestado(request)}
+                            disabled={downloadingId === request.id}
+                            className="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50 disabled:opacity-50"
+                            title="Baixar Atestado de Matrícula"
+                          >
+                            {downloadingId === request.id ? (
+                              <div className="animate-spin rounded-full h-[18px] w-[18px] border-b-2 border-indigo-600" />
+                            ) : (
+                              <Download size={18} />
+                            )}
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -623,6 +665,31 @@ export default function AdminRequests() {
                         {selectedRequest.observations}
                       </p>
                     </div>
+                  </div>
+                )}
+
+                {hasAtestadoPDF(selectedRequest) && (
+                  <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                    <p className="text-sm text-indigo-700 font-semibold mb-2 flex items-center gap-2">
+                      <FileText size={16} />
+                      Atestado de Matrícula Disponível
+                    </p>
+                    <p className="text-xs text-indigo-600 mb-3">
+                      Hash de assinatura:{' '}
+                      <span className="font-mono font-bold">{selectedRequest.signatureHash}</span>
+                    </p>
+                    <button
+                      onClick={() => handleDownloadAtestado(selectedRequest)}
+                      disabled={downloadingId === selectedRequest.id}
+                      className="flex items-center gap-2 px-3 py-2 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                    >
+                      {downloadingId === selectedRequest.id ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                      ) : (
+                        <Download size={16} />
+                      )}
+                      Baixar Atestado PDF
+                    </button>
                   </div>
                 )}
               </>

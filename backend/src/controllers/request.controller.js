@@ -7,7 +7,8 @@
  * Atualizado em: 2025-11-03
  */
 
-const { Request, RequestType, User, Student } = require('../models');
+const { Request, RequestType, User, Student, Enrollment, Course } = require('../models');
+const AtestadoMatriculaService = require('../services/atestadoMatricula.service');
 
 /**
  * Controller de Solicitações
@@ -465,8 +466,6 @@ class RequestController {
 
       // Se for renovação de matrícula, atualizar o status do enrollment
       if (request.requestType && request.requestType.name === 'Matrícula - Renovação') {
-        const { Enrollment } = require('../models');
-
         // Buscar enrollment ativo do aluno
         const enrollment = await Enrollment.findOne({
           where: {
@@ -483,6 +482,14 @@ class RequestController {
         } else {
           console.warn(`[RequestController] Enrollment não encontrado para o aluno ${request.student_id}`);
         }
+      }
+
+      // Se for pedido de atestado de matrícula, gerar PDF automaticamente
+      const typeName = request.requestType ? request.requestType.name : null;
+      console.log(`[RequestController] Tipo da solicitação aprovada: "${typeName}" (ID: ${id})`);
+
+      if (typeName === 'Matrícula - Pedido de Atestado') {
+        await handleAtestadoGeneration(request);
       }
 
       // Recarregar com relações
@@ -659,6 +666,93 @@ class RequestController {
   }
 
   /**
+   * Realiza o download do PDF do Atestado de Matrícula.
+   *
+   * Acessível por administradores (qualquer solicitação) e
+   * pelo próprio aluno (apenas suas solicitações).
+   *
+   * @param {object} req - Objeto de requisição do Express
+   * @param {object} res - Objeto de resposta do Express
+   * @returns {Promise<void>}
+   */
+  async downloadAtestado(req, res) {
+    try {
+      const { id } = req.params;
+      const { user } = req;
+
+      // Buscar solicitação
+      const request = await Request.findOne({
+        where: { id, deleted_at: null },
+        include: [{ association: 'requestType', attributes: ['id', 'name'] }],
+      });
+
+      if (!request) {
+        return res.status(404).json({
+          success: false,
+          error: { code: 'REQUEST_NOT_FOUND', message: 'Solicitação não encontrada' },
+        });
+      }
+
+      // Verificar permissão de acesso
+      if (user.role === 'student' && request.student_id !== user.student_id) {
+        return res.status(403).json({
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Você não tem permissão para acessar este atestado' },
+        });
+      }
+
+      // Verificar se existe PDF gerado
+      if (!request.pdf_path) {
+        return res.status(404).json({
+          success: false,
+          error: { code: 'PDF_NOT_FOUND', message: 'Atestado PDF não disponível para esta solicitação' },
+        });
+      }
+
+      const path = require('path');
+      const fs = require('fs');
+      const absolutePath = path.resolve(process.cwd(), request.pdf_path);
+
+      if (!fs.existsSync(absolutePath)) {
+        return res.status(404).json({
+          success: false,
+          error: { code: 'FILE_NOT_FOUND', message: 'Arquivo do atestado não encontrado no servidor' },
+        });
+      }
+
+      // Enviar arquivo
+      const fileName = `atestado_matricula_${id}.pdf`;
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+
+      const fileStream = fs.createReadStream(absolutePath);
+      fileStream.pipe(res);
+
+      fileStream.on('error', (err) => {
+        console.error(`[RequestController] Erro ao enviar atestado ${id}:`, err.message);
+        if (!res.headersSent) {
+          res.status(500).json({
+            success: false,
+            error: { code: 'STREAM_ERROR', message: 'Erro ao enviar arquivo' },
+          });
+        }
+      });
+
+      console.log(`[RequestController] Download do atestado ${id} por usuário ${user.id} (${user.role})`);
+    } catch (error) {
+      console.error('[RequestController] Erro ao fazer download do atestado:', error);
+      return res.status(500).json({
+        success: false,
+        error: {
+          code: 'INTERNAL_ERROR',
+          message: 'Erro ao realizar download do atestado',
+          details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+        },
+      });
+    }
+  }
+
+  /**
    * Listar todos os tipos de solicitação
    *
    * Retorna lista de todos os tipos de solicitação disponíveis no sistema.
@@ -723,6 +817,93 @@ class RequestController {
         }
       });
     }
+  }
+}
+
+/**
+ * Gera o PDF do Atestado de Matrícula quando uma solicitação do tipo
+ * "Matrícula - Pedido de Atestado" é aprovada e a matrícula do aluno está ativa.
+ *
+ * Função autônoma (fora da classe) para evitar perda de contexto `this`
+ * ao ser chamada como callback de rota do Express.
+ *
+ * @param {Object} request - Instância do model Request (já aprovada)
+ * @returns {Promise<void>}
+ */
+async function handleAtestadoGeneration(request) {
+  console.log(`[AtestadoGeneration] Iniciando geração para solicitação ${request.id}, aluno ${request.student_id}`);
+  try {
+    // Buscar matrícula ativa do aluno
+    const enrollment = await Enrollment.findOne({
+      where: {
+        student_id: request.student_id,
+        status: 'active',
+        deleted_at: null,
+      },
+      include: [
+        {
+          association: 'course',
+          attributes: ['id', 'name'],
+        },
+      ],
+      order: [['created_at', 'DESC']],
+    });
+
+    if (!enrollment) {
+      console.warn(
+        `[AtestadoGeneration] Atestado não gerado: aluno ${request.student_id} não possui matrícula ativa.`
+      );
+      return;
+    }
+
+    console.log(`[AtestadoGeneration] Enrollment ativo encontrado: ID ${enrollment.id}, curso: ${enrollment.course?.name}`);
+
+    // Buscar dados do aluno
+    const student = await Student.findByPk(request.student_id, {
+      attributes: ['id', 'nome', 'cpf', 'matricula'],
+    });
+
+    if (!student) {
+      console.warn(`[AtestadoGeneration] Atestado não gerado: aluno ${request.student_id} não encontrado.`);
+      return;
+    }
+
+    console.log(`[AtestadoGeneration] Aluno encontrado: ${student.nome}`);
+
+    // Gerar hash único de 16 chars
+    const signatureHash = await AtestadoMatriculaService.generateUniqueHash();
+    console.log(`[AtestadoGeneration] Hash gerado: ${signatureHash}`);
+
+    // Gerar PDF com PDFKit
+    const pdfResult = await AtestadoMatriculaService.generateAtestadoPDF({
+      requestId: request.id,
+      studentName: student.nome,
+      studentCpf: student.cpf,
+      studentMatricula: student.matricula,
+      courseName: enrollment.course ? enrollment.course.name : 'Curso não informado',
+      enrollmentDate: enrollment.enrollment_date,
+      currentSemester: enrollment.current_semester,
+      signatureHash,
+    });
+
+    console.log(`[AtestadoGeneration] PDF gerado: ${pdfResult.relativePath}`);
+
+    // Salvar pdf_path e signature_hash na solicitação
+    await request.update({
+      pdf_path: pdfResult.relativePath,
+      signature_hash: signatureHash,
+    });
+
+    console.log(
+      `[AtestadoGeneration] Atestado salvo com sucesso para solicitação ${request.id} ` +
+        `(Hash: ${signatureHash}, Arquivo: ${pdfResult.fileName})`
+    );
+  } catch (error) {
+    // Log completo do erro sem interromper o fluxo de aprovação
+    console.error(
+      `[AtestadoGeneration] ERRO na solicitação ${request.id}:`,
+      error
+    );
   }
 }
 

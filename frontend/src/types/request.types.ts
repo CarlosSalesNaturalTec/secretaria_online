@@ -37,6 +37,11 @@ export interface IRequest {
   createdAt: string;
   updatedAt: string;
 
+  // Atestado de Matrícula - gerado automaticamente ao aprovar solicitação
+  // do tipo "Matrícula - Pedido de Atestado" com matrícula ativa
+  pdfPath?: string | null;
+  signatureHash?: string | null;
+
   // Relacionamentos
   student?: {
     id: number;

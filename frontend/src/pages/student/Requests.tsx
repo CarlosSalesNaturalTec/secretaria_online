@@ -23,6 +23,7 @@ import {
   XCircle,
   Filter,
   ChevronDown,
+  Download,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import {
@@ -30,6 +31,7 @@ import {
   getAll,
   getRequestTypes,
   calculateExpectedDate,
+  downloadAtestado,
 } from '@/services/request.service';
 import type { IRequest, RequestStatus, IRequestType } from '@/types/request.types';
 
@@ -57,6 +59,7 @@ export default function Requests() {
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [showForm, setShowForm] = useState(false);
   const [expandedRequestId, setExpandedRequestId] = useState<number | null>(null);
+  const [downloadingId, setDownloadingId] = useState<number | null>(null);
 
   // Form state
   const [selectedTypeId, setSelectedTypeId] = useState<number | null>(null);
@@ -162,6 +165,23 @@ export default function Requests() {
       );
     } finally {
       setCreating(false);
+    }
+  };
+
+  /**
+   * Realiza o download do PDF do Atestado de Matrícula
+   *
+   * @param {number} requestId - ID da solicitação
+   */
+  const handleDownloadAtestado = async (requestId: number) => {
+    try {
+      setDownloadingId(requestId);
+      await downloadAtestado(requestId);
+    } catch (err) {
+      console.error('[Requests] Erro ao baixar atestado:', err);
+      setError('Erro ao baixar o atestado. Tente novamente.');
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -614,6 +634,32 @@ export default function Requests() {
                             </div>
                           )}
                         </div>
+                      </div>
+                    )}
+
+                    {/* Download do Atestado de Matrícula */}
+                    {request.status === 'approved' && request.signatureHash && request.pdfPath && (
+                      <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
+                        <p className="text-sm font-semibold text-indigo-800 mb-1 flex items-center gap-2">
+                          <FileText className="w-4 h-4" />
+                          Atestado de Matrícula Disponível
+                        </p>
+                        <p className="text-xs text-indigo-600 mb-3">
+                          Assinatura eletrônica:{' '}
+                          <span className="font-mono font-bold">{request.signatureHash}</span>
+                        </p>
+                        <button
+                          onClick={() => handleDownloadAtestado(request.id)}
+                          disabled={downloadingId === request.id}
+                          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {downloadingId === request.id ? (
+                            <Clock className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Download className="w-4 h-4" />
+                          )}
+                          {downloadingId === request.id ? 'Baixando...' : 'Baixar Atestado PDF'}
+                        </button>
                       </div>
                     )}
                   </div>

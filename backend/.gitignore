@@ -23,6 +23,7 @@ pids/
 uploads/documents/*
 uploads/contracts/*
 uploads/temp/*
+uploads/atestados/*
 !uploads/documents/.gitkeep
 !uploads/contracts/.gitkeep
 !uploads/temp/.gitkeep

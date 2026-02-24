@@ -78,6 +78,9 @@ const classScheduleRoutes = require('./classSchedule.routes');
 // Disciplinas Extras de Alunos (feat-002)
 const studentExtraDisciplineRoutes = require('./studentExtraDiscipline.routes');
 
+// Rotas Públicas - verificação de documentos (sem autenticação)
+const publicRoutes = require('./public.routes');
+
 // ============================================================================
 // INICIALIZAÇÃO DO ROUTER
 // ============================================================================
@@ -381,6 +384,17 @@ router.use('/', classScheduleRoutes);
  * Permissões: Admin (CRUD), Student (própria grade e disciplinas extras)
  */
 router.use('/', studentExtraDisciplineRoutes);
+
+/**
+ * Rotas Públicas (sem autenticação)
+ * Base: /api/v1/public
+ *
+ * Endpoints:
+ * - GET /public/verify-atestado/:hash - Verificar autenticidade de atestado de matrícula
+ *
+ * Permissões: Público (sem autenticação)
+ */
+router.use('/public', publicRoutes);
 
 // ============================================================================
 // EXPORTAÇÃO

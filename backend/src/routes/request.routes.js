@@ -206,4 +206,20 @@ router.put(
   RequestController.reject
 );
 
+/**
+ * @route   GET /api/requests/:id/download-atestado
+ * @desc    Download do PDF do Atestado de Matrícula gerado ao aprovar a solicitação
+ * @access  Admin (qualquer solicitação), Aluno (apenas suas próprias)
+ *
+ * @example
+ * GET /api/requests/5/download-atestado
+ * Response: arquivo PDF para download
+ */
+router.get(
+  '/:id/download-atestado',
+  authenticate,
+  authorize('admin', 'student'),
+  RequestController.downloadAtestado
+);
+
 module.exports = router;

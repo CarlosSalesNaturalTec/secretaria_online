@@ -98,6 +98,17 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
         comment: 'Observações do revisor sobre a aprovação/rejeição',
       },
+      pdf_path: {
+        type: DataTypes.STRING(500),
+        allowNull: true,
+        comment: 'Caminho relativo do PDF gerado para atestados de matrícula',
+      },
+      signature_hash: {
+        type: DataTypes.STRING(16),
+        allowNull: true,
+        unique: true,
+        comment: 'Hash de assinatura eletrônica (16 chars hex) para validação pública',
+      },
       deleted_at: {
         type: DataTypes.DATE,
         allowNull: true,

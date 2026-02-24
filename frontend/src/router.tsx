@@ -20,6 +20,11 @@ import { PrivateRoute } from './components';
 import Login from './pages/auth/Login';
 
 /**
+ * Página Pública - Verificação de Atestado de Matrícula (sem autenticação)
+ */
+const VerifyAtestado = lazy(() => import('./pages/public/VerifyAtestado'));
+
+/**
  * Layouts
  */
 import DashboardLayout from './components/layout/DashboardLayout';
@@ -99,6 +104,15 @@ const publicRoutes: RouteObject[] = [
     path: '/login',
     element: <Login />,
     errorElement: <div>Erro ao carregar página de login</div>,
+  },
+  {
+    path: '/verificar-atestado',
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <VerifyAtestado />
+      </Suspense>
+    ),
+    errorElement: <div>Erro ao carregar página de verificação</div>,
   },
 ];
 

@@ -254,6 +254,78 @@ export async function getRequestTypes(): Promise<IRequestType[]> {
 }
 
 /**
+ * Realiza o download do PDF do Atestado de Matrícula de uma solicitação aprovada.
+ * Abre o arquivo em uma nova aba ou força o download no navegador.
+ *
+ * @param {number} id - ID da solicitação
+ * @returns {Promise<void>}
+ * @throws {Error} Quando ocorre erro ao baixar o arquivo
+ *
+ * @example
+ * await downloadAtestado(123);
+ */
+export async function downloadAtestado(id: number): Promise<void> {
+  try {
+    const response = await api.get(`/requests/${id}/download-atestado`, {
+      responseType: 'blob',
+    });
+
+    const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `atestado_matricula_${id}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error(`[RequestService] Erro ao baixar atestado ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Verifica a autenticidade de um atestado pelo hash (chamada pública, sem token).
+ *
+ * @param {string} hash - Hash de 16 caracteres hexadecimais
+ * @returns {Promise<IAtestadoVerificationResult>} Resultado da verificação
+ * @throws {Error} Quando ocorre erro na verificação
+ */
+export async function verifyAtestado(hash: string): Promise<IAtestadoVerificationResult> {
+  try {
+    const response = await api.get<IAtestadoVerificationResult>(
+      `/public/verify-atestado/${hash}`,
+      { headers: { Authorization: undefined } }
+    );
+    return response.data;
+  } catch (error) {
+    console.error(`[RequestService] Erro ao verificar atestado hash ${hash}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Resultado da verificação pública de um atestado
+ */
+export interface IAtestadoVerificationResult {
+  success: boolean;
+  valid: boolean;
+  message?: string;
+  data?: {
+    studentName: string;
+    studentMatricula: number | null;
+    courseName: string;
+    issuedAt: string;
+    signatureHash: string;
+    requestId: number;
+  };
+  error?: {
+    code: string;
+    message: string;
+  };
+}
+
+/**
  * Calcula prazo estimado de resposta
  *
  * @param {Date} createdAt - Data de criação da solicitação
