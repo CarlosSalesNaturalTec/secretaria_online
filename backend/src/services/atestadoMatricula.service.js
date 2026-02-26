@@ -438,12 +438,14 @@ class AtestadoMatriculaService {
         { align: 'center', width: contentWidth, lineBreak: false }
       );
 
+    const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
+
     doc
       .font('Helvetica')
       .fontSize(7)
       .fillColor('#888888')
       .text(
-        'Para verificar a autenticidade deste documento acesse: /verificar-atestado',
+        `Verifique a autenticidade em: ${frontendUrl}/verificar-atestado`,
         marginLeft,
         footerY + 34,
         { align: 'center', width: contentWidth, lineBreak: false }

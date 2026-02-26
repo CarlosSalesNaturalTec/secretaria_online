@@ -79,10 +79,10 @@ class PublicController {
       });
 
       if (!request) {
-        return res.status(404).json({
+        return res.status(200).json({
           success: true,
           valid: false,
-          message: 'Documento não encontrado. O hash informado não corresponde a nenhum atestado válido emitido por este sistema.',
+          message: 'Documento não encontrado. O código informado não corresponde a nenhum atestado válido emitido por este sistema.',
         });
       }
 
