@@ -189,6 +189,10 @@ class AtestadoMatriculaService {
 
       try {
         this._addContent(doc, data);
+        // Volta para a página 0 e desenha o rodapé com posicionamento absoluto,
+        // evitando que as linhas do rodapé extrapolem a área de conteúdo e gerem páginas extras.
+        doc.switchToPage(0);
+        this._addFooter(doc, data);
       } catch (contentError) {
         doc.end();
         reject(contentError);
@@ -354,7 +358,7 @@ class AtestadoMatriculaService {
       .font('Helvetica')
       .fontSize(12)
       .fillColor('#000000')
-      .text(`São Paulo, ${dateExtensive}.`, marginLeft, doc.y, {
+      .text(`Salvador, ${dateExtensive}.`, marginLeft, doc.y, {
         align: 'center',
         width: contentWidth,
       });
@@ -383,9 +387,27 @@ class AtestadoMatriculaService {
         align: 'center',
         width: contentWidth,
       });
+  }
 
-    // ── RODAPÉ COM HASH ───────────────────────────────────────────────────
-    const footerY = doc.page.height - 70;
+  /**
+   * Adiciona o rodapé com assinatura eletrônica na parte inferior da página.
+   * Deve ser chamado após doc.switchToPage(0) para garantir que o rodapé
+   * apareça na página principal sem gerar páginas extras.
+   *
+   * @param {PDFDocument} doc  - Instância do documento PDFKit
+   * @param {Object}      data - Dados do atestado (necessita signatureHash)
+   * @private
+   */
+  static _addFooter(doc, data) {
+    const pageWidth = doc.page.width;
+    const marginLeft = 50;
+    const marginRight = 50;
+    const contentWidth = pageWidth - marginLeft - marginRight;
+
+    // Posiciona o rodapé a partir da borda inferior da área de conteúdo,
+    // garantindo que todas as linhas caibam dentro dos limites da página.
+    const contentBottom = doc.page.height - doc.page.margins.bottom;
+    const footerY = contentBottom - 50;
 
     doc
       .moveTo(marginLeft, footerY)
@@ -402,18 +424,18 @@ class AtestadoMatriculaService {
         'Documento gerado eletronicamente pelo Sistema de Secretaria Online.',
         marginLeft,
         footerY + 8,
-        { align: 'center', width: contentWidth }
+        { align: 'center', width: contentWidth, lineBreak: false }
       );
 
     doc
       .font('Helvetica-Bold')
-      .fontSize(8)
+      .fontSize(9)
       .fillColor('#333333')
       .text(
         `Assinatura Eletrônica: ${data.signatureHash}`,
         marginLeft,
         footerY + 20,
-        { align: 'center', width: contentWidth }
+        { align: 'center', width: contentWidth, lineBreak: false }
       );
 
     doc
@@ -423,8 +445,8 @@ class AtestadoMatriculaService {
       .text(
         'Para verificar a autenticidade deste documento acesse: /verificar-atestado',
         marginLeft,
-        footerY + 32,
-        { align: 'center', width: contentWidth }
+        footerY + 34,
+        { align: 'center', width: contentWidth, lineBreak: false }
       );
   }
 
