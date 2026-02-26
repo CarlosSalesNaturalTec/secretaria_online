@@ -131,6 +131,11 @@ export function ClassScheduleForm({
   onSubmit,
   isSubmitting = false,
 }: ClassScheduleFormProps) {
+  // Auxiliar para ler campo suportando snake_case e camelCase
+  // (a API converte respostas para camelCase no interceptor do Axios)
+  const getField = (s: IClassSchedule, snake: keyof IClassSchedule, camel: string) =>
+    s[snake] ?? (s as any)[camel];
+
   const {
     register,
     handleSubmit,
@@ -139,25 +144,27 @@ export function ClassScheduleForm({
   } = useForm<ClassScheduleFormData>({
     resolver: zodResolver(classScheduleFormSchema),
     defaultValues: {
-      discipline_id: editingSchedule?.discipline_id || 0,
-      teacher_id: editingSchedule?.teacher_id || null,
-      day_of_week: editingSchedule?.day_of_week || 1,
-      start_time: editingSchedule?.start_time?.substring(0, 5) || '',
-      end_time: editingSchedule?.end_time?.substring(0, 5) || '',
-      online_link: editingSchedule?.online_link || '',
+      discipline_id: editingSchedule ? (getField(editingSchedule, 'discipline_id', 'disciplineId') as number) || 0 : 0,
+      teacher_id: editingSchedule ? (getField(editingSchedule, 'teacher_id', 'teacherId') as number | null) ?? null : null,
+      day_of_week: editingSchedule ? (getField(editingSchedule, 'day_of_week', 'dayOfWeek') as number) || 1 : 1,
+      start_time: editingSchedule ? ((getField(editingSchedule, 'start_time', 'startTime') as string) || '').substring(0, 5) : '',
+      end_time: editingSchedule ? ((getField(editingSchedule, 'end_time', 'endTime') as string) || '').substring(0, 5) : '',
+      online_link: editingSchedule ? (getField(editingSchedule, 'online_link', 'onlineLink') as string) || '' : '',
     },
   });
 
   // Atualizar form quando editingSchedule mudar
   useEffect(() => {
     if (editingSchedule) {
+      const startTime = (getField(editingSchedule, 'start_time', 'startTime') as string) || '';
+      const endTime = (getField(editingSchedule, 'end_time', 'endTime') as string) || '';
       reset({
-        discipline_id: editingSchedule.discipline_id,
-        teacher_id: editingSchedule.teacher_id,
-        day_of_week: editingSchedule.day_of_week,
-        start_time: editingSchedule.start_time.substring(0, 5),
-        end_time: editingSchedule.end_time.substring(0, 5),
-        online_link: editingSchedule.online_link || '',
+        discipline_id: (getField(editingSchedule, 'discipline_id', 'disciplineId') as number),
+        teacher_id: (getField(editingSchedule, 'teacher_id', 'teacherId') as number | null) ?? null,
+        day_of_week: (getField(editingSchedule, 'day_of_week', 'dayOfWeek') as number),
+        start_time: startTime.substring(0, 5),
+        end_time: endTime.substring(0, 5),
+        online_link: (getField(editingSchedule, 'online_link', 'onlineLink') as string) || '',
       });
     }
   }, [editingSchedule, reset]);
