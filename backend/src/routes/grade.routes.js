@@ -8,6 +8,7 @@
  * Endpoints:
  * - POST /api/grades - Lançar nota individual
  * - PUT /api/grades/:id - Editar nota
+ * - DELETE /api/grades/:id - Excluir nota
  * - GET /api/grades/my-grades - Obter minhas notas (aluno)
  *
  * Nota: Rotas relacionadas a avaliações estão em evaluation.routes.js:
@@ -77,6 +78,24 @@ router.post(
 router.put(
   '/:id',
   GradeController.update
+);
+
+/**
+ * DELETE /api/grades/:id
+ * Exclui uma nota (soft delete)
+ *
+ * Requer: Autenticado (Professor que criou ou Admin)
+ *
+ * Respostas:
+ * - 200: Nota excluída com sucesso
+ * - 400: ID inválido
+ * - 403: Sem permissão
+ * - 404: Nota não encontrada
+ * - 500: Erro servidor
+ */
+router.delete(
+  '/:id',
+  GradeController.delete
 );
 
 /**

@@ -26,10 +26,11 @@ import {
   ChevronUp,
   Filter,
   Edit2,
+  Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
-import { getMyGrades, getGradesByStudent, updateGrade } from '@/services/grade.service';
+import { getMyGrades, getGradesByStudent, updateGrade, deleteGrade } from '@/services/grade.service';
 import StudentService from '@/services/student.service';
 import type {
   IGradeWithEvaluation,
@@ -80,6 +81,10 @@ export default function Grades({ studentId, isEditable = false }: GradesProps) {
   const [newGradeValue, setNewGradeValue] = useState<string>('');
   const [newConceptValue, setNewConceptValue] = useState<GradeConcept | ''>('');
   const [isSaving, setIsSaving] = useState(false);
+
+  // Estados para exclusão
+  const [gradeToDelete, setGradeToDelete] = useState<IGradeWithEvaluation | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Estados para filtros
   const [semesterFilter, setSemesterFilter] = useState<string>('');
@@ -317,6 +322,34 @@ export default function Grades({ studentId, isEditable = false }: GradesProps) {
       alert('Erro ao salvar nota. Tente novamente.');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  /**
+   * Abre modal de confirmação de exclusão
+   */
+  const handleDeleteClick = (grade: IGradeWithEvaluation, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setGradeToDelete(grade);
+  };
+
+  /**
+   * Confirma e executa a exclusão da nota
+   */
+  const handleConfirmDelete = async () => {
+    if (!gradeToDelete) return;
+
+    try {
+      setIsDeleting(true);
+      await deleteGrade(gradeToDelete.id);
+
+      setAllGrades(prev => prev.filter(g => g.id !== gradeToDelete.id));
+      setGradeToDelete(null);
+    } catch (err) {
+      console.error('Erro ao excluir nota:', err);
+      alert('Erro ao excluir nota. Tente novamente.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -687,13 +720,15 @@ export default function Grades({ studentId, isEditable = false }: GradesProps) {
                         <div
                           key={gradeItem.id}
                           className={`bg-white rounded-lg p-4 border border-gray-200 flex items-center justify-between ${
-                            isEditable ? 'cursor-pointer hover:border-blue-400 hover:shadow-sm transition-all' : ''
+                            isEditable ? 'hover:border-blue-400 hover:shadow-sm transition-all' : ''
                           }`}
-                          onClick={() => handleEditClick(gradeItem)}
-                          role={isEditable ? "button" : undefined}
-                          title={isEditable ? "Clique para editar" : undefined}
                         >
-                          <div className="flex items-start gap-3 flex-1">
+                          <div
+                            className={`flex items-start gap-3 flex-1 ${isEditable ? 'cursor-pointer' : ''}`}
+                            onClick={() => handleEditClick(gradeItem)}
+                            role={isEditable ? 'button' : undefined}
+                            title={isEditable ? 'Clique para editar' : undefined}
+                          >
                             <Calendar className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
                             <div>
                               <h5 className="font-medium text-gray-900 flex items-center flex-wrap gap-2">
@@ -715,12 +750,27 @@ export default function Grades({ studentId, isEditable = false }: GradesProps) {
                             </div>
                           </div>
 
-                          {/* Nota ou Conceito */}
+                          {/* Nota ou Conceito + ações */}
                           <div className="flex items-center gap-3">
                             {isEditable && (
-                              <Edit2 className="w-4 h-4 text-gray-400" />
+                              <>
+                                <button
+                                  onClick={() => handleEditClick(gradeItem)}
+                                  title="Editar nota"
+                                  className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={(e) => handleDeleteClick(gradeItem, e)}
+                                  title="Excluir nota"
+                                  className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </>
                             )}
-                            
+
                             {gradeItem.grade !== null ? (
                               <div
                                 className={`px-4 py-2 rounded-lg border font-bold text-xl ${getGradeColorClass(
@@ -753,6 +803,34 @@ export default function Grades({ studentId, isEditable = false }: GradesProps) {
           })}
         </div>
       )}
+
+      {/* Modal de Confirmação de Exclusão */}
+      <Modal
+        isOpen={!!gradeToDelete}
+        onClose={() => setGradeToDelete(null)}
+        title="Excluir Nota"
+        description={`Tem certeza que deseja excluir a nota da avaliação "${gradeToDelete?.evaluation.name}"? Esta ação não pode ser desfeita.`}
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => setGradeToDelete(null)}
+              disabled={isDeleting}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleConfirmDelete}
+              loading={isDeleting}
+            >
+              Excluir
+            </Button>
+          </div>
+        }
+      >
+        <div />
+      </Modal>
 
       {/* Modal de Edição */}
       <Modal

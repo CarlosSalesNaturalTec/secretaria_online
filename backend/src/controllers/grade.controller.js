@@ -22,6 +22,7 @@ class GradeController {
     // Fazer bind dos métodos para manter o contexto 'this'
     this.create = this.create.bind(this);
     this.update = this.update.bind(this);
+    this.delete = this.delete.bind(this);
     this.getByEvaluation = this.getByEvaluation.bind(this);
     this.getStats = this.getStats.bind(this);
     this.getPending = this.getPending.bind(this);
@@ -293,6 +294,74 @@ class GradeController {
         success: true,
         data: updatedGrade,
         message: 'Nota atualizada com sucesso'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Exclui uma nota (soft delete)
+   *
+   * DELETE /api/grades/:id
+   *
+   * @param {object} req - Requisição Express
+   * @param {object} req.user - Usuário autenticado
+   * @param {object} req.params.id - ID da nota
+   * @param {object} res - Resposta Express
+   * @param {function} next - Middleware next
+   */
+  async delete(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { id: userId, role } = req.user;
+
+      if (!id || isNaN(parseInt(id))) {
+        return res.status(400).json({
+          success: false,
+          error: { code: 'INVALID_REQUEST', message: 'ID da nota inválido' }
+        });
+      }
+
+      if (!['teacher', 'admin'].includes(role)) {
+        return res.status(403).json({
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Apenas professores podem excluir notas' }
+        });
+      }
+
+      if (role === 'teacher') {
+        const gradeRecord = await require('../models').Grade.findByPk(id, {
+          attributes: ['evaluation_id']
+        });
+
+        if (!gradeRecord) {
+          return res.status(404).json({
+            success: false,
+            error: { code: 'NOT_FOUND', message: 'Nota não encontrada' }
+          });
+        }
+
+        const isTeacherValid = await this._validateTeacherOwnership(userId, gradeRecord.evaluation_id);
+
+        if (!isTeacherValid) {
+          logger.warn('[GradeController.delete] Professor tentou excluir nota em avaliação não lecionada', {
+            userId, gradeId: id
+          });
+          return res.status(403).json({
+            success: false,
+            error: { code: 'FORBIDDEN', message: 'Você não leciona a disciplina desta avaliação' }
+          });
+        }
+      }
+
+      await GradeService.deleteGrade(id);
+
+      logger.info('[GradeController.delete] Nota excluída com sucesso', { gradeId: id, userId });
+
+      res.status(200).json({
+        success: true,
+        message: 'Nota excluída com sucesso'
       });
     } catch (error) {
       next(error);

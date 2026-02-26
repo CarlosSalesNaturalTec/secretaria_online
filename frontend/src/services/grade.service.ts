@@ -393,6 +393,31 @@ export async function updateGrade(
 }
 
 /**
+ * Exclui uma nota (soft delete)
+ *
+ * @param {number} id - ID da nota a ser excluída
+ * @returns {Promise<void>}
+ * @throws {Error} Quando ID é inválido ou erro na API
+ */
+export async function deleteGrade(id: number): Promise<void> {
+  try {
+    if (!id || id <= 0) {
+      throw new Error('ID da nota é obrigatório e deve ser maior que zero');
+    }
+
+    const response = await api.delete<ApiResponse<null>>(`/grades/${id}`);
+
+    if (!response.data.success) {
+      throw new Error(response.data.error?.message || 'Erro ao excluir nota');
+    }
+  } catch (error) {
+    console.error('[GradeService] Erro ao excluir nota:', error);
+    if (error instanceof Error) throw error;
+    throw new Error('Falha ao excluir nota. Tente novamente.');
+  }
+}
+
+/**
  * Exporta todas as funções do serviço como objeto
  *
  * Permite importação nomeada ou import do objeto completo
@@ -411,6 +436,7 @@ const GradeService = {
   getGradesByEvaluation,
   createGrade,
   updateGrade,
+  deleteGrade,
 };
 
 export default GradeService;
