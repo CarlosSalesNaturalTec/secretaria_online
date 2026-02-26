@@ -399,47 +399,15 @@ module.exports = (sequelize, DataTypes) => {
 
         /**
          * Hook: beforeCreate
-         * Valida conflitos de horário antes de criar
          */
         beforeCreate: async (schedule, options) => {
-          const hasConflict = await ClassSchedule.validateTimeConflict(
-            schedule.class_id,
-            schedule.day_of_week,
-            schedule.start_time,
-            schedule.end_time
-          );
-
-          if (hasConflict) {
-            throw new Error('Conflito de horário: já existe uma aula neste horário para esta turma');
-          }
-
           console.log(`[ClassSchedule] Criando horário: ${DAY_NAMES[schedule.day_of_week]} ${schedule.start_time}-${schedule.end_time}`);
         },
 
         /**
          * Hook: beforeUpdate
-         * Valida conflitos de horário antes de atualizar
          */
         beforeUpdate: async (schedule, options) => {
-          // Só validar se houve mudança em campos relevantes
-          const changedFields = schedule.changed();
-          const relevantChanges = ['day_of_week', 'start_time', 'end_time', 'class_id'];
-          const hasRelevantChanges = changedFields && relevantChanges.some(f => changedFields.includes(f));
-
-          if (hasRelevantChanges) {
-            const hasConflict = await ClassSchedule.validateTimeConflict(
-              schedule.class_id,
-              schedule.day_of_week,
-              schedule.start_time,
-              schedule.end_time,
-              schedule.id // Excluir o próprio registro
-            );
-
-            if (hasConflict) {
-              throw new Error('Conflito de horário: já existe uma aula neste horário para esta turma');
-            }
-          }
-
           console.log(`[ClassSchedule] Atualizando horário ID: ${schedule.id}`);
         },
 

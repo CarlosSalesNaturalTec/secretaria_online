@@ -45,18 +45,6 @@ class ClassScheduleService {
       throw new Error('O horário de início deve ser menor que o horário de término');
     }
 
-    // Validar conflito de horário (hook já faz, mas verificamos antes para mensagem clara)
-    const hasConflict = await ClassSchedule.validateTimeConflict(
-      scheduleData.class_id,
-      scheduleData.day_of_week,
-      scheduleData.start_time,
-      scheduleData.end_time
-    );
-
-    if (hasConflict) {
-      throw new Error('Conflito de horário: já existe uma aula neste horário para esta turma');
-    }
-
     // Validar formato de URL se fornecido
     if (scheduleData.online_link && !this.isValidUrl(scheduleData.online_link)) {
       throw new Error('O link online deve ser uma URL válida');
@@ -199,22 +187,6 @@ class ClassScheduleService {
       throw new Error('O horário de início deve ser menor que o horário de término');
     }
 
-    // Validar conflito de horário se campos relevantes mudaram
-    const classId = updateData.class_id || schedule.class_id;
-    const dayOfWeek = updateData.day_of_week || schedule.day_of_week;
-
-    const hasConflict = await ClassSchedule.validateTimeConflict(
-      classId,
-      dayOfWeek,
-      startTime,
-      endTime,
-      id // Excluir o próprio registro
-    );
-
-    if (hasConflict) {
-      throw new Error('Conflito de horário: já existe uma aula neste horário para esta turma');
-    }
-
     // Validar formato de URL se fornecido
     if (updateData.online_link && !this.isValidUrl(updateData.online_link)) {
       throw new Error('O link online deve ser uma URL válida');
@@ -346,19 +318,6 @@ class ClassScheduleService {
 
           if (scheduleData.start_time >= scheduleData.end_time) {
             errors.push({ index: i, error: 'Horário de início deve ser menor que término' });
-            continue;
-          }
-
-          // Verificar conflito considerando os já criados neste lote
-          const hasConflict = await ClassSchedule.validateTimeConflict(
-            classId,
-            scheduleData.day_of_week,
-            scheduleData.start_time,
-            scheduleData.end_time
-          );
-
-          if (hasConflict) {
-            errors.push({ index: i, error: 'Conflito de horário detectado' });
             continue;
           }
 
