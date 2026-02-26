@@ -79,6 +79,7 @@ const classScheduleRoutes = require('./classSchedule.routes');
 const studentExtraDisciplineRoutes = require('./studentExtraDiscipline.routes');
 
 // Rotas Públicas - verificação de documentos (sem autenticação)
+// IMPORTANTE: deve ser importado antes dos registros de rota catch-all ('/')
 const publicRoutes = require('./public.routes');
 
 // ============================================================================
@@ -352,6 +353,20 @@ router.use('/admin', adminRoutes);
 router.use('/reenrollments', reenrollmentRoutes);
 
 /**
+ * Rotas Públicas (sem autenticação)
+ * Base: /api/v1/public
+ *
+ * IMPORTANTE: deve ser registrado ANTES das rotas catch-all ('/')
+ * para não ser interceptado pelo authMiddleware global dessas rotas.
+ *
+ * Endpoints:
+ * - GET /public/verify-atestado/:hash - Verificar autenticidade de atestado de matrícula
+ *
+ * Permissões: Público (sem autenticação)
+ */
+router.use('/public', publicRoutes);
+
+/**
  * Rotas de Grade de Horários das Turmas
  * Base: /api/v1 (rotas já incluem prefixos /classes, /schedules)
  *
@@ -384,17 +399,6 @@ router.use('/', classScheduleRoutes);
  * Permissões: Admin (CRUD), Student (própria grade e disciplinas extras)
  */
 router.use('/', studentExtraDisciplineRoutes);
-
-/**
- * Rotas Públicas (sem autenticação)
- * Base: /api/v1/public
- *
- * Endpoints:
- * - GET /public/verify-atestado/:hash - Verificar autenticidade de atestado de matrícula
- *
- * Permissões: Público (sem autenticação)
- */
-router.use('/public', publicRoutes);
 
 // ============================================================================
 // EXPORTAÇÃO
