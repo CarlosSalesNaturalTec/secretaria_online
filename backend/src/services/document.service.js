@@ -483,6 +483,7 @@ class DocumentService {
       const {
         status,
         studentId,
+        matricula,
         page = 1,
         limit = 20,
         orderBy = 'created_at',
@@ -501,13 +502,21 @@ class DocumentService {
         where.student_id = studentId;
       }
 
+      // Construir where clause para o estudante (filtro por matrícula)
+      const studentWhere = {};
+      if (matricula) {
+        studentWhere.matricula = matricula;
+      }
+
       // Buscar documentos
       const { count, rows } = await Document.findAndCountAll({
         where,
         include: [
           {
             association: 'student',
-            attributes: ['id', 'nome', 'email', 'cpf'],
+            attributes: ['id', 'nome', 'email', 'cpf', 'matricula'],
+            where: Object.keys(studentWhere).length > 0 ? studentWhere : undefined,
+            required: Object.keys(studentWhere).length > 0,
           },
           {
             association: 'documentType',

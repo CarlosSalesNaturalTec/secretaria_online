@@ -75,6 +75,8 @@ export default function AdminDocuments() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<DocumentStatus | 'all'>('all');
+  const [filterMatricula, setFilterMatricula] = useState<string>('');
+  const [matriculaInput, setMatriculaInput] = useState<string>('');
 
   // Estados do modal de ações
   const [selectedDocument, setSelectedDocument] = useState<IDocument | null>(null);
@@ -88,7 +90,7 @@ export default function AdminDocuments() {
    */
   useEffect(() => {
     loadDocumentsAndStats();
-  }, [filterStatus]);
+  }, [filterStatus, filterMatricula]);
 
   /**
    * Carrega documentos da API com filtros aplicados
@@ -98,7 +100,9 @@ export default function AdminDocuments() {
       setLoading(true);
       setError(null);
 
-      const filters = filterStatus !== 'all' ? { status: filterStatus } : {};
+      const filters: { status?: DocumentStatus; matricula?: number } = {};
+      if (filterStatus !== 'all') filters.status = filterStatus;
+      if (filterMatricula) filters.matricula = parseInt(filterMatricula);
 
       const [documentsResponse, statsData] = await Promise.all([
         documentService.getAll(filters),
@@ -231,6 +235,21 @@ export default function AdminDocuments() {
   }
 
   /**
+   * Aplica o filtro de matrícula
+   */
+  function handleMatriculaSearch() {
+    setFilterMatricula(matriculaInput.trim());
+  }
+
+  /**
+   * Limpa o filtro de matrícula
+   */
+  function handleMatriculaClear() {
+    setMatriculaInput('');
+    setFilterMatricula('');
+  }
+
+  /**
    * Formata data para exibição
    */
   function formatDate(dateString: string): string {
@@ -354,21 +373,54 @@ export default function AdminDocuments() {
 
       {/* Filtros */}
       <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-        <div className="flex items-center gap-4">
-          <Filter className="text-gray-600" size={20} />
-          <label className="text-sm font-medium text-gray-700">
-            Filtrar por status:
-          </label>
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value as DocumentStatus | 'all')}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">Todos</option>
-            <option value="pending">Pendentes</option>
-            <option value="approved">Aprovados</option>
-            <option value="rejected">Rejeitados</option>
-          </select>
+        <div className="flex flex-wrap items-center gap-4">
+          <Filter className="text-gray-600 flex-shrink-0" size={20} />
+
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
+              Status:
+            </label>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value as DocumentStatus | 'all')}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            >
+              <option value="all">Todos</option>
+              <option value="pending">Pendentes</option>
+              <option value="approved">Aprovados</option>
+              <option value="rejected">Rejeitados</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
+              Matrícula:
+            </label>
+            <div className="flex gap-1">
+              <input
+                type="number"
+                value={matriculaInput}
+                onChange={(e) => setMatriculaInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleMatriculaSearch()}
+                placeholder="Nº de matrícula..."
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm w-44"
+              />
+              <button
+                onClick={handleMatriculaSearch}
+                className="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
+              >
+                Buscar
+              </button>
+              {filterMatricula && (
+                <button
+                  onClick={handleMatriculaClear}
+                  className="px-3 py-2 border border-gray-300 text-gray-600 rounded-md hover:bg-gray-50 transition-colors text-sm"
+                >
+                  Limpar
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -415,6 +467,11 @@ export default function AdminDocuments() {
                         <span className="text-xs text-gray-500">
                           {document.user?.email || 'N/A'}
                         </span>
+                        {document.user?.matricula && (
+                          <span className="text-xs text-blue-600 font-medium">
+                            Mat. {document.user.matricula}
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

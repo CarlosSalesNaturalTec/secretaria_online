@@ -37,6 +37,7 @@ export interface IDocumentUser {
   email: string;
   cpf: string;
   role: DocumentUserType;
+  matricula?: number | null;
 }
 
 /**
@@ -72,6 +73,7 @@ export interface IDocumentFilters {
   userType?: DocumentUserType;
   userId?: number;
   documentTypeId?: number;
+  matricula?: number;
   page?: number;
   limit?: number;
 }

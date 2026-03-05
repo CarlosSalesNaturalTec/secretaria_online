@@ -174,6 +174,7 @@ class DocumentController {
       const {
         status,
         studentId,
+        matricula,
         page = 1,
         limit = 20,
         orderBy = 'created_at',
@@ -207,6 +208,7 @@ class DocumentController {
       const result = await DocumentService.list({
         status,
         studentId: studentId ? parseInt(studentId) : undefined,
+        matricula: matricula ? parseInt(matricula) : undefined,
         page: parseInt(page) || 1,
         limit: parseInt(limit) || 20,
         orderBy,
