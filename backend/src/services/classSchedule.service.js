@@ -6,6 +6,7 @@
  */
 
 const { ClassSchedule, Class, Discipline, Teacher, sequelize } = require('../models');
+const exemptionService = require('./studentDisciplineExemption.service');
 const { Op } = require('sequelize');
 
 class ClassScheduleService {
@@ -63,7 +64,7 @@ class ClassScheduleService {
    * @returns {Promise<ClassSchedule[]>} Lista de horários
    */
   async getByClass(classId, options = {}) {
-    const { dayOfWeek, disciplineId, includeTeacher = true } = options;
+    const { dayOfWeek, disciplineId, includeTeacher = true, studentId } = options;
 
     // Verificar se a turma existe
     const turma = await Class.findByPk(classId);
@@ -103,7 +104,19 @@ class ClassScheduleService {
       order: [['day_of_week', 'ASC'], ['start_time', 'ASC']]
     });
 
-    return schedules.map(s => this.formatSchedule(s));
+    // Se studentId fornecido, marcar disciplinas dispensadas
+    let exemptIds = [];
+    if (studentId) {
+      exemptIds = await exemptionService.getExemptDisciplineIds(studentId, classId);
+    }
+
+    return schedules.map(s => {
+      const formatted = this.formatSchedule(s);
+      if (studentId) {
+        formatted.is_exempted = exemptIds.includes(formatted.discipline_id);
+      }
+      return formatted;
+    });
   }
 
   /**

@@ -51,6 +51,7 @@ const AdminGrades = lazy(() => import('./pages/admin/Grades'));
 const AdminStudentGrades = lazy(() => import('./pages/admin/StudentGrades'));
 const AdminClassSchedules = lazy(() => import('./pages/admin/ClassSchedules'));
 const AdminStudentExtraDisciplines = lazy(() => import('./pages/admin/StudentExtraDisciplines'));
+const AdminStudentDisciplineExemptions = lazy(() => import('./pages/admin/StudentDisciplineExemptions'));
 
 /**
  * Páginas de Aluno (Lazy Loading)
@@ -227,6 +228,14 @@ const privateRoutes: RouteObject[] = [
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <AdminStudentExtraDisciplines />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'students/:studentId/exemptions',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AdminStudentDisciplineExemptions />
           </Suspense>
         ),
       },

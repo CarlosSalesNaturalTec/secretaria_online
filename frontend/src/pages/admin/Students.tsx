@@ -8,7 +8,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, KeyRound, AlertCircle, UserPlus, Search, BookOpen, GraduationCap, BookMarked } from 'lucide-react';
+import { Plus, Pencil, Trash2, KeyRound, AlertCircle, UserPlus, Search, BookOpen, GraduationCap, BookMarked, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Table, type Column } from '@/components/ui/Table';
 import { Button } from '@/components/ui/Button';
@@ -403,6 +403,16 @@ export default function StudentsPage() {
             title="Gerenciar Disciplinas Extras"
           >
             <BookMarked size={16} />
+          </Button>
+
+          {/* Botão Aproveitamentos */}
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => navigate(`/admin/students/${student.id}/exemptions`)}
+            title="Gerenciar Aproveitamentos de Disciplinas"
+          >
+            <Award size={16} />
           </Button>
 
           {/* Botão Criar Usuário - só aparece se não tiver usuário */}

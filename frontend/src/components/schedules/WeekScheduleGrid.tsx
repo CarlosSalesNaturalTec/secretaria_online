@@ -177,7 +177,8 @@ export function WeekScheduleGrid({
     const isExtraValue = getScheduleValue(schedule, 'is_extra', 'isExtra');
     const extraReason = getScheduleValue(schedule, 'extra_reason', 'extraReason');
 
-    const colorClass = getDisciplineColor(disciplineId);
+    const isExempted = (schedule as any).is_exempted === true;
+    const colorClass = isExempted ? 'bg-amber-50 border-amber-300 text-amber-900' : getDisciplineColor(disciplineId);
     const isExtra = highlightExtra && isExtraValue;
 
     return (
@@ -186,12 +187,14 @@ export function WeekScheduleGrid({
         className={`
           p-3 rounded-lg border-2 ${colorClass}
           ${isExtra ? 'ring-2 ring-orange-500 ring-offset-2' : ''}
+          ${isExempted ? 'opacity-75' : ''}
           transition-all hover:shadow-md
         `}
         title={`
           ${schedule.discipline?.name || 'Disciplina'}
           ${schedule.teacher?.nome ? `\nProfessor: ${schedule.teacher.nome}` : ''}
           ${isExtraValue ? `\n⚠️ Disciplina Extra (${EXTRA_REASON_LABELS[extraReason] || extraReason})` : ''}
+          ${isExempted ? '\n✅ Disciplina Dispensada (Aproveitamento)' : ''}
         `}
       >
         {/* Cabeçalho */}
@@ -231,6 +234,13 @@ export function WeekScheduleGrid({
         {isExtra && (
           <div className="flex items-center text-xs text-orange-700 bg-orange-50 px-2 py-1 rounded mb-2">
             <span className="font-medium">Extra: {EXTRA_REASON_LABELS[extraReason] || extraReason}</span>
+          </div>
+        )}
+
+        {/* Badge de disciplina dispensada */}
+        {isExempted && (
+          <div className="flex items-center text-xs text-amber-700 bg-amber-100 px-2 py-1 rounded mb-2">
+            <span className="font-medium">Dispensado</span>
           </div>
         )}
 

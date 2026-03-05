@@ -40,7 +40,7 @@ class ClassScheduleController {
   async getByClass(req, res, next) {
     try {
       const { classId } = req.params;
-      const { dayOfWeek, disciplineId } = req.query;
+      const { dayOfWeek, disciplineId, studentId } = req.query;
 
       const options = {};
       if (dayOfWeek) {
@@ -48,6 +48,9 @@ class ClassScheduleController {
       }
       if (disciplineId) {
         options.disciplineId = parseInt(disciplineId, 10);
+      }
+      if (studentId) {
+        options.studentId = parseInt(studentId, 10);
       }
 
       const schedules = await classScheduleService.getByClass(parseInt(classId, 10), options);

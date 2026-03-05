@@ -78,6 +78,9 @@ const classScheduleRoutes = require('./classSchedule.routes');
 // Disciplinas Extras de Alunos (feat-002)
 const studentExtraDisciplineRoutes = require('./studentExtraDiscipline.routes');
 
+// Aproveitamento de Disciplinas (feat-003)
+const studentDisciplineExemptionRoutes = require('./studentDisciplineExemption.routes');
+
 // Rotas Públicas - verificação de documentos (sem autenticação)
 // IMPORTANTE: deve ser importado antes dos registros de rota catch-all ('/')
 const publicRoutes = require('./public.routes');
@@ -399,6 +402,21 @@ router.use('/', classScheduleRoutes);
  * Permissões: Admin (CRUD), Student (própria grade e disciplinas extras)
  */
 router.use('/', studentExtraDisciplineRoutes);
+
+/**
+ * Rotas de Aproveitamento de Disciplinas
+ * Base: /api/v1 (rotas incluem prefixos /students, /exemptions)
+ *
+ * Endpoints:
+ * - POST /students/:studentId/exemptions - Registrar dispensa (admin)
+ * - GET  /students/:studentId/exemptions - Listar dispensas de um aluno (admin)
+ * - GET  /exemptions - Listar todas as dispensas (admin)
+ * - GET  /exemptions/:id - Buscar dispensa por ID (admin)
+ * - DELETE /exemptions/:id - Remover dispensa (admin)
+ *
+ * Permissões: Admin only
+ */
+router.use('/', studentDisciplineExemptionRoutes);
 
 // ============================================================================
 // EXPORTAÇÃO

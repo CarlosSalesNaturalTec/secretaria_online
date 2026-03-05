@@ -139,6 +139,12 @@ export interface IClassSchedule {
    * Motivo da disciplina extra (se is_extra=true)
    */
   extra_reason?: string;
+
+  /**
+   * Indica se a disciplina foi dispensada (aproveitamento de estudos)
+   * Campo calculado pelo backend quando studentId é fornecido
+   */
+  is_exempted?: boolean;
 }
 
 /**

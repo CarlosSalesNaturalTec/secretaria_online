@@ -18,6 +18,7 @@ const {
   sequelize
 } = require('../models');
 const { Op } = require('sequelize');
+const exemptionService = require('./studentDisciplineExemption.service');
 
 class StudentExtraDisciplineService {
   /**
@@ -364,9 +365,16 @@ class StudentExtraDisciplineService {
       weekSchedule[day].sort((a, b) => a.start_time.localeCompare(b.start_time));
     }
 
+    // Buscar disciplinas dispensadas do aluno
+    const exemptDisciplineIds = await exemptionService.getExemptDisciplineIds(studentId);
+
     return {
       courses,
-      mainClassSchedules: mainClassSchedules.map(s => this.formatSchedule(s)),
+      mainClassSchedules: mainClassSchedules.map(s => {
+        const formatted = this.formatSchedule(s);
+        formatted.is_exempted = exemptDisciplineIds.includes(formatted.discipline_id);
+        return formatted;
+      }),
       extraDisciplineSchedules: extraDisciplineSchedules.map(s => this.formatSchedule(s)),
       extraDisciplines: extraDisciplines.map(ed => this.formatExtraDiscipline(ed)),
       weekSchedule
