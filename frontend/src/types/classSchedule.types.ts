@@ -142,9 +142,10 @@ export interface IClassSchedule {
 
   /**
    * Indica se a disciplina foi dispensada (aproveitamento de estudos)
-   * Campo calculado pelo backend quando studentId é fornecido
+   * Campo calculado pelo backend; convertido para isExempted pelo interceptor Axios
    */
   is_exempted?: boolean;
+  isExempted?: boolean;
 }
 
 /**

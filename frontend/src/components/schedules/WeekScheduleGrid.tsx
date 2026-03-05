@@ -177,7 +177,7 @@ export function WeekScheduleGrid({
     const isExtraValue = getScheduleValue(schedule, 'is_extra', 'isExtra');
     const extraReason = getScheduleValue(schedule, 'extra_reason', 'extraReason');
 
-    const isExempted = (schedule as any).is_exempted === true;
+    const isExempted = (schedule as any).isExempted === true || (schedule as any).is_exempted === true;
     const colorClass = isExempted ? 'bg-amber-50 border-amber-300 text-amber-900' : getDisciplineColor(disciplineId);
     const isExtra = highlightExtra && isExtraValue;
 
