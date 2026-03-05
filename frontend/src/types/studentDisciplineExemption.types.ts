@@ -10,18 +10,18 @@ export interface IStudentDisciplineExemption {
   student_id: number;
   discipline_id: number;
   class_id?: number;
-  origin_institution?: string;
+  originInstitution?: string;
   notes?: string;
   discipline?: { id: number; name: string; code?: string };
   class?: { id: number; semester: number; year: number };
   student?: { id: number; nome: string; matricula: string };
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ICreateExemptionDTO {
   discipline_id: number;
   class_id?: number;
-  origin_institution?: string;
+  origin_institution?: string; // snake_case enviado ao backend
   notes?: string;
 }

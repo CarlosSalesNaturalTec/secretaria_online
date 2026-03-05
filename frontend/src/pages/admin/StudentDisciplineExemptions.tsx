@@ -205,7 +205,7 @@ export default function StudentDisciplineExemptionsPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700">
-                    {exemption.origin_institution || <span className="text-gray-400 italic">Não informado</span>}
+                    {exemption.originInstitution || <span className="text-gray-400 italic">Não informado</span>}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700 max-w-xs">
                     {exemption.notes ? (
