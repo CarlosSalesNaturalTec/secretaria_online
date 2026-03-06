@@ -10,19 +10,23 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    // Remove o índice único que o MySQL criou sem a cláusula WHERE (não suportada),
-    // o que bloqueia re-inserção após soft delete.
-    await queryInterface.removeIndex(
-      'student_discipline_exemptions',
-      'idx_sde_unique_student_discipline'
+    // Remove o índice único (se existir) - MySQL não suporta índices parciais com WHERE
+    await queryInterface.sequelize.query(
+      'ALTER TABLE `student_discipline_exemptions` DROP INDEX IF EXISTS `idx_sde_unique_student_discipline`'
     );
 
     // Adiciona índice composto simples (sem unicidade) para performance de queries
-    await queryInterface.addIndex(
-      'student_discipline_exemptions',
-      ['student_id', 'discipline_id'],
-      { name: 'idx_sde_student_discipline', using: 'BTREE' }
+    // (só adiciona se ainda não existir)
+    const [indexes] = await queryInterface.sequelize.query(
+      "SHOW INDEX FROM `student_discipline_exemptions` WHERE Key_name = 'idx_sde_student_discipline'"
     );
+    if (indexes.length === 0) {
+      await queryInterface.addIndex(
+        'student_discipline_exemptions',
+        ['student_id', 'discipline_id'],
+        { name: 'idx_sde_student_discipline', using: 'BTREE' }
+      );
+    }
   },
 
   async down(queryInterface, Sequelize) {
