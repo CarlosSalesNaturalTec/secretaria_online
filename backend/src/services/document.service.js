@@ -533,8 +533,24 @@ class DocumentService {
         offset,
       });
 
+      // Mapear student → user (nome → name) para compatibilidade com o frontend
+      const documents = rows.map((doc) => {
+        const plain = doc.toJSON();
+        if (plain.student) {
+          plain.user = {
+            id: plain.student.id,
+            name: plain.student.nome,
+            email: plain.student.email,
+            cpf: plain.student.cpf,
+            matricula: plain.student.matricula,
+          };
+          delete plain.student;
+        }
+        return plain;
+      });
+
       return {
-        documents: rows,
+        documents,
         total: count,
         page,
         limit,
