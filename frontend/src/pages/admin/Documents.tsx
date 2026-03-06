@@ -440,6 +440,9 @@ export default function AdminDocuments() {
                     Usuário
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Matrícula
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Tipo de Documento
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -467,12 +470,10 @@ export default function AdminDocuments() {
                         <span className="text-xs text-gray-500">
                           {document.user?.email || 'N/A'}
                         </span>
-                        {document.user?.matricula && (
-                          <span className="text-xs text-blue-600 font-medium">
-                            Mat. {document.user.matricula}
-                          </span>
-                        )}
                       </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-700">
+                      {document.user?.matricula ?? 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {document.documentType?.name || 'N/A'}
